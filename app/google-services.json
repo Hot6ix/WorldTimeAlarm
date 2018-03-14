@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "919992742452",
+    "firebase_url": "https://worldtimealarm.firebaseio.com",
+    "project_id": "worldtimealarm",
+    "storage_bucket": "worldtimealarm.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:919992742452:android:307d76bda80f6d62",
+        "android_client_info": {
+          "package_name": "com.simples.j.worldtimealarm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "919992742452-gprkaeijnh7mit714l946e8lorbh701q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.simples.j.worldtimealarm",
+            "certificate_hash": "040bb1fac72ee41f21f9839706dcbf439e742f83"
+          }
+        },
+        {
+          "client_id": "919992742452-i3nh1m1c4c2pdfrnp0nueerag2spc6bb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfnjvlJ5tUfJ1FgiitTMt0TiEWEF2NoVw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "919992742452-i3nh1m1c4c2pdfrnp0nueerag2spc6bb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

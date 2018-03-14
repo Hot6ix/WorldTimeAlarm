@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="@string/setting_group_1_key"
+        android:title="@string/setting_group_1">
+
+        <com.simples.j.worldtimealarm.support.SeekBarPreference
+            android:key="@string/setting_alarm_volume_key"
+            android:title="@string/setting_alarm_volume_title"
+            android:layout="@layout/preference_seekbar"/>
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/setting_alarm_volume_increase_key"
+            android:title="@string/setting_alarm_volume_increase_title"/>
+
+        <ListPreference
+            android:key="@string/setting_alarm_mute_key"
+            android:title="@string/setting_alarm_mute_title"
+            android:entries="@array/alarm_mute"
+            android:entryValues="@array/alarm_mute_values"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/setting_group_2" >
+
+        <Preference
+            android:key="@string/setting_version_key"
+            android:title="@string/setting_version_title">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://www.naver.com"/>
+
+        </Preference>
+
+        <Preference
+            android:key="@string/setting_source_key"
+            android:title="@string/setting_source_title">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://www.naver.com"/>
+
+        </Preference>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

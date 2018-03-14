@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditText
+        android:id="@+id/label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:labelFor="@id/label"
+        android:inputType="textCapSentences|textAutoCorrect"
+        android:focusable="true"
+        android:layout_marginStart="@dimen/padding20"
+        android:layout_marginEnd="@dimen/padding20"
+        android:layout_marginTop="@dimen/padding10"
+        android:layout_marginBottom="@dimen/padding10"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <requestFocus />
+    </EditText>
+
+</android.support.constraint.ConstraintLayout>

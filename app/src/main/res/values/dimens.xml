@@ -1,0 +1,19 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="padding5">5dp</dimen>
+    <dimen name="padding10">10dp</dimen>
+    <dimen name="padding15">15dp</dimen>
+    <dimen name="padding20">20dp</dimen>
+    <dimen name="padding25">25dp</dimen>
+    <dimen name="padding35">35dp</dimen>
+    <dimen name="text_xxlarge">35sp</dimen>
+    <dimen name="text_clock_size">50sp</dimen>
+    <dimen name="text_xlarge">25sp</dimen>
+    <dimen name="text_mlarge">20sp</dimen>
+    <dimen name="text_large">18sp</dimen>
+    <dimen name="text_middle">16sp</dimen>
+    <dimen name="text_small">14sp</dimen>
+    <dimen name="text_xsmall">12sp</dimen>
+    <dimen name="alarm_item_height">90dp</dimen>
+    <dimen name="banner_height">50dp</dimen>
+</resources>
