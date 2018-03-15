@@ -187,7 +187,7 @@
         android:layout_height="wrap_content"
         ads:adSize="LARGE_BANNER"
         ads:adUnitId="@string/banner_ad_unit_id_3"
-        android:layout_marginBottom="@dimen/padding10"
+        android:layout_marginBottom="@dimen/padding20"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         ads:layout_constraintTop_toBottomOf="@id/selector"

@@ -1,87 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">WorldTimeAlarm</string>
-    <string name="main_label">Alarm</string>
-    <string name="action_settings">Settings</string>
+    <string name="main_label">报警</string>
+    <string name="action_settings">设置</string>
     <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
     <string name="banner_ad_unit_id_1">ca-app-pub-1459869098528763/1967704280</string>
     <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/6060648491</string>
     <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
-    <string name="current_time_zone">Current time zone</string>
+    <string name="current_time_zone">当前时区</string>
     <string name="space">&#160;</string>
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
-    <string name="search_title">Search</string>
+    <string name="search_title">搜索</string>
 
     <!-- Show info -->
-    <string name="alarm_empty">No alarm set</string>
-    <string name="no_result">No result</string>
-    <string name="cancel">Cancel</string>
-    <string name="save">Save</string>
-    <string name="ok">OK</string>
-    <string name="turn_off">Turn off</string>
-    <string name="select_timezone">Time zone</string>
-    <string name="select_ringtone">Ringtone</string>
-    <string name="select_vibration">Vibration</string>
-    <string name="no_ringtone">No ringtone</string>
-    <string name="no_vibrator">No vibration</string>
-    <string name="timezone">Time zone</string>
-    <string name="label">Label</string>
-    <string name="slow">slow</string>
-    <string name="fast">fast</string>
-    <string name="hours">%1$d hours</string>
-    <string name="hour">%1$d hour</string>
-    <string name="minutes">%1$d minutes</string>
-    <string name="hours_minutes">%1$d hours %2$d minutes</string>
-    <string name="weekend">Weekend</string>
-    <string name="weekday">Weekday</string>
-    <string name="tomorrow">Tomorrow</string>
-    <string name="today">Today</string>
-    <string name="everyday">Everyday</string>
-    <string name="am">AM</string>
-    <string name="pm">PM</string>
-    <string name="undo">Undo</string>
-    <string name="alarm">Alarm</string>
-    <string name="snooze">Snooze</string>
-    <string name="dismiss">Dismiss</string>
-    <string name="alarm_fired_title">Alarm</string>
-    <string name="unmute">Unmute</string>
-    <string name="missed_alarm">Missed Alarm</string>
+    <string name="alarm_empty">没有警报设置</string>
+    <string name="no_result">没有结果</string>
+    <string name="cancel">取消</string>
+    <string name="save">保存</string>
+    <string name="ok">好</string>
+    <string name="turn_off">关掉</string>
+    <string name="select_timezone">时区</string>
+    <string name="select_ringtone">铃声</string>
+    <string name="select_vibration">振动</string>
+    <string name="no_ringtone">没有铃声</string>
+    <string name="no_vibrator">没有振动</string>
+    <string name="timezone">时区</string>
+    <string name="label">标签</string>
+    <string name="slow">慢</string>
+    <string name="fast">快速</string>
+    <string name="hours">%1$d小时</string>
+    <string name="hour">%1$d小时</string>
+    <string name="minutes">%1$d分钟</string>
+    <string name="hours_minutes">%1$d小时 %2$d分钟</string>
+    <string name="weekend">周末</string>
+    <string name="weekday">平日</string>
+    <string name="tomorrow">明天</string>
+    <string name="today">今天</string>
+    <string name="everyday">每天</string>
+    <string name="am">上午</string>
+    <string name="pm">下午</string>
+    <string name="undo">解开</string>
+    <string name="alarm">报警</string>
+    <string name="snooze">贪睡</string>
+    <string name="dismiss">清除报警</string>
+    <string name="alarm_fired_title">报警</string>
+    <string name="unmute">取消静音</string>
+    <string name="missed_alarm">错过了警报</string>
 
     <!-- Message -->
-    <string name="alarm_removed">Alarm removed.</string>
-    <string name="less_than_a_minute">less than a minute</string>
-    <string name="same_as_current">Same as current time zone</string>
-    <string name="alarm_on">Alarm set for %1$s from now.</string>
-    <string name="alarm_on_repeat">Alarm set for every %1$s at %2$s.</string>
-    <string name="alarm_on_repeat_every">Alarm set for everyday at %1$s.</string>
-    <string name="alarm_dismissed">Alarm dismissed.</string>
-    <string name="volume_is_muted">Alarm volume is muted.</string>
+    <string name="alarm_removed">该警报已被删除。</string>
+    <string name="less_than_a_minute">不到一分钟</string>
+    <string name="same_as_current">与当前时区相同</string>
+    <string name="alarm_on">从现在开始，闹钟设置为%1$s分钟。</string>
+    <string name="alarm_on_repeat">每周%1$s%2$s设置闹钟。</string>
+    <string name="alarm_on_repeat_every">每天%1$s点设置闹钟。</string>
+    <string name="alarm_dismissed">报警解除。</string>
+    <string name="volume_is_muted">警报音量被静音。</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">GENERAL</string>
-    <string name="setting_group_1">General</string>
+    <string name="setting_group_1">一般</string>
     <string name="setting_alarm_mute_key">ALARM_MUTE_KEY</string>
-    <string name="setting_alarm_mute_title">Alarm mute time</string>
+    <string name="setting_alarm_mute_title">报警静音时间</string>
     <string name="setting_alarm_volume_key">ALARM_VOLUME_KEY</string>
-    <string name="setting_alarm_volume_title">Alarm Volume</string>
+    <string name="setting_alarm_volume_title">报警音量</string>
     <string name="setting_alarm_volume_increase_key">ALARM_INCREASE_KEY</string>
-    <string name="setting_alarm_volume_increase_title">Gradual volume increase</string>
+    <string name="setting_alarm_volume_increase_title">逐渐增加卷</string>
     <string name="setting_time_zone_change_key">TIME_ZONE_CHANGE</string>
-    <string name="setting_time_zone_change_title">Notify when time zone changes</string>
+    <string name="setting_time_zone_change_title">当时区变化时通知</string>
 
-    <string name="setting_group_2">Others</string>
+    <string name="setting_group_2">其他</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">Version</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">Open source - GitHub</string>
 
     <string-array name="alarm_mute">
-        <item>Disable</item>
-        <item>1 minute</item>
-        <item>2 minutes</item>
-        <item>5 minutes</item>
-        <item>10 minutes</item>
-        <item>30 minutes</item>
+        <item>禁用</item>
+        <item>1分钟</item>
+        <item>2分钟</item>
+        <item>5分钟</item>
+        <item>10分钟</item>
+        <item>30分钟</item>
     </string-array>
 
     <string-array name="alarm_mute_values">
@@ -109,38 +110,38 @@
     </string-array>
 
     <string-array name="am_pm">
-        <item>AM</item>
-        <item>PM</item>
+        <item>上午</item>
+        <item>下午</item>
     </string-array>
 
     <string-array name="day_of_week">
-        <item>S</item>
-        <item>M</item>
-        <item>T</item>
-        <item>W</item>
-        <item>T</item>
-        <item>F</item>
-        <item>S</item>
+        <item>日</item>
+        <item>一</item>
+        <item>二</item>
+        <item>三</item>
+        <item>四</item>
+        <item>五</item>
+        <item>六</item>
     </string-array>
 
     <string-array name="day_of_week_simple">
-        <item>Sun</item>
-        <item>Mon</item>
-        <item>Tue</item>
-        <item>Wed</item>
-        <item>Thu</item>
-        <item>Fri</item>
-        <item>Sat</item>
+        <item>日</item>
+        <item>一</item>
+        <item>二</item>
+        <item>三</item>
+        <item>四</item>
+        <item>五</item>
+        <item>六</item>
     </string-array>
 
     <string-array name="day_of_week_full">
-        <item>Sunday</item>
-        <item>Monday</item>
-        <item>Tuesday</item>
-        <item>Wednesday</item>
-        <item>Thursday</item>
-        <item>Friday</item>
-        <item>Saturday</item>
+        <item>星期日</item>
+        <item>星期一</item>
+        <item>星期二</item>
+        <item>星期三</item>
+        <item>星期四</item>
+        <item>星期五</item>
+        <item>星期六</item>
     </string-array>
 
     <integer-array name="day_of_week_values">
@@ -154,10 +155,10 @@
     </integer-array>
 
     <string-array name="alarm_options">
-        <item>Ringtone</item>
-        <item>Vibration</item>
-        <item>Snooze</item>
-        <item>Label</item>
+        <item>铃声</item>
+        <item>振动</item>
+        <item>贪睡</item>
+        <item>标签</item>
     </string-array>
 
     <integer-array name="vibrator_simple">
@@ -219,20 +220,20 @@
     </array>
 
     <array name="vibrator_name">
-        <item>Simple</item>
-        <item>Short</item>
-        <item>Long</item>
-        <item>Heartbeat</item>
-        <item>8-bit</item>
+        <item>简单</item>
+        <item>短</item>
+        <item>长</item>
+        <item>心跳</item>
+        <item>8位</item>
     </array>
 
     <array name="snooze_array">
-        <item>Disable</item>
-        <item>5 minutes</item>
-        <item>10 minutes</item>
-        <item>15 minutes</item>
-        <item>20 minutes</item>
-        <item>30 minutes</item>
+        <item>禁用</item>
+        <item>5分钟</item>
+        <item>10分钟</item>
+        <item>15分钟</item>
+        <item>20分钟</item>
+        <item>30分钟</item>
     </array>
 
     <integer-array name="snooze_values">

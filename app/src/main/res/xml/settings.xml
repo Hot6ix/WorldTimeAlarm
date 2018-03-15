@@ -32,7 +32,7 @@
 
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://www.naver.com"/>
+                android:data="https://play.google.com/store/apps/details?id=com.simples.j.worldtimealarm"/>
 
         </Preference>
 
@@ -42,7 +42,7 @@
 
             <intent
                 android:action="android.intent.action.VIEW"
-                android:data="https://www.naver.com"/>
+                android:data="https://github.com/Hot6ix/WorldTimeAlarm"/>
 
         </Preference>
 

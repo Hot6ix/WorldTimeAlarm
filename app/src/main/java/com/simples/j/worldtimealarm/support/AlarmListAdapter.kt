@@ -3,7 +3,6 @@ package com.simples.j.worldtimealarm.support
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,6 @@ import com.simples.j.worldtimealarm.etc.C
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * Created by j on 19/02/2018.
