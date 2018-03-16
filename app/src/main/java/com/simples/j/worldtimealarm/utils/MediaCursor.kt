@@ -23,9 +23,13 @@ class MediaCursor {
             val ringtoneManager = RingtoneManager(context)
             ringtoneManager.getRingtone(RingtoneManager.TYPE_ALARM)
 
-            val cursor = ringtoneManager.cursor
-            while(cursor.moveToNext()) {
-                array.add(RingtoneItem(cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX), ringtoneManager.getRingtoneUri(cursor.position).toString()))
+            try {
+                val cursor = ringtoneManager.cursor
+                while(cursor.moveToNext()) {
+                    array.add(RingtoneItem(cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX), ringtoneManager.getRingtoneUri(cursor.position).toString()))
+                }
+            } catch (e: SecurityException) {
+                e.printStackTrace()
             }
 
             return array
