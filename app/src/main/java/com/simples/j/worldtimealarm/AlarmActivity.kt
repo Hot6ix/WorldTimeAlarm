@@ -99,7 +99,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             isNew = false
             existAlarmItem = intent.getParcelableExtra(AlarmReceiver.ITEM)
             currentTimeZone = existAlarmItem!!.timeZone
-            calendar = Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone))
+            val formattedTimeZone = existAlarmItem!!.timeZone.replace(" ", "_")
+            calendar = Calendar.getInstance(TimeZone.getTimeZone(formattedTimeZone))
             calendar.timeInMillis = existAlarmItem!!.timeSet.toLong()
             calendar.set(Calendar.SECOND, 0)
 
@@ -113,8 +114,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             }
 
             time_zone.text = existAlarmItem!!.timeZone
-            var offset = MediaCursor.getOffsetOfDifference(applicationContext,TimeZone.getTimeZone(existAlarmItem!!.timeZone).rawOffset - TimeZone.getDefault().rawOffset)
-            if(TimeZone.getDefault() == TimeZone.getTimeZone(existAlarmItem!!.timeZone)) {
+            var offset = MediaCursor.getOffsetOfDifference(applicationContext,TimeZone.getTimeZone(formattedTimeZone).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(formattedTimeZone).dstSavings - TimeZone.getDefault().dstSavings)
+            if(TimeZone.getDefault() == TimeZone.getTimeZone(formattedTimeZone)) {
                 offset = resources.getString(R.string.current_time_zone)
                 expectedTime.visibility = View.GONE
                 divider2.visibility = View.GONE
@@ -189,11 +190,12 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
                     currentTimeZone = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)
-                    calendar.timeZone = TimeZone.getTimeZone(currentTimeZone)
+                    val formattedTimeZone = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID).replace(" ", "_")
+                    calendar.timeZone = TimeZone.getTimeZone(formattedTimeZone)
 
-                    val difference = TimeZone.getTimeZone(currentTimeZone).rawOffset - TimeZone.getDefault().rawOffset
+                    val difference = TimeZone.getTimeZone(formattedTimeZone).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(formattedTimeZone).dstSavings - TimeZone.getDefault().dstSavings
                     val offset: String
-                    if(TimeZone.getDefault() == TimeZone.getTimeZone(currentTimeZone)) {
+                    if(TimeZone.getDefault() == TimeZone.getTimeZone(formattedTimeZone)) {
                         offset = resources.getString(R.string.current_time_zone)
                         expectedTime.visibility = View.GONE
                         divider2.visibility = View.GONE

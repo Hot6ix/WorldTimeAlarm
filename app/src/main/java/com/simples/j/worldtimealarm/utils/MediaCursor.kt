@@ -2,6 +2,7 @@ package com.simples.j.worldtimealarm.utils
 
 import android.content.Context
 import android.media.RingtoneManager
+import android.util.Log
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
@@ -60,10 +61,11 @@ class MediaCursor {
             val offsetText = if(difference < 0) context.resources.getString(R.string.slow)
             else context.resources.getString(R.string.fast)
 
+            Log.d("taggg", (difference.toLong().absoluteValue / 3600000.0).toString())
             val hours = TimeUnit.MILLISECONDS.toHours(difference.toLong()).absoluteValue
             val minutes = (TimeUnit.MILLISECONDS.toMinutes(difference.toLong()) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(difference.toLong()))).absoluteValue
 
-            val offset = when {
+            return when {
                 hours > 0 && minutes > 0 -> context.getString(R.string.hours_minutes, hours, minutes) + offsetText // hours & minutes
                 hours.toInt() == 1 -> context.getString(R.string.hour, hours) + offsetText // hour
                 hours > 0 && minutes.toInt() == 0 -> context.getString(R.string.hours, hours) + offsetText // hours
@@ -71,8 +73,6 @@ class MediaCursor {
                 hours.toInt() == 0 && minutes.toInt() == 0 -> context.getString(R.string.same_as_current) // same as current
                 else -> ""
             }
-
-            return offset
         }
 
         fun getRemainTime(context: Context, calendar: Calendar): String {

@@ -28,9 +28,9 @@ class TimeZoneAdapter(private var tzs: ArrayList<String>, private val context: C
     override fun getItemId(position: Int): Long = super.getItemId(position)
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val difference = TimeZone.getTimeZone(tzs[position]).rawOffset - TimeZone.getDefault().rawOffset
+        val difference = TimeZone.getTimeZone(tzs[position].replace(" ", "_")).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(tzs[position].replace(" ", "_")).dstSavings - TimeZone.getDefault().dstSavings
 
-        val offset = if(TimeZone.getDefault() == TimeZone.getTimeZone(tzs[position])) context.resources.getString(R.string.current_time_zone)
+        val offset = if(TimeZone.getDefault() == TimeZone.getTimeZone(tzs[position].replace(" ", "_"))) context.resources.getString(R.string.current_time_zone)
         else MediaCursor.getOffsetOfDifference(context, difference)
 
         holder.country.text = tzs[position]

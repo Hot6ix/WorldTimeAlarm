@@ -81,7 +81,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
         if(intent.extras != null) {
             val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
-            item = option.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+            item = option.getParcelable(AlarmReceiver.ITEM)
 //            Log.d(C.TAG, "Alarm alert : Info($item)")
             Log.d(C.TAG, "Alarm alerted : ID(${item.notiId+1})")
 
@@ -118,7 +118,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
             // Show selected time zone's time, but not print if time zone is default
             if(TimeZone.getDefault() != TimeZone.getTimeZone(item.timeZone)) {
-                val difference = TimeZone.getTimeZone(item.timeZone).rawOffset - TimeZone.getDefault().rawOffset
+                val difference = TimeZone.getTimeZone(item.timeZone).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(item.timeZone).dstSavings - TimeZone.getDefault().dstSavings
                 divider1_wake.visibility = View.VISIBLE
                 time_zone_layout.visibility = View.VISIBLE
                 time_zone_name_wake.text = item.timeZone
