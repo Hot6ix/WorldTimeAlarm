@@ -47,6 +47,12 @@
     <string name="alarm_fired_title">报警</string>
     <string name="unmute">取消静音</string>
     <string name="missed_alarm">错过了警报</string>
+    <string name="select_color">选择一种颜色</string>
+    <string name="not_selected">未选中的</string>
+    <string name="clear">未选中</string>
+    <string name="new_alarm_long">新警报</string>
+    <string name="new_alarm_short">新警报</string>
+    <string name="expected_time">闹钟将设置为下午%1$s</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>
@@ -159,6 +165,7 @@
         <item>振动</item>
         <item>贪睡</item>
         <item>标签</item>
+        <item>颜色标签</item>
     </string-array>
 
     <integer-array name="vibrator_simple">

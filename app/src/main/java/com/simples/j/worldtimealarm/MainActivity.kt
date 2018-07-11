@@ -26,10 +26,9 @@ import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
-import com.simples.j.worldtimealarm.utils.VolumeController
+import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
@@ -82,9 +81,9 @@ class MainActivity : AppCompatActivity(), AlarmListAdapter.OnItemClickListener, 
         if(!muteStatusIsShown) {
             if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
                 Handler().postDelayed({
-                    Snackbar.make(main_layout, getString(R.string.volume_is_muted), Snackbar.LENGTH_LONG).setAction(getString(R.string.unmute), {
+                    Snackbar.make(main_layout, getString(R.string.volume_is_muted), Snackbar.LENGTH_LONG).setAction(getString(R.string.unmute)) {
                         audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
-                    }).addCallback(object: Snackbar.Callback() {
+                    }.addCallback(object: Snackbar.Callback() {
                         override fun onShown(sb: Snackbar?) {
                             super.onShown(sb)
                             muteStatusIsShown = true
@@ -104,6 +103,18 @@ class MainActivity : AppCompatActivity(), AlarmListAdapter.OnItemClickListener, 
 //        bundle.putParcelable(AlarmReceiver.ITEM, AlarmItem(99, "Asia/Seoul", Calendar.getInstance().time.time.toString(), intArrayOf(0,0,0,0,0,0,0), null, null, 3000, null, 1, 78788))
 //        intent.putExtra(AlarmReceiver.OPTIONS, bundle)
 //        startActivity(intent)
+
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+
+        if(alarmItems.size != dbCursor.getAlarmListSize().toInt()) {
+            alarmItems.clear()
+            alarmItems.addAll(dbCursor.getAlarmList())
+            Log.d("taggg", alarmItems.size.toString())
+            alarmListAdapter.notifyDataSetChanged()
+        }
     }
 
     override fun onDestroy() {
@@ -197,29 +208,13 @@ class MainActivity : AppCompatActivity(), AlarmListAdapter.OnItemClickListener, 
         dbCursor.removeAlarm(removedItem!!.notiId)
         setEmptyMessage()
 
-        Snackbar.make(main_layout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo), {
+        Snackbar.make(main_layout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
             dbCursor.insertAlarm(removedItem!!)
             if(removedItem?.on_off == 1) alarmController.scheduleAlarm(applicationContext, removedItem!!, AlarmController.TYPE_ALARM)
             alarmListAdapter.addItem(itemPosition, removedItem!!)
             recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
             setEmptyMessage()
-        }).show()
-    }
-
-    private fun getRemainTime(calendar: Calendar): String {
-        calendar.set(Calendar.SECOND, 0)
-        val difference = calendar.time.time - System.currentTimeMillis()
-
-        val hours = TimeUnit.MILLISECONDS.toHours(difference.toLong()).absoluteValue
-        val minutes = (TimeUnit.MILLISECONDS.toMinutes(difference.toLong()) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(difference.toLong()))).absoluteValue
-
-        return when {
-            hours > 0 && minutes > 0 -> getString(R.string.hours_minutes, hours, minutes)
-            hours > 0 && minutes.toInt() == 0 -> getString(R.string.hours, hours)
-            hours.toInt() == 0 && minutes > 0 -> getString(R.string.minutes, minutes)
-            hours.toInt() == 1 -> getString(R.string.hour, hours)
-            else -> getString(R.string.less_than_a_minute)
-        }
+        }.show()
     }
 
     private fun setEmptyMessage() {
@@ -263,13 +258,13 @@ class MainActivity : AppCompatActivity(), AlarmListAdapter.OnItemClickListener, 
             if (calendar.timeInMillis - System.currentTimeMillis() > C.ONE_DAY) {
                 calendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
             }
-            snackBar = Snackbar.make(main_layout, getString(R.string.alarm_on, getRemainTime(calendar)), Snackbar.LENGTH_LONG)
+            snackBar = Snackbar.make(main_layout, getString(R.string.alarm_on, MediaCursor.getRemainTime(applicationContext, calendar)), Snackbar.LENGTH_LONG)
         }
 
         snackBar?.show()
     }
 
-    inner class UpdateRequestReceiver(): BroadcastReceiver() {
+    inner class UpdateRequestReceiver: BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
             Log.d(C.TAG, intent.action)

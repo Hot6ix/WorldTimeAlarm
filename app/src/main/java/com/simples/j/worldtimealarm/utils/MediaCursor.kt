@@ -75,6 +75,21 @@ class MediaCursor {
             return offset
         }
 
+        fun getRemainTime(context: Context, calendar: Calendar): String {
+            calendar.set(Calendar.SECOND, 0)
+            val difference = calendar.time.time - System.currentTimeMillis()
+
+            val hours = TimeUnit.MILLISECONDS.toHours(difference).absoluteValue
+            val minutes = (TimeUnit.MILLISECONDS.toMinutes(difference) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(difference))).absoluteValue
+
+            return when {
+                hours > 0 && minutes > 0 -> context.getString(R.string.hours_minutes, hours, minutes)
+                hours > 0 && minutes.toInt() == 0 -> context.getString(R.string.hours, hours)
+                hours.toInt() == 0 && minutes > 0 -> context.getString(R.string.minutes, minutes)
+                hours.toInt() == 1 -> context.getString(R.string.hour, hours)
+                else -> context.getString(R.string.less_than_a_minute)
+            }
+        }
     }
 
 }

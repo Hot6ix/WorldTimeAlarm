@@ -9,4 +9,50 @@
     <color name="blueGray">#546e7a</color>
     <color name="blueGrayDark">#455a64</color>
     <color name="blueGrayDarker">#37474f</color>
+
+
+    <color name="color1">#EF5350</color>
+    <color name="color2">#ec407a</color>
+    <color name="color3">#ab47bc</color>
+    <color name="color4">#7e57c2</color>
+    <color name="color5">#5c6bc0</color>
+    <color name="color6">#42a5f5</color>
+    <color name="color7">#29b6f6</color>
+    <color name="color8">#26c6da</color>
+    <color name="color9">#26a69a</color>
+    <color name="color10">#66bb6a</color>
+    <color name="color11">#9ccc65</color>
+    <color name="color12">#d4e157</color>
+    <color name="color13">#ffee58</color>
+    <color name="color14">#ffca28</color>
+    <color name="color15">#ffa726</color>
+    <color name="color16">#ff7043</color>
+    <color name="color17">#8d6e63</color>
+    <color name="color18">#bdbdbd</color>
+    <color name="color19">#78909c</color>
+
+    <array name="color_list">
+        <item>@color/color2</item>
+        <item>@color/color1</item>
+        <item>@color/color16</item>
+        <item>@color/color15</item>
+        <item>@color/color14</item>
+        <item>@color/color13</item>
+        <item>@color/color12</item>
+        <item>@color/color11</item>
+        <item>@color/color10</item>
+        <item>@color/color9</item>
+        <item>@color/color8</item>
+        <item>@color/color7</item>
+        <item>@color/color6</item>
+        <item>@color/color5</item>
+        <item>@color/colorPrimary</item>
+        <item>@color/color4</item>
+        <item>@color/color3</item>
+        <item>@color/color18</item>
+        <item>@color/color19</item>
+        <item>@color/color17</item>
+        <item>@android:color/black</item>
+    </array>
+
 </resources>

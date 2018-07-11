@@ -1,10 +1,12 @@
 package com.simples.j.worldtimealarm
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -82,6 +84,12 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             item = option.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
 //            Log.d(C.TAG, "Alarm alert : Info($item)")
             Log.d(C.TAG, "Alarm alerted : ID(${item.notiId+1})")
+
+            // Change background color if color tag set
+            if(item.colorTag != 0) {
+                wake_up_layout.setBackgroundColor(item.colorTag)
+                window.statusBarColor = item.colorTag
+            }
 
             // Play ringtone
             val ringtoneUri = item.ringtone
@@ -233,14 +241,19 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     private fun showAlarmNotification() {
         val intent = Intent(this, WakeUpActivity::class.java)
 
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(application.packageName, application.packageName+"/channel", NotificationManager.IMPORTANCE_DEFAULT)
+            notificationChannel.enableVibration(true)
+            notificationChannel.vibrationPattern = LongArray(0)
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+
         val notification = NotificationCompat.Builder(applicationContext, applicationContext.packageName)
+                .setVibrate(LongArray(0))
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
                 .setContentTitle(resources.getString(R.string.alarm))
                 .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
                 .setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
-//                .setVibrate(longArrayOf(0))
-//                .setPriority(NotificationCompat.PRIORITY_MAX)
-//                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOngoing(true)
 
         if(item.label != null && item.label!!.isNotEmpty()) {

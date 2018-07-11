@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="add_new_alarm"
+        android:icon="@drawable/ic_action_add_dark"
+        android:shortcutShortLabel="@string/new_alarm_short"
+        android:shortcutLongLabel="@string/new_alarm_long">
+        <intent
+            android:action="com.simples.j.worldtimealarm.ADD_NEW_ALARM"
+            android:targetPackage="com.simples.j.worldtimealarm"
+            android:targetClass="com.simples.j.worldtimealarm.AlarmActivity"/>
+    </shortcut>
+</shortcuts>

@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.support
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +44,15 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var conte
         }
         if (calendar.timeInMillis - System.currentTimeMillis() > C.ONE_DAY) {
             calendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
+        }
+
+        val colorTag = list[adapterPosition].colorTag
+        if(colorTag != 0) {
+            holder.colorTag.visibility = View.VISIBLE
+            holder.colorTag.setBackgroundColor(list[adapterPosition].colorTag)
+        }
+        else {
+            holder.colorTag.visibility = View.GONE
         }
 
         holder.amPm.text = if(calendar.get(Calendar.AM_PM) == 0) context.getString(R.string.am) else context.getString(R.string.pm)
@@ -120,6 +130,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var conte
         var localTime: TextView = view.local_time
         var repeat: TextView = view.repeat
         var switch: Switch = view.on_off
+        var colorTag: View = view.colorTag
     }
 
     interface OnItemClickListener {

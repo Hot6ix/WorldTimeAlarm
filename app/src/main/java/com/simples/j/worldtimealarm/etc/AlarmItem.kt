@@ -9,9 +9,9 @@ import java.util.*
  * Created by j on 26/02/2018.
  *
  */
-data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, var repeat: IntArray, var ringtone: String?, var vibration: LongArray?, var snooze: Long, var label: String?, var on_off: Int, var notiId: Int) : Parcelable {
+data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, var repeat: IntArray, var ringtone: String?, var vibration: LongArray?, var snooze: Long, var label: String?, var on_off: Int, var notiId: Int, var colorTag: Int) : Parcelable {
     override fun toString(): String {
-        return "$id, $timeZone, $timeSet, ${Arrays.toString(repeat)}, $ringtone, $vibration, $snooze, $label, $on_off, $notiId"
+        return "$id, $timeZone, $timeSet, ${Arrays.toString(repeat)}, $ringtone, $vibration, $snooze, $label, $on_off, $notiId, $colorTag"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -31,6 +31,7 @@ data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, va
             source.readLong(),
             source.readString(),
             source.readInt(),
+            source.readInt(),
             source.readInt()
     )
 
@@ -47,6 +48,7 @@ data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, va
         writeString(label)
         writeInt(on_off)
         writeInt(notiId)
+        writeInt(colorTag)
     }
 
     companion object {

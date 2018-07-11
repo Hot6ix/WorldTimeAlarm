@@ -28,10 +28,10 @@
     <string name="label">Label</string>
     <string name="slow">slow</string>
     <string name="fast">fast</string>
-    <string name="hours">%1$d hours</string>
-    <string name="hour">%1$d hour</string>
-    <string name="minutes">%1$d minutes</string>
-    <string name="hours_minutes">%1$d hours %2$d minutes</string>
+    <string name="hours">%1$d hours&#160;</string>
+    <string name="hour">%1$d hour&#160;</string>
+    <string name="minutes">%1$d minutes&#160;</string>
+    <string name="hours_minutes">%1$d hours %2$d minutes&#160;</string>
     <string name="weekend">Weekend</string>
     <string name="weekday">Weekday</string>
     <string name="tomorrow">Tomorrow</string>
@@ -46,6 +46,12 @@
     <string name="alarm_fired_title">Alarm</string>
     <string name="unmute">Unmute</string>
     <string name="missed_alarm">Missed Alarm</string>
+    <string name="select_color">Select a color</string>
+    <string name="not_selected">Not selected</string>
+    <string name="clear">Clear</string>
+    <string name="new_alarm_long">New alarm</string>
+    <string name="new_alarm_short">New alarm</string>
+    <string name="expected_time">Alarm will set for&#160;%1$s</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm removed.</string>
@@ -158,6 +164,7 @@
         <item>Vibration</item>
         <item>Snooze</item>
         <item>Label</item>
+        <item>Color Tag</item>
     </string-array>
 
     <integer-array name="vibrator_simple">

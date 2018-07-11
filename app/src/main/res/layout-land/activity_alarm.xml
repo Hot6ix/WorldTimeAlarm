@@ -119,6 +119,27 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/time_picker" />
 
+                <TextView
+                    android:id="@+id/expectedTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Alarm on 2017/09/13 09 : 00 AM"
+                    android:paddingTop="@dimen/padding10"
+                    android:paddingBottom="@dimen/padding10"
+                    android:paddingStart="@dimen/padding20"
+                    android:paddingEnd="@dimen/padding20"
+                    android:gravity="center"
+                    app:layout_constraintTop_toBottomOf="@id/divider1"
+                    app:layout_constraintStart_toStartOf="@drawable/ic_dashboard_black_24dp"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <View
+                    android:id="@+id/divider2"
+                    style="@style/Divider"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/expectedTime" />
+
             </android.support.constraint.ConstraintLayout>
 
             <android.support.constraint.ConstraintLayout

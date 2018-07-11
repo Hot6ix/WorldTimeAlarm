@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "919992742452-6ls48mbcfnv2ev34k9n53dv9674ate97.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.simples.j.worldtimealarm",
+            "certificate_hash": "e0edf9e0dbe908ddcea10278722775633b20fa7c"
+          }
+        },
+        {
           "client_id": "919992742452-i3nh1m1c4c2pdfrnp0nueerag2spc6bb.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -20,15 +20,18 @@ class DatabaseManager(private val context: Context): SQLiteOpenHelper(context, D
                 "$COLUMN_SNOOZE INTEGER," +
                 "$COLUMN_LABEL TEXT," +
                 "$COLUMN_ON_OFF INTEGER," +
-                "$COLUMN_NOTI_ID INTEGER)")
+                "$COLUMN_NOTI_ID INTEGER," +
+                "$COLUMN_COLOR_TAG INTEGER)")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, old: Int, new: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if(new > old) {
+            db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_COLOR_TAG INTEGER DEFAULT 0")
+        }
     }
 
     companion object {
-        const val VERSION = 1
+        const val VERSION = 2
         const val DB_NAME = "alarm.db"
 
         const val TABLE_NAME = "AlarmList"
@@ -42,6 +45,7 @@ class DatabaseManager(private val context: Context): SQLiteOpenHelper(context, D
         const val COLUMN_LABEL = "label"
         const val COLUMN_ON_OFF = "on_off"
         const val COLUMN_NOTI_ID = "notiId"
+        const val COLUMN_COLOR_TAG = "colorTag"
     }
 
 }

@@ -29,10 +29,10 @@
     <string name="label">라벨</string>
     <string name="slow">느림</string>
     <string name="fast">빠름</string>
-    <string name="hours">%1$d시간</string>
-    <string name="hour">%1$d시간</string>
-    <string name="minutes">%1$d분</string>
-    <string name="hours_minutes">%1$d시간 %2$d분</string>
+    <string name="hours">%1$d시간&#160;</string>
+    <string name="hour">%1$d시간&#160;</string>
+    <string name="minutes">%1$d분&#160;</string>
+    <string name="hours_minutes">%1$d시간 %2$d분&#160;</string>
     <string name="weekend">주말</string>
     <string name="weekday">주중</string>
     <string name="tomorrow">내일</string>
@@ -46,7 +46,13 @@
     <string name="dismiss">알람 해제</string>
     <string name="alarm_fired_title">알람</string>
     <string name="unmute">음소거 해제</string>
-    <string name="missed_alarm">놓친 알</string>
+    <string name="missed_alarm">놓친 알람</string>
+    <string name="select_color">색상 선택</string>
+    <string name="not_selected">선택 안됨</string>
+    <string name="clear">선택 안함</string>
+    <string name="new_alarm_long">새 알람</string>
+    <string name="new_alarm_short">새 알람</string>
+    <string name="expected_time">%1$s에 알람이 울립니다.</string>
 
     <!-- Message -->
     <string name="alarm_removed">알람이 삭제되었습니다.</string>
@@ -159,6 +165,7 @@
         <item>진동</item>
         <item>다시 알림</item>
         <item>라벨</item>
+        <item>색상 태그</item>
     </string-array>
 
     <integer-array name="vibrator_simple">

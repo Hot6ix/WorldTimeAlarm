@@ -2,6 +2,7 @@ package com.simples.j.worldtimealarm.utils
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.DatabaseUtils
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import java.util.*
 import kotlin.collections.ArrayList
@@ -28,6 +29,7 @@ class DatabaseCursor(context: Context) {
         contentValues.put(DatabaseManager.COLUMN_LABEL, item.label)
         contentValues.put(DatabaseManager.COLUMN_ON_OFF, item.on_off)
         contentValues.put(DatabaseManager.COLUMN_NOTI_ID, item.notiId)
+        contentValues.put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
 
         db.insert(DatabaseManager.TABLE_NAME, null, contentValues)
         db.close()
@@ -50,6 +52,7 @@ class DatabaseCursor(context: Context) {
                 val label = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_LABEL))
                 val switch = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ON_OFF))
                 val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
+                val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
 
                 val item = AlarmItem(
                         id,
@@ -61,7 +64,8 @@ class DatabaseCursor(context: Context) {
                         snooze.toLong(),
                         label,
                         switch,
-                        notiId)
+                        notiId,
+                        colorTag)
                 alarmList.add(item)
             }
         }
@@ -89,6 +93,7 @@ class DatabaseCursor(context: Context) {
                 val label = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_LABEL))
                 val switch = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ON_OFF))
                 val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
+                val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
 
                 val item = AlarmItem(
                         id,
@@ -100,7 +105,8 @@ class DatabaseCursor(context: Context) {
                         snooze.toLong(),
                         label,
                         switch,
-                        notiId)
+                        notiId,
+                        colorTag)
                 alarmList.add(item)
             }
         }
@@ -130,6 +136,7 @@ class DatabaseCursor(context: Context) {
         contentValues.put(DatabaseManager.COLUMN_LABEL, item.label)
         contentValues.put(DatabaseManager.COLUMN_ON_OFF, item.on_off)
         contentValues.put(DatabaseManager.COLUMN_NOTI_ID, item.notiId)
+        contentValues.put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
 
         db.update(DatabaseManager.TABLE_NAME, contentValues, DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(item.notiId.toString()))
         db.close()
@@ -159,6 +166,18 @@ class DatabaseCursor(context: Context) {
         db.close()
 
         return id
+    }
+
+    fun getAlarmListSize(): Long {
+        val db = dbManager.readableDatabase
+        val count = DatabaseUtils.queryNumEntries(db, DatabaseManager.TABLE_NAME)
+        db.close()
+        return count
+    }
+
+    fun getDbVersion(): Int {
+        val db = dbManager.readableDatabase
+        return db.version
     }
 
     companion object {
