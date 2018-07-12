@@ -117,13 +117,14 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             // Show selected time zone's time, but not print if time zone is default
-            if(TimeZone.getDefault() != TimeZone.getTimeZone(item.timeZone)) {
-                val difference = TimeZone.getTimeZone(item.timeZone).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(item.timeZone).dstSavings - TimeZone.getDefault().dstSavings
+            val timeZone = item.timeZone.replace(" ", "_")
+            if(TimeZone.getDefault() != TimeZone.getTimeZone(timeZone)) {
+                val difference = TimeZone.getTimeZone(timeZone).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(timeZone).dstSavings - TimeZone.getDefault().dstSavings
                 divider1_wake.visibility = View.VISIBLE
                 time_zone_layout.visibility = View.VISIBLE
                 time_zone_name_wake.text = item.timeZone
                 time_zone_offset_wake.text = MediaCursor.getOffsetOfDifference(applicationContext, difference)
-                time_zone_time_wake.timeZone = item.timeZone
+                time_zone_time_wake.timeZone = timeZone
             }
 
             // Show label
