@@ -30,8 +30,6 @@ import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.DateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.math.absoluteValue
 
 class MainActivity : AppCompatActivity(), AlarmListAdapter.OnItemClickListener, ListSwipeController.OnSwipeListener {
 
@@ -112,7 +110,6 @@ class MainActivity : AppCompatActivity(), AlarmListAdapter.OnItemClickListener, 
         if(alarmItems.size != dbCursor.getAlarmListSize().toInt()) {
             alarmItems.clear()
             alarmItems.addAll(dbCursor.getAlarmList())
-            Log.d("taggg", alarmItems.size.toString())
             alarmListAdapter.notifyDataSetChanged()
         }
     }

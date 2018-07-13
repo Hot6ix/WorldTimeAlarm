@@ -10,7 +10,7 @@ android {
         applicationId "com.simples.j.worldtimealarm"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 7
+        versionCode 8
         versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
