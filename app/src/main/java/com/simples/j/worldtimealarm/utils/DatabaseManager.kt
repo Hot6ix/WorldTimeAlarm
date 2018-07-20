@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper
 class DatabaseManager(private val context: Context): SQLiteOpenHelper(context, DB_NAME, null, VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL("CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+        db.execSQL("CREATE TABLE $TABLE_ALARM_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_TIME_ZONE TEXT, " +
                 "$COLUMN_TIME_SET TEXT, " +
                 "$COLUMN_REPEAT TEXT," +
@@ -22,19 +22,28 @@ class DatabaseManager(private val context: Context): SQLiteOpenHelper(context, D
                 "$COLUMN_ON_OFF INTEGER," +
                 "$COLUMN_NOTI_ID INTEGER," +
                 "$COLUMN_COLOR_TAG INTEGER)")
+        db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$COLUMN_TIME_ZONE TEXT)")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, old: Int, new: Int) {
-        if(new > old) {
-            db.execSQL("ALTER TABLE $TABLE_NAME ADD COLUMN $COLUMN_COLOR_TAG INTEGER DEFAULT 0")
+        when {
+            old == 1 && new > old -> {
+                db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_COLOR_TAG INTEGER DEFAULT 0")
+            }
+            old == 2 && new > old -> {
+                db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "$COLUMN_TIME_ZONE TEXT)")
+            }
         }
     }
 
     companion object {
-        const val VERSION = 2
+        const val VERSION = 3
         const val DB_NAME = "alarm.db"
 
-        const val TABLE_NAME = "AlarmList"
+        const val TABLE_ALARM_LIST = "AlarmList"
+        const val TABLE_CLOCK_LIST = "ClockList"
         const val COLUMN_ID = "id"
         const val COLUMN_TIME_ZONE = "timezone"
         const val COLUMN_TIME_SET = "time_set"

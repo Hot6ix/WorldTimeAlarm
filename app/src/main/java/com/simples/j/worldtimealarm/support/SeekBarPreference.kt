@@ -4,11 +4,12 @@ import android.content.Context
 import android.database.ContentObserver
 import android.media.AudioManager
 import android.media.AudioManager.STREAM_ALARM
-import android.preference.Preference
 import android.provider.Settings
+import android.support.constraint.ConstraintLayout
+import android.support.v7.preference.Preference
+import android.support.v7.preference.PreferenceViewHolder
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
 import com.simples.j.worldtimealarm.R
@@ -23,14 +24,10 @@ class SeekBarPreference(context: Context, attributeSet: AttributeSet): Preferenc
     private lateinit var seekBar: SeekBar
     private lateinit var image: ImageView
 
-    override fun onCreateView(parent: ViewGroup?): View {
-        return super.onCreateView(parent)
-    }
+    override fun onBindViewHolder(holder: PreferenceViewHolder?) {
+        super.onBindViewHolder(holder)
 
-    override fun onBindView(view: View?) {
-        super.onBindView(view)
-
-        val layout = view?.findViewById<View>(R.id.seekbar_preference_layout)
+        val layout = holder!!.itemView
         if(layout != null) {
             image = layout.findViewById<ImageView>(R.id.volume_level)
             seekBar = layout.findViewById<SeekBar>(R.id.pref_seekbar)

@@ -12,7 +12,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.SearchView
+import android.widget.Toast
+import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.support.TimeZoneAdapter
+import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import kotlinx.android.synthetic.main.activity_time_zone_search.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -24,11 +27,14 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
     private lateinit var timeZoneAdapter: TimeZoneAdapter
     private var query: String? = null
     private var resultArray = ArrayList<String>()
+    private var code: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_time_zone_search)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        code = intent.getStringExtra(WorldClockFragment.TIME_ZONE_NEW_KEY)
 
         if(savedInstanceState != null) {
             query = savedInstanceState.getString(STATE_QUERY)
@@ -76,7 +82,6 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         outState?.putString(STATE_QUERY, query)
         outState?.putStringArrayList(STATE_RESULT, resultArray)
 
-
         super.onSaveInstanceState(outState)
     }
 
@@ -110,10 +115,30 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
     }
 
     override fun onItemClick(view: View, position: Int) {
-        val intent = Intent()
-        intent.putExtra(TIME_ZONE_ID, resultArray[position])
-        setResult(Activity.RESULT_OK, intent)
-        finish()
+        if(code != null) {
+            val array = DatabaseCursor(applicationContext).getClockList()
+            var isExist = false
+            array.forEach {
+                if(it.timezone == resultArray[position]) {
+                    isExist = true
+                }
+            }
+            if(isExist) {
+                Toast.makeText(applicationContext, resources.getString(R.string.exist_timezone), Toast.LENGTH_SHORT).show()
+            }
+            else {
+                val intent = Intent()
+                intent.putExtra(TIME_ZONE_ID, resultArray[position])
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+            }
+        }
+        else {
+            val intent = Intent()
+            intent.putExtra(TIME_ZONE_ID, resultArray[position])
+            setResult(Activity.RESULT_OK, intent)
+            finish()
+        }
     }
 
     companion object {

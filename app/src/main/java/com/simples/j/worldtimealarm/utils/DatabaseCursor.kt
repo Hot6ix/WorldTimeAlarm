@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.DatabaseUtils
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.ClockItem
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -31,7 +32,7 @@ class DatabaseCursor(context: Context) {
         contentValues.put(DatabaseManager.COLUMN_NOTI_ID, item.notiId)
         contentValues.put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
 
-        db.insert(DatabaseManager.TABLE_NAME, null, contentValues)
+        db.insert(DatabaseManager.TABLE_ALARM_LIST, null, contentValues)
         db.close()
     }
 
@@ -39,7 +40,7 @@ class DatabaseCursor(context: Context) {
         val db = dbManager.readableDatabase
         val alarmList = ArrayList<AlarmItem>()
 
-        val cursor = db.query(DatabaseManager.TABLE_NAME, null, null, null, null, null, DatabaseManager.COLUMN_ID + " ASC")
+        val cursor = db.query(DatabaseManager.TABLE_ALARM_LIST, null, null, null, null, null, DatabaseManager.COLUMN_ID + " ASC")
         if(cursor.count > 0) {
             while(cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
@@ -80,7 +81,7 @@ class DatabaseCursor(context: Context) {
         val db = dbManager.readableDatabase
         val alarmList = ArrayList<AlarmItem>()
 
-        val cursor = db.query(DatabaseManager.TABLE_NAME, null, DatabaseManager.COLUMN_ON_OFF + "= ?", arrayOf("1"), null, null, DatabaseManager.COLUMN_ID + " ASC")
+        val cursor = db.query(DatabaseManager.TABLE_ALARM_LIST, null, DatabaseManager.COLUMN_ON_OFF + "= ?", arrayOf("1"), null, null, DatabaseManager.COLUMN_ID + " ASC")
         if(cursor.count > 0) {
             while(cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
@@ -119,7 +120,7 @@ class DatabaseCursor(context: Context) {
 
     fun removeAlarm(notiId: Int) {
         val db = dbManager.writableDatabase
-        db.delete(DatabaseManager.TABLE_NAME, DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(notiId.toString()))
+        db.delete(DatabaseManager.TABLE_ALARM_LIST, DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(notiId.toString()))
         db.close()
     }
 
@@ -138,7 +139,7 @@ class DatabaseCursor(context: Context) {
         contentValues.put(DatabaseManager.COLUMN_NOTI_ID, item.notiId)
         contentValues.put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
 
-        db.update(DatabaseManager.TABLE_NAME, contentValues, DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(item.notiId.toString()))
+        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(item.notiId.toString()))
         db.close()
     }
 
@@ -148,7 +149,7 @@ class DatabaseCursor(context: Context) {
         val contentValues = ContentValues()
         contentValues.put(DatabaseManager.COLUMN_ON_OFF, if(switch) 1 else 0)
 
-        db.update(DatabaseManager.TABLE_NAME, contentValues, DatabaseManager.COLUMN_NOTI_ID + " = ?", arrayOf(notiId.toString()))
+        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_NOTI_ID + " = ?", arrayOf(notiId.toString()))
         db.close()
     }
 
@@ -156,7 +157,7 @@ class DatabaseCursor(context: Context) {
         val db = dbManager.readableDatabase
 
         var id = WRONG_ID
-        val cursor = db.query(DatabaseManager.TABLE_NAME, arrayOf(DatabaseManager.COLUMN_ID), DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(notiId.toString()), null, null, null)
+        val cursor = db.query(DatabaseManager.TABLE_ALARM_LIST, arrayOf(DatabaseManager.COLUMN_ID), DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(notiId.toString()), null, null, null)
         if(cursor.count > 0) {
             while(cursor.moveToNext()) {
                 id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
@@ -170,7 +171,7 @@ class DatabaseCursor(context: Context) {
 
     fun getAlarmListSize(): Long {
         val db = dbManager.readableDatabase
-        val count = DatabaseUtils.queryNumEntries(db, DatabaseManager.TABLE_NAME)
+        val count = DatabaseUtils.queryNumEntries(db, DatabaseManager.TABLE_ALARM_LIST)
         db.close()
         return count
     }
@@ -178,6 +179,55 @@ class DatabaseCursor(context: Context) {
     fun getDbVersion(): Int {
         val db = dbManager.readableDatabase
         return db.version
+    }
+
+    fun insertClock(item: ClockItem) {
+        val db = dbManager.writableDatabase
+
+        val contentValues = ContentValues()
+        if(item.id != null)  contentValues.put(DatabaseManager.COLUMN_ID, item.id)
+        contentValues.put(DatabaseManager.COLUMN_TIME_ZONE, item.timezone)
+
+        db.insert(DatabaseManager.TABLE_CLOCK_LIST, null, contentValues)
+        db.close()
+    }
+
+    fun getClockList(): ArrayList<ClockItem> {
+        val db = dbManager.readableDatabase
+        val clockList = ArrayList<ClockItem>()
+
+        val cursor = db.query(DatabaseManager.TABLE_CLOCK_LIST, null, null, null, null, null, DatabaseManager.COLUMN_ID + " ASC")
+        if(cursor.count > 0) {
+            while (cursor.moveToNext()) {
+                val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+                val timezone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
+                val item = ClockItem(
+                        id,
+                        timezone)
+                clockList.add(item)
+            }
+        }
+
+        cursor.close()
+        db.close()
+
+        return clockList
+    }
+
+    fun removeClock(item: ClockItem) {
+        val db = dbManager.writableDatabase
+        db.delete(DatabaseManager.TABLE_CLOCK_LIST, DatabaseManager.COLUMN_TIME_ZONE + "= ?", arrayOf(item.timezone))
+        db.close()
+    }
+
+    fun updateClockItem(item: ClockItem) {
+        val db = dbManager.writableDatabase
+
+        val contentValues = ContentValues()
+        contentValues.put(DatabaseManager.COLUMN_TIME_ZONE, item.timezone)
+
+        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(item.id.toString()))
+        db.close()
     }
 
     companion object {

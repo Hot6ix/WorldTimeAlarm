@@ -63,6 +63,7 @@
     <string name="alarm_on_repeat_every">每天%1$s点设置闹钟。</string>
     <string name="alarm_dismissed">报警解除。</string>
     <string name="volume_is_muted">警报音量被静音。</string>
+    <string name="exist_timezone">The timezone is already exist.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">GENERAL</string>

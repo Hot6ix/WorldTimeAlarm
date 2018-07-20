@@ -20,7 +20,7 @@
             android:name=".MainActivity"
             android:label="@string/main_label"
             android:launchMode="singleInstance"
-            android:theme="@style/AppTheme">
+            android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

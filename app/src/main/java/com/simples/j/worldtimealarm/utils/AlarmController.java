@@ -13,7 +13,6 @@ import com.simples.j.worldtimealarm.R;
 import com.simples.j.worldtimealarm.etc.AlarmItem;
 import com.simples.j.worldtimealarm.etc.C;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -106,6 +105,7 @@ public class AlarmController {
                     if (expectedDay == Calendar.SATURDAY) expectedDay = 0;
                     while(!repeat.contains(expectedDay)) {
                         expectedDay++;
+                        if(expectedDay > 7) expectedDay = 0;
                     }
                     calendar.set(Calendar.DAY_OF_WEEK, expectedDay);
                 }

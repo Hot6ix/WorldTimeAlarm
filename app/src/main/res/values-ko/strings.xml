@@ -63,6 +63,7 @@
     <string name="alarm_on_repeat_every">매일 %1$s에 알람이 울립니다.</string>
     <string name="alarm_dismissed">알람이 해제되었습니다.</string>
     <string name="volume_is_muted">알람 볼륨이 음소거 상태입니다.</string>
+    <string name="exist_timezone">이미 존재하는 시간대입니다.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">GENERAL</string>

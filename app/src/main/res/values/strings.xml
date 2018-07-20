@@ -62,6 +62,7 @@
     <string name="alarm_on_repeat_every">Alarm set for everyday at %1$s.</string>
     <string name="alarm_dismissed">Alarm dismissed.</string>
     <string name="volume_is_muted">Alarm volume is muted.</string>
+    <string name="exist_timezone">The timezone is already exist.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">GENERAL</string>

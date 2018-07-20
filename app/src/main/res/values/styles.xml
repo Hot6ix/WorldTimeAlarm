@@ -30,6 +30,7 @@
         <item name="colorPrimary">@color/blueGray</item>
         <item name="colorPrimaryDark">@color/blueGrayDark</item>
         <item name="android:statusBarColor">@color/blueGrayDark</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
     </style>
     
     <style name="Divider">

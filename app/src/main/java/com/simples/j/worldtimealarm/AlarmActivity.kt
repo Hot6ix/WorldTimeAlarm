@@ -228,10 +228,14 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     override fun onClick(view: View) {
         when(view.id) {
             R.id.alarm_save -> {
+                Log.d("tagggg", "t0")
                 val item = scheduleAlarm()
 
+                Log.d("tagggg", "t1")
                 if(isNew) DatabaseCursor(applicationContext).insertAlarm(item)
                 else DatabaseCursor(applicationContext).updateAlarm(item)
+
+                Log.d("tagggg", "t2")
 
                 if(isTaskRoot) showToast(item)
 
@@ -467,6 +471,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         calendar.set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH))
         calendar.set(Calendar.SECOND, 0)
 
+        Log.d("tagggg", "t10-1")
         notiId = 100000 + Random().nextInt(899999)
 
         val item = AlarmItem(
@@ -483,7 +488,9 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 currentColorTag
         )
 
+        Log.d("tagggg", "t0-2")
         AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
+        Log.d("tagggg", "t0-3")
         return item
     }
 
