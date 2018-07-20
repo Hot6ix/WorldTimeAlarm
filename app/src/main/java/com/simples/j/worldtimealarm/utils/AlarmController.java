@@ -106,6 +106,7 @@ public class AlarmController {
                     if (expectedDay == Calendar.SATURDAY) expectedDay = 0;
                     while(!repeat.contains(expectedDay)) {
                         expectedDay++;
+                        if(expectedDay > 7) expectedDay = 1;
                     }
                     calendar.set(Calendar.DAY_OF_WEEK, expectedDay);
                 }
