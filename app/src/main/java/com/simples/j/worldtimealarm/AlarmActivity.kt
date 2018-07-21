@@ -14,7 +14,6 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
@@ -33,17 +32,13 @@ import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
 import com.simples.j.worldtimealarm.support.AlarmDayAdapter
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
 import com.simples.j.worldtimealarm.support.ColorGridAdapter
-import com.simples.j.worldtimealarm.utils.MediaCursor
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import com.simples.j.worldtimealarm.utils.MediaCursor.Companion.getRemainTime
+import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.*
-import kotlinx.android.synthetic.main.activity_main.*
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.exp
 
 class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, AlarmOptionAdapter.OnItemClickListener, View.OnClickListener, TimePicker.OnTimeChangedListener, ColorGridAdapter.OnItemClickListener {
 
@@ -124,6 +119,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             else {
                 expectedTime.visibility = View.VISIBLE
                 expectedTime.text = getString(R.string.expected_time,DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time))
+                divider2.visibility = View.VISIBLE
             }
             time_zone_offset.text = offset
             selectedDays = existAlarmItem!!.repeat
@@ -153,6 +149,53 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             divider2.visibility = View.GONE
         }
 
+        // Restore data
+        if(savedInstanceState != null) {
+            currentTimeZone = savedInstanceState.getString(STATE_TIME_ZONE_KEY)
+            val formattedTimeZone = currentTimeZone.replace(" ", "_")
+            calendar = Calendar.getInstance(TimeZone.getTimeZone(formattedTimeZone))
+            calendar.time = savedInstanceState.getSerializable(STATE_DATE_KEY) as Date
+            selectedDays = savedInstanceState.getIntArray(STATE_REPEAT_KEY)
+
+            if(Build.VERSION.SDK_INT < 23) {
+                time_picker.currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+                time_picker.currentMinute = calendar.get(Calendar.MINUTE)
+            }
+            else {
+                time_picker.hour = calendar.get(Calendar.HOUR_OF_DAY)
+                time_picker.minute = calendar.get(Calendar.MINUTE)
+            }
+
+            time_zone.text = currentTimeZone
+            val difference = TimeZone.getTimeZone(formattedTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+            var offset = MediaCursor.getOffsetOfDifference(applicationContext, difference)
+            if(TimeZone.getDefault() == TimeZone.getTimeZone(formattedTimeZone)) {
+                offset = resources.getString(R.string.current_time_zone)
+                expectedTime.visibility = View.GONE
+                divider2.visibility = View.GONE
+            }
+            else {
+                expectedTime.visibility = View.VISIBLE
+                expectedTime.text = getString(R.string.expected_time,DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time))
+                divider2.visibility = View.VISIBLE
+            }
+            time_zone_offset.text = offset
+
+            currentRingtone = savedInstanceState.getSerializable(STATE_RINGTONE_KEY) as RingtoneItem
+            currentVibrationPattern = savedInstanceState.getSerializable(STATE_VIBRATION_KEY) as PatternItem
+            currentSnooze = savedInstanceState.getLong(STATE_SNOOZE_KEY)
+            currentLabel = savedInstanceState.getString(STATE_LABEL_KEY)
+            currentColorTag = savedInstanceState.getInt(STATE_COLOR_TAG_KEY)
+
+            optionList = getDefaultOptionList(
+                    currentRingtone,
+                    currentVibrationPattern,
+                    currentSnooze,
+                    currentLabel ?: "",
+                    currentColorTag)
+        }
+
+        // init dialog
         ringtoneDialog = getRingtoneDialog()
         vibrationDialog = getVibrationDialog()
         snoozeDialog = getSnoozeDialog()
@@ -163,6 +206,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         alarm_save.setOnClickListener(this)
         alarm_cancel.setOnClickListener(this)
 
+        // init alarm repeat
         alarmDayAdapter = AlarmDayAdapter(selectedDays, applicationContext)
         alarmDayAdapter.setOnItemClickListener(this)
         repeat_day.layoutManager = GridLayoutManager(this, 7, GridLayoutManager.VERTICAL, false)
@@ -170,6 +214,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         repeat_day.isNestedScrollingEnabled = false
         detail_content_layout.isNestedScrollingEnabled = false
 
+        // init alarm options
         alarmOptionAdapter = AlarmOptionAdapter(optionList, applicationContext)
         alarmOptionAdapter.setOnItemClickListener(this)
         alarm_options.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -219,6 +264,19 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.putString(STATE_TIME_ZONE_KEY, currentTimeZone)
+        outState?.putSerializable(STATE_DATE_KEY, calendar.time)
+        outState?.putIntArray(STATE_REPEAT_KEY, selectedDays)
+        outState?.putSerializable(STATE_RINGTONE_KEY, currentRingtone)
+        outState?.putSerializable(STATE_VIBRATION_KEY, currentVibrationPattern)
+        outState?.putLong(STATE_SNOOZE_KEY, currentSnooze)
+        outState?.putString(STATE_LABEL_KEY, currentLabel)
+        outState?.putInt(STATE_COLOR_TAG_KEY, currentColorTag)
+
+        super.onSaveInstanceState(outState)
+    }
+
     override fun onTimeChanged(picker: TimePicker?, hour: Int, minute: Int) {
         calendar.set(Calendar.HOUR_OF_DAY, hour)
         calendar.set(Calendar.MINUTE, minute)
@@ -228,14 +286,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     override fun onClick(view: View) {
         when(view.id) {
             R.id.alarm_save -> {
-                Log.d("tagggg", "t0")
                 val item = scheduleAlarm()
 
-                Log.d("tagggg", "t1")
                 if(isNew) DatabaseCursor(applicationContext).insertAlarm(item)
                 else DatabaseCursor(applicationContext).updateAlarm(item)
-
-                Log.d("tagggg", "t2")
 
                 if(isTaskRoot) showToast(item)
 
@@ -471,7 +525,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         calendar.set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH))
         calendar.set(Calendar.SECOND, 0)
 
-        Log.d("tagggg", "t10-1")
         notiId = 100000 + Random().nextInt(899999)
 
         val item = AlarmItem(
@@ -488,9 +541,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 currentColorTag
         )
 
-        Log.d("tagggg", "t0-2")
         AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
-        Log.d("tagggg", "t0-3")
         return item
     }
 
@@ -529,6 +580,15 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     }
 
     companion object {
+        private const val STATE_TIME_ZONE_KEY = "STATE_TIME_ZONE_KEY"
+        private const val STATE_DATE_KEY = "STATE_DATE_KEY"
+        private const val STATE_REPEAT_KEY = "STATE_REPEAT_KEY"
+        private const val STATE_RINGTONE_KEY = "STATE_RINGTONE_KEY"
+        private const val STATE_VIBRATION_KEY = "STATE_VIBRATION_KEY"
+        private const val STATE_SNOOZE_KEY = "STATE_SNOOZE_KEY"
+        private const val STATE_LABEL_KEY = "STATE_LABEL_KEY"
+        private const val STATE_COLOR_TAG_KEY = "STATE_COLOR_TAG_KEY"
+
         private const val TAG_FRAGMENT_RINGTONE = "TAG_FRAGMENT_RINGTONE"
         private const val TAG_FRAGMENT_VIBRATION = "TAG_FRAGMENT_VIBRATION"
         private const val TIME_ZONE_REQUEST_CODE = 1

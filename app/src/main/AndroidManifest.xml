@@ -30,7 +30,6 @@
         </activity>
         <activity
             android:name=".AlarmActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
             android:theme="@style/NoActionBar" />
 
         <receiver

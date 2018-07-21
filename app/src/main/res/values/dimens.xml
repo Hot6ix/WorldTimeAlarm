@@ -11,6 +11,7 @@
     <dimen name="text_xxlarge">35sp</dimen>
     <dimen name="text_clock_size">50sp</dimen>
     <dimen name="text_xlarge">25sp</dimen>
+    <dimen name="text_xmlarge">22sp</dimen>
     <dimen name="text_mlarge">20sp</dimen>
     <dimen name="text_large">18sp</dimen>
     <dimen name="text_middle">16sp</dimen>
