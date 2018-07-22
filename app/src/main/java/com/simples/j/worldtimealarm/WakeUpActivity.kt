@@ -85,10 +85,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 //            Log.d(C.TAG, "Alarm alert : Info($item)")
             Log.d(C.TAG, "Alarm alerted : ID(${item.notiId+1})")
 
-            // Change background color if color tag set
             if(item.colorTag != 0) {
-                clock.setBackgroundColor(item.colorTag)
-                label.setBackgroundColor(item.colorTag)
                 window.statusBarColor = item.colorTag
             }
 
@@ -130,7 +127,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
             // Show label
             if(item.label != null && item.label!!.isNotEmpty()) {
-                label.visibility = View.VISIBLE
+                label_card_view.visibility = View.VISIBLE
                 label.text = item.label
                 label.movementMethod = ScrollingMovementMethod()
             }

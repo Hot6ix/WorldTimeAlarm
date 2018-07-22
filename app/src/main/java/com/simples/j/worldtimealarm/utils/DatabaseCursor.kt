@@ -217,9 +217,11 @@ class DatabaseCursor(context: Context) {
             while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
                 val timezone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
+                val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
                 val item = ClockItem(
                         id,
-                        timezone)
+                        timezone,
+                        index)
                 clockList.add(item)
             }
         }

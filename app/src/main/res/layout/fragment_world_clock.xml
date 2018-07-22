@@ -13,8 +13,7 @@
         android:layout_height="match_parent"
         android:layout_marginStart="@dimen/padding20"
         android:layout_marginEnd="@dimen/padding20"
-        android:scrollbars="none"
-        android:fillViewport="true">
+        android:scrollbars="none">
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
@@ -55,7 +54,7 @@
                     android:gravity="center"
                     android:paddingBottom="@dimen/padding10"
                     android:paddingTop="@dimen/padding10"
-                    android:textSize="@dimen/text_large"
+                    android:textSize="@dimen/text_middle"
                     app:layout_constraintTop_toBottomOf="@id/world_time" />
 
             </android.support.constraint.ConstraintLayout>
@@ -69,27 +68,14 @@
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/clockList"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:clipToPadding="false"
                 android:paddingBottom="@dimen/alarm_item_height"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/divider0" />
-
-            <TextView
-                android:id="@+id/clock_empty"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:gravity="center"
-                android:text="@string/clock_empty"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/divider0"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
 

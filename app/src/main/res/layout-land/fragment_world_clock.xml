@@ -61,7 +61,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:scrollbars="none"
-            android:fillViewport="true"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/standardTimeLayout"
@@ -74,22 +73,10 @@
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/clockList"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:clipToPadding="false"
                     android:paddingBottom="@dimen/alarm_item_height"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
-
-                <TextView
-                    android:id="@+id/clock_empty"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="@string/clock_empty"
-                    android:visibility="gone"
-                    android:gravity="center"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

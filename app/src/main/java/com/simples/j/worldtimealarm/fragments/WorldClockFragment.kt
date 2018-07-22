@@ -115,7 +115,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         swipeHelper = ItemTouchHelper(swipeController)
         swipeHelper.attachToRecyclerView(clockList)
         swipeController.setOnSwipeListener(this)
-        setEmptyMessage()
+        setEmptyProcess()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -141,14 +141,14 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
             requestCode == TIME_ZONE_NEW_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    DatabaseCursor(context!!).insertClock(ClockItem(null, data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)))
+                    DatabaseCursor(context!!).insertClock(ClockItem(null, data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID), null))
                     clockItems.clear()
                     clockItems.addAll(DatabaseCursor(context!!).getClockList())
                 }
             }
         }
 
-        setEmptyMessage()
+        setEmptyProcess()
         clockListAdapter.notifyDataSetChanged()
     }
 
@@ -172,13 +172,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         removedItem = clockItems[itemPosition]
         clockListAdapter.removeItem(itemPosition)
         DatabaseCursor(context!!).removeClock(removedItem!!)
-        setEmptyMessage()
+        setEmptyProcess()
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
             DatabaseCursor(context!!).insertClock(removedItem!!)
             clockListAdapter.addItem(itemPosition, removedItem!!)
             recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
-            setEmptyMessage()
+            setEmptyProcess()
         }.show()
     }
 
@@ -187,14 +187,14 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         clockListAdapter.notifyItemMoved(from, to)
     }
 
-    private fun setEmptyMessage() {
-        if(clockItems.size < 1) {
-            clockList.visibility = View.GONE
-            clock_empty.visibility = View.VISIBLE
-        }
-        else {
-            clockList.visibility = View.VISIBLE
-            clock_empty.visibility = View.GONE
+    private fun setEmptyProcess() {
+        when(resources.configuration.orientation) {
+            Configuration.ORIENTATION_PORTRAIT -> {
+                clock_content_layout.visibility = View.VISIBLE
+            }
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                clock_content_layout.visibility = if(clockItems.size > 0) View.VISIBLE else View.GONE
+            }
         }
     }
 
