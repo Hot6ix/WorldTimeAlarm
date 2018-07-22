@@ -13,7 +13,7 @@ Version 1.1
 Version 1.1 (Version code until 9)
 - Fix repeat days bug
 
-Version 1.2
+Version 1.2 (Not launched yet)
 - New design of main view
 - New design of wake up view
 - Support changing order of alarm or time items
