@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WorldTimeAlarm</string>
+    <string name="app_name">World Time Alarm</string>
     <string name="main_label">报警</string>
     <string name="action_settings">设置</string>
     <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>

@@ -8,12 +8,12 @@ import android.database.sqlite.SQLiteOpenHelper
  * Created by j on 26/02/2018.
  *
  */
-class DatabaseManager(private val context: Context): SQLiteOpenHelper(context, DB_NAME, null, VERSION) {
+class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, null, VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL("CREATE TABLE $TABLE_ALARM_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "$COLUMN_TIME_ZONE TEXT, " +
-                "$COLUMN_TIME_SET TEXT, " +
+        db.execSQL("CREATE TABLE $TABLE_ALARM_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "$COLUMN_TIME_ZONE TEXT," +
+                "$COLUMN_TIME_SET TEXT," +
                 "$COLUMN_REPEAT TEXT," +
                 "$COLUMN_RINGTONE TEXT," +
                 "$COLUMN_VIBRATION TEXT," +
@@ -21,9 +21,11 @@ class DatabaseManager(private val context: Context): SQLiteOpenHelper(context, D
                 "$COLUMN_LABEL TEXT," +
                 "$COLUMN_ON_OFF INTEGER," +
                 "$COLUMN_NOTI_ID INTEGER," +
-                "$COLUMN_COLOR_TAG INTEGER)")
+                "$COLUMN_COLOR_TAG INTEGER," +
+                "$COLUMN_INDEX INTEGER);")
+
         db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "$COLUMN_TIME_ZONE TEXT)")
+                "$COLUMN_TIME_ZONE TEXT);")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, old: Int, new: Int) {
@@ -34,6 +36,10 @@ class DatabaseManager(private val context: Context): SQLiteOpenHelper(context, D
             old == 2 && new > old -> {
                 db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "$COLUMN_TIME_ZONE TEXT)")
+                db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_INDEX INTEGER")
+
+                val list = DatabaseCursor(context).getAlarmList()
+                if(list.size > 0) list.forEachIndexed { index, alarmItem -> DatabaseCursor(context).updateDisplayOrder(alarmItem.id!!, index)  }
             }
         }
     }
@@ -55,6 +61,7 @@ class DatabaseManager(private val context: Context): SQLiteOpenHelper(context, D
         const val COLUMN_ON_OFF = "on_off"
         const val COLUMN_NOTI_ID = "notiId"
         const val COLUMN_COLOR_TAG = "colorTag"
+        const val COLUMN_INDEX = "dorder"
     }
 
 }

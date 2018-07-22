@@ -17,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
 
-    <com.simples.j.worldtimealarm.etc.UnswipeableViewPager
+    <com.simples.j.worldtimealarm.utils.UnswipeableViewPager
         android:id="@+id/fragment_pager"
         android:layout_width="wrap_content"
         android:layout_height="0dp"

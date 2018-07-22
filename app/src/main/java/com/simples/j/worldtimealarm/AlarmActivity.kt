@@ -538,7 +538,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 optionList[3].summary,
                 1,
                 if(isNew) notiId else existAlarmItem!!.notiId,
-                currentColorTag
+                currentColorTag,
+                null
         )
 
         AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)

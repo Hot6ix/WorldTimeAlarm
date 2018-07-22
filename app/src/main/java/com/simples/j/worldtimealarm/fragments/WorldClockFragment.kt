@@ -101,19 +101,21 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
 
         time_zone.text = TimeZone.getDefault().id
-        swipeController = ListSwipeController()
-        swipeHelper = ItemTouchHelper(swipeController)
-        swipeHelper.attachToRecyclerView(clockList)
-        swipeController.setOnSwipeListener(this)
-        recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
-        clockList.isNestedScrollingEnabled = false
-        clock_content_layout.isNestedScrollingEnabled = false
 
         clockItems = DatabaseCursor(context!!).getClockList()
         clockListAdapter = ClockListAdapter(context!!, clockItems, calendar)
-        clockList.adapter = clockListAdapter
+        recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
         clockList.layoutManager = recyclerLayoutManager
+        clockList.adapter = clockListAdapter
+        clockList.isNestedScrollingEnabled = false
+        clock_content_layout.isNestedScrollingEnabled = false
         clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
+
+        swipeController = ListSwipeController(clockListAdapter)
+        swipeHelper = ItemTouchHelper(swipeController)
+        swipeHelper.attachToRecyclerView(clockList)
+        swipeController.setOnSwipeListener(this)
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

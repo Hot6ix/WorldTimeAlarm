@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.support
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,8 @@ import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.interfaces.ItemTouchHelperAdapter
+import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -20,7 +23,7 @@ import java.util.*
  * Created by j on 19/02/2018.
  *
  */
-class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
+class AlarmListAdapter(var dbCursor: DatabaseCursor, var list: ArrayList<AlarmItem>, var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>(), ItemTouchHelperAdapter {
 
     private lateinit var listener: OnItemClickListener
 
@@ -107,6 +110,20 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var conte
             }
             listener.onItemStatusChanged(b, list[adapterPosition])
         }
+    }
+
+    override fun onItemMove(from: Int, to: Int) {
+        if(from < to) {
+            for(i in from until to) {
+                Collections.swap(list,  i, i+1)
+            }
+        }
+        else {
+            for(i in from downTo to + 1) {
+                Collections.swap(list,  i, i-1)
+            }
+        }
+        notifyItemMoved(from, to)
     }
 
     fun removeItem(index: Int) {

@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.utils
 import android.content.ContentValues
 import android.content.Context
 import android.database.DatabaseUtils
+import android.util.Log
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.ClockItem
 import java.util.*
@@ -40,7 +41,7 @@ class DatabaseCursor(context: Context) {
         val db = dbManager.readableDatabase
         val alarmList = ArrayList<AlarmItem>()
 
-        val cursor = db.query(DatabaseManager.TABLE_ALARM_LIST, null, null, null, null, null, DatabaseManager.COLUMN_ID + " ASC")
+        val cursor = db.query(DatabaseManager.TABLE_ALARM_LIST, null, null, null, null, null, DatabaseManager.COLUMN_INDEX + " ASC")
         if(cursor.count > 0) {
             while(cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
@@ -54,6 +55,7 @@ class DatabaseCursor(context: Context) {
                 val switch = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ON_OFF))
                 val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
                 val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
+                val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
 
                 val item = AlarmItem(
                         id,
@@ -66,7 +68,8 @@ class DatabaseCursor(context: Context) {
                         label,
                         switch,
                         notiId,
-                        colorTag)
+                        colorTag,
+                        index)
                 alarmList.add(item)
             }
         }
@@ -81,7 +84,7 @@ class DatabaseCursor(context: Context) {
         val db = dbManager.readableDatabase
         val alarmList = ArrayList<AlarmItem>()
 
-        val cursor = db.query(DatabaseManager.TABLE_ALARM_LIST, null, DatabaseManager.COLUMN_ON_OFF + "= ?", arrayOf("1"), null, null, DatabaseManager.COLUMN_ID + " ASC")
+        val cursor = db.query(DatabaseManager.TABLE_ALARM_LIST, null, DatabaseManager.COLUMN_ON_OFF + "= ?", arrayOf("1"), null, null, null)
         if(cursor.count > 0) {
             while(cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
@@ -95,6 +98,7 @@ class DatabaseCursor(context: Context) {
                 val switch = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ON_OFF))
                 val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
                 val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
+                val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
 
                 val item = AlarmItem(
                         id,
@@ -107,7 +111,8 @@ class DatabaseCursor(context: Context) {
                         label,
                         switch,
                         notiId,
-                        colorTag)
+                        colorTag,
+                        index)
                 alarmList.add(item)
             }
         }
@@ -138,8 +143,19 @@ class DatabaseCursor(context: Context) {
         contentValues.put(DatabaseManager.COLUMN_ON_OFF, item.on_off)
         contentValues.put(DatabaseManager.COLUMN_NOTI_ID, item.notiId)
         contentValues.put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
+        contentValues.put(DatabaseManager.COLUMN_INDEX, item.index)
 
         db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(item.notiId.toString()))
+        db.close()
+    }
+
+    fun updateDisplayOrder(id: Int, order: Int) {
+        val db = dbManager.writableDatabase
+
+        val contentValues = ContentValues()
+        contentValues.put(DatabaseManager.COLUMN_INDEX, order)
+
+        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(id.toString()))
         db.close()
     }
 
@@ -196,7 +212,7 @@ class DatabaseCursor(context: Context) {
         val db = dbManager.readableDatabase
         val clockList = ArrayList<ClockItem>()
 
-        val cursor = db.query(DatabaseManager.TABLE_CLOCK_LIST, null, null, null, null, null, DatabaseManager.COLUMN_ID + " ASC")
+        val cursor = db.query(DatabaseManager.TABLE_CLOCK_LIST, null, null, null, null, null, null)
         if(cursor.count > 0) {
             while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))

@@ -27,6 +27,7 @@ import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.interfaces.ItemTouchHelperAdapter
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
@@ -67,8 +68,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         super.onActivityCreated(savedInstanceState)
 
         updateRequestReceiver = UpdateRequestReceiver()
-        swipeController = ListSwipeController()
-        swipeHelper = ItemTouchHelper(swipeController)
         dbCursor = DatabaseCursor(context!!)
         alarmController = AlarmController.getInstance(context!!)
         audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -78,12 +77,17 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         alarmItems = dbCursor.getAlarmList()
-        alarmListAdapter = AlarmListAdapter(alarmItems, context!!)
+        alarmItems.forEach { Log.d("tagggg", it.toString()) }
+        alarmListAdapter = AlarmListAdapter(dbCursor, alarmItems, context!!)
         alarmListAdapter.setOnItemListener(this)
         recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
+
         alarmList.layoutManager = recyclerLayoutManager
         alarmList.adapter = alarmListAdapter
         alarmList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
+
+        swipeController = ListSwipeController(alarmListAdapter)
+        swipeHelper = ItemTouchHelper(swipeController)
         swipeHelper.attachToRecyclerView(alarmList)
         swipeController.setOnSwipeListener(this)
         setEmptyMessage()

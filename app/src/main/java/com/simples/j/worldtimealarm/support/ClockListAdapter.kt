@@ -13,6 +13,7 @@ import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.ClockItem
+import com.simples.j.worldtimealarm.interfaces.ItemTouchHelperAdapter
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import kotlinx.android.synthetic.main.clock_list_item.view.*
 import java.text.DateFormat
@@ -24,7 +25,7 @@ import kotlin.math.exp
  * Created by j on 19/02/2018.
  *
  */
-class ClockListAdapter(private var context: Context, private var list: ArrayList<ClockItem>, private var calendar: Calendar): RecyclerView.Adapter<ClockListAdapter.ViewHolder>() {
+class ClockListAdapter(private var context: Context, private var list: ArrayList<ClockItem>, private var calendar: Calendar): RecyclerView.Adapter<ClockListAdapter.ViewHolder>(), ItemTouchHelperAdapter {
 
     private lateinit var listener: OnItemClickListener
 
@@ -55,6 +56,20 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
         dateFormat.timeZone = timeZone
         holder.time_zone_time.text = timeFormat.format(expectedCalendar.time)
         holder.time_zone_date.text = dateFormat.format(expectedCalendar.time)
+    }
+
+    override fun onItemMove(from: Int, to: Int) {
+        if(from < to) {
+            for(i in from until to) {
+                Collections.swap(list,  i, i+1)
+            }
+        }
+        else {
+            for(i in from downTo to + 1) {
+                Collections.swap(list,  i, i-1)
+            }
+        }
+        notifyItemMoved(from, to)
     }
 
     fun removeItem(index: Int) {
