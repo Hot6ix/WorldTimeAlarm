@@ -14,6 +14,7 @@
 
     <!-- Show info -->
     <string name="alarm_empty">No alarm set</string>
+    <string name="clock_empty">Empty</string>
     <string name="no_result">No result</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>

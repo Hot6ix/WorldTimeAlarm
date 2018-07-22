@@ -20,14 +20,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.MobileAds
 import com.simples.j.worldtimealarm.AlarmActivity
 import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
-import com.simples.j.worldtimealarm.interfaces.ItemTouchHelperAdapter
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
@@ -41,7 +38,7 @@ import java.util.*
  * A simple [Fragment] subclass.
  *
  */
-class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, ListSwipeController.OnSwipeListener {
+class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, ListSwipeController.OnListControlListener {
 
     private lateinit var alarmListAdapter: AlarmListAdapter
     private lateinit var updateRequestReceiver: UpdateRequestReceiver
@@ -77,8 +74,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         alarmItems = dbCursor.getAlarmList()
-        alarmItems.forEach { Log.d("tagggg", it.toString()) }
-        alarmListAdapter = AlarmListAdapter(dbCursor, alarmItems, context!!)
+        alarmListAdapter = AlarmListAdapter(alarmItems, context!!)
         alarmListAdapter.setOnItemListener(this)
         recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
 
@@ -86,7 +82,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         alarmList.adapter = alarmListAdapter
         alarmList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
 
-        swipeController = ListSwipeController(alarmListAdapter)
+        swipeController = ListSwipeController()
         swipeHelper = ItemTouchHelper(swipeController)
         swipeHelper.attachToRecyclerView(alarmList)
         swipeController.setOnSwipeListener(this)
@@ -178,7 +174,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             dbCursor.updateAlarmOnOffByNotiId(item.notiId, true)
             alarmController.scheduleAlarm(context!!, item, AlarmController.TYPE_ALARM)
             showSnackBar(item)
-            alarmListAdapter.notifyItemChanged(alarmItems.indexOf(item))
+//            alarmListAdapter.notifyItemChanged(alarmItems.indexOf(item))
         }
         else {
             alarmItems.find { it.notiId == item.notiId }?.on_off = 0
@@ -205,6 +201,11 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
             setEmptyMessage()
         }.show()
+    }
+
+    override fun onItemMove(from: Int, to: Int) {
+        Collections.swap(alarmItems,  from, to)
+        alarmListAdapter.notifyItemMoved(from, to)
     }
 
     private fun setEmptyMessage() {

@@ -15,6 +15,7 @@
 
     <!-- Show info -->
     <string name="alarm_empty">알람 없음</string>
+    <string name="clock_empty">비어있음</string>
     <string name="no_result">결과 없음</string>
     <string name="cancel">취소</string>
     <string name="save">저장</string>

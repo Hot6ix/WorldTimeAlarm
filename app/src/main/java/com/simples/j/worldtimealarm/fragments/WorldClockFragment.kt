@@ -37,7 +37,7 @@ import kotlin.math.min
  * A simple [Fragment] subclass.
  *
  */
-class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnSwipeListener {
+class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener {
 
     private lateinit var clockListAdapter: ClockListAdapter
     private lateinit var calendar: Calendar
@@ -111,11 +111,11 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         clock_content_layout.isNestedScrollingEnabled = false
         clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
 
-        swipeController = ListSwipeController(clockListAdapter)
+        swipeController = ListSwipeController()
         swipeHelper = ItemTouchHelper(swipeController)
         swipeHelper.attachToRecyclerView(clockList)
         swipeController.setOnSwipeListener(this)
-
+        setEmptyMessage()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -137,19 +137,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
                     world_time.text = timeFormat.format(calendar.time)
                     world_date.text = dateFormat.format(calendar.time)
-
-//                    val cal1 = Calendar.getInstance(TimeZone.getTimeZone("Asia/Taipei")) // +8
-//                    cal1.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
-//                    val cal2 = Calendar.getInstance(TimeZone.getTimeZone("Asia/Bishkek")) // +6
-//                    cal2.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
-//                    val cal3 = Calendar.getInstance(TimeZone.getTimeZone("Antarctica/Troll")) // 0
-//                    cal3.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
-//
-//                    val differenceOriginal = TimeZone.getDefault().getOffset(System.currentTimeMillis()) - TimeZone.getTimeZone("Asia/Taipei").getOffset(System.currentTimeMillis())
-//                    val difference = TimeZone.getTimeZone("Asia/Seoul").getOffset(System.currentTimeMillis()) - TimeZone.getTimeZone("Asia/Taipei").getOffset(System.currentTimeMillis())
-//                    cal1.add(Calendar.MILLISECOND, -differenceOriginal)
-//                    cal1.add(Calendar.MILLISECOND, -difference)
-//                    Log.d("tagggg", cal1.time.toString())
                 }
             }
             requestCode == TIME_ZONE_NEW_CODE && resultCode == Activity.RESULT_OK -> {
@@ -161,6 +148,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
         }
 
+        setEmptyMessage()
         clockListAdapter.notifyDataSetChanged()
     }
 
@@ -184,14 +172,30 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         removedItem = clockItems[itemPosition]
         clockListAdapter.removeItem(itemPosition)
         DatabaseCursor(context!!).removeClock(removedItem!!)
-//        setEmptyMessage()
+        setEmptyMessage()
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
             DatabaseCursor(context!!).insertClock(removedItem!!)
             clockListAdapter.addItem(itemPosition, removedItem!!)
             recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
-//            setEmptyMessage()
+            setEmptyMessage()
         }.show()
+    }
+
+    override fun onItemMove(from: Int, to: Int) {
+        Collections.swap(clockItems, from, to)
+        clockListAdapter.notifyItemMoved(from, to)
+    }
+
+    private fun setEmptyMessage() {
+        if(clockItems.size < 1) {
+            clockList.visibility = View.GONE
+            clock_empty.visibility = View.VISIBLE
+        }
+        else {
+            clockList.visibility = View.VISIBLE
+            clock_empty.visibility = View.GONE
+        }
     }
 
     companion object {

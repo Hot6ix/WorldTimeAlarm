@@ -87,7 +87,8 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
             // Change background color if color tag set
             if(item.colorTag != 0) {
-                wake_up_layout.setBackgroundColor(item.colorTag)
+                clock.setBackgroundColor(item.colorTag)
+                label.setBackgroundColor(item.colorTag)
                 window.statusBarColor = item.colorTag
             }
 
@@ -121,7 +122,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             if(TimeZone.getDefault() != TimeZone.getTimeZone(timeZone)) {
 //                val difference = TimeZone.getTimeZone(timeZone).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(timeZone).dstSavings - TimeZone.getDefault().dstSavings
                 val difference = TimeZone.getTimeZone(timeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-                divider1_wake.visibility = View.VISIBLE
                 time_zone_layout.visibility = View.VISIBLE
                 time_zone_name_wake.text = item.timeZone
                 time_zone_offset_wake.text = MediaCursor.getOffsetOfDifference(applicationContext, difference)
@@ -130,7 +130,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
             // Show label
             if(item.label != null && item.label!!.isNotEmpty()) {
-                divider2_wake.visibility = View.VISIBLE
                 label.visibility = View.VISIBLE
                 label.text = item.label
                 label.movementMethod = ScrollingMovementMethod()

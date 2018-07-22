@@ -11,13 +11,14 @@
         android:id="@+id/clock_content_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="none">
+        android:layout_marginStart="@dimen/padding20"
+        android:layout_marginEnd="@dimen/padding20"
+        android:scrollbars="none"
+        android:fillViewport="true">
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/padding20"
-            android:layout_marginEnd="@dimen/padding20"
+            android:layout_height="wrap_content"
             android:focusableInTouchMode="true">
 
             <android.support.constraint.ConstraintLayout
@@ -29,33 +30,33 @@
                     android:id="@+id/time_zone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textSize="@dimen/text_middle"
+                    android:background="?attr/selectableItemBackground"
                     android:ellipsize="end"
-                    android:paddingTop="@dimen/padding10"
+                    android:gravity="center"
                     android:paddingBottom="@dimen/padding10"
-                    android:background="?attr/selectableItemBackground"/>
+                    android:paddingTop="@dimen/padding10"
+                    android:textSize="@dimen/text_middle" />
 
                 <TextView
                     android:id="@+id/world_time"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
                     android:gravity="center"
                     android:includeFontPadding="false"
                     android:textSize="@dimen/text_clock_size"
-                    android:background="?attr/selectableItemBackground"
-                    app:layout_constraintTop_toBottomOf="@id/time_zone"/>
+                    app:layout_constraintTop_toBottomOf="@id/time_zone" />
 
                 <TextView
                     android:id="@+id/world_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textSize="@dimen/text_large"
-                    android:paddingTop="@dimen/padding10"
-                    android:paddingBottom="@dimen/padding10"
                     android:background="?attr/selectableItemBackground"
-                    app:layout_constraintTop_toBottomOf="@id/world_time"/>
+                    android:gravity="center"
+                    android:paddingBottom="@dimen/padding10"
+                    android:paddingTop="@dimen/padding10"
+                    android:textSize="@dimen/text_large"
+                    app:layout_constraintTop_toBottomOf="@id/world_time" />
 
             </android.support.constraint.ConstraintLayout>
 
@@ -68,13 +69,27 @@
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/clockList"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/alarm_item_height"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginBottom="8dp"
                 android:clipToPadding="false"
-                app:layout_constraintTop_toBottomOf="@id/divider0"
+                android:paddingBottom="@dimen/alarm_item_height"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintTop_toBottomOf="@id/divider0" />
+
+            <TextView
+                android:id="@+id/clock_empty"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:gravity="center"
+                android:text="@string/clock_empty"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/divider0"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
 

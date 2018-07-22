@@ -38,7 +38,6 @@ class TimeZoneAdapter(private var tzs: ArrayList<String>, private val context: C
 //        val difference = TimeZone.getTimeZone(tzs[position].replace(" ", "_")).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(tzs[position].replace(" ", "_")).dstSavings - TimeZone.getDefault().dstSavings
         val difference = TimeZone.getTimeZone(tzs[position].replace(" ", "_")).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
 
-        Log.d("tagggg", difference.toString())
         val offset = if(TimeZone.getDefault() == TimeZone.getTimeZone(tzs[position].replace(" ", "_"))) context.resources.getString(R.string.current_time_zone)
         else MediaCursor.getOffsetOfDifference(context, difference)
 

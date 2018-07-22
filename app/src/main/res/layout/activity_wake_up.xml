@@ -6,181 +6,173 @@
     android:id="@+id/wake_up_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blueGrayDark"
+    android:paddingTop="@dimen/padding20"
     tools:context="com.simples.j.worldtimealarm.WakeUpActivity">
 
-    <TextClock
-        android:id="@+id/clock"
+    <android.support.v7.widget.CardView
+        android:id="@+id/clock_card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingBottom="@dimen/padding25"
-        android:paddingEnd="@dimen/padding35"
-        android:paddingStart="@dimen/padding35"
-        android:paddingTop="@dimen/padding25"
-        android:textSize="@dimen/text_clock_size"
-        android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        ads:layout_constraintBottom_toTopOf="@id/divider0_wake"/>
-
-    <View
-        android:id="@+id/divider0_wake"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginEnd="@dimen/padding20"
         android:layout_marginStart="@dimen/padding20"
-        android:background="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/clock"
-        ads:layout_constraintBottom_toTopOf="@id/time_zone_layout"/>
+        android:layout_marginEnd="@dimen/padding20"
+        android:layout_marginBottom="@dimen/padding20">
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/time_zone_layout"
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextClock
+                android:id="@+id/clock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingBottom="@dimen/padding25"
+                android:paddingEnd="@dimen/padding35"
+                android:paddingStart="@dimen/padding35"
+                android:paddingTop="@dimen/padding25"
+                android:textSize="@dimen/text_clock_size"
+                android:textColor="@android:color/white"
+                android:background="@color/blueGrayDark"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                ads:layout_constraintBottom_toTopOf="@id/time_zone_layout"/>
+
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/time_zone_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/padding20"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/clock"
+                ads:layout_constraintBottom_toBottomOf="parent">
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/time_zone_name_wake"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="@dimen/padding15"
+                    android:gravity="center_vertical"
+                    android:text="@string/test"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMaxTextSize="@dimen/text_mlarge"
+                    app:layout_constraintEnd_toStartOf="@id/time_zone_time_wake"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    ads:layout_constraintBottom_toTopOf="@id/time_zone_offset_wake"/>
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/time_zone_offset_wake"
+                    android:layout_width="0dp"
+                    android:layout_height="30dp"
+                    android:layout_marginEnd="@dimen/padding15"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/test"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMaxTextSize="@dimen/text_large"
+                    app:layout_constraintEnd_toStartOf="@id/time_zone_time_wake"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/time_zone_name_wake"
+                    ads:layout_constraintBottom_toBottomOf="parent"/>
+
+                <TextClock
+                    android:id="@+id/time_zone_time_wake"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/test"
+                    android:textSize="@dimen/text_xxlarge"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/label_card_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/padding20"
-        android:visibility="gone"
+        android:layout_margin="@dimen/padding20"
+        android:background="@color/blueGray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider0_wake"
-        ads:layout_constraintBottom_toTopOf="@id/divider1_wake">
+        app:layout_constraintTop_toBottomOf="@id/clock_card_view"
+        app:layout_constraintBottom_toTopOf="@id/selector_card_view">
 
-        <android.support.v7.widget.AppCompatTextView
-            android:id="@+id/time_zone_name_wake"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="@dimen/padding15"
-            android:gravity="center_vertical"
-            android:text="@string/test"
-            android:textColor="@android:color/white"
-            app:autoSizeTextType="uniform"
-            app:autoSizeMaxTextSize="@dimen/text_mlarge"
-            app:layout_constraintEnd_toStartOf="@id/time_zone_time_wake"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            ads:layout_constraintBottom_toTopOf="@id/time_zone_offset_wake"/>
-
-        <android.support.v7.widget.AppCompatTextView
-            android:id="@+id/time_zone_offset_wake"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_marginEnd="@dimen/padding15"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@string/test"
-            android:textColor="@android:color/white"
-            app:autoSizeTextType="uniform"
-            app:autoSizeMaxTextSize="@dimen/text_large"
-            app:layout_constraintEnd_toStartOf="@id/time_zone_time_wake"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/time_zone_name_wake"
-            ads:layout_constraintBottom_toBottomOf="parent"/>
-
-        <TextClock
-            android:id="@+id/time_zone_time_wake"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/label"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="@dimen/padding20"
+            android:scrollbars="vertical"
+            android:maxLines="5"
             android:text="@string/test"
-            android:textSize="@dimen/text_xxlarge"
+            android:textSize="@dimen/text_middle"
             android:textColor="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:background="@color/blueGrayDark"
+            android:visibility="gone"/>
 
-    </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
 
-    <View
-        android:id="@+id/divider1_wake"
+    <android.support.v7.widget.CardView
+        android:id="@+id/selector_card_view"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginEnd="@dimen/padding20"
-        android:layout_marginStart="@dimen/padding20"
-        android:background="@android:color/white"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/time_zone_layout"
-        ads:layout_constraintBottom_toTopOf="@id/label"/>
-
-    <TextView
-        android:id="@+id/label"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="@dimen/padding20"
-        android:scrollbars="vertical"
-        android:maxLines="5"
-        android:text="@string/test"
-        android:textSize="@dimen/text_middle"
-        android:textColor="@android:color/white"
-        android:visibility="gone"
-        ads:layout_constraintBottom_toTopOf="@+id/divider2_wake"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider1_wake" />
-
-    <View
-        android:id="@+id/divider2_wake"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginEnd="@dimen/padding20"
-        android:layout_marginStart="@dimen/padding20"
-        android:background="@android:color/white"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/label"
-        ads:layout_constraintBottom_toTopOf="@id/selector"/>
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/selector"
-        android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginEnd="@dimen/padding20"
         android:layout_marginStart="@dimen/padding20"
+        android:layout_marginBottom="@dimen/padding20"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/divider2_wake"
+        app:layout_constraintTop_toBottomOf="@id/label_card_view"
         ads:layout_constraintBottom_toTopOf="@id/adViewWakeUp">
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/snooze"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="?attr/selectableItemBackground"
-            android:layout_margin="@dimen/padding5"
-            android:text="@string/snooze"
-            android:textColor="@android:color/white"
-            android:maxLines="1"
-            android:padding="@dimen/padding20"
-            app:autoSizeTextType="uniform"
-            app:autoSizeMaxTextSize="@dimen/text_mlarge"
-            app:layout_constraintEnd_toStartOf="@id/dismiss"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            ads:layout_constraintBottom_toBottomOf="parent"/>
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/selector"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/dismiss"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="?attr/selectableItemBackground"
-            android:layout_margin="@dimen/padding5"
-            android:text="@string/dismiss"
-            android:textColor="@android:color/white"
-            android:maxLines="1"
-            android:padding="@dimen/padding20"
-            app:autoSizeTextType="uniform"
-            app:autoSizeMaxTextSize="@dimen/text_mlarge"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/snooze"
-            app:layout_constraintTop_toTopOf="parent"
-            ads:layout_constraintBottom_toBottomOf="parent"/>
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/snooze"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="?attr/selectableItemBackground"
+                android:layout_margin="@dimen/padding5"
+                android:text="@string/snooze"
+                android:maxLines="1"
+                android:padding="@dimen/padding20"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMaxTextSize="@dimen/text_mlarge"
+                app:layout_constraintEnd_toStartOf="@id/dismiss"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                ads:layout_constraintBottom_toBottomOf="parent"/>
 
-    </android.support.constraint.ConstraintLayout>
+            <android.support.v7.widget.AppCompatButton
+                android:id="@+id/dismiss"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="?attr/selectableItemBackground"
+                android:layout_margin="@dimen/padding5"
+                android:text="@string/dismiss"
+                android:maxLines="1"
+                android:padding="@dimen/padding20"
+                app:autoSizeTextType="uniform"
+                app:autoSizeMaxTextSize="@dimen/text_mlarge"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/snooze"
+                app:layout_constraintTop_toTopOf="parent"
+                ads:layout_constraintBottom_toBottomOf="parent"/>
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.v7.widget.CardView>
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adViewWakeUp"
