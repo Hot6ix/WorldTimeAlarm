@@ -37,9 +37,6 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
                 db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "$COLUMN_TIME_ZONE TEXT)")
                 db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_INDEX INTEGER")
-
-                val list = DatabaseCursor(context).getAlarmList()
-                if(list.size > 0) list.forEachIndexed { index, alarmItem -> DatabaseCursor(context).updateDisplayOrder(alarmItem.id!!, index)  }
             }
         }
     }
