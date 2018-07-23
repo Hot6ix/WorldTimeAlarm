@@ -66,8 +66,8 @@
     <string name="exist_timezone">The timezone is already exist.</string>
 
     <!-- Settings -->
-    <string name="setting_group_1_key">GENERAL</string>
-    <string name="setting_group_1">General</string>
+    <string name="setting_group_1_key">ALARM</string>
+    <string name="setting_group_1">Alarm</string>
     <string name="setting_alarm_mute_key">ALARM_MUTE_KEY</string>
     <string name="setting_alarm_mute_title">Alarm mute time</string>
     <string name="setting_alarm_volume_key">ALARM_VOLUME_KEY</string>

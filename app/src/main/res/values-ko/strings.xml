@@ -67,8 +67,8 @@
     <string name="exist_timezone">이미 존재하는 시간대입니다.</string>
 
     <!-- Settings -->
-    <string name="setting_group_1_key">GENERAL</string>
-    <string name="setting_group_1">일반</string>
+    <string name="setting_group_1_key">ALARM</string>
+    <string name="setting_group_1">알람</string>
     <string name="setting_alarm_mute_key">ALARM_MUTE_KEY</string>
     <string name="setting_alarm_mute_title">알람 음소거</string>
     <string name="setting_alarm_volume_key">ALARM_VOLUME_KEY</string>

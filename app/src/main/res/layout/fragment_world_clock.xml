@@ -7,79 +7,70 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.WorldClockFragment">
 
-    <android.support.v4.widget.NestedScrollView
-        android:id="@+id/clock_content_layout"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="@dimen/padding20"
-        android:layout_marginEnd="@dimen/padding20"
-        android:scrollbars="none">
+        android:layout_height="match_parent">
 
         <android.support.constraint.ConstraintLayout
+            android:id="@+id/standardTimeLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:focusableInTouchMode="true">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/standardTimeLayout"
+            <TextView
+                android:id="@+id/time_zone"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:paddingBottom="@dimen/padding10"
+                android:paddingTop="@dimen/padding10"
+                android:textSize="@dimen/text_middle" />
 
-                <TextView
-                    android:id="@+id/time_zone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:paddingBottom="@dimen/padding10"
-                    android:paddingTop="@dimen/padding10"
-                    android:textSize="@dimen/text_middle" />
-
-                <TextView
-                    android:id="@+id/world_time"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:gravity="center"
-                    android:includeFontPadding="false"
-                    android:textSize="@dimen/text_clock_size"
-                    app:layout_constraintTop_toBottomOf="@id/time_zone" />
-
-                <TextView
-                    android:id="@+id/world_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:gravity="center"
-                    android:paddingBottom="@dimen/padding10"
-                    android:paddingTop="@dimen/padding10"
-                    android:textSize="@dimen/text_middle"
-                    app:layout_constraintTop_toBottomOf="@id/world_time" />
-
-            </android.support.constraint.ConstraintLayout>
-
-            <View
-                android:id="@+id/divider0"
-                style="@style/Divider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/standardTimeLayout" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/clockList"
+            <TextView
+                android:id="@+id/world_time"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingBottom="@dimen/alarm_item_height"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/divider0" />
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:textSize="@dimen/text_clock_size"
+                app:layout_constraintTop_toBottomOf="@id/time_zone" />
+
+            <TextView
+                android:id="@+id/world_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:paddingBottom="@dimen/padding10"
+                android:paddingTop="@dimen/padding10"
+                android:textSize="@dimen/text_middle"
+                app:layout_constraintTop_toBottomOf="@id/world_time" />
 
         </android.support.constraint.ConstraintLayout>
 
-    </android.support.v4.widget.NestedScrollView>
+        <View
+            android:id="@+id/divider0"
+            style="@style/Divider"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/standardTimeLayout" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/clockList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/alarm_item_height"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider0" />
+
+    </android.support.constraint.ConstraintLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/new_timezone"

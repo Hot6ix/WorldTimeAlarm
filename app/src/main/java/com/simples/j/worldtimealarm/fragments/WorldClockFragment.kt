@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
@@ -14,13 +13,11 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
-
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
 import com.simples.j.worldtimealarm.etc.ClockItem
@@ -29,9 +26,7 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
 import kotlinx.android.synthetic.main.fragment_world_clock.*
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.min
 
 /**
  * A simple [Fragment] subclass.
@@ -107,15 +102,12 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
         clockList.layoutManager = recyclerLayoutManager
         clockList.adapter = clockListAdapter
-        clockList.isNestedScrollingEnabled = false
-        clock_content_layout.isNestedScrollingEnabled = false
         clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
 
         swipeController = ListSwipeController()
         swipeHelper = ItemTouchHelper(swipeController)
         swipeHelper.attachToRecyclerView(clockList)
         swipeController.setOnSwipeListener(this)
-        setEmptyProcess()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -148,7 +140,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
         }
 
-        setEmptyProcess()
         clockListAdapter.notifyDataSetChanged()
     }
 
@@ -172,30 +163,17 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         removedItem = clockItems[itemPosition]
         clockListAdapter.removeItem(itemPosition)
         DatabaseCursor(context!!).removeClock(removedItem!!)
-        setEmptyProcess()
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
             DatabaseCursor(context!!).insertClock(removedItem!!)
             clockListAdapter.addItem(itemPosition, removedItem!!)
             recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
-            setEmptyProcess()
         }.show()
     }
 
     override fun onItemMove(from: Int, to: Int) {
         Collections.swap(clockItems, from, to)
         clockListAdapter.notifyItemMoved(from, to)
-    }
-
-    private fun setEmptyProcess() {
-        when(resources.configuration.orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> {
-                clock_content_layout.visibility = View.VISIBLE
-            }
-            Configuration.ORIENTATION_LANDSCAPE -> {
-                clock_content_layout.visibility = if(clockItems.size > 0) View.VISIBLE else View.GONE
-            }
-        }
     }
 
     companion object {

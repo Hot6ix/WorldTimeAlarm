@@ -18,7 +18,7 @@
             android:paddingBottom="@dimen/alarm_item_height"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/clock_content_layout"
+            app:layout_constraintEnd_toStartOf="@id/clockList"
             app:layout_constraintStart_toStartOf="parent">
 
             <TextView
@@ -56,35 +56,16 @@
 
         </android.support.constraint.ConstraintLayout>
 
-        <android.support.v4.widget.NestedScrollView
-            android:id="@+id/clock_content_layout"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/clockList"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:scrollbars="none"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/alarm_item_height"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/standardTimeLayout"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <android.support.constraint.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:focusableInTouchMode="true">
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/clockList"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clipToPadding="false"
-                    android:paddingBottom="@dimen/alarm_item_height"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
-
-            </android.support.constraint.ConstraintLayout>
-
-        </android.support.v4.widget.NestedScrollView>
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
 
