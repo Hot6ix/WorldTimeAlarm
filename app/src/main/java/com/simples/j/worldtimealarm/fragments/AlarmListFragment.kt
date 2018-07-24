@@ -74,6 +74,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         alarmItems = dbCursor.getAlarmList()
+        alarmItems.forEach { Log.d("tagggg${it.id}", it.toString()) }
         alarmListAdapter = AlarmListAdapter(alarmItems, context!!)
         alarmListAdapter.setOnItemListener(this)
         recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
