@@ -25,7 +25,21 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/setting_group_2" >
+        android:key="@string/setting_group_2_key"
+        android:title="@string/setting_group_2">
+
+        <Preference
+            android:key="@string/setting_converter_timezone_key"
+            android:title="@string/setting_converter_timezone"/>
+
+        <Preference
+            android:key="@string/setting_converter_goto_key"
+            android:title="@string/setting_converter_goto"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/setting_group_3" >
 
         <Preference
             android:key="@string/setting_version_key"

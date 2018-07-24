@@ -78,7 +78,16 @@
     <string name="setting_time_zone_change_key">TIME_ZONE_CHANGE</string>
     <string name="setting_time_zone_change_title">当时区变化时通知</string>
 
-    <string name="setting_group_2">其他</string>
+    <string name="setting_group_2_key">CONVERTER</string>
+    <string name="setting_group_2">时间转换</string>
+    <string name="setting_converter_timezone_key">CONVERTER_TIME_ZONE</string>
+    <string name="setting_converter_timezone">默认时区</string>
+    <string name="setting_converter_goto_key">CONVERTER_GOTO</string>
+    <string name="setting_converter_goto">更改日期和时间</string>
+
+    <string name="setting_group_3_key">Others</string>
+
+    <string name="setting_group_3">其他</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">Version</string>
     <string name="setting_source_key">GITHUB</string>

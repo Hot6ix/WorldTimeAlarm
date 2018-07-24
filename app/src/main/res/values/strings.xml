@@ -77,7 +77,15 @@
     <string name="setting_time_zone_change_key">TIME_ZONE_CHANGE</string>
     <string name="setting_time_zone_change_title">Notify when time zone changes</string>
 
-    <string name="setting_group_2">Others</string>
+    <string name="setting_group_2_key">CONVERTER</string>
+    <string name="setting_group_2">Time convert</string>
+    <string name="setting_converter_timezone_key">CONVERTER_TIME_ZONE</string>
+    <string name="setting_converter_timezone">Default time zone</string>
+    <string name="setting_converter_goto_key">CONVERTER_GOTO</string>
+    <string name="setting_converter_goto">Change date and time</string>
+
+    <string name="setting_group_3_key">Others</string>
+    <string name="setting_group_3">Others</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">Version</string>
     <string name="setting_source_key">GITHUB</string>

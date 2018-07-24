@@ -1,9 +1,11 @@
 package com.simples.j.worldtimealarm.fragments
 
 
+import android.content.Intent
 import android.media.AudioManager
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.provider.Settings
 import android.support.v7.preference.ListPreference
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
@@ -25,6 +27,12 @@ class SettingFragment : PreferenceFragmentCompat() {
         version.summary = pName
 
         bindPreferenceSummaryToValue(findPreference(resources.getString(R.string.setting_alarm_mute_key)))
+        findPreference(resources.getString(R.string.setting_converter_goto_key)).setOnPreferenceClickListener {
+            val intent = Intent(Settings.ACTION_DATE_SETTINGS)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+            true
+        }
     }
 
     companion object {

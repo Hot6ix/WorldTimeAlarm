@@ -78,7 +78,15 @@
     <string name="setting_time_zone_change_key">TIME_ZONE_CHANGE</string>
     <string name="setting_time_zone_change_title">시간대가 변경되면 알림</string>
 
-    <string name="setting_group_2">기타</string>
+    <string name="setting_group_2_key">CONVERTER</string>
+    <string name="setting_group_2">시간 변환</string>
+    <string name="setting_converter_timezone_key">CONVERTER_TIME_ZONE</string>
+    <string name="setting_converter_timezone">기본 시간대</string>
+    <string name="setting_converter_goto_key">CONVERTER_GOTO</string>
+    <string name="setting_converter_goto">날짜 및 시간 변경</string>
+
+    <string name="setting_group_3_key">Others</string>
+    <string name="setting_group_3">기타</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">Version</string>
     <string name="setting_source_key">GITHUB</string>
