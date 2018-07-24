@@ -174,6 +174,10 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onItemMove(from: Int, to: Int) {
         Collections.swap(clockItems, from, to)
         clockListAdapter.notifyItemMoved(from, to)
+        DatabaseCursor(context!!).swapClockOrder(clockItems[from], clockItems[to])
+        val tmp = clockItems[from].index
+        clockItems[from].index = clockItems[to].index
+        clockItems[to].index = tmp
     }
 
     companion object {

@@ -288,7 +288,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             R.id.alarm_save -> {
                 val item = scheduleAlarm()
 
-                if(isNew) DatabaseCursor(applicationContext).insertAlarm(item)
+                if(isNew) {
+                    item.id = DatabaseCursor(applicationContext).insertAlarm(item).toInt()
+                    item.index = item.id
+                }
                 else DatabaseCursor(applicationContext).updateAlarm(item)
 
                 if(isTaskRoot) showToast(item)
@@ -551,12 +554,11 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         calendar.time = Date(item.timeSet.toLong())
 
         if(item.repeat.any { it == 1 }) {
-            var days = ""
             val dayArray = resources.getStringArray(R.array.day_of_week_full)
             val repeatArray = item.repeat.mapIndexed { index, i ->
                 if(i == 1) dayArray[index] else null
             }.filter { it != null }
-            days = if(repeatArray.size == 7)
+            val days = if(repeatArray.size == 7)
                 getString(R.string.everyday)
             else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2)
                 getString(R.string.weekend)

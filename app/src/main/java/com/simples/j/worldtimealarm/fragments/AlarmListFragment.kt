@@ -74,7 +74,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         alarmItems = dbCursor.getAlarmList()
-        alarmItems.forEach { Log.d("tagggg${it.id}", it.toString()) }
         alarmListAdapter = AlarmListAdapter(alarmItems, context!!)
         alarmListAdapter.setOnItemListener(this)
         recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
@@ -135,7 +134,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             requestCode == REQUEST_CODE_NEW && resultCode == Activity.RESULT_OK -> {
                 val item = data?.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
                 if(item != null) {
-                    item.id = dbCursor.getAlarmId(item.notiId)
+//                    item.id = dbCursor.getAlarmId(item.notiId)
                     alarmItems.add(item)
                     alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
                     alarmList.scrollToPosition(alarmItems.size - 1)
@@ -207,6 +206,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     override fun onItemMove(from: Int, to: Int) {
         Collections.swap(alarmItems,  from, to)
         alarmListAdapter.notifyItemMoved(from, to)
+        dbCursor.swapAlarmOrder(alarmItems[from], alarmItems[to])
+        val tmp = alarmItems[from].index
+        alarmItems[from].index = alarmItems[to].index
+        alarmItems[to].index = tmp
     }
 
     private fun setEmptyMessage() {
@@ -225,12 +228,12 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         calendar.time = Date(item.timeSet.toLong())
 
         if(item.repeat.any { it == 1 }) {
-            var days = ""
+
             val dayArray = resources.getStringArray(R.array.day_of_week_full)
             val repeatArray = item.repeat.mapIndexed { index, i ->
                 if(i == 1) dayArray[index] else null
             }.filter { it != null }
-            days = if(repeatArray.size == 7)
+            val days = if(repeatArray.size == 7)
                 getString(R.string.everyday)
             else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2)
                 getString(R.string.weekend)

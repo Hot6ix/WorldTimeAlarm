@@ -17,11 +17,10 @@ class DatabaseCursor(context: Context) {
 
     private var dbManager = DatabaseManager(context)
 
-    fun insertAlarm(item: AlarmItem) {
+    fun insertAlarm(item: AlarmItem): Long {
         val db = dbManager.writableDatabase
 
         val contentValues = ContentValues()
-        if(item.id != null) contentValues.put(DatabaseManager.COLUMN_ID, item.id)
         contentValues.put(DatabaseManager.COLUMN_TIME_ZONE, item.timeZone)
         contentValues.put(DatabaseManager.COLUMN_TIME_SET, item.timeSet)
         contentValues.put(DatabaseManager.COLUMN_REPEAT, Arrays.toString(item.repeat))
@@ -33,8 +32,36 @@ class DatabaseCursor(context: Context) {
         contentValues.put(DatabaseManager.COLUMN_NOTI_ID, item.notiId)
         contentValues.put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
 
-        db.insert(DatabaseManager.TABLE_ALARM_LIST, null, contentValues)
+        val id = db.insert(DatabaseManager.TABLE_ALARM_LIST, null, contentValues)
+        db.execSQL("UPDATE ${DatabaseManager.TABLE_ALARM_LIST} SET ${DatabaseManager.COLUMN_INDEX} = ${DatabaseManager.COLUMN_ID}")
         db.close()
+
+        return id
+    }
+
+    fun getSingleAlarm(alarmId: Int): AlarmItem {
+        val db = dbManager.readableDatabase
+
+        val cursor = db.query(DatabaseManager.TABLE_ALARM_LIST, null, "${DatabaseManager.COLUMN_ID} = ?", arrayOf(alarmId.toString()), null, null, null)
+        cursor.moveToFirst()
+        val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+        val timeZone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
+        val timeSet = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
+        val repeat = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
+        val ringtone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_RINGTONE))
+        val vibration = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_VIBRATION)).replace("[", "").replace("]", "")
+        val snooze = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_SNOOZE))
+        val label = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_LABEL))
+        val switch = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ON_OFF))
+        val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
+        val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
+        val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
+
+        val item = AlarmItem(id, timeZone, timeSet, repeat.split(",").map { it.trim().toInt() }.toIntArray(), ringtone, if(vibration == "null") null else vibration.split(",").map { it.trim().toLong() }.toLongArray(), snooze.toLong(), label, switch, notiId, colorTag, index)
+        cursor.close()
+        db.close()
+
+        return item
     }
 
     fun getAlarmList(): ArrayList<AlarmItem> {
@@ -149,13 +176,22 @@ class DatabaseCursor(context: Context) {
         db.close()
     }
 
-    fun updateDisplayOrder(id: Int, order: Int) {
+    fun swapAlarmOrder(from: AlarmItem, to: AlarmItem) {
         val db = dbManager.writableDatabase
 
-        val contentValues = ContentValues()
-        contentValues.put(DatabaseManager.COLUMN_INDEX, order)
+        val fromOrder = from.index
+        val toOrder = to.index
 
-        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(id.toString()))
+        // Change from item order
+        val contentValues = ContentValues()
+        contentValues.put(DatabaseManager.COLUMN_INDEX, toOrder)
+        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(from.id!!.toString()))
+
+        // Change from item order
+        contentValues.clear()
+        contentValues.put(DatabaseManager.COLUMN_INDEX, fromOrder)
+        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(to.id!!.toString()))
+
         db.close()
     }
 
@@ -197,14 +233,35 @@ class DatabaseCursor(context: Context) {
         return db.version
     }
 
-    fun insertClock(item: ClockItem) {
+    fun insertClock(item: ClockItem): Long {
         val db = dbManager.writableDatabase
 
         val contentValues = ContentValues()
-        if(item.id != null)  contentValues.put(DatabaseManager.COLUMN_ID, item.id)
         contentValues.put(DatabaseManager.COLUMN_TIME_ZONE, item.timezone)
 
-        db.insert(DatabaseManager.TABLE_CLOCK_LIST, null, contentValues)
+        val id = db.insert(DatabaseManager.TABLE_CLOCK_LIST, null, contentValues)
+        db.execSQL("UPDATE ${DatabaseManager.TABLE_CLOCK_LIST} SET ${DatabaseManager.COLUMN_INDEX} = ${DatabaseManager.COLUMN_ID}")
+        db.close()
+
+        return id
+    }
+
+    fun swapClockOrder(from: ClockItem, to: ClockItem) {
+        val db = dbManager.writableDatabase
+
+        val fromOrder = from.index
+        val toOrder = to.index
+
+        // Change from item order
+        val contentValues = ContentValues()
+        contentValues.put(DatabaseManager.COLUMN_INDEX, toOrder)
+        db.update(DatabaseManager.TABLE_CLOCK_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(from.id!!.toString()))
+
+        // Change from item order
+        contentValues.clear()
+        contentValues.put(DatabaseManager.COLUMN_INDEX, fromOrder)
+        db.update(DatabaseManager.TABLE_CLOCK_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(to.id!!.toString()))
+
         db.close()
     }
 
@@ -212,7 +269,7 @@ class DatabaseCursor(context: Context) {
         val db = dbManager.readableDatabase
         val clockList = ArrayList<ClockItem>()
 
-        val cursor = db.query(DatabaseManager.TABLE_CLOCK_LIST, null, null, null, null, null, null)
+        val cursor = db.query(DatabaseManager.TABLE_CLOCK_LIST, null, null, null, null, null, DatabaseManager.COLUMN_INDEX + " ASC")
         if(cursor.count > 0) {
             while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
