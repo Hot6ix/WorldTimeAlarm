@@ -31,9 +31,14 @@ class DatabaseCursor(context: Context) {
         contentValues.put(DatabaseManager.COLUMN_ON_OFF, item.on_off)
         contentValues.put(DatabaseManager.COLUMN_NOTI_ID, item.notiId)
         contentValues.put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
+        contentValues.put(DatabaseManager.COLUMN_INDEX, item.index)
 
         val id = db.insert(DatabaseManager.TABLE_ALARM_LIST, null, contentValues)
-        db.execSQL("UPDATE ${DatabaseManager.TABLE_ALARM_LIST} SET ${DatabaseManager.COLUMN_INDEX} = ${DatabaseManager.COLUMN_ID}")
+        if(item.index == -1) {
+            contentValues.clear()
+            contentValues.put(DatabaseManager.COLUMN_INDEX, id)
+            db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, "${DatabaseManager.COLUMN_ID} = ?", arrayOf(id.toString()))
+        }
         db.close()
 
         return id
@@ -238,9 +243,14 @@ class DatabaseCursor(context: Context) {
 
         val contentValues = ContentValues()
         contentValues.put(DatabaseManager.COLUMN_TIME_ZONE, item.timezone)
+        contentValues.put(DatabaseManager.COLUMN_INDEX, item.index)
 
         val id = db.insert(DatabaseManager.TABLE_CLOCK_LIST, null, contentValues)
-        db.execSQL("UPDATE ${DatabaseManager.TABLE_CLOCK_LIST} SET ${DatabaseManager.COLUMN_INDEX} = ${DatabaseManager.COLUMN_ID}")
+        if(item.index == -1) {
+            contentValues.clear()
+            contentValues.put(DatabaseManager.COLUMN_INDEX, id)
+            db.update(DatabaseManager.TABLE_CLOCK_LIST, contentValues, "${DatabaseManager.COLUMN_ID} = ?", arrayOf(id.toString()))
+        }
         db.close()
 
         return id

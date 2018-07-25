@@ -73,6 +73,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private var existAlarmItem: AlarmItem? = null
     private var labelEditor: EditText? = null
     private var ringtone: Ringtone? = null
+    private var alarm_action = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +92,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
         if(intent.hasExtra(AlarmReceiver.ITEM)) {
             // Modify
+            alarm_action = ACTION_MODIFY
             isNew = false
             existAlarmItem = intent.getParcelableExtra(AlarmReceiver.ITEM)
             currentTimeZone = existAlarmItem!!.timeZone
@@ -138,6 +140,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         }
         else {
             // New
+            alarm_action = ACTION_NEW
             calendar = Calendar.getInstance()
             // If arrays don't contain default timezone id, add
             time_zone.text = TimeZone.getDefault().id
@@ -292,7 +295,9 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     item.id = DatabaseCursor(applicationContext).insertAlarm(item).toInt()
                     item.index = item.id
                 }
-                else DatabaseCursor(applicationContext).updateAlarm(item)
+                else {
+                    DatabaseCursor(applicationContext).updateAlarm(item)
+                }
 
                 if(isTaskRoot) showToast(item)
 
@@ -531,7 +536,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         notiId = 100000 + Random().nextInt(899999)
 
         val item = AlarmItem(
-                null,
+                if(alarm_action == ACTION_NEW) null else existAlarmItem!!.id,
                 currentTimeZone,
                 calendar.time.time.toString(),
                 selectedDays,
@@ -542,7 +547,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 1,
                 if(isNew) notiId else existAlarmItem!!.notiId,
                 currentColorTag,
-                null
+                if(alarm_action == ACTION_NEW) -1 else existAlarmItem!!.index
         )
 
         AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
@@ -595,5 +600,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         private const val TAG_FRAGMENT_RINGTONE = "TAG_FRAGMENT_RINGTONE"
         private const val TAG_FRAGMENT_VIBRATION = "TAG_FRAGMENT_VIBRATION"
         private const val TIME_ZONE_REQUEST_CODE = 1
+        private const val ACTION_NEW = 0
+        private const val ACTION_MODIFY = 1
     }
 }

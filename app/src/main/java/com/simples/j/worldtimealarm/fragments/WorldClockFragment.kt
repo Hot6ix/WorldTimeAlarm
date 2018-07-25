@@ -133,7 +133,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
             requestCode == TIME_ZONE_NEW_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    DatabaseCursor(context!!).insertClock(ClockItem(null, data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID), null))
+                    DatabaseCursor(context!!).insertClock(ClockItem(null, data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID), -1))
                     clockItems.clear()
                     clockItems.addAll(DatabaseCursor(context!!).getClockList())
                 }
@@ -165,7 +165,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         DatabaseCursor(context!!).removeClock(removedItem!!)
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
-            DatabaseCursor(context!!).insertClock(removedItem!!)
+            val id = DatabaseCursor(context!!).insertClock(removedItem!!)
+            removedItem!!.id = id.toInt()
             clockListAdapter.addItem(itemPosition, removedItem!!)
             recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
         }.show()

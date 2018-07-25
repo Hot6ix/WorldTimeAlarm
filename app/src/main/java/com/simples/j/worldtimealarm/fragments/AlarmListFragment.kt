@@ -195,7 +195,8 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         setEmptyMessage()
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
-            dbCursor.insertAlarm(removedItem!!)
+            val id = dbCursor.insertAlarm(removedItem!!)
+            removedItem!!.id = id.toInt()
             if(removedItem?.on_off == 1) alarmController.scheduleAlarm(context!!, removedItem!!, AlarmController.TYPE_ALARM)
             alarmListAdapter.addItem(itemPosition, removedItem!!)
             recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
