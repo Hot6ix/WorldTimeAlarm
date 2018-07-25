@@ -289,7 +289,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     override fun onClick(view: View) {
         when(view.id) {
             R.id.alarm_save -> {
-                val item = scheduleAlarm()
+                val item = createAlarm()
 
                 if(isNew) {
                     item.id = DatabaseCursor(applicationContext).insertAlarm(item).toInt()
@@ -298,6 +298,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 else {
                     DatabaseCursor(applicationContext).updateAlarm(item)
                 }
+
+                AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
 
                 if(isTaskRoot) showToast(item)
 
@@ -528,7 +530,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         }
     }
 
-    private fun scheduleAlarm(): AlarmItem {
+    private fun createAlarm(): AlarmItem {
         val current = Calendar.getInstance()
         calendar.set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH))
         calendar.set(Calendar.SECOND, 0)
@@ -550,7 +552,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 if(alarm_action == ACTION_NEW) -1 else existAlarmItem!!.index
         )
 
-        AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
         return item
     }
 

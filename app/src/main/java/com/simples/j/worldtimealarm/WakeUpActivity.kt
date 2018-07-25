@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -103,7 +102,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 player?.start()
 
                 if(sharedPref.getBoolean(resources.getString(R.string.setting_alarm_volume_increase_key), false)) {
-                    val volume = VolumeController(applicationContext, audioManager.getStreamVolume(AudioManager.STREAM_ALARM))
+                    val volume = VolumeController(applicationContext, audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM))
                     volume.start()
                 }
             }
