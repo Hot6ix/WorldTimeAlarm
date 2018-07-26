@@ -127,6 +127,11 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        context!!.unregisterReceiver(updateRequestReceiver)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 

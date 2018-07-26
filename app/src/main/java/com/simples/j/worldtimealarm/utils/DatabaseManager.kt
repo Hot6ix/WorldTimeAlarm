@@ -30,16 +30,15 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
     }
 
     override fun onUpgrade(db: SQLiteDatabase, old: Int, new: Int) {
-        when {
-            old < 2-> {
-                db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_COLOR_TAG INTEGER DEFAULT 0")
-            }
-            old < 3 -> {
-                db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        "$COLUMN_TIME_ZONE TEXT)")
-                db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_INDEX INTEGER")
-                db.execSQL("UPDATE $TABLE_ALARM_LIST SET $COLUMN_INDEX = $COLUMN_ID")
-            }
+        if(old < 2) {
+            db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_COLOR_TAG INTEGER DEFAULT 0")
+        }
+        if(old < 3) {
+            db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "$COLUMN_TIME_ZONE TEXT," +
+                    "$COLUMN_INDEX INTEGER);")
+            db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_INDEX INTEGER")
+            db.execSQL("UPDATE $TABLE_ALARM_LIST SET $COLUMN_INDEX = $COLUMN_ID")
         }
     }
 

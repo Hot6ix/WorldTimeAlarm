@@ -38,6 +38,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.1'
     implementation 'com.android.support:customtabs:27.1.1'
     implementation 'com.android.support:preference-v14:27.1.1'
+    implementation 'com.skyfishjy.ripplebackground:library:1.0.1'
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.0'
 }
 

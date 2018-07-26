@@ -12,12 +12,17 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.*
 import android.preference.PreferenceManager
+import android.support.constraint.ConstraintSet
 import android.support.v4.app.NotificationCompat
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.method.ScrollingMovementMethod
+import android.transition.AutoTransition
+import android.transition.TransitionManager
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
@@ -45,6 +50,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
     private var player: MediaPlayer? = null
     private var vibrator: Vibrator? = null
+    private var isMenuExpanded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,8 +91,10 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             Log.d(C.TAG, "Alarm alerted : ID(${item.notiId+1})")
 
             if(item.colorTag != 0) {
+                wake_up_layout.setBackgroundColor(item.colorTag)
                 window.statusBarColor = item.colorTag
             }
+            else wake_up_layout.setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.blueGray))
 
             // Play ringtone
             val ringtoneUri = item.ringtone
@@ -125,19 +133,20 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             }
 
             // Show label
-            if(item.label != null && item.label!!.isNotEmpty()) {
-                label_card_view.visibility = View.VISIBLE
+            if(item.label != null && item.label!!.trim().isNotEmpty()) {
+                label.visibility = View.VISIBLE
                 label.text = item.label
                 label.movementMethod = ScrollingMovementMethod()
             }
 
-            // Set snooze
-            if(item.snooze == 0.toLong() || intent.action == AlarmReceiver.ACTION_SNOOZE) {
-                snooze.visibility = View.GONE
-            }
-
             // show notification
             showAlarmNotification()
+
+            // if snooze is not set, interaction button will work like dismiss
+            selector_layout.startRippleAnimation()
+            if(item.snooze == 0.toLong() || intent.action == AlarmReceiver.ACTION_SNOOZE) {
+                interaction_button.setImageDrawable(getDrawable(R.drawable.ic_action_alarm_off))
+            }
 
 //            // If alarm type is snooze ignore, if not set alarm
 //            if(intent.action == AlarmReceiver.ACTION_ALARM) {
@@ -180,6 +189,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 //            }
         }
 
+        interaction_button.setOnClickListener(this)
         snooze.setOnClickListener(this)
         dismiss.setOnClickListener(this)
     }
@@ -201,6 +211,36 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(view: View) {
         when(view.id) {
+            R.id.interaction_button -> {
+                if(item.snooze == 0.toLong() || intent.action == AlarmReceiver.ACTION_SNOOZE) {
+                    finish()
+                }
+                else {
+                    val constraintSet = ConstraintSet()
+                    constraintSet.clone(selector)
+
+                    if(!isMenuExpanded) {
+                        constraintSet.connect(dismiss.id, ConstraintSet.START, interaction_button.id, ConstraintSet.END)
+                        constraintSet.connect(snooze.id, ConstraintSet.END, interaction_button.id, ConstraintSet.START)
+                        interaction_button.setImageDrawable(getDrawable(R.drawable.ic_action_close_white))
+                    }
+                    else {
+                        constraintSet.connect(dismiss.id, ConstraintSet.START, selector.id, ConstraintSet.START)
+                        constraintSet.connect(snooze.id, ConstraintSet.END, selector.id, ConstraintSet.END)
+                        interaction_button.setImageDrawable(getDrawable(R.drawable.ic_action_menu_white))
+                    }
+
+                    val transition = AutoTransition()
+                    transition.duration = 300
+                    transition.interpolator = AccelerateDecelerateInterpolator()
+
+                    TransitionManager.beginDelayedTransition(selector, transition)
+                    constraintSet.applyTo(selector)
+
+                    isMenuExpanded = !isMenuExpanded
+
+                }
+            }
             R.id.dismiss -> {
                 finish()
             }

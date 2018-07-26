@@ -1,45 +1,20 @@
 package com.simples.j.worldtimealarm
 
-import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.Configuration
-import android.media.AudioManager
 import android.os.Bundle
-import android.os.Handler
 import android.support.constraint.ConstraintLayout
-import android.support.design.widget.Snackbar
 import android.support.design.widget.TabLayout
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
-import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
-import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.support.FragmentPagerAdapter
-import com.simples.j.worldtimealarm.utils.AlarmController
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import com.simples.j.worldtimealarm.utils.ListSwipeController
-import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_main.*
-import java.text.DateFormat
-import java.util.*
 
 class MainActivity : AppCompatActivity(){
 
@@ -50,6 +25,18 @@ class MainActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Sample alarm item to start wakeup activity
+//        val item = AlarmItem(999, "Asia/Taipei", "1532695080742", intArrayOf(0,0,0,0,0,0,0,0), null, null, 6000, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 0, 999999, 0, 999)
+//
+//        val wakeUpIntent = Intent(this, WakeUpActivity::class.java)
+//        val bundle = Bundle()
+//        bundle.putParcelable(AlarmReceiver.ITEM, item)
+//        wakeUpIntent.putExtra(AlarmReceiver.OPTIONS, bundle)
+//        wakeUpIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//        wakeUpIntent.action = intent.action
+//        wakeUpIntent.putExtra(AlarmReceiver.OPTIONS, bundle)
+//        startActivity(wakeUpIntent)
 
         MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
         adViewMain.loadAd(AdRequest.Builder().build())
