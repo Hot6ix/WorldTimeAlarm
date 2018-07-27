@@ -9,10 +9,7 @@ import android.media.AudioManager
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
+import android.os.*
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -26,6 +23,7 @@ import android.view.WindowManager
 import android.widget.*
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
+import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
 import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.fragments.ChoiceDialogFragment
 import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
@@ -78,9 +76,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alarm)
-
-        MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
-        adViewAlarm.loadAd(AdRequest.Builder().build())
 
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -600,7 +595,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
         private const val TAG_FRAGMENT_RINGTONE = "TAG_FRAGMENT_RINGTONE"
         private const val TAG_FRAGMENT_VIBRATION = "TAG_FRAGMENT_VIBRATION"
-        private const val TIME_ZONE_REQUEST_CODE = 1
         private const val ACTION_NEW = 0
         private const val ACTION_MODIFY = 1
     }

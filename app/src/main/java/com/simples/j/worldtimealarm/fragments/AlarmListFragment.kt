@@ -69,14 +69,14 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         alarmController = AlarmController.getInstance(context!!)
         audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        new_alarm.setOnClickListener {
-            startActivityForResult(Intent(context!!, AlarmActivity::class.java), REQUEST_CODE_NEW)
-        }
-
         alarmItems = dbCursor.getAlarmList()
         alarmListAdapter = AlarmListAdapter(alarmItems, context!!)
         alarmListAdapter.setOnItemListener(this)
         recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
+
+        new_alarm.setOnClickListener {
+            startActivityForResult(Intent(context!!, AlarmActivity::class.java), REQUEST_CODE_NEW)
+        }
 
         alarmList.layoutManager = recyclerLayoutManager
         alarmList.adapter = alarmListAdapter

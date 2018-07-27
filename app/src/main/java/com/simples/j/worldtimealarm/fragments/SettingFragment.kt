@@ -1,21 +1,29 @@
 package com.simples.j.worldtimealarm.fragments
 
 
+import android.app.Activity
 import android.content.Intent
 import android.media.AudioManager
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.preference.SwitchPreference
 import android.provider.Settings
 import android.support.v7.preference.ListPreference
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.TimeZoneSearchActivity
+import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
+import com.simples.j.worldtimealarm.fragments.WorldClockFragment.Companion.TIME_ZONE_CHANGED_KEY
+import java.util.*
 
 /**
  * A simple [Fragment] subclass.
  *
  */
 class SettingFragment : PreferenceFragmentCompat() {
+
+    private lateinit var converterTimezone: Preference
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.settings)
@@ -27,11 +35,45 @@ class SettingFragment : PreferenceFragmentCompat() {
         version.summary = pName
 
         bindPreferenceSummaryToValue(findPreference(resources.getString(R.string.setting_alarm_mute_key)))
+
+        converterTimezone = findPreference(resources.getString(R.string.setting_converter_timezone_key))
+        val converterTimezoneId = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), "")
+        converterTimezone.summary =
+                if(converterTimezoneId.isEmpty()) TimeZone.getDefault().id.replace("_", " ")
+                else converterTimezoneId.replace("_", " ")
+
+        converterTimezone.setOnPreferenceClickListener {
+            startActivityForResult(Intent(activity, TimeZoneSearchActivity::class.java), TIME_ZONE_REQUEST_CODE)
+            false
+        }
+        converterTimezone.setOnPreferenceChangeListener { preference, newValue ->
+            val isEnabled = preference.isEnabled
+            if(!isEnabled) converterTimezone.summary = TimeZone.getDefault().id
+            true
+        }
+
         findPreference(resources.getString(R.string.setting_converter_goto_key)).setOnPreferenceClickListener {
             val intent = Intent(Settings.ACTION_DATE_SETTINGS)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
             true
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when {
+            requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
+                if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
+                    val timeZone = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)
+                    val formattedTimeZone = timeZone.replace(" ", "_")
+                    converterTimezone.summary = timeZone
+                    PreferenceManager.getDefaultSharedPreferences(context).edit().putString(resources.getString(R.string.setting_converter_timezone_id_key), formattedTimeZone).apply()
+                    val intent = Intent(WorldClockFragment.ACTION_TIME_ZONE_CHANGED)
+                    intent.putExtra(TIME_ZONE_CHANGED_KEY, formattedTimeZone)
+                    context!!.sendBroadcast(intent)
+                }
+            }
         }
     }
 

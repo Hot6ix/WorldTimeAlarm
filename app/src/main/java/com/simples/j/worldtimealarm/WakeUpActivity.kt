@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.ColorStateList
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -15,6 +16,7 @@ import android.preference.PreferenceManager
 import android.support.constraint.ConstraintSet
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.method.ScrollingMovementMethod
 import android.transition.AutoTransition
@@ -93,6 +95,14 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             if(item.colorTag != 0) {
                 wake_up_layout.setBackgroundColor(item.colorTag)
                 window.statusBarColor = item.colorTag
+
+                val darken =
+                        if(item.colorTag == ContextCompat.getColor(applicationContext, android.R.color.black))
+                            ContextCompat.getColor(applicationContext, R.color.blueGray)
+                        else MediaCursor.makeDarker(item.colorTag, 0.85f)
+                ViewCompat.setBackgroundTintList(interaction_button, ColorStateList.valueOf(darken))
+                ViewCompat.setBackgroundTintList(dismiss, ColorStateList.valueOf(darken))
+                ViewCompat.setBackgroundTintList(snooze, ColorStateList.valueOf(darken))
             }
             else wake_up_layout.setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.blueGray))
 

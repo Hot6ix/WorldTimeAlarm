@@ -144,5 +144,7 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         const val TIME_ZONE_ID = "TIME_ZONE_ID"
         const val STATE_QUERY = "STATE_QUERY"
         const val STATE_RESULT = "STATE_RESULT"
+        const val TIME_ZONE_REQUEST_CODE = 1
+        const val TIME_ZONE_NEW_CODE = 2
     }
 }

@@ -4,7 +4,6 @@
     <string name="main_label">알람</string>
     <string name="action_settings">설정</string>
     <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
-    <string name="banner_ad_unit_id_1">ca-app-pub-1459869098528763/1967704280</string>
     <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/6060648491</string>
     <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">현재 시간대</string>
@@ -82,6 +81,7 @@
     <string name="setting_group_2">시간 변환</string>
     <string name="setting_converter_timezone_key">CONVERTER_TIME_ZONE</string>
     <string name="setting_converter_timezone">기본 시간대</string>
+    <string name="setting_converter_timezone_id_key">CONVERTER_TIME_ZONE_ID</string>
     <string name="setting_converter_goto_key">CONVERTER_GOTO</string>
     <string name="setting_converter_goto">날짜 및 시간 변경</string>
 
