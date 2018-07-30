@@ -67,6 +67,18 @@
             app:layout_constraintStart_toEndOf="@id/standardTimeLayout"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <TextView
+            android:id="@+id/list_empty"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="@string/clock_empty"
+            android:visibility="gone"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/standardTimeLayout"
+            app:layout_constraintEnd_toEndOf="parent" />
+
     </android.support.constraint.ConstraintLayout>
 
     <android.support.design.widget.FloatingActionButton

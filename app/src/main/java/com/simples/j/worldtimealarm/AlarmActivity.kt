@@ -480,6 +480,12 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 .setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
                     dialogInterface.cancel()
                 }
+                .setNeutralButton(resources.getString(R.string.clear)) { dialogInterface, _ ->
+                    currentLabel = ""
+                    optionList[3].summary = ""
+                    alarmOptionAdapter.notifyItemChanged(3)
+                    dialogInterface.cancel()
+                }
                 .setOnCancelListener { labelEditor?.setText(optionList[3].summary) }
         return dialog.create()
     }

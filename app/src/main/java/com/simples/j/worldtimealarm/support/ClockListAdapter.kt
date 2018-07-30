@@ -39,7 +39,7 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
         val differenceOriginal = calendar.timeZone.getOffset(System.currentTimeMillis()) - expectedCalendar.timeZone.getOffset(System.currentTimeMillis())
         expectedCalendar.add(Calendar.MILLISECOND, -differenceOriginal)
 
-        holder.time_zone_name.text = expectedCalendar.timeZone.id
+        holder.time_zone_name.text = expectedCalendar.timeZone.id.replace("_", " ")
         val timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
         timeFormat.timeZone = timeZone
         val dateFormat = DateFormat.getDateInstance(DateFormat.LONG)

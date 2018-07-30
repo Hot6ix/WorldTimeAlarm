@@ -68,9 +68,11 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         super.onActivityCreated(savedInstanceState)
 
         calendar = Calendar.getInstance()
+        val isUserTimeZoneEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(resources.getString(R.string.setting_converter_timezone_key), false)
         val converterTimezoneId = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), "")
         timeZone =
-                if(converterTimezoneId.isEmpty()) calendar.timeZone
+                if(converterTimezoneId.isEmpty() || !isUserTimeZoneEnabled) calendar.timeZone
+                else if(savedInstanceState != null && !savedInstanceState.isEmpty) TimeZone.getTimeZone(savedInstanceState.getString(USER_SELECTED_TIMEZONE))
                 else TimeZone.getTimeZone(converterTimezoneId)
         calendar.timeZone = timeZone
         timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
@@ -110,7 +112,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             dateDialog.show()
         }
 
-
         time_zone.text = timeZone.id.replace("_", " ")
 
         clockItems = DatabaseCursor(context!!).getClockList()
@@ -129,11 +130,17 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         val intentFilter = IntentFilter()
         intentFilter.addAction(ACTION_TIME_ZONE_CHANGED)
         context!!.registerReceiver(timeZoneChangedReceiver, intentFilter)
+        setEmptyMessage()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         context!!.unregisterReceiver(timeZoneChangedReceiver)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(USER_SELECTED_TIMEZONE, timeZone.id)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -151,6 +158,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                     DatabaseCursor(context!!).insertClock(ClockItem(null, data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID), -1))
                     clockItems.clear()
                     clockItems.addAll(DatabaseCursor(context!!).getClockList())
+                    setEmptyMessage()
                 }
             }
         }
@@ -178,12 +186,14 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         removedItem = clockItems[itemPosition]
         clockListAdapter.removeItem(itemPosition)
         DatabaseCursor(context!!).removeClock(removedItem!!)
+        setEmptyMessage()
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
             val id = DatabaseCursor(context!!).insertClock(removedItem!!)
             removedItem!!.id = id.toInt()
             clockListAdapter.addItem(itemPosition, removedItem!!)
             recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
+            setEmptyMessage()
         }.show()
     }
 
@@ -212,6 +222,16 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         world_date.text = dateFormat.format(calendar.time)
     }
 
+    fun setEmptyMessage() {
+        if(clockItems.size < 1) {
+            clockList.visibility = View.GONE
+            list_empty.visibility = View.VISIBLE
+        }
+        else {
+            clockList.visibility = View.VISIBLE
+            list_empty.visibility = View.GONE
+        }
+    }
 
     inner class UpdateRequestReceiver: BroadcastReceiver() {
 
@@ -231,6 +251,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     companion object {
         const val TIME_ZONE_NEW_KEY = "REQUEST_KEY"
         const val TIME_ZONE_CHANGED_KEY = "TIME_ZONE_ID"
+        const val USER_SELECTED_TIMEZONE = "TIME_ZONE_ID"
         const val ACTION_TIME_ZONE_CHANGED = "com.simples.j.worldtimealarm.APP_TIMEZONE_CHANGED"
     }
 }

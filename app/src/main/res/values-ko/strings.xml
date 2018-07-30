@@ -49,7 +49,7 @@
     <string name="missed_alarm">놓친 알람</string>
     <string name="select_color">색상 선택</string>
     <string name="not_selected">선택 안됨</string>
-    <string name="clear">선택 안함</string>
+    <string name="clear">지우기</string>
     <string name="new_alarm_long">새 알람</string>
     <string name="new_alarm_short">새 알람</string>
     <string name="expected_time">%1$s에 알람이 울립니다.</string>
