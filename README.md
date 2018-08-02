@@ -13,12 +13,15 @@ Version 1.1
 Version 1.1 (Version code until 9)
 - Fix repeat days bug
 
-Version 1.2 (Not launched yet)
+Changes - expected to be Version 1.2 (Not launched yet)
+- Add time converter feature
+- Add empty button in label dialog view
+- Add setting options for time converter
+- Optimized landscape view
+- Support changing order of alarm or time items
 - New design of main view
 - New design of wake up view
-- Support changing order of alarm or time items
-- Add time converter feature
-- Optimized landscape view
+
 
 FAQ
 
