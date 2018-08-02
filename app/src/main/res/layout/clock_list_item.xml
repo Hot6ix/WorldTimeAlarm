@@ -30,13 +30,24 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
+            android:id="@+id/time_zone_am_pm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:textSize="@dimen/text_middle"
+            android:layout_marginEnd="@dimen/padding5"
+            app:layout_constraintEnd_toStartOf="@id/time_zone_time"
+            app:layout_constraintBaseline_toBaselineOf="@id/time_zone_time"/>
+
+        <TextView
             android:id="@+id/time_zone_time"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end|center_horizontal"
-            android:textSize="@dimen/text_large"
+            android:textSize="@dimen/text_xxlarge"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/time_zone_date"/>
+            app:layout_constraintBottom_toTopOf="@id/time_zone_date"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <TextView
             android:id="@+id/time_zone_date"

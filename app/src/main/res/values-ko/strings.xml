@@ -19,7 +19,7 @@
     <string name="cancel">취소</string>
     <string name="save">저장</string>
     <string name="ok">확인</string>
-    <string name="turn_off">Turn off</string>
+    <string name="turn_off">끄기</string>
     <string name="select_timezone">시간대</string>
     <string name="select_ringtone">벨소리</string>
     <string name="select_vibration">진동</string>
@@ -88,7 +88,7 @@
     <string name="setting_group_3_key">Others</string>
     <string name="setting_group_3">기타</string>
     <string name="setting_version_key">VERSION</string>
-    <string name="setting_version_title">Version</string>
+    <string name="setting_version_title">버전</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">Open source - GitHub</string>
 

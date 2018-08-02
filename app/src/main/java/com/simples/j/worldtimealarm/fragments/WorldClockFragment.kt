@@ -24,7 +24,6 @@ import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
 import com.simples.j.worldtimealarm.R
-import com.simples.j.worldtimealarm.TimeSetChangedReceiver
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_NEW_CODE
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
@@ -35,6 +34,7 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
 import kotlinx.android.synthetic.main.fragment_world_clock.*
 import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -75,11 +75,12 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                 else if(savedInstanceState != null && !savedInstanceState.isEmpty) TimeZone.getTimeZone(savedInstanceState.getString(USER_SELECTED_TIMEZONE))
                 else TimeZone.getTimeZone(converterTimezoneId)
         calendar.timeZone = timeZone
-        timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+        timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
         dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
         dateFormat.timeZone = timeZone
 
+        world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
         world_date.text = dateFormat.format(calendar.time)
 
@@ -89,9 +90,10 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         val timeDialog = TimePickerDialog(context!!, { _: TimePicker, hour: Int, minute: Int ->
             calendar.set(Calendar.HOUR_OF_DAY, hour)
             calendar.set(Calendar.MINUTE, minute)
-            timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+            timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
             timeFormat.timeZone = timeZone
             world_time.text = timeFormat.format(calendar.time)
+            world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
             clockListAdapter.notifyDataSetChanged()
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false)
 
@@ -105,7 +107,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             clockListAdapter.notifyDataSetChanged()
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
 
-        world_time.setOnClickListener {
+        world_time_layout.setOnClickListener {
             timeDialog.show()
         }
         world_date.setOnClickListener {
@@ -149,7 +151,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         when {
             requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    timeZone = TimeZone.getTimeZone(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID))
+                    timeZone = TimeZone.getTimeZone(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID).replace(" ", "_"))
                     updateStandardTimeZone()
                 }
             }
@@ -213,16 +215,17 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         calendar.set(Calendar.SECOND, 0)
 
-        timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+        timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
         dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
         dateFormat.timeZone = timeZone
 
+        world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
         world_date.text = dateFormat.format(calendar.time)
     }
 
-    fun setEmptyMessage() {
+    private fun setEmptyMessage() {
         if(clockItems.size < 1) {
             clockList.visibility = View.GONE
             list_empty.visibility = View.VISIBLE

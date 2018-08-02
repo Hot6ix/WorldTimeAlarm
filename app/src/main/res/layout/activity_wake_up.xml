@@ -69,8 +69,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textColor="@android:color/white"
-                android:text="@string/test"
-                android:textSize="@dimen/text_mxlarge"
+                android:textSize="@dimen/text_xxlarge"
                 app:layout_constraintTop_toBottomOf="@id/time_zone_offset_wake"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
