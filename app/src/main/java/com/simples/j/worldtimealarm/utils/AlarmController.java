@@ -13,7 +13,6 @@ import com.simples.j.worldtimealarm.R;
 import com.simples.j.worldtimealarm.etc.AlarmItem;
 import com.simples.j.worldtimealarm.etc.C;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;

@@ -39,9 +39,9 @@ class TimeZoneAdapter(private var tzs: ArrayList<String>, private val context: C
         val difference = TimeZone.getTimeZone(tzs[position].replace(" ", "_")).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
 
         val offset = if(TimeZone.getDefault() == TimeZone.getTimeZone(tzs[position].replace(" ", "_"))) context.resources.getString(R.string.current_time_zone)
-        else MediaCursor.getOffsetOfDifference(context, difference)
+        else MediaCursor.getOffsetOfDifference(context, difference, MediaCursor.TYPE_CURRENT)
 
-        holder.country.text = TimeZone.getTimeZone(tzs[position]).getDisplayName(Locale.getDefault())
+        holder.country.text = tzs[position]
         holder.offset.text = offset
         holder.itemView.setOnClickListener { listener.onItemClick(it, position) }
     }

@@ -6,19 +6,25 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
+import android.content.res.ColorStateList
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.*
 import android.preference.PreferenceManager
+import android.support.constraint.ConstraintSet
 import android.support.v4.app.NotificationCompat
+import android.support.v4.content.ContextCompat
+import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.method.ScrollingMovementMethod
+import android.transition.AutoTransition
+import android.transition.TransitionManager
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
@@ -46,6 +52,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
     private var player: MediaPlayer? = null
     private var vibrator: Vibrator? = null
+    private var isMenuExpanded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,11 +92,19 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 //            Log.d(C.TAG, "Alarm alert : Info($item)")
             Log.d(C.TAG, "Alarm alerted : ID(${item.notiId+1})")
 
-            // Change background color if color tag set
             if(item.colorTag != 0) {
                 wake_up_layout.setBackgroundColor(item.colorTag)
                 window.statusBarColor = item.colorTag
+
+                val darken =
+                        if(item.colorTag == ContextCompat.getColor(applicationContext, android.R.color.black))
+                            ContextCompat.getColor(applicationContext, R.color.blueGray)
+                        else MediaCursor.makeDarker(item.colorTag, 0.85f)
+                ViewCompat.setBackgroundTintList(interaction_button, ColorStateList.valueOf(darken))
+                ViewCompat.setBackgroundTintList(dismiss, ColorStateList.valueOf(darken))
+                ViewCompat.setBackgroundTintList(snooze, ColorStateList.valueOf(darken))
             }
+            else wake_up_layout.setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.blueGray))
 
             // Play ringtone
             val ringtoneUri = item.ringtone
@@ -105,7 +120,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 player?.start()
 
                 if(sharedPref.getBoolean(resources.getString(R.string.setting_alarm_volume_increase_key), false)) {
-                    val volume = VolumeController(applicationContext, audioManager.getStreamVolume(AudioManager.STREAM_ALARM))
+                    val volume = VolumeController(applicationContext, audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM))
                     volume.start()
                 }
             }
@@ -121,28 +136,27 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             if(TimeZone.getDefault() != TimeZone.getTimeZone(timeZone)) {
 //                val difference = TimeZone.getTimeZone(timeZone).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(timeZone).dstSavings - TimeZone.getDefault().dstSavings
                 val difference = TimeZone.getTimeZone(timeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-                divider1_wake.visibility = View.VISIBLE
                 time_zone_layout.visibility = View.VISIBLE
                 time_zone_name_wake.text = item.timeZone
-                time_zone_offset_wake.text = MediaCursor.getOffsetOfDifference(applicationContext, difference)
+                time_zone_offset_wake.text = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
                 time_zone_time_wake.timeZone = timeZone
             }
 
             // Show label
-            if(item.label != null && item.label!!.isNotEmpty()) {
-                divider2_wake.visibility = View.VISIBLE
+            if(item.label != null && item.label!!.trim().isNotEmpty()) {
                 label.visibility = View.VISIBLE
                 label.text = item.label
                 label.movementMethod = ScrollingMovementMethod()
             }
 
-            // Set snooze
-            if(item.snooze == 0.toLong() || intent.action == AlarmReceiver.ACTION_SNOOZE) {
-                snooze.visibility = View.GONE
-            }
-
             // show notification
             showAlarmNotification()
+
+            // if snooze is not set, interaction button will work like dismiss
+            selector_layout.startRippleAnimation()
+            if(item.snooze == 0.toLong() || intent.action == AlarmReceiver.ACTION_SNOOZE) {
+                interaction_button.setImageDrawable(getDrawable(R.drawable.ic_action_alarm_off))
+            }
 
 //            // If alarm type is snooze ignore, if not set alarm
 //            if(intent.action == AlarmReceiver.ACTION_ALARM) {
@@ -185,6 +199,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 //            }
         }
 
+        interaction_button.setOnClickListener(this)
         snooze.setOnClickListener(this)
         dismiss.setOnClickListener(this)
     }
@@ -206,6 +221,36 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(view: View) {
         when(view.id) {
+            R.id.interaction_button -> {
+                if(item.snooze == 0.toLong() || intent.action == AlarmReceiver.ACTION_SNOOZE) {
+                    finish()
+                }
+                else {
+                    val constraintSet = ConstraintSet()
+                    constraintSet.clone(selector)
+
+                    if(!isMenuExpanded) {
+                        constraintSet.connect(dismiss.id, ConstraintSet.START, interaction_button.id, ConstraintSet.END)
+                        constraintSet.connect(snooze.id, ConstraintSet.END, interaction_button.id, ConstraintSet.START)
+                        interaction_button.setImageDrawable(getDrawable(R.drawable.ic_action_close_white))
+                    }
+                    else {
+                        constraintSet.connect(dismiss.id, ConstraintSet.START, selector.id, ConstraintSet.START)
+                        constraintSet.connect(snooze.id, ConstraintSet.END, selector.id, ConstraintSet.END)
+                        interaction_button.setImageDrawable(getDrawable(R.drawable.ic_action_menu_white))
+                    }
+
+                    val transition = AutoTransition()
+                    transition.duration = 300
+                    transition.interpolator = AccelerateDecelerateInterpolator()
+
+                    TransitionManager.beginDelayedTransition(selector, transition)
+                    constraintSet.applyTo(selector)
+
+                    isMenuExpanded = !isMenuExpanded
+
+                }
+            }
             R.id.dismiss -> {
                 finish()
             }

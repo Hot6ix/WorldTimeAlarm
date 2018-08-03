@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
         android:key="@string/setting_group_1_key"
@@ -25,7 +25,23 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/setting_group_2" >
+        android:key="@string/setting_group_2_key"
+        android:title="@string/setting_group_2">
+
+        <com.simples.j.worldtimealarm.support.SwitchPreference
+            android:key="@string/setting_converter_timezone_key"
+            android:title="@string/setting_converter_timezone"
+            android:defaultValue="false"
+            android:layout="@layout/preference_timezone"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/setting_group_3" >
+
+        <Preference
+            android:key="@string/setting_converter_goto_key"
+            android:title="@string/setting_converter_goto"/>
 
         <Preference
             android:key="@string/setting_version_key"
@@ -36,6 +52,10 @@
                 android:data="https://play.google.com/store/apps/details?id=com.simples.j.worldtimealarm"/>
 
         </Preference>
+
+        <Preference
+            android:key="@string/setting_license_key"
+            android:title="@string/setting_license_title"/>
 
         <Preference
             android:key="@string/setting_source_key"
@@ -49,4 +69,4 @@
 
     </PreferenceCategory>
 
-</PreferenceScreen>
+</android.support.v7.preference.PreferenceScreen>

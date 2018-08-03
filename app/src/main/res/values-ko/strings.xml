@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WorldTimeAlarm</string>
+    <string name="app_name">World Time Alarm</string>
     <string name="main_label">알람</string>
     <string name="action_settings">설정</string>
     <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
-    <string name="banner_ad_unit_id_1">ca-app-pub-1459869098528763/1967704280</string>
     <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/6060648491</string>
     <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">현재 시간대</string>
+    <string name="set_time_zone">설정된 시간대</string>
     <string name="space">&#160;</string>
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
@@ -15,11 +15,12 @@
 
     <!-- Show info -->
     <string name="alarm_empty">알람 없음</string>
+    <string name="clock_empty">비어있음</string>
     <string name="no_result">결과 없음</string>
     <string name="cancel">취소</string>
     <string name="save">저장</string>
     <string name="ok">확인</string>
-    <string name="turn_off">Turn off</string>
+    <string name="turn_off">끄기</string>
     <string name="select_timezone">시간대</string>
     <string name="select_ringtone">벨소리</string>
     <string name="select_vibration">진동</string>
@@ -49,7 +50,7 @@
     <string name="missed_alarm">놓친 알람</string>
     <string name="select_color">색상 선택</string>
     <string name="not_selected">선택 안됨</string>
-    <string name="clear">선택 안함</string>
+    <string name="clear">지우기</string>
     <string name="new_alarm_long">새 알람</string>
     <string name="new_alarm_short">새 알람</string>
     <string name="expected_time">%1$s에 알람이 울립니다.</string>
@@ -58,15 +59,17 @@
     <string name="alarm_removed">알람이 삭제되었습니다.</string>
     <string name="less_than_a_minute">1분</string>
     <string name="same_as_current">현재 시간대와 동일</string>
+    <string name="same_as_set">설정된 시간대와 동일</string>
     <string name="alarm_on">알람이 %1$s 후 울립니다.</string>
     <string name="alarm_on_repeat">매주 %1$s %2$s에 알람이 울립니다.</string>
     <string name="alarm_on_repeat_every">매일 %1$s에 알람이 울립니다.</string>
     <string name="alarm_dismissed">알람이 해제되었습니다.</string>
     <string name="volume_is_muted">알람 볼륨이 음소거 상태입니다.</string>
+    <string name="exist_timezone">이미 존재하는 시간대입니다.</string>
 
     <!-- Settings -->
-    <string name="setting_group_1_key">GENERAL</string>
-    <string name="setting_group_1">일반</string>
+    <string name="setting_group_1_key">ALARM</string>
+    <string name="setting_group_1">알람</string>
     <string name="setting_alarm_mute_key">ALARM_MUTE_KEY</string>
     <string name="setting_alarm_mute_title">알람 음소거</string>
     <string name="setting_alarm_volume_key">ALARM_VOLUME_KEY</string>
@@ -76,11 +79,22 @@
     <string name="setting_time_zone_change_key">TIME_ZONE_CHANGE</string>
     <string name="setting_time_zone_change_title">시간대가 변경되면 알림</string>
 
-    <string name="setting_group_2">기타</string>
+    <string name="setting_group_2_key">CONVERTER</string>
+    <string name="setting_group_2">시간 변환</string>
+    <string name="setting_converter_timezone_key">CONVERTER_TIME_ZONE</string>
+    <string name="setting_converter_timezone">기본 시간대</string>
+    <string name="setting_converter_timezone_id_key">CONVERTER_TIME_ZONE_ID</string>
+    <string name="setting_converter_goto_key">CONVERTER_GOTO</string>
+    <string name="setting_converter_goto">날짜 및 시간 변경</string>
+
+    <string name="setting_group_3_key">Others</string>
+    <string name="setting_group_3">기타</string>
     <string name="setting_version_key">VERSION</string>
-    <string name="setting_version_title">Version</string>
+    <string name="setting_version_title">버전</string>
+    <string name="setting_license_key">LICENSE</string>
+    <string name="setting_license_title">오픈 소스 라이센스</string>
     <string name="setting_source_key">GITHUB</string>
-    <string name="setting_source_title">Open source - GitHub</string>
+    <string name="setting_source_title">GitHub 놀러가기</string>
 
     <string-array name="alarm_mute">
         <item>사용 안함</item>
@@ -251,5 +265,29 @@
         <item>1200000</item>
         <item>1800000</item>
     </integer-array>
+
+    <string name="mit_license">
+        The MIT License (MIT)
+        \n\n
+Copyright (c) 2014 Yao Yu
+\n\n
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+\n\n
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+\n\n
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+    </string>
 
 </resources>

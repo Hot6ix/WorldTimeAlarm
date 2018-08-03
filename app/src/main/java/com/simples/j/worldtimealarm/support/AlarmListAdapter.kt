@@ -12,6 +12,7 @@ import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -20,7 +21,7 @@ import java.util.*
  * Created by j on 19/02/2018.
  *
  */
-class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
+class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
 
     private lateinit var listener: OnItemClickListener
 
@@ -35,10 +36,8 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var conte
     override fun getItemViewType(position: Int): Int = 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val adapterPosition = holder.adapterPosition
-
         val calendar = Calendar.getInstance()
-        calendar.time = Date(list[adapterPosition].timeSet.toLong())
+        calendar.time = Date(list[holder.adapterPosition].timeSet.toLong())
         while (calendar.timeInMillis < System.currentTimeMillis()) {
             calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
@@ -46,10 +45,10 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var conte
             calendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
         }
 
-        val colorTag = list[adapterPosition].colorTag
+        val colorTag = list[holder.adapterPosition].colorTag
         if(colorTag != 0) {
             holder.colorTag.visibility = View.VISIBLE
-            holder.colorTag.setBackgroundColor(list[adapterPosition].colorTag)
+            holder.colorTag.setBackgroundColor(list[holder.adapterPosition].colorTag)
         }
         else {
             holder.colorTag.visibility = View.GONE
@@ -60,7 +59,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var conte
 
         val dayArray = context.resources.getStringArray(R.array.day_of_week_simple)
         val dayLongArray = context.resources.getStringArray(R.array.day_of_week_full)
-        val repeatArray = list[adapterPosition].repeat.mapIndexed { index, i ->
+        val repeatArray = list[holder.adapterPosition].repeat.mapIndexed { index, i ->
             if(i == 1) dayArray[index] else null
         }.filter { it != null }
         if(repeatArray.isNotEmpty()) {
@@ -71,7 +70,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var conte
             else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5)
                 holder.repeat.text = context.resources.getString(R.string.weekday)
             else if(repeatArray.size == 1)
-                holder.repeat.text = dayLongArray[list[adapterPosition].repeat.indexOf(list[adapterPosition].repeat.find { it == 1 }!!)]
+                holder.repeat.text = dayLongArray[list[holder.adapterPosition].repeat.indexOf(list[holder.adapterPosition].repeat.find { it == 1 }!!)]
             else holder.repeat.text = repeatArray.joinToString()
         }
         else {
@@ -81,10 +80,10 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var conte
                 holder.repeat.text = context.resources.getString(R.string.tomorrow)
         }
 
-        holder.itemView.setOnClickListener { listener.onItemClicked(it, list[adapterPosition]) }
+        holder.itemView.setOnClickListener { listener.onItemClicked(it, list[holder.adapterPosition]) }
         holder.switch.setOnCheckedChangeListener(null)
-        holder.switch.isChecked = list[adapterPosition].on_off != 0
-        if(list[adapterPosition].on_off != 0) {
+        holder.switch.isChecked = list[holder.adapterPosition].on_off != 0
+        if(list[holder.adapterPosition].on_off != 0) {
             holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
             holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
             holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
@@ -105,10 +104,10 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private var conte
                 holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
                 holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
             }
-            listener.onItemStatusChanged(b, list[adapterPosition])
+
+            listener.onItemStatusChanged(b, list[holder.adapterPosition])
         }
     }
-
     fun removeItem(index: Int) {
         list.removeAt(index)
         notifyItemRemoved(index)
