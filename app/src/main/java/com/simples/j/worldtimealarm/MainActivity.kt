@@ -4,13 +4,20 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Message
 import android.support.constraint.ConstraintLayout
+import android.support.constraint.ConstraintSet
 import android.support.design.widget.TabLayout
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.transition.AutoTransition
+import android.transition.TransitionManager
+import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ImageView
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.simples.j.worldtimealarm.etc.AlarmItem
@@ -18,22 +25,42 @@ import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.support.FragmentPagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_wake_up.*
 
 class MainActivity : AppCompatActivity(){
 
     private lateinit var fragmentPagerAdapter: FragmentStatePagerAdapter
+    private var adisLoaded = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        testWakeUpActivity()
+//        testWakeUpActivity()
 
-        Handler(Handler.Callback {
-            MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
+        MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
+
+        adViewMain.adListener = object: AdListener() {
+
+            override fun onAdLoaded() {
+                super.onAdLoaded()
+                adisLoaded = true
+                adViewMain.visibility = View.VISIBLE
+                organizeLayout()
+            }
+
+            override fun onAdFailedToLoad(errorCode: Int) {
+                super.onAdFailedToLoad(errorCode)
+                adisLoaded = false
+                adViewMain.visibility = View.INVISIBLE
+                organizeLayout()
+            }
+
+        }
+
+        adViewMain.postDelayed({
             adViewMain.loadAd(AdRequest.Builder().build())
-            true
-        }).sendEmptyMessageDelayed(0, 1000)
+        }, 1000)
 
 //        val tabView01 = layoutInflater.inflate(R.layout.tab_item, null)
 //        tabView01.findViewById<ImageView>(R.id.tab_icon).setBackgroundResource(R.drawable.ic_action_alarm_white)
@@ -87,6 +114,11 @@ class MainActivity : AppCompatActivity(){
         super.onSaveInstanceState(outState)
     }
 
+    override fun onResume() {
+        super.onResume()
+        if(!adisLoaded) adViewMain.loadAd(AdRequest.Builder().build())
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         adViewMain.destroy()
@@ -110,6 +142,26 @@ class MainActivity : AppCompatActivity(){
 //            else -> super.onOptionsItemSelected(item)
 //        }
 //    }
+
+    fun organizeLayout() {
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(main_layout)
+
+        if(!adisLoaded) {
+            constraintSet.connect(fragment_pager.id, ConstraintSet.TOP, main_layout.id, ConstraintSet.TOP)
+        }
+        else {
+            constraintSet.connect(fragment_pager.id, ConstraintSet.TOP, adViewMain.id, ConstraintSet.BOTTOM)
+        }
+
+        val transition = AutoTransition()
+        transition.duration = 300
+        transition.interpolator = AccelerateDecelerateInterpolator()
+
+        TransitionManager.beginDelayedTransition(main_layout, transition)
+        constraintSet.applyTo(main_layout)
+
+    }
 
     fun testWakeUpActivity() {
         // Sample alarm item to start wakeup activity

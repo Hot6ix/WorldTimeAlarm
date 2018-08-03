@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.support.v7.preference.ListPreference
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
+import android.util.Log
 import android.widget.CompoundButton
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
@@ -82,17 +83,20 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
     }
     override fun onCheckedChanged(buttonView: CompoundButton?, isChecked: Boolean) {
         converterTimezone.isChecked = isChecked
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(resources.getString(R.string.setting_converter_timezone_key), isChecked).apply()
         when(isChecked) {
             true -> {
-                val timezone = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), "").replace(" ", "_")
+                var timezone = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), "").replace(" ", "_")
+                if(timezone.isEmpty()) timezone = TimeZone.getDefault().id
+
                 val intent = Intent(WorldClockFragment.ACTION_TIME_ZONE_CHANGED)
                 intent.putExtra(TIME_ZONE_CHANGED_KEY, timezone)
                 context!!.sendBroadcast(intent)
             }
             false -> {
-                val intent = Intent(WorldClockFragment.ACTION_TIME_ZONE_CHANGED)
-                intent.putExtra(TIME_ZONE_CHANGED_KEY, TimeZone.getDefault().id)
-                context!!.sendBroadcast(intent)
+//                val intent = Intent(WorldClockFragment.ACTION_TIME_ZONE_CHANGED)
+//                intent.putExtra(TIME_ZONE_CHANGED_KEY, TimeZone.getDefault().id)
+//                context!!.sendBroadcast(intent)
             }
         }
     }

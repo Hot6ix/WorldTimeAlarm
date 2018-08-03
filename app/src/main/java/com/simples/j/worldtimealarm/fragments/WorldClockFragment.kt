@@ -69,10 +69,10 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         calendar = Calendar.getInstance()
         val isUserTimeZoneEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(resources.getString(R.string.setting_converter_timezone_key), false)
-        val converterTimezoneId = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), "")
+        val converterTimezoneId = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), TimeZone.getDefault().id)
         timeZone =
-                if(converterTimezoneId.isEmpty() || !isUserTimeZoneEnabled) calendar.timeZone
-                else if(savedInstanceState != null && !savedInstanceState.isEmpty) TimeZone.getTimeZone(savedInstanceState.getString(USER_SELECTED_TIMEZONE))
+                if(savedInstanceState != null && !savedInstanceState.isEmpty) TimeZone.getTimeZone(savedInstanceState.getString(USER_SELECTED_TIMEZONE))
+                else if(!isUserTimeZoneEnabled) calendar.timeZone
                 else TimeZone.getTimeZone(converterTimezoneId)
         calendar.timeZone = timeZone
         timeFormat = SimpleDateFormat("K:mm", Locale.getDefault())
