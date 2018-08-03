@@ -13,7 +13,7 @@ Version 1.1
 Version 1.1 (Version code until 9)
 - Fix repeat days bug
 
-Changes - expected to be Version 1.2 (Not launched yet)
+Version 1.2
 - Add time converter feature
 - Add empty button in label dialog view
 - Add setting options for time converter
