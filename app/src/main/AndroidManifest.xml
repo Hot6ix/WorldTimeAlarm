@@ -77,7 +77,12 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".LicenseActivity"></activity>
+        <activity android:name=".LicenseActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.simples.j.worldtimealarm.MainActivity"/>
+        </activity>
     </application>
 
 </manifest>

@@ -46,14 +46,14 @@ class MainActivity : AppCompatActivity(){
                 super.onAdLoaded()
                 adisLoaded = true
                 adViewMain.visibility = View.VISIBLE
-                organizeLayout()
+//                organizeLayout()
             }
 
             override fun onAdFailedToLoad(errorCode: Int) {
                 super.onAdFailedToLoad(errorCode)
                 adisLoaded = false
                 adViewMain.visibility = View.INVISIBLE
-                organizeLayout()
+//                organizeLayout()
             }
 
         }
