@@ -107,7 +107,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
             time_zone.text = existAlarmItem!!.timeZone
             val difference = TimeZone.getTimeZone(formattedTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-            var offset = MediaCursor.getOffsetOfDifference(applicationContext, difference)
+            var offset = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
             if(TimeZone.getDefault() == TimeZone.getTimeZone(formattedTimeZone)) {
                 offset = resources.getString(R.string.current_time_zone)
                 expectedTime.visibility = View.GONE
@@ -166,7 +166,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
             time_zone.text = currentTimeZone
             val difference = TimeZone.getTimeZone(formattedTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-            var offset = MediaCursor.getOffsetOfDifference(applicationContext, difference)
+            var offset = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
             if(TimeZone.getDefault() == TimeZone.getTimeZone(formattedTimeZone)) {
                 offset = resources.getString(R.string.current_time_zone)
                 expectedTime.visibility = View.GONE
@@ -245,7 +245,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         divider2.visibility = View.GONE
                     }
                     else {
-                        offset = MediaCursor.getOffsetOfDifference(applicationContext, difference)
+                        offset = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
                         val current = Calendar.getInstance()
                         calendar.set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH))
                         calendar.set(Calendar.SECOND, 0)

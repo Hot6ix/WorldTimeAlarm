@@ -11,22 +11,38 @@
     android:background="?android:attr/selectableItemBackground"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TextView
-        android:id="@+id/time_zone_name_clock"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/time_zone_layout"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:gravity="start|center_vertical"
-        android:textSize="@dimen/text_small"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/clock_layout"/>
+        app:layout_constraintEnd_toStartOf="@id/clock_layout">
+
+        <TextView
+            android:id="@+id/time_zone_name_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:textSize="@dimen/text_small"/>
+
+        <TextView
+            android:id="@+id/time_zone_offset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:textSize="@dimen/text_xsmall"
+            android:textColor="@color/colorPrimary"
+            app:layout_constraintTop_toBottomOf="@id/time_zone_name_clock"/>
+
+    </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/clock_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@id/time_zone_name_clock"
+        app:layout_constraintStart_toEndOf="@id/time_zone_layout"
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
@@ -43,8 +59,10 @@
             android:id="@+id/time_zone_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end|center_horizontal"
-            android:textSize="@dimen/text_xxlarge"
+            android:gravity="end|bottom"
+            android:textSize="@dimen/text_mxlarge"
+            android:includeFontPadding="false"
+            app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/time_zone_date"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -53,8 +71,9 @@
             android:id="@+id/time_zone_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end|center_horizontal"
+            android:gravity="end|top"
             android:textSize="@dimen/text_small"
+            app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintTop_toBottomOf="@id/time_zone_time"
             app:layout_constraintBottom_toBottomOf="parent"/>
 

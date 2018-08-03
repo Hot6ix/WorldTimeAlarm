@@ -138,7 +138,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 val difference = TimeZone.getTimeZone(timeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
                 time_zone_layout.visibility = View.VISIBLE
                 time_zone_name_wake.text = item.timeZone
-                time_zone_offset_wake.text = MediaCursor.getOffsetOfDifference(applicationContext, difference)
+                time_zone_offset_wake.text = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
                 time_zone_time_wake.timeZone = timeZone
             }
 

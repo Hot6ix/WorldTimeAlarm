@@ -6,6 +6,7 @@
     <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/6060648491</string>
     <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">Current time zone</string>
+    <string name="set_time_zone">Set time zone</string>
     <string name="space">&#160;</string>
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
@@ -57,6 +58,7 @@
     <string name="alarm_removed">Alarm removed.</string>
     <string name="less_than_a_minute">less than a minute</string>
     <string name="same_as_current">Same as current time zone</string>
+    <string name="same_as_set">Same as set time zone</string>
     <string name="alarm_on">Alarm set for %1$s from now.</string>
     <string name="alarm_on_repeat">Alarm set for every %1$s at %2$s.</string>
     <string name="alarm_on_repeat_every">Alarm set for everyday at %1$s.</string>

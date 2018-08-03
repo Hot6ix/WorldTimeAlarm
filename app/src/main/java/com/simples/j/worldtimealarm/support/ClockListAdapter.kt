@@ -10,6 +10,7 @@ import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.ClockItem
+import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.clock_list_item.view.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -41,7 +42,12 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
         val differenceOriginal = calendar.timeZone.getOffset(System.currentTimeMillis()) - expectedCalendar.timeZone.getOffset(System.currentTimeMillis())
         expectedCalendar.add(Calendar.MILLISECOND, -differenceOriginal)
 
+        val offset = if(calendar.timeZone == timeZone) context.resources.getString(R.string.set_time_zone)
+        else MediaCursor.getOffsetOfDifference(context, -differenceOriginal, MediaCursor.TYPE_CONVERTER)
+
         holder.timeZoneName.text = expectedCalendar.timeZone.id.replace("_", " ")
+        holder.timeZoneOffset.text = offset
+
         val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
         val dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
@@ -69,6 +75,7 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         var timeZoneName: TextView = view.time_zone_name_clock
+        var timeZoneOffset: TextView = view.time_zone_offset
         var timeZoneTime: TextView = view.time_zone_time
         var amPm: TextView = view.time_zone_am_pm
         var timeZoneDate: TextView = view.time_zone_date

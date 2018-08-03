@@ -75,7 +75,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                 else if(savedInstanceState != null && !savedInstanceState.isEmpty) TimeZone.getTimeZone(savedInstanceState.getString(USER_SELECTED_TIMEZONE))
                 else TimeZone.getTimeZone(converterTimezoneId)
         calendar.timeZone = timeZone
-        timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+        timeFormat = SimpleDateFormat("K:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
         dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
         dateFormat.timeZone = timeZone
@@ -90,7 +90,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         val timeDialog = TimePickerDialog(context!!, { _: TimePicker, hour: Int, minute: Int ->
             calendar.set(Calendar.HOUR_OF_DAY, hour)
             calendar.set(Calendar.MINUTE, minute)
-            timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+            timeFormat = SimpleDateFormat("K:mm", Locale.getDefault())
             timeFormat.timeZone = timeZone
             world_time.text = timeFormat.format(calendar.time)
             world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
@@ -215,7 +215,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         calendar.set(Calendar.SECOND, 0)
 
-        timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+        timeFormat = SimpleDateFormat("K:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
         dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
         dateFormat.timeZone = timeZone

@@ -7,6 +7,7 @@
     <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/6060648491</string>
     <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">현재 시간대</string>
+    <string name="set_time_zone">설정된 시간대</string>
     <string name="space">&#160;</string>
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
@@ -58,6 +59,7 @@
     <string name="alarm_removed">알람이 삭제되었습니다.</string>
     <string name="less_than_a_minute">1분</string>
     <string name="same_as_current">현재 시간대와 동일</string>
+    <string name="same_as_set">설정된 시간대와 동일</string>
     <string name="alarm_on">알람이 %1$s 후 울립니다.</string>
     <string name="alarm_on_repeat">매주 %1$s %2$s에 알람이 울립니다.</string>
     <string name="alarm_on_repeat_every">매일 %1$s에 알람이 울립니다.</string>

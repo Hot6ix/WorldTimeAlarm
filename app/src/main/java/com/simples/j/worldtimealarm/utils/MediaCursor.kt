@@ -23,6 +23,9 @@ class MediaCursor {
 
     companion object {
 
+        const val TYPE_CURRENT = 0
+        const val TYPE_CONVERTER = 1
+
         fun getRingtoneList(context: Context): ArrayList<RingtoneItem> {
             val array = ArrayList<RingtoneItem>()
             array.add(RingtoneItem(context.resources.getString(R.string.no_ringtone), null))
@@ -62,7 +65,7 @@ class MediaCursor {
             return array
         }
 
-        fun getOffsetOfDifference(context: Context, difference: Int): String {
+        fun getOffsetOfDifference(context: Context, difference: Int, type: Int): String {
             val offsetText = if(difference < 0) context.resources.getString(R.string.slow)
             else context.resources.getString(R.string.fast)
 
@@ -73,8 +76,9 @@ class MediaCursor {
                 hours > 0 && minutes > 0 -> context.getString(R.string.hours_minutes, hours, minutes) + offsetText // hours & minutes
                 hours.toInt() == 1 -> context.getString(R.string.hour, hours) + offsetText // hour
                 hours > 0 && minutes.toInt() == 0 -> context.getString(R.string.hours, hours) + offsetText // hours
-                hours.toInt() == 0 && minutes > 0 -> context.getString(R.string.minutes, minutes) + offsetText // minutes
-                hours.toInt() == 0 && minutes.toInt() == 0 -> context.getString(R.string.same_as_current) // same as current
+                hours.toInt() == 0 && minutes > 0-> context.getString(R.string.minutes, minutes) + offsetText // minutes
+                hours.toInt() == 0 && minutes.toInt() == 0 && type == TYPE_CURRENT -> context.getString(R.string.same_as_current) // same as current
+                hours.toInt() == 0 && minutes.toInt() == 0 && type == TYPE_CONVERTER -> context.getString(R.string.same_as_set) // same as current
                 else -> ""
             }
         }

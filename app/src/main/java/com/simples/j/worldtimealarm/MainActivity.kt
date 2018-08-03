@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        testWakeUpActivity()
+        testWakeUpActivity()
 
         Handler(Handler.Callback {
             MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
