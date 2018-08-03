@@ -164,7 +164,7 @@
         android:layout_marginTop="@dimen/padding10"
         android:layout_marginEnd="@dimen/padding20"
         android:layout_marginStart="@dimen/padding20"
-        app:rb_color="@color/whiteGray"
+        app:rb_color="@android:color/white"
         app:rb_radius="@dimen/padding30"
         app:rb_rippleAmount="1"
         app:rb_duration="1200"
