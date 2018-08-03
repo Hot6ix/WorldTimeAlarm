@@ -92,8 +92,10 @@
     <string name="setting_group_3">其他</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">版</string>
+    <string name="setting_license_key">LICENSE</string>
+    <string name="setting_license_title">开源许可证</string>
     <string name="setting_source_key">GITHUB</string>
-    <string name="setting_source_title">Open source - GitHub</string>
+    <string name="setting_source_title">访问GitHub</string>
 
     <string-array name="alarm_mute">
         <item>禁用</item>

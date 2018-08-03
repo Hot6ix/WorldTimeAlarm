@@ -90,8 +90,10 @@
     <string name="setting_group_3">Others</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">Version</string>
+    <string name="setting_license_key">LICENSE</string>
+    <string name="setting_license_title">Open source license</string>
     <string name="setting_source_key">GITHUB</string>
-    <string name="setting_source_title">Open source - GitHub</string>
+    <string name="setting_source_title">Visit GitHub</string>
 
     <string-array name="alarm_mute">
         <item>Disable</item>
@@ -262,5 +264,29 @@
         <item>1200000</item>
         <item>1800000</item>
     </integer-array>
+
+    <string name="mit_license">
+        The MIT License (MIT)
+        \n\n
+Copyright (c) 2014 Yao Yu
+\n\n
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+\n\n
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+\n\n
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+    </string>
 
 </resources>

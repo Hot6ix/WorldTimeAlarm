@@ -13,6 +13,7 @@ import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
 import android.util.Log
 import android.widget.CompoundButton
+import com.simples.j.worldtimealarm.LicenseActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
@@ -61,6 +62,11 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
             val intent = Intent(Settings.ACTION_DATE_SETTINGS)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
+            true
+        }
+
+        findPreference(resources.getString(R.string.setting_license_key)).setOnPreferenceClickListener {
+            startActivity(Intent(context, LicenseActivity::class.java))
             true
         }
     }

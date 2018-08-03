@@ -54,6 +54,10 @@
         </Preference>
 
         <Preference
+            android:key="@string/setting_license_key"
+            android:title="@string/setting_license_title"/>
+
+        <Preference
             android:key="@string/setting_source_key"
             android:title="@string/setting_source_title">
 
