@@ -16,6 +16,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-1459869098528763~3472357649" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/main_label"
@@ -30,6 +35,18 @@
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="http"
+                    android:host="noob.co.kr"
+                    android:pathPrefix="/worldtimealarm" />
+            </intent-filter>
+
         </activity>
         <activity
             android:name=".AlarmActivity"
@@ -77,11 +94,12 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".LicenseActivity"
+        <activity
+            android:name=".LicenseActivity"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.simples.j.worldtimealarm.MainActivity"/>
+                android:value="com.simples.j.worldtimealarm.MainActivity" />
         </activity>
     </application>
 
