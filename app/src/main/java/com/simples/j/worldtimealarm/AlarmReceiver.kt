@@ -65,40 +65,37 @@ class AlarmReceiver(): BroadcastReceiver() {
             dbCursor = DatabaseCursor(context)
             val repeatValue = context.resources.getIntArray(R.array.day_of_week_values)
             val repeat = item.repeat.mapIndexed { index, i -> if(i == 1) repeatValue[index] else 0 }.filter { it != 0 }
-            val today = Calendar.getInstance()
-            if(repeat.contains(today.get(Calendar.DAY_OF_WEEK)) || repeat.isEmpty()) {
-                val calendar = Calendar.getInstance()
-                calendar.time = Date(item.timeSet.toLong())
-                if(repeat.isEmpty()) {
-                    // Disable one time alarm
-                    calendar.add(Calendar.DAY_OF_YEAR, 1)
-                    item.timeSet = calendar.timeInMillis.toString()
-                    item.on_off = 0
-                    dbCursor.updateAlarm(item)
-                }
-                else {
-                    // If alarm is repeating, set next alarm
-                    val currentDay = calendar.get(Calendar.DAY_OF_WEEK)
-                    val currentDayIndex = repeat.indexOf(currentDay)
 
-                    if(currentDayIndex == repeat.lastIndex) {
-                        calendar.add(Calendar.WEEK_OF_MONTH, 1)
-                        calendar.set(Calendar.DAY_OF_WEEK, repeat[0])
-                    }
-                    else calendar.set(Calendar.DAY_OF_WEEK, repeat[currentDayIndex + 1])
-
-                    item.timeSet = calendar.timeInMillis.toString()
-                    dbCursor.updateAlarm(item)
-
-                    AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
-                }
-
-                val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE)
-                val bundle = Bundle()
-                bundle.putParcelable(AlarmReceiver.ITEM, item)
-                requestIntent.putExtra(AlarmReceiver.OPTIONS, bundle)
-                context.sendBroadcast(requestIntent)
+            if(repeat.isEmpty()) {
+                // Disable one time alarm
+                item.on_off = 0
+                dbCursor.updateAlarm(item)
             }
+            else {
+                // If alarm is repeating, set next alarm
+//                val calendar = Calendar.getInstance().apply {
+//                    time = Date(item.timeSet.toLong())
+//                }
+//                val currentDay = calendar.get(Calendar.DAY_OF_WEEK)
+//                val currentDayIndex = repeat.indexOf(currentDay)
+//
+//                if(currentDayIndex == repeat.lastIndex) {
+//                    calendar.add(Calendar.WEEK_OF_MONTH, 1)
+//                    calendar.set(Calendar.DAY_OF_WEEK, repeat[0])
+//                }
+//                else calendar.set(Calendar.DAY_OF_WEEK, repeat[currentDayIndex + 1])
+//
+//                item.timeSet = calendar.timeInMillis.toString()
+//                dbCursor.updateAlarm(item)
+
+                AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+            }
+
+            val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE)
+            val bundle = Bundle()
+            bundle.putParcelable(AlarmReceiver.ITEM, item)
+            requestIntent.putExtra(AlarmReceiver.OPTIONS, bundle)
+            context.sendBroadcast(requestIntent)
         }
     }
 
