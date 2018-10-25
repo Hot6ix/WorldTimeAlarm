@@ -335,9 +335,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             }
             4 -> { // Color Tag
                 getColorTagChoiceDialog().show()
-//                currentColorTag = ContextCompat.getColor(applicationContext, R.color.colorPrimary)
-//                optionList[4].summary = currentColorTag.toString()
-//                alarmOptionAdapter.notifyItemChanged(4)
             }
         }
     }
@@ -538,7 +535,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
         notiId = 100000 + Random().nextInt(899999)
 
-        val item = AlarmItem(
+        return AlarmItem(
                 if(alarm_action == ACTION_NEW) null else existAlarmItem!!.id,
                 currentTimeZone,
                 calendar.time.time.toString(),
@@ -552,8 +549,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 currentColorTag,
                 if(alarm_action == ACTION_NEW) -1 else existAlarmItem!!.index
         )
-
-        return item
     }
 
     private fun showToast(item: AlarmItem) {

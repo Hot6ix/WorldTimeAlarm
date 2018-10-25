@@ -62,13 +62,6 @@ class MainActivity : AppCompatActivity(){
             adViewMain.loadAd(AdRequest.Builder().build())
         }, 1000)
 
-//        val tabView01 = layoutInflater.inflate(R.layout.tab_item, null)
-//        tabView01.findViewById<ImageView>(R.id.tab_icon).setBackgroundResource(R.drawable.ic_action_alarm_white)
-//        val tabView02 = layoutInflater.inflate(R.layout.tab_item, null)
-//        tabView02.findViewById<ImageView>(R.id.tab_icon).setBackgroundResource(R.drawable.ic_action_world_white)
-//        val tabView03 = layoutInflater.inflate(R.layout.tab_item, null)
-//        tabView02.findViewById<ImageView>(R.id.tab_icon).setBackgroundResource(R.drawable.ic_action_setting_white)
-
         val tab01 = tab.newTab()
                 .setIcon(R.drawable.ic_action_alarm_white)
         val tab02 = tab.newTab()
@@ -123,25 +116,6 @@ class MainActivity : AppCompatActivity(){
         super.onDestroy()
         adViewMain.destroy()
     }
-
-//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        menuInflater.inflate(R.menu.menu_main, menu)
-//        return true
-//    }
-
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        return when (item.itemId) {
-//            R.id.action_settings -> {
-//                startActivity(Intent(this, SettingsActivity::class.java))
-//                true
-//            }
-//            else -> super.onOptionsItemSelected(item)
-//        }
-//    }
 
     fun organizeLayout() {
         val constraintSet = ConstraintSet()

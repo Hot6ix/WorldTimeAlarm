@@ -56,9 +56,11 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
 
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
         val searchView = menu?.findItem(R.id.search_timezone)?.actionView as SearchView
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(componentName))
-        searchView.isIconified = false
-        searchView.queryHint = resources.getString(R.string.hint)
+        searchView.apply {
+            setSearchableInfo(searchManager.getSearchableInfo(componentName))
+            isIconified = false
+            queryHint = resources.getString(R.string.hint)
+        }
         searchView.setOnQueryTextListener(this)
         if(query != null && query!!.isNotEmpty()) {
             searchView.setQuery(query, true)

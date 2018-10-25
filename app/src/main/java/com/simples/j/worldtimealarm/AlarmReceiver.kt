@@ -19,7 +19,7 @@ import java.util.*
  * Created by j on 21/02/2018.
  *
  */
-class AlarmReceiver(): BroadcastReceiver() {
+class AlarmReceiver: BroadcastReceiver() {
 
     private lateinit var dbCursor: DatabaseCursor
 
@@ -72,22 +72,6 @@ class AlarmReceiver(): BroadcastReceiver() {
                 dbCursor.updateAlarm(item)
             }
             else {
-                // If alarm is repeating, set next alarm
-//                val calendar = Calendar.getInstance().apply {
-//                    time = Date(item.timeSet.toLong())
-//                }
-//                val currentDay = calendar.get(Calendar.DAY_OF_WEEK)
-//                val currentDayIndex = repeat.indexOf(currentDay)
-//
-//                if(currentDayIndex == repeat.lastIndex) {
-//                    calendar.add(Calendar.WEEK_OF_MONTH, 1)
-//                    calendar.set(Calendar.DAY_OF_WEEK, repeat[0])
-//                }
-//                else calendar.set(Calendar.DAY_OF_WEEK, repeat[currentDayIndex + 1])
-//
-//                item.timeSet = calendar.timeInMillis.toString()
-//                dbCursor.updateAlarm(item)
-
                 AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
             }
 
