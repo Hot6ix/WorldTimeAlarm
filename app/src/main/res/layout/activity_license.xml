@@ -15,9 +15,10 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
+            android:id="@+id/license_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/mit_license"
+            android:textSize="10sp"
             android:padding="@dimen/padding15"/>
 
     </ScrollView>
