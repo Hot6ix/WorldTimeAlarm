@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity(){
 
         }
 
-        adViewMain.loadAd(AdRequest.Builder().addTestDevice("6EF4925B538C754B535FCB7177FCAC3D").build())
+        adViewMain.loadAd(AdRequest.Builder().build())
 
         val tab01 = tab.newTab()
                 .setIcon(R.drawable.ic_action_alarm_white)
