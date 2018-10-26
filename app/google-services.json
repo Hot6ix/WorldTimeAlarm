@@ -31,6 +31,14 @@
           }
         },
         {
+          "client_id": "919992742452-ou3f0br58k66rl8oks202ao2h75jtgsf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.simples.j.worldtimealarm",
+            "certificate_hash": "0f2dde50d53198b31bfece9b2fbe104f2ddbc97a"
+          }
+        },
+        {
           "client_id": "919992742452-i3nh1m1c4c2pdfrnp0nueerag2spc6bb.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -56,7 +64,8 @@
         "ads_service": {
           "status": 2
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-1459869098528763~3472357649"
     }
   ],
   "configuration_version": "1"

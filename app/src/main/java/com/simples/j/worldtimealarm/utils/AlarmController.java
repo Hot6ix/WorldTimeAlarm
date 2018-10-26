@@ -55,6 +55,7 @@ public class AlarmController {
                     break;
                 }
             }
+
             if(!isRepeating) {
                 // One time alarm
                 // Add a day until calendar time is larger than current time
@@ -90,9 +91,7 @@ public class AlarmController {
 
                 if(isContained) {
                     // currentDay is contained in repeat
-                    // Set expected calendar's day to today's day
                     calendar.set(Calendar.DAY_OF_YEAR, today.get(Calendar.DAY_OF_YEAR));
-                    // Expected calendar is less than today
 
                     if(today.after(calendar)) {
                         // If today is last repeat day, return to first repeat day
@@ -108,14 +107,13 @@ public class AlarmController {
                 else {
                     // currentDay is not contained in repeat
                     // Add a week to pass to next week
-                    calendar.set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) + 1);
                     // If today is not after from repeated day back to current week
-                    for(int i=0; i<repeat.size(); i++) {
-                        if(repeat.get(i) > currentDay) {
-                            calendar.set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR));
-                            break;
-                        }
+                    calendar.set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR));
+
+                    if(repeat.get(repeat.size()-1) < currentDay) {
+                        calendar.set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) + 1);
                     }
+
                     int expectedDay = today.get(Calendar.DAY_OF_WEEK);
                     if (expectedDay == Calendar.SATURDAY) expectedDay = 1;
                     while(!repeat.contains(expectedDay)) {
