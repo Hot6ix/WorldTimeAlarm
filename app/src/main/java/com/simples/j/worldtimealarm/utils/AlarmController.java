@@ -94,7 +94,6 @@ public class AlarmController {
                     calendar.set(Calendar.DAY_OF_YEAR, today.get(Calendar.DAY_OF_YEAR));
                     // Expected calendar is less than today
 
-                    Log.d(C.TAG, SimpleDateFormat.getDateTimeInstance().format(calendar.getTime()));
                     if(today.after(calendar)) {
                         // If today is last repeat day, return to first repeat day
                         if(currentDayIndex == repeat.size() - 1) {
@@ -105,7 +104,6 @@ public class AlarmController {
                             calendar.set(Calendar.DAY_OF_WEEK, repeat.get(currentDayIndex + 1));
                         }
                     }
-                    Log.d(C.TAG, SimpleDateFormat.getDateTimeInstance().format(calendar.getTime()));
                 }
                 else {
                     // currentDay is not contained in repeat
