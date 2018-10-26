@@ -22,6 +22,12 @@ Version 1.2
 - New design of main view
 - New design of wake up view
 
+Version 1.3
+- Remove unnecessary function
+- Fix alarm scheduling bugs
+- Optimize alarm scheduling
+- Add app license
+
 
 FAQ
 
