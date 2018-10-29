@@ -91,9 +91,12 @@ public class AlarmController {
 
                 if(isContained) {
                     // currentDay is contained in repeat
+                    Log.d(C.TAG, String.valueOf(calendar.getTimeInMillis()));
                     calendar.set(Calendar.DAY_OF_YEAR, today.get(Calendar.DAY_OF_YEAR));
+                    Log.d(C.TAG, String.valueOf(calendar.getTimeInMillis()));
+                    Log.d(C.TAG, String.valueOf(today.getTimeInMillis()));
 
-                    if(today.after(calendar)) {
+                    if(today.getTimeInMillis() >= calendar.getTimeInMillis()) {
                         // If today is last repeat day, return to first repeat day
                         if(currentDayIndex == repeat.size() - 1) {
                             calendar.add(Calendar.WEEK_OF_MONTH, 1);
