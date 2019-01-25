@@ -121,7 +121,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             time_zone_offset.text = offset
             selectedDays = existAlarmItem!!.repeat
 
-            currentRingtone = ringtoneList.find { it.uri.toString() == existAlarmItem!!.ringtone } ?: ringtoneList[0]
+            currentRingtone = ringtoneList.find { it.uri.toString() == existAlarmItem!!.ringtone } ?: ringtoneList[1]
             currentVibrationPattern = vibratorPatternList.find { it.array?.contentEquals(existAlarmItem!!.vibration ?: LongArray(0)) ?: false } ?: vibratorPatternList[0]
             currentSnooze = snoozeValues.find { it == existAlarmItem!!.snooze } ?: snoozeValues[0]
             currentLabel = existAlarmItem!!.label
@@ -343,7 +343,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         tempColorTag = color
     }
 
-    private fun getDefaultOptionList(defaultRingtone: RingtoneItem = ringtoneList[0], defaultVibration: PatternItem = vibratorPatternList[0], defaultSnooze: Long = snoozeValues[0], label: String = "", colorTag: Int = 0): ArrayList<OptionItem> {
+    private fun getDefaultOptionList(defaultRingtone: RingtoneItem = ringtoneList[1], defaultVibration: PatternItem = vibratorPatternList[0], defaultSnooze: Long = snoozeValues[0], label: String = "", colorTag: Int = 0): ArrayList<OptionItem> {
         val array = ArrayList<OptionItem>()
         val options = resources.getStringArray(R.array.alarm_options)
         currentRingtone = defaultRingtone

@@ -45,7 +45,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
     private lateinit var clockListAdapter: ClockListAdapter
     private lateinit var calendar: Calendar
-    private lateinit var timeFormat: DateFormat
+    private lateinit var timeFormat: SimpleDateFormat
     private lateinit var dateFormat: DateFormat
     private lateinit var swipeHelper: ItemTouchHelper
     private lateinit var swipeController: ListSwipeController
