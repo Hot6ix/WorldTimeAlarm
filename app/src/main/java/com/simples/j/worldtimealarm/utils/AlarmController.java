@@ -58,14 +58,14 @@ public class AlarmController {
 
             if(!isRepeating) {
                 // One time alarm
-                // Add a day until calendar time is larger than current time
+                // Add a day until calendar time is after from current time
                 while(calendar.getTimeInMillis() < System.currentTimeMillis()) {
                     calendar.add(Calendar.DAY_OF_YEAR, 1);
                 }
                 // If expected date is less than 24 hour from today
                 // Set to date of today
                 if(calendar.getTimeInMillis() - System.currentTimeMillis() > C.ONE_DAY) {
-                    calendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
+                    calendar.set(Calendar.DAY_OF_YEAR, today.get(Calendar.DAY_OF_YEAR));
                 }
             }
             else {

@@ -63,15 +63,12 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
             if(i == 1) dayArray[index] else null
         }.filter { it != null }
         if(repeatArray.isNotEmpty()) {
-            if(repeatArray.size == 7)
-                holder.repeat.text = context.resources.getString(R.string.everyday)
-            else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2)
-                holder.repeat.text = context.resources.getString(R.string.weekend)
-            else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5)
-                holder.repeat.text = context.resources.getString(R.string.weekday)
-            else if(repeatArray.size == 1)
-                holder.repeat.text = dayLongArray[list[holder.adapterPosition].repeat.indexOf(list[holder.adapterPosition].repeat.find { it == 1 }!!)]
-            else holder.repeat.text = repeatArray.joinToString()
+            holder.repeat.text =
+                    if(repeatArray.size == 7) context.resources.getString(R.string.everyday)
+                    else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2) context.resources.getString(R.string.weekend)
+                    else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5) context.resources.getString(R.string.weekday)
+                    else if(repeatArray.size == 1) dayLongArray[list[holder.adapterPosition].repeat.indexOf(list[holder.adapterPosition].repeat.find { it == 1 }!!)]
+                    else repeatArray.joinToString()
         }
         else {
             if(calendar.get(Calendar.DAY_OF_YEAR) == Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
@@ -83,6 +80,7 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
         holder.itemView.setOnClickListener { listener.onItemClicked(it, list[holder.adapterPosition]) }
         holder.switch.setOnCheckedChangeListener(null)
         holder.switch.isChecked = list[holder.adapterPosition].on_off != 0
+
         if(list[holder.adapterPosition].on_off != 0) {
             holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
             holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
@@ -93,6 +91,7 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
             holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
             holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
         }
+
         holder.switch.setOnCheckedChangeListener { _, b ->
             if(!b) {
                 holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.lightGray))

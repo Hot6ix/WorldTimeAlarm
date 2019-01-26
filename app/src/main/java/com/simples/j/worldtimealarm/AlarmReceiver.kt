@@ -34,11 +34,12 @@ class AlarmReceiver: BroadcastReceiver() {
 
         // If alarm alerted to user and until dismiss or snooze, also upcoming alarms will be notified as missed.
         if(!WakeUpActivity.isActivityRunning) {
-            val wakeUpIntent = Intent(context, WakeUpActivity::class.java)
-            wakeUpIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            wakeUpIntent.action = intent.action
-            wakeUpIntent.putExtra(OPTIONS, option)
-            context.startActivity(wakeUpIntent)
+            Intent(context, WakeUpActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                action = intent.action
+                putExtra(OPTIONS, option)
+                context.startActivity(this)
+            }
         }
         else {
 //            Log.d(C.TAG, "Missed alarm alert : Info($item)")
