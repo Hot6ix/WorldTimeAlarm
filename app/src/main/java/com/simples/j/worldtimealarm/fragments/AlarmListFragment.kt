@@ -83,9 +83,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         alarmList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
 
         swipeController = ListSwipeController()
+        swipeController.setOnSwipeListener(this)
+
         swipeHelper = ItemTouchHelper(swipeController)
         swipeHelper.attachToRecyclerView(alarmList)
-        swipeController.setOnSwipeListener(this)
         setEmptyMessage()
 
         // If alarm volume is muted, show snackBar

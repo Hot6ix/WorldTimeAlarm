@@ -44,7 +44,6 @@ import java.util.*
 class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener {
 
     private lateinit var clockListAdapter: ClockListAdapter
-    private lateinit var calendar: Calendar
     private lateinit var timeFormat: SimpleDateFormat
     private lateinit var dateFormat: DateFormat
     private lateinit var swipeHelper: ItemTouchHelper
@@ -53,6 +52,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private lateinit var fragmentLayout: CoordinatorLayout
     private lateinit var timeZoneChangedReceiver: UpdateRequestReceiver
     private lateinit var timeZone: TimeZone
+
+    private var calendar = Calendar.getInstance()
     private var clockItems = ArrayList<ClockItem>()
     private var removedItem: ClockItem? = null
 
@@ -67,7 +68,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        calendar = Calendar.getInstance()
         val isUserTimeZoneEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(resources.getString(R.string.setting_converter_timezone_key), false)
         val converterTimezoneId = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), TimeZone.getDefault().id)
         timeZone =
@@ -124,20 +124,22 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
 
         swipeController = ListSwipeController()
-        swipeHelper = ItemTouchHelper(swipeController)
-        swipeHelper.attachToRecyclerView(clockList)
         swipeController.setOnSwipeListener(this)
 
+        swipeHelper = ItemTouchHelper(swipeController)
+        swipeHelper.attachToRecyclerView(clockList)
+
         timeZoneChangedReceiver = UpdateRequestReceiver()
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(ACTION_TIME_ZONE_CHANGED)
-        context!!.registerReceiver(timeZoneChangedReceiver, intentFilter)
+        val intentFilter = IntentFilter().apply {
+            addAction(ACTION_TIME_ZONE_CHANGED)
+        }
+        context?.registerReceiver(timeZoneChangedReceiver, intentFilter)
         setEmptyMessage()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        context!!.unregisterReceiver(timeZoneChangedReceiver)
+        context?.unregisterReceiver(timeZoneChangedReceiver)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

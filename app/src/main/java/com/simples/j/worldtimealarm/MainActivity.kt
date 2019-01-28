@@ -90,9 +90,11 @@ class MainActivity : AppCompatActivity(){
             Configuration.ORIENTATION_LANDSCAPE -> tab.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, (50 * resources.displayMetrics.density).toInt())
         }
 
-
         fragmentPagerAdapter = FragmentPagerAdapter(supportFragmentManager)
-        fragment_pager.adapter = fragmentPagerAdapter
+        fragment_pager.apply {
+            adapter = fragmentPagerAdapter
+            offscreenPageLimit = 3
+        }
 
         if(savedInstanceState != null) {
             tab.getTabAt(savedInstanceState.getInt(TAB_STATE, 0))?.select()
