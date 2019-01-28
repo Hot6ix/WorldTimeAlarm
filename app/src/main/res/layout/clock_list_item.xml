@@ -25,7 +25,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="start|center_vertical"
-            android:textSize="@dimen/text_small"/>
+            android:textSize="@dimen/text_small"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
             android:id="@+id/time_zone_offset"
@@ -34,7 +36,8 @@
             android:gravity="start|center_vertical"
             android:textSize="@dimen/text_xsmall"
             android:textColor="@color/colorPrimary"
-            app:layout_constraintTop_toBottomOf="@id/time_zone_name_clock"/>
+            app:layout_constraintTop_toBottomOf="@id/time_zone_name_clock"
+            app:layout_constraintStart_toStartOf="parent"/>
 
     </android.support.constraint.ConstraintLayout>
 
@@ -42,6 +45,8 @@
         android:id="@+id/clock_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/time_zone_layout"
         app:layout_constraintEnd_toEndOf="parent">
 
