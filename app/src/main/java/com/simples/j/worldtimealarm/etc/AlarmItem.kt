@@ -9,9 +9,9 @@ import java.util.*
  * Created by j on 26/02/2018.
  *
  */
-data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, var repeat: IntArray, var ringtone: String?, var vibration: LongArray?, var snooze: Long, var label: String?, var on_off: Int, var notiId: Int, var colorTag: Int, var index: Int?) : Parcelable {
+data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, var repeat: IntArray, var ringtone: String?, var vibration: LongArray?, var snooze: Long, var label: String? = null, var on_off: Int, var notiId: Int, var colorTag: Int, var index: Int?, var startDate: String? = null, var endDate: String? = null) : Parcelable {
     override fun toString(): String {
-        return "$id, $timeZone, $timeSet, ${Arrays.toString(repeat)}, $ringtone, $vibration, $snooze, $label, $on_off, $notiId, $colorTag, $index"
+        return "$id, $timeZone, $timeSet, ${Arrays.toString(repeat)}, $ringtone, $vibration, $snooze, $label, $on_off, $notiId, $colorTag, $index, $startDate, $endDate"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -33,7 +33,9 @@ data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, va
             source.readInt(),
             source.readInt(),
             source.readInt(),
-            source.readValue(Int::class.java.classLoader) as Int?
+            source.readValue(Int::class.java.classLoader) as Int?,
+            source.readString(),
+            source.readString()
     )
 
     override fun describeContents() = 0
@@ -51,6 +53,8 @@ data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, va
         writeInt(notiId)
         writeInt(colorTag)
         writeValue(index)
+        writeString(startDate)
+        writeString(endDate)
     }
 
     companion object {

@@ -7,11 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.NotificationCompat
+import android.text.format.DateUtils
 import android.util.Log
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
+import java.lang.NumberFormatException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -65,15 +67,38 @@ class AlarmReceiver: BroadcastReceiver() {
         if(intent.action == AlarmReceiver.ACTION_ALARM) {
             dbCursor = DatabaseCursor(context)
             val repeatValue = context.resources.getIntArray(R.array.day_of_week_values)
-            val repeat = item.repeat.mapIndexed { index, i -> if(i == 1) repeatValue[index] else 0 }.filter { it != 0 }
 
-            if(repeat.isEmpty()) {
+            if(!item.repeat.any { it > 0 }) {
                 // Disable one time alarm
                 item.on_off = 0
                 dbCursor.updateAlarm(item)
             }
             else {
-                AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+                var isExpired = false
+                with(item.endDate) {
+                    try {
+                        val endTimeInMillis = this?.toLong()
+                        if(endTimeInMillis != null) {
+                            val endDate = Calendar.getInstance().apply {
+                                timeInMillis = endTimeInMillis
+                            }
+
+                            val today = Calendar.getInstance()
+                            isExpired = (today.get(Calendar.YEAR) == endDate.get(Calendar.YEAR) && today.get(Calendar.MONTH) == endDate.get(Calendar.MONTH) && today.get(Calendar.DAY_OF_MONTH) == endDate.get(Calendar.DAY_OF_MONTH)) || today.after(endDate)
+                        }
+                    } catch (e: NumberFormatException) {
+                        e.printStackTrace()
+                    }
+                }
+
+                if(isExpired) {
+                    // Alarm has been expired
+                    Log.d(C.TAG, "Alarm expired : ID(${item.notiId+1})")
+                    item.on_off = 0
+                    dbCursor.updateAlarm(item)
+                }
+                else
+                    AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
             }
 
             val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE)

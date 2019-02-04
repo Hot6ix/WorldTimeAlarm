@@ -42,15 +42,30 @@ public class AlarmController {
     public void scheduleAlarm(Context context, AlarmItem item, int type) {
         Calendar calendar = Calendar.getInstance();
         Calendar today = Calendar.getInstance();
+        Calendar start = Calendar.getInstance();
         if(type == TYPE_ALARM) {
+            try {
+                start.setTimeInMillis(Long.parseLong(item.getStartDate()));
+            } catch(NumberFormatException e) {
+                e.printStackTrace();
+            }
+
             calendar.setTime(new Date(Long.valueOf(item.getTimeSet())));
-            calendar.set(Calendar.YEAR, today.get(Calendar.YEAR));
-            calendar.set(Calendar.MONTH, today.get(Calendar.MONTH));
+            if(start.after(today)) {
+                calendar.set(Calendar.YEAR, start.get(Calendar.YEAR));
+                calendar.set(Calendar.MONTH, start.get(Calendar.MONTH));
+                calendar.set(Calendar.DAY_OF_YEAR, start.get(Calendar.DAY_OF_YEAR));
+            }
+            else {
+                calendar.set(Calendar.YEAR, today.get(Calendar.YEAR));
+                calendar.set(Calendar.MONTH, today.get(Calendar.MONTH));
+                calendar.set(Calendar.DAY_OF_YEAR, today.get(Calendar.DAY_OF_YEAR));
+            }
 
             // Check if alarm repeating
             boolean isRepeating = false;
             for(int i : item.getRepeat()) {
-                if(i == 1) {
+                if(i > 0) {
                     isRepeating = true;
                     break;
                 }
@@ -59,6 +74,7 @@ public class AlarmController {
             if(!isRepeating) {
                 // One time alarm
                 // Add a day until calendar time is after from current time
+
                 while(calendar.getTimeInMillis() < System.currentTimeMillis()) {
                     calendar.add(Calendar.DAY_OF_YEAR, 1);
                 }
@@ -74,15 +90,15 @@ public class AlarmController {
                 int[] repeatValues = context.getResources().getIntArray(R.array.day_of_week_values);
                 ArrayList<Integer> repeat = new ArrayList<>();
                 for(int i=0; i<item.getRepeat().length; i++) {
-                    if(item.getRepeat()[i] == 1) repeat.add(repeatValues[i]);
+                    if(item.getRepeat()[i] > 0) repeat.add(repeatValues[i]);
                 }
 
                 // Check if today's date contained in repeat information
-                int currentDay = today.get(Calendar.DAY_OF_WEEK);
+                int todayIndex = today.get(Calendar.DAY_OF_WEEK);
                 int currentDayIndex = 0;
                 boolean isContained = false;
                 for(int i=0; i<repeat.size(); i++) {
-                    if(repeat.get(i) == currentDay) {
+                    if(repeat.get(i) == todayIndex) {
                         currentDayIndex = i;
                         isContained = true;
                         break;
@@ -91,8 +107,6 @@ public class AlarmController {
 
                 if(isContained) {
                     // currentDay is contained in repeat
-                    calendar.set(Calendar.DAY_OF_YEAR, today.get(Calendar.DAY_OF_YEAR));
-
                     if(today.getTimeInMillis() >= calendar.getTimeInMillis()) {
                         // If today is last repeat day, return to first repeat day
                         if(currentDayIndex == repeat.size() - 1) {
@@ -100,21 +114,22 @@ public class AlarmController {
                             calendar.set(Calendar.DAY_OF_WEEK, repeat.get(0));
                         }
                         else {
+                            calendar.set(Calendar.WEEK_OF_MONTH, today.get(Calendar.WEEK_OF_MONTH));
                             calendar.set(Calendar.DAY_OF_WEEK, repeat.get(currentDayIndex + 1));
                         }
                     }
                 }
                 else {
                     // currentDay is not contained in repeat
-                    // Add a week to pass to next week
+                    // Add a week
                     // If today is not after from repeated day back to current week
-                    calendar.set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR));
+                    calendar.set(Calendar.WEEK_OF_YEAR, start.get(Calendar.WEEK_OF_YEAR));
 
-                    if(repeat.get(repeat.size()-1) < currentDay) {
-                        calendar.set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR) + 1);
+                    if(repeat.get(repeat.size()-1) < todayIndex) {
+                        calendar.set(Calendar.WEEK_OF_YEAR, start.get(Calendar.WEEK_OF_YEAR) + 1);
                     }
 
-                    int expectedDay = today.get(Calendar.DAY_OF_WEEK);
+                    int expectedDay = start.get(Calendar.DAY_OF_WEEK);
                     if (expectedDay == Calendar.SATURDAY) expectedDay = 1;
                     while(!repeat.contains(expectedDay)) {
                         expectedDay++;
@@ -127,6 +142,27 @@ public class AlarmController {
             calendar.set(Calendar.SECOND, 0);
         }
         else calendar.add(Calendar.MILLISECOND, (int) item.getSnooze());
+
+        try {
+            Calendar end = Calendar.getInstance();
+            end.setTimeInMillis(Long.valueOf(item.getEndDate()));
+            if(calendar.after(end)) {
+                // This alarm had been expired
+                Log.d(C.TAG, "Alarm had been expired : ID(${item.notiId+1})");
+
+                item.setOn_off(0);
+                new DatabaseCursor(context).updateAlarm(item);
+
+                Intent requestIntent = new Intent(MainActivity.ACTION_UPDATE_SINGLE);
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(AlarmReceiver.ITEM, item);
+                requestIntent.putExtra(AlarmReceiver.OPTIONS, bundle);
+                context.sendBroadcast(requestIntent);
+                return;
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
 
         int notiId = item.getNotiId();
 

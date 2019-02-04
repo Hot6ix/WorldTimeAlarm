@@ -1,6 +1,7 @@
 package com.simples.j.worldtimealarm
 
 import android.app.Activity
+import android.app.DatePickerDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -20,6 +21,7 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
@@ -35,10 +37,12 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.*
 import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
-class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, AlarmOptionAdapter.OnItemClickListener, View.OnClickListener, TimePicker.OnTimeChangedListener, ColorGridAdapter.OnItemClickListener {
+class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, AlarmOptionAdapter.OnItemClickListener, View.OnClickListener, TimePicker.OnTimeChangedListener, ColorGridAdapter.OnItemClickListener, View.OnLongClickListener {
 
     private lateinit var alarmDayAdapter: AlarmDayAdapter
     private lateinit var alarmOptionAdapter: AlarmOptionAdapter
@@ -56,6 +60,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private lateinit var vibrationDialog: ChoiceDialogFragment
     private lateinit var snoozeDialog: AlertDialog
     private lateinit var labelDialog: AlertDialog
+    private lateinit var startDatePickerDialog: DatePickerDialog
+    private lateinit var endDatePickerDialog: DatePickerDialog
     private lateinit var selectedDays: IntArray
 
     private lateinit var vibrator: Vibrator
@@ -72,6 +78,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private var labelEditor: EditText? = null
     private var ringtone: Ringtone? = null
     private var alarm_action = -1
+    private var startDate: Calendar? = null
+    private var endDate: Calendar? = null
+    private val tmpCal = Calendar.getInstance()
+    private val dateFormat = DateFormat.getDateInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +94,13 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         vibratorPatternList = MediaCursor.getVibratorPatterns(applicationContext)
         snoozeTimeList = resources.getStringArray(R.array.snooze_array)
         snoozeValues = resources.getIntArray(R.array.snooze_values).map { it.toLong() }.toTypedArray()
+
+        startDatePickerDialog = DatePickerDialog(this, startDatePickerListener, tmpCal.get(Calendar.YEAR), tmpCal.get(Calendar.MONTH), tmpCal.get(Calendar.DAY_OF_MONTH)).apply {
+            datePicker.minDate = tmpCal.timeInMillis
+        }
+        endDatePickerDialog = DatePickerDialog(this, endDatePickerListener, tmpCal.get(Calendar.YEAR), tmpCal.get(Calendar.MONTH), tmpCal.get(Calendar.DAY_OF_MONTH)).apply {
+            datePicker.minDate = tmpCal.timeInMillis
+        }
 
         if(intent.hasExtra(AlarmReceiver.ITEM)) {
             // Modify
@@ -119,6 +136,31 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 divider2.visibility = View.VISIBLE
             }
             time_zone_offset.text = offset
+
+            existAlarmItem?.startDate?.toLongOrNull().let {
+                if(it != null) {
+                    startDate = Calendar.getInstance().apply {
+                        timeInMillis = existAlarmItem?.startDate?.toLongOrNull() ?: this.timeInMillis
+                        set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY))
+                        set(Calendar.MINUTE, calendar.get(Calendar.MINUTE))
+                    }
+                    startDatePickerDialog.updateDate(startDate!!.get(Calendar.YEAR), startDate!!.get(Calendar.MONTH), startDate!!.get(Calendar.DAY_OF_MONTH))
+                    range_start.text = dateFormat.format(startDate!!.time)
+                }
+            }
+
+            existAlarmItem?.endDate?.toLongOrNull().let {
+                if(it != null) {
+                    endDate = Calendar.getInstance().apply {
+                        timeInMillis = it
+                        set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY))
+                        set(Calendar.MINUTE, calendar.get(Calendar.MINUTE))
+                    }
+                    endDatePickerDialog.updateDate(endDate!!.get(Calendar.YEAR), endDate!!.get(Calendar.MONTH), endDate!!.get(Calendar.DAY_OF_MONTH))
+                    range_end.text = dateFormat.format(endDate!!.time)
+                }
+            }
+
             selectedDays = existAlarmItem!!.repeat
 
             currentRingtone = ringtoneList.find { it.uri.toString() == existAlarmItem!!.ringtone } ?: ringtoneList[1]
@@ -140,7 +182,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             // If arrays don't contain default timezone id, add
             time_zone.text = TimeZone.getDefault().id
             time_zone_offset.text = resources.getString(R.string.current_time_zone)
-            selectedDays = intArrayOf(0, 0, 0, 0, 0, 0, 0)
+            selectedDays = IntArray(7) { 0 }
             optionList = getDefaultOptionList()
             currentTimeZone = TimeZone.getDefault().id
             expectedTime.visibility = View.GONE
@@ -178,6 +220,25 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 divider2.visibility = View.VISIBLE
             }
             time_zone_offset.text = offset
+
+            savedInstanceState.getLong(STATE_START_DATE_KEY).let {
+                if(it > 0) {
+                    startDate = Calendar.getInstance().apply {
+                        timeInMillis = it
+                    }
+                    startDatePickerDialog.updateDate(startDate!!.get(Calendar.YEAR), startDate!!.get(Calendar.MONTH), startDate!!.get(Calendar.DAY_OF_MONTH))
+                    range_start.text = dateFormat.format(startDate?.time)
+                }
+            }
+            savedInstanceState.getLong(STATE_END_DATE_KEY).let {
+                if(it > 0) {
+                    endDate = Calendar.getInstance().apply {
+                        timeInMillis = it
+                    }
+                    endDatePickerDialog.updateDate(endDate!!.get(Calendar.YEAR), endDate!!.get(Calendar.MONTH), endDate!!.get(Calendar.DAY_OF_MONTH))
+                    range_end.text = dateFormat.format(endDate?.time)
+                }
+            }
 
             currentRingtone = savedInstanceState.getSerializable(STATE_RINGTONE_KEY) as RingtoneItem
             currentVibrationPattern = savedInstanceState.getSerializable(STATE_VIBRATION_KEY) as PatternItem
@@ -219,6 +280,12 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         alarm_options.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
         alarm_options.adapter = alarmOptionAdapter
         alarm_options.isNestedScrollingEnabled = false
+
+        // init time range
+        time_range_start.setOnClickListener(this)
+        time_range_start.setOnLongClickListener(this)
+        time_range_end.setOnClickListener(this)
+        time_range_end.setOnLongClickListener(this)
     }
 
     override fun onStop() {
@@ -251,7 +318,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         calendar.set(Calendar.SECOND, 0)
                         expectedTime.visibility = View.VISIBLE
                         divider2.visibility = View.VISIBLE
-                        expectedTime.text = getString(R.string.expected_time,DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time))
+                        expectedTime.text = getString(R.string.expected_time, DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time))
                     }
 
                     time_zone.text = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)
@@ -271,6 +338,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         outState?.putLong(STATE_SNOOZE_KEY, currentSnooze)
         outState?.putString(STATE_LABEL_KEY, currentLabel)
         outState?.putInt(STATE_COLOR_TAG_KEY, currentColorTag)
+        outState?.putLong(STATE_START_DATE_KEY, startDate?.timeInMillis ?: 0)
+        outState?.putLong(STATE_END_DATE_KEY, endDate?.timeInMillis ?: 0)
 
         super.onSaveInstanceState(outState)
     }
@@ -279,11 +348,75 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         calendar.set(Calendar.HOUR_OF_DAY, hour)
         calendar.set(Calendar.MINUTE, minute)
         expectedTime.text = getString(R.string.expected_time,DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time))
+
+        startDate?.set(Calendar.HOUR_OF_DAY, hour)
+        startDate?.set(Calendar.MINUTE, minute)
+        endDate?.set(Calendar.HOUR_OF_DAY, hour)
+        endDate?.set(Calendar.MINUTE, minute)
     }
 
     override fun onClick(view: View) {
         when(view.id) {
             R.id.alarm_save -> {
+                if(startDate != null) {
+                    when {
+//                        startDate!!.timeInMillis < System.currentTimeMillis() -> {
+//                            Toast.makeText(applicationContext, "No1!", Toast.LENGTH_SHORT).show()
+//                            return
+//                        }
+                        !selectedDays.any { it > 0 } -> {
+                            Toast.makeText(applicationContext, "No2!", Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                    }
+                }
+                if(endDate != null) {
+                    when {
+                        endDate!!.timeInMillis < System.currentTimeMillis() -> {
+                            Toast.makeText(applicationContext, "No3!", Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                        !selectedDays.any { it > 0 } -> {
+                            Toast.makeText(applicationContext, "No4!", Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                    }
+                }
+
+                if(startDate != null && endDate != null) {
+                    if(startDate!!.timeInMillis >= endDate!!.timeInMillis) {
+                        Toast.makeText(applicationContext, "Invalid range", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+
+                    // need to check repeat days that alarm makes sense
+                    val difference = endDate!!.timeInMillis - startDate!!.timeInMillis
+                    when(TimeUnit.MILLISECONDS.toDays(difference)) {
+                        in 2..5 -> {
+                            val copyOfRepeat = selectedDays.clone()
+                            val tmpCal = startDate!!.clone() as Calendar
+                            while(!tmpCal.after(endDate)) {
+                                val index = copyOfRepeat.indexOf(tmpCal.get(Calendar.DAY_OF_WEEK))
+                                if(index > -1) copyOfRepeat[index] = 0
+                                tmpCal.add(Calendar.DATE, 1)
+                            }
+
+                            if(copyOfRepeat.any { it > 0 }) {
+                                Toast.makeText(applicationContext, "Alarm is invalid", Toast.LENGTH_SHORT).show()
+                                return
+                            }
+                        }
+                        1L-> {
+                            with(selectedDays.filter { it > 0 }) {
+                                if(this.size == 1 && this[0] == startDate!!.get(Calendar.DAY_OF_WEEK)) {
+                                    Toast.makeText(applicationContext, "Unreachable alarm", Toast.LENGTH_SHORT).show()
+                                    return
+                                }
+                            }
+                        }
+                    }
+                }
+
                 val item = createAlarm()
 
                 if(isNew) {
@@ -310,11 +443,33 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             R.id.time_zone_view -> {
                 startActivityForResult(Intent(this, TimeZoneSearchActivity::class.java), TIME_ZONE_REQUEST_CODE)
             }
+            R.id.time_range_start -> {
+                startDatePickerDialog.show()
+            }
+            R.id.time_range_end -> {
+                endDatePickerDialog.show()
+            }
         }
     }
 
-    override fun onItemClickListener(view: View, position: Int) {
-        if(view.isSelected) selectedDays[position] = 1
+    override fun onLongClick(view: View): Boolean {
+        when(view.id) {
+            R.id.time_range_start -> {
+                startDate = null
+                range_start.text = getString(R.string.range_not_set)
+                Toast.makeText(applicationContext, getString(R.string.range_removed),Toast.LENGTH_SHORT).show()
+            }
+            R.id.time_range_end -> {
+                endDate = null
+                range_end.text = getString(R.string.range_not_set)
+                Toast.makeText(applicationContext, getString(R.string.range_removed),Toast.LENGTH_SHORT).show()
+            }
+        }
+        return true
+    }
+
+    override fun onDayItemSelected(view: View, position: Int) {
+        if(view.isSelected) selectedDays[position] = position + 1
         else selectedDays[position] = 0
     }
 
@@ -547,7 +702,9 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 1,
                 if(isNew) notiId else existAlarmItem!!.notiId,
                 currentColorTag,
-                if(alarm_action == ACTION_NEW) -1 else existAlarmItem!!.index
+                if(alarm_action == ACTION_NEW) -1 else existAlarmItem!!.index,
+                startDate?.timeInMillis.toString(),
+                endDate?.timeInMillis.toString()
         )
     }
 
@@ -584,6 +741,18 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         }
     }
 
+    private val startDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+        if(startDate == null) startDate = calendar.clone() as Calendar
+        startDate?.set(year, month, dayOfMonth)
+        range_start.text = dateFormat.format(startDate?.time)
+    }
+
+    private val endDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+        if(endDate == null) endDate = calendar.clone() as Calendar
+        endDate?.set(year, month, dayOfMonth)
+        range_end.text = dateFormat.format(endDate?.time)
+    }
+
     companion object {
         private const val STATE_TIME_ZONE_KEY = "STATE_TIME_ZONE_KEY"
         private const val STATE_DATE_KEY = "STATE_DATE_KEY"
@@ -593,6 +762,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         private const val STATE_SNOOZE_KEY = "STATE_SNOOZE_KEY"
         private const val STATE_LABEL_KEY = "STATE_LABEL_KEY"
         private const val STATE_COLOR_TAG_KEY = "STATE_COLOR_TAG_KEY"
+        private const val STATE_START_DATE_KEY = "STATE_START_DATE_KEY"
+        private const val STATE_END_DATE_KEY = "STATE_END_DATE_KEY"
 
         private const val TAG_FRAGMENT_RINGTONE = "TAG_FRAGMENT_RINGTONE"
         private const val TAG_FRAGMENT_VIBRATION = "TAG_FRAGMENT_VIBRATION"

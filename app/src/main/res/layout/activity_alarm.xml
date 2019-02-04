@@ -11,7 +11,8 @@
         android:id="@+id/decide_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/blueGray">
+        android:background="@color/blueGray"
+        app:layout_constraintTop_toTopOf="parent">
 
         <Button
             android:id="@+id/alarm_cancel"
@@ -69,7 +70,8 @@
                     android:paddingEnd="@dimen/padding20"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
+                    android:background="?attr/selectableItemBackground"
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <TextView
                         android:id="@+id/time_zone"
@@ -94,23 +96,102 @@
                 </android.support.constraint.ConstraintLayout>
 
                 <View
-                    android:id="@+id/divider0"
+                    android:id="@+id/divider_timezone"
                     style="@style/Divider"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/time_zone_view" />
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/time_range_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/divider_timezone">
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/time_range_start"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/padding10"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/time_range_end">
+
+                        <TextView
+                            android:id="@+id/range_start_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/range_start"
+                            android:textColor="@android:color/black"
+                            android:gravity="center"
+                            app:layout_constraintTop_toTopOf="parent"/>
+
+                        <TextView
+                            android:id="@+id/range_start"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/range_not_set"
+                            android:textColor="@color/colorPrimary"
+                            app:layout_constraintTop_toBottomOf="@id/range_start_title"/>
+
+                    </android.support.constraint.ConstraintLayout>
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/time_range_end"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/padding10"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/time_range_start"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <TextView
+                            android:id="@+id/range_end_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/range_end"
+                            android:textColor="@android:color/black"
+                            android:gravity="center"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/range_end"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/range_not_set"
+                            android:textColor="@color/colorPrimary"
+                            app:layout_constraintTop_toBottomOf="@id/range_end_title"/>
+
+                    </android.support.constraint.ConstraintLayout>
+
+                </android.support.constraint.ConstraintLayout>
+
+                <View
+                    android:id="@+id/divider_range"
+                    style="@style/Divider"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/time_range_layout" />
 
                 <TimePicker
                     android:id="@+id/time_picker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:timePickerMode="spinner"
-                    app:layout_constraintTop_toBottomOf="@id/divider0"
+                    app:layout_constraintTop_toBottomOf="@id/divider_range"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"/>
 
                 <View
-                    android:id="@+id/divider1"
+                    android:id="@+id/divider_expected"
                     style="@style/Divider"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -126,7 +207,7 @@
                     android:paddingEnd="@dimen/padding20"
                     android:gravity="center"
                     android:textColor="@color/colorPrimary"
-                    app:layout_constraintTop_toBottomOf="@id/divider1"
+                    app:layout_constraintTop_toBottomOf="@id/divider_expected"
                     app:layout_constraintStart_toStartOf="@drawable/ic_dashboard_black_24dp"
                     app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -148,7 +229,7 @@
                 app:layout_constraintStart_toStartOf="parent" />
 
             <View
-                android:id="@+id/divider3"
+                android:id="@+id/divider_repeat"
                 style="@style/Divider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -158,7 +239,7 @@
                 android:id="@+id/alarm_options"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/divider3"
+                app:layout_constraintTop_toBottomOf="@id/divider_repeat"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 

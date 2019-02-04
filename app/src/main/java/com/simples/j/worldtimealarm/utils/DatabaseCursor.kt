@@ -32,6 +32,8 @@ class DatabaseCursor(context: Context) {
             put(DatabaseManager.COLUMN_NOTI_ID, item.notiId)
             put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
             put(DatabaseManager.COLUMN_INDEX, item.index)
+            put(DatabaseManager.COLUMN_START_DATE, item.startDate)
+            put(DatabaseManager.COLUMN_END_DATE, item.endDate)
         }
 
         val id = db.insert(DatabaseManager.TABLE_ALARM_LIST, null, contentValues)
@@ -62,8 +64,12 @@ class DatabaseCursor(context: Context) {
         val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
         val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
         val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
+        val startDate = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_START_DATE))
+        val endDate = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_END_DATE))
 
-        val item = AlarmItem(id, timeZone, timeSet, repeat.split(",").map { it.trim().toInt() }.toIntArray(), ringtone, if(vibration == "null") null else vibration.split(",").map { it.trim().toLong() }.toLongArray(), snooze.toLong(), label, switch, notiId, colorTag, index)
+        val repeatValues = repeat.split(",").map { it.trim().toInt() }.toIntArray()
+        val vibrationValues = if(vibration == "null") null else vibration.split(",").map { it.trim().toLong() }.toLongArray()
+        val item = AlarmItem(id, timeZone, timeSet, repeatValues, ringtone, vibrationValues, snooze.toLong(), label, switch, notiId, colorTag, index, startDate, endDate)
         cursor.close()
         db.close()
 
@@ -89,6 +95,8 @@ class DatabaseCursor(context: Context) {
                 val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
                 val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
                 val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
+                val startDate = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_START_DATE))
+                val endDate = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_END_DATE))
 
                 val item = AlarmItem(
                         id,
@@ -102,7 +110,9 @@ class DatabaseCursor(context: Context) {
                         switch,
                         notiId,
                         colorTag,
-                        index)
+                        index,
+                        startDate,
+                        endDate)
                 alarmList.add(item)
             }
         }
@@ -132,6 +142,8 @@ class DatabaseCursor(context: Context) {
                 val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
                 val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
                 val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
+                val startDate = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_START_DATE))
+                val endDate = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_END_DATE))
 
                 val item = AlarmItem(
                         id,
@@ -145,7 +157,9 @@ class DatabaseCursor(context: Context) {
                         switch,
                         notiId,
                         colorTag,
-                        index)
+                        index,
+                        startDate,
+                        endDate)
                 alarmList.add(item)
             }
         }
@@ -177,6 +191,8 @@ class DatabaseCursor(context: Context) {
             put(DatabaseManager.COLUMN_NOTI_ID, item.notiId)
             put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
             put(DatabaseManager.COLUMN_INDEX, item.index)
+            put(DatabaseManager.COLUMN_START_DATE, item.startDate)
+            put(DatabaseManager.COLUMN_END_DATE, item.endDate)
         }
 
         db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(item.notiId.toString()))

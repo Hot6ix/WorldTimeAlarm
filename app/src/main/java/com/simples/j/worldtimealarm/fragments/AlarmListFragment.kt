@@ -280,6 +280,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                     }
 
                     if(item.repeat.any { it == 1 }) {
+                        if(item.on_off == 0) alarmItems[index].on_off= 0
                     }
                     else {
                         // One time alarm

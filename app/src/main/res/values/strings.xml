@@ -53,6 +53,9 @@
     <string name="new_alarm_long">New alarm</string>
     <string name="new_alarm_short">New alarm</string>
     <string name="expected_time">Alarm will set for&#160;%1$s</string>
+    <string name="range_start">Start date</string>
+    <string name="range_end">End date</string>
+    <string name="range_not_set">Not set</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm removed.</string>
@@ -65,6 +68,7 @@
     <string name="alarm_dismissed">Alarm dismissed.</string>
     <string name="volume_is_muted">Alarm volume is muted.</string>
     <string name="exist_timezone">The timezone is already exist.</string>
+    <string name="range_removed">Date has been removed.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>
