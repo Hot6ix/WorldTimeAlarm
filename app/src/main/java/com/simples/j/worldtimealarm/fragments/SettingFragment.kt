@@ -6,12 +6,10 @@ import android.content.Intent
 import android.media.AudioManager
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.preference.SwitchPreference
 import android.provider.Settings
 import android.support.v7.preference.ListPreference
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
-import android.util.Log
 import android.widget.CompoundButton
 import com.simples.j.worldtimealarm.LicenseActivity
 import com.simples.j.worldtimealarm.R
@@ -20,17 +18,13 @@ import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_R
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment.Companion.TIME_ZONE_CHANGED_KEY
 import java.util.*
 
-/**
- * A simple [Fragment] subclass.
- *
- */
 class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChangeListener {
 
     private lateinit var converterTimezone: com.simples.j.worldtimealarm.support.SwitchPreference
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.settings)
-        activity!!.volumeControlStream = AudioManager.STREAM_ALARM
+        activity?.volumeControlStream = AudioManager.STREAM_ALARM
 
         val pName = activity!!.packageManager.getPackageInfo(activity!!.packageName, 0).versionName
 
@@ -44,7 +38,7 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
 
         val converterTimezoneId = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), "")
         converterTimezone.summary =
-                if(converterTimezoneId.isEmpty()) TimeZone.getDefault().id.replace("_", " ")
+                if(converterTimezoneId.isNullOrEmpty()) TimeZone.getDefault().id.replace("_", " ")
                 else converterTimezoneId.replace("_", " ")
 
         converterTimezone.setOnPreferenceClickListener {
@@ -52,7 +46,7 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
                 startActivityForResult(Intent(activity, TimeZoneSearchActivity::class.java), TIME_ZONE_REQUEST_CODE)
             true
         }
-        converterTimezone.setOnPreferenceChangeListener { preference, newValue ->
+        converterTimezone.setOnPreferenceChangeListener { preference, _ ->
             val isEnabled = preference.isEnabled
             if(!isEnabled) converterTimezone.summary = TimeZone.getDefault().id
             true
@@ -92,8 +86,8 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
         PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(resources.getString(R.string.setting_converter_timezone_key), isChecked).apply()
         when(isChecked) {
             true -> {
-                var timezone = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), "").replace(" ", "_")
-                if(timezone.isEmpty()) timezone = TimeZone.getDefault().id
+                var timezone = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), "")?.replace(" ", "_")
+                if(timezone.isNullOrEmpty()) timezone = TimeZone.getDefault().id
 
                 val intent = Intent(WorldClockFragment.ACTION_TIME_ZONE_CHANGED)
                 intent.putExtra(TIME_ZONE_CHANGED_KEY, timezone)
@@ -119,13 +113,12 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
             if (preference is ListPreference) {
                 // For list preferences, look up the correct display value in
                 // the preference's 'entries' list.
-                val listPreference = preference
-                val index = listPreference.findIndexOfValue(stringValue)
+                val index = preference.findIndexOfValue(stringValue)
 
                 // Set the summary to reflect the new value.
                 preference.setSummary(
                         if (index >= 0)
-                            listPreference.entries[index]
+                            preference.entries[index]
                         else
                             null)
 
