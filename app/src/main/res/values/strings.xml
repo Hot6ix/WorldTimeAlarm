@@ -3,7 +3,7 @@
     <string name="main_label">Alarm</string>
     <string name="action_settings">Settings</string>
     <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
-    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/6060648491</string>
+    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/2970704508</string>
     <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">Current time zone</string>
     <string name="set_time_zone">Set time zone</string>
@@ -53,6 +53,12 @@
     <string name="new_alarm_long">New alarm</string>
     <string name="new_alarm_short">New alarm</string>
     <string name="expected_time">Alarm will set for&#160;%1$s</string>
+    <string name="range_start">Start date</string>
+    <string name="range_end">End date</string>
+    <string name="range_not_set">Not set</string>
+    <string name="range_text">%1$s ~ %2$s</string>
+    <string name="range_until">Until %1$s</string>
+    <string name="range_begin">Start on %1$s</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm removed.</string>
@@ -64,7 +70,13 @@
     <string name="alarm_on_repeat_every">Alarm set for everyday at %1$s.</string>
     <string name="alarm_dismissed">Alarm dismissed.</string>
     <string name="volume_is_muted">Alarm volume is muted.</string>
-    <string name="exist_timezone">The timezone is already exist.</string>
+    <string name="exist_timezone">Selected timezone already in list.</string>
+    <string name="start_date_removed">Start date removed.</string>
+    <string name="end_date_removed">End date removed.</string>
+    <string name="end_date_earlier_than_today">End date cannot be earlier than today.</string>
+    <string name="end_date_earlier_than_start_date">End date cannot be earlier than Start date.</string>
+    <string name="must_check_repeat">Must check repeat day at least one.</string>
+    <string name="invalid_repeat">Must check valid repeat if range is less than a week.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>

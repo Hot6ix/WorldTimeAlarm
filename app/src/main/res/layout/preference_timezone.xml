@@ -12,6 +12,7 @@
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="@android:style/TextAppearance"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -22,7 +23,8 @@
         android:ellipsize="marquee"
         android:textColor="?android:attr/textColorSecondary"
         android:textAppearance="@android:style/TextAppearance.Small"
-        app:layout_constraintTop_toBottomOf="@android:id/title"/>
+        app:layout_constraintTop_toBottomOf="@android:id/title"
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <Switch
         android:id="@+id/pref_switch"

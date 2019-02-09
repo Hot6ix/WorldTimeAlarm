@@ -77,6 +77,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             clear()
             Log.d(C.TAG, "Alarm muted : ID(${item.notiId+1})")
         }
+
         if(sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0").toInt() != 0) {
             timerHandler.postDelayed(handlerRunnable, sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0").toLong())
         }
@@ -112,10 +113,11 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .setUsage(AudioAttributes.USAGE_ALARM)
             if(ringtoneUri != null && ringtoneUri.isNotEmpty() && ringtoneUri != "null") {
-                player = MediaPlayer()
-                player?.setDataSource(applicationContext, Uri.parse(item.ringtone))
-                player?.setAudioAttributes(audioAttrs.build())
-                player?.isLooping = true
+                player = MediaPlayer().apply {
+                    setDataSource(applicationContext, Uri.parse(item.ringtone))
+                    setAudioAttributes(audioAttrs.build())
+                    isLooping = true
+                }
                 player?.prepare()
                 player?.start()
 

@@ -1,14 +1,9 @@
 package com.simples.j.worldtimealarm.utils
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.media.RingtoneManager
-import android.os.Bundle
-import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.R
-import com.simples.j.worldtimealarm.WakeUpActivity
-import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import java.util.*

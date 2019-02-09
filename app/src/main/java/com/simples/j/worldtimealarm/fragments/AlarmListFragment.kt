@@ -83,9 +83,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         alarmList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
 
         swipeController = ListSwipeController()
+        swipeController.setOnSwipeListener(this)
+
         swipeHelper = ItemTouchHelper(swipeController)
         swipeHelper.attachToRecyclerView(alarmList)
-        swipeController.setOnSwipeListener(this)
         setEmptyMessage()
 
         // If alarm volume is muted, show snackBar
@@ -109,12 +110,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         intentFilter.addAction(ACTION_UPDATE_ALL)
         intentFilter.addAction(ACTION_UPDATE_SINGLE)
         context!!.registerReceiver(updateRequestReceiver, intentFilter)
-//        val intent =Intent(this, WakeUpActivity::class.java)
-//        val bundle = Bundle()
-////        bundle.putParcelable(AlarmReceiver.ITEM, AlarmItem(99, "America/Argentina/ComodRivadavia", Calendar.getInstance().time.time.toString(), intArrayOf(0,0,0,0,0,0,0), null, null, 3000, null, 1, 78788))
-//        bundle.putParcelable(AlarmReceiver.ITEM, AlarmItem(99, "Asia/Seoul", Calendar.getInstance().time.time.toString(), intArrayOf(0,0,0,0,0,0,0), null, null, 3000, null, 1, 78788))
-//        intent.putExtra(AlarmReceiver.OPTIONS, bundle)
-//        startActivity(intent)
     }
 
     override fun onResume() {
@@ -233,11 +228,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         val calendar = Calendar.getInstance()
         calendar.time = Date(item.timeSet.toLong())
 
-        if(item.repeat.any { it == 1 }) {
-
+        if(item.repeat.any { it > 0 }) {
             val dayArray = resources.getStringArray(R.array.day_of_week_full)
             val repeatArray = item.repeat.mapIndexed { index, i ->
-                if(i == 1) dayArray[index] else null
+                if(i > 0) dayArray[index] else null
             }.filter { it != null }
             val days = if(repeatArray.size == 7)
                 getString(R.string.everyday)
@@ -273,18 +267,24 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 ACTION_UPDATE_SINGLE -> {
                     val bundle = intent.getBundleExtra(AlarmReceiver.OPTIONS)
                     val item = bundle.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
-                    var index = 0
+                    var index = -1
                     alarmItems.forEachIndexed { i, it ->
                         if(it.notiId == item.notiId) index = i
                     }
 
-                    if(item.repeat.any { it == 1 }) {
+                    if(index > -1) {
+                        if(item.repeat.any { it > 0 }) {
+                            if(item.on_off == 0) alarmItems[index].on_off= 0
+                        }
+                        else {
+                            // One time alarm
+                            alarmItems[index].on_off = 0
+                        }
+                        alarmListAdapter.notifyItemChanged(index)
                     }
                     else {
-                        // One time alarm
-                        alarmItems[index].on_off = 0
+                        // wrong request
                     }
-                    alarmListAdapter.notifyItemChanged(index)
                 }
                 ACTION_UPDATE_ALL -> {
                     alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())

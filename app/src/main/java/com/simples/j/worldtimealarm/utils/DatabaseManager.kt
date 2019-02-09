@@ -22,7 +22,9 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
                 "$COLUMN_ON_OFF INTEGER," +
                 "$COLUMN_NOTI_ID INTEGER," +
                 "$COLUMN_COLOR_TAG INTEGER," +
-                "$COLUMN_INDEX INTEGER);")
+                "$COLUMN_INDEX INTEGER," +
+                "$COLUMN_START_DATE INTEGER," +
+                "$COLUMN_END_DATE INTEGER);")
 
         db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_TIME_ZONE TEXT, " +
@@ -40,10 +42,14 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
             db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_INDEX INTEGER")
             db.execSQL("UPDATE $TABLE_ALARM_LIST SET $COLUMN_INDEX = $COLUMN_ID")
         }
+        if(old < 4) {
+            db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_START_DATE INTEGER")
+            db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_END_DATE INTEGER")
+        }
     }
 
     companion object {
-        const val VERSION = 3
+        const val VERSION = 4
         const val DB_NAME = "alarm.db"
 
         const val TABLE_ALARM_LIST = "AlarmList"
@@ -60,6 +66,8 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
         const val COLUMN_NOTI_ID = "notiId"
         const val COLUMN_COLOR_TAG = "colorTag"
         const val COLUMN_INDEX = "dorder"
+        const val COLUMN_START_DATE = "start_date"
+        const val COLUMN_END_DATE = "end_date"
     }
 
 }

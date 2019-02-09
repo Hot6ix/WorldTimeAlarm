@@ -37,7 +37,7 @@ class AlarmDayAdapter(private var selectedDays: IntArray, private var context: C
         holder.day.isSelected = selectedDays[position] != 0
         holder.day.setOnClickListener {
             it.isSelected = !it.isSelected
-            onItemClickListener.onItemClickListener(it, position)
+            onItemClickListener.onDayItemSelected(it, position)
         }
     }
 
@@ -50,6 +50,6 @@ class AlarmDayAdapter(private var selectedDays: IntArray, private var context: C
     }
 
     interface OnItemClickListener {
-        fun onItemClickListener(view: View, position: Int)
+        fun onDayItemSelected(view: View, position: Int)
     }
 }
