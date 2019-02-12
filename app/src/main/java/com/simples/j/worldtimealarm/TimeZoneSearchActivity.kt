@@ -37,7 +37,8 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
 
         if(savedInstanceState != null) {
             query = savedInstanceState.getString(STATE_QUERY)
-            resultArray.addAll(savedInstanceState.getStringArrayList(STATE_RESULT))
+            val list = savedInstanceState.getStringArrayList(STATE_RESULT) ?: ArrayList()
+            resultArray.addAll(list)
         }
 
         timeZoneArray = TimeZone.getAvailableIDs().map { it.replace("_", " ") }.toMutableList()

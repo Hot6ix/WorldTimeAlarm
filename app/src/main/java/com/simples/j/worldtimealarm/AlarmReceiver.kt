@@ -26,6 +26,10 @@ class AlarmReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
         val item = option.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+        if(item == null) {
+            Log.d(C.TAG, "AlarmReceiver failed to get AlarmItem")
+            return
+        }
 //        Log.d(C.TAG, "Alarm triggered : Info(${option.getParcelable<AlarmItem>(ITEM)})")
         Log.d(C.TAG, "Alarm triggered : ID(${item.notiId+1})")
 
@@ -81,7 +85,7 @@ class AlarmReceiver: BroadcastReceiver() {
                 var isExpired = false
                 with(item.endDate) {
                     try {
-                        val endTimeInMillis = this?.toLong()
+                        val endTimeInMillis = this
                         if(endTimeInMillis != null) {
                             val endDate = Calendar.getInstance().apply {
                                 timeInMillis = endTimeInMillis

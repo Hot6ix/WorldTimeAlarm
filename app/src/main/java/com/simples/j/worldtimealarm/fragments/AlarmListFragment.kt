@@ -267,6 +267,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 ACTION_UPDATE_SINGLE -> {
                     val bundle = intent.getBundleExtra(AlarmReceiver.OPTIONS)
                     val item = bundle.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+                    if(item == null) {
+                        Log.d(C.TAG, "AlarmItem is null")
+                        return
+                    }
                     var index = -1
                     alarmItems.forEachIndexed { i, it ->
                         if(it.notiId == item.notiId) index = i

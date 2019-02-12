@@ -1,9 +1,9 @@
 package com.simples.j.worldtimealarm.fragments
 
 import android.app.Dialog
-import android.app.DialogFragment
 import android.content.DialogInterface
 import android.os.Bundle
+import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import com.simples.j.worldtimealarm.R
@@ -21,21 +21,21 @@ class ChoiceDialogFragment: DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         Log.d(C.TAG, "Dialog created")
-        val array = arguments.getStringArray(CONTENT_ARRAY)
+        val array = arguments?.getStringArray(CONTENT_ARRAY)
         var selected = lastChoice
 
-        val dialog = AlertDialog.Builder(activity)
-                .setTitle(arguments.getString(CONTENT_TITLE))
-                .setSingleChoiceItems(array, selected, { dialogInterface, index ->
+        val dialog = AlertDialog.Builder(context!!)
+                .setTitle(arguments?.getString(CONTENT_TITLE))
+                .setSingleChoiceItems(array, selected) { dialogInterface, index ->
                     listener.onItemSelected(dialogInterface, index)
                     selected = lastChoice
-                })
-                .setNegativeButton(R.string.cancel, { dialogInterface, index ->
+                }
+                .setNegativeButton(R.string.cancel) { dialogInterface, index ->
                     listener.onNegativeButtonClickListener(dialogInterface, index)
-                })
-                .setPositiveButton(R.string.ok, { dialogInterface, index ->
+                }
+                .setPositiveButton(R.string.ok) { dialogInterface, index ->
                     listener.onPositiveButtonClickListener(dialogInterface, index)
-                })
+                }
         return dialog.create()
     }
 

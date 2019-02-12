@@ -489,10 +489,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     override fun onItemClick(view: View, position: Int, item: OptionItem) {
         when(position) {
             0 -> { // Ringtone
-                ringtoneDialog.show(fragmentManager, TAG_FRAGMENT_RINGTONE)
+                ringtoneDialog.show(supportFragmentManager, TAG_FRAGMENT_RINGTONE)
             }
             1 -> { // Vibration
-                vibrationDialog.show(fragmentManager, TAG_FRAGMENT_VIBRATION)
+                vibrationDialog.show(supportFragmentManager, TAG_FRAGMENT_VIBRATION)
             }
             2 -> { // Snoose
                 snoozeDialog.show()
@@ -530,7 +530,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         val array = ringtoneList.map { it.title }.toTypedArray()
         var selected = ringtoneList.indexOf(currentRingtone)
 
-        var dialog = fragmentManager.findFragmentByTag(TAG_FRAGMENT_RINGTONE) as? ChoiceDialogFragment
+        var dialog = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_RINGTONE) as? ChoiceDialogFragment
         if(dialog == null) dialog = ChoiceDialogFragment.newInstance(resources.getString(R.string.select_ringtone), array)
         dialog.setLastChoice(selected)
         dialog.setOnDialogEventListener(object: OnDialogEventListener {
@@ -572,7 +572,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         val array = vibratorPatternList.map { it.name }.toTypedArray()
         var selected = vibratorPatternList.indexOf(currentVibrationPattern)
 
-        var dialog = fragmentManager.findFragmentByTag(TAG_FRAGMENT_VIBRATION) as? ChoiceDialogFragment
+        var dialog = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_VIBRATION) as? ChoiceDialogFragment
         if(dialog == null) dialog = ChoiceDialogFragment.newInstance(resources.getString(R.string.select_vibration), array)
         dialog.setLastChoice(selected)
         dialog.setOnDialogEventListener(object: OnDialogEventListener {

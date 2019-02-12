@@ -25,6 +25,7 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ImageView
 import android.widget.Toast
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
@@ -58,6 +59,11 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wake_up)
 
+        // fix floating action button bugs on version 28
+        interaction_button.scaleType = ImageView.ScaleType.CENTER
+        snooze.scaleType = ImageView.ScaleType.CENTER
+        dismiss.scaleType = ImageView.ScaleType.CENTER
+
         MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
         adViewWakeUp.loadAd(AdRequest.Builder().build())
 
@@ -78,8 +84,8 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             Log.d(C.TAG, "Alarm muted : ID(${item.notiId+1})")
         }
 
-        if(sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0").toInt() != 0) {
-            timerHandler.postDelayed(handlerRunnable, sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0").toLong())
+        if(sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0")?.toInt() != 0) {
+            timerHandler.postDelayed(handlerRunnable, sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0")!!.toLong())
         }
 
         wakeLocker = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, C.WAKE_TAG)
@@ -89,8 +95,8 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
         if(intent.extras != null) {
             val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
-            item = option.getParcelable(AlarmReceiver.ITEM)
-//            Log.d(C.TAG, "Alarm alert : Info($item)")
+            item = option.getParcelable(AlarmReceiver.ITEM)!!
+
             Log.d(C.TAG, "Alarm alerted : ID(${item.notiId+1})")
 
             if(item.colorTag != 0) {
