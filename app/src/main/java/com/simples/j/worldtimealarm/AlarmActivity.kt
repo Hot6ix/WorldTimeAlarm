@@ -60,6 +60,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private lateinit var vibrationDialog: ChoiceDialogFragment
     private lateinit var snoozeDialog: AlertDialog
     private lateinit var labelDialog: AlertDialog
+    private lateinit var colorTagDialog: AlertDialog
     private lateinit var startDatePickerDialog: DatePickerDialog
     private lateinit var endDatePickerDialog: DatePickerDialog
     private lateinit var selectedDays: IntArray
@@ -265,6 +266,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         vibrationDialog = getVibrationDialog()
         snoozeDialog = getSnoozeDialog()
         labelDialog = getLabelDialog()
+        colorTagDialog = getColorTagChoiceDialog()
 
         time_picker.setOnTimeChangedListener(this)
         time_zone_view.setOnClickListener(this)
@@ -502,20 +504,20 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     override fun onItemClick(view: View, position: Int, item: OptionItem) {
         when(position) {
             0 -> { // Ringtone
-                ringtoneDialog.show(supportFragmentManager, TAG_FRAGMENT_RINGTONE)
+                if(!ringtoneDialog.isAdded) ringtoneDialog.show(supportFragmentManager, TAG_FRAGMENT_RINGTONE)
             }
             1 -> { // Vibration
-                vibrationDialog.show(supportFragmentManager, TAG_FRAGMENT_VIBRATION)
+                if(!vibrationDialog.isAdded) vibrationDialog.show(supportFragmentManager, TAG_FRAGMENT_VIBRATION)
             }
             2 -> { // Snoose
-                snoozeDialog.show()
+                if(!snoozeDialog.isShowing) snoozeDialog.show()
             }
             3 -> { // Label
                 labelDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-                labelDialog.show()
+                if(!labelDialog.isShowing) labelDialog.show()
             }
             4 -> { // Color Tag
-                getColorTagChoiceDialog().show()
+                if(!colorTagDialog.isShowing) colorTagDialog.show()
             }
         }
     }
