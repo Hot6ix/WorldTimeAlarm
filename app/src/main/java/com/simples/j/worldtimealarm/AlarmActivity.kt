@@ -21,6 +21,7 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
@@ -36,6 +37,7 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.*
 import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -307,12 +309,23 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     currentTimeZone = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)
                     val formattedTimeZone = currentTimeZone.replace(" ", "_")
 
-                    calendar.timeZone = TimeZone.getTimeZone(formattedTimeZone)
-                    startDate?.timeZone = TimeZone.getTimeZone(formattedTimeZone)
-                    endDate?.timeZone = TimeZone.getTimeZone(formattedTimeZone)
-                    endDatePickerDialog.datePicker.minDate = calendar.timeInMillis
+                    with(TimeZone.getTimeZone(formattedTimeZone)) {
+                        calendar.timeZone = this
+                        startDate?.timeZone = this
+                        endDate?.timeZone = this
+                        endDatePickerDialog.datePicker.minDate = calendar.timeInMillis
+                        dateFormat.timeZone = this
+                    }
 
                     val difference = TimeZone.getTimeZone(formattedTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+
+//                    val tmpCal = Calendar.getInstance().apply {
+//                        add(Calendar.MILLISECOND, difference)
+//                    }
+//                    if(tmpCal.after(startDate)) startDatePickerDialog.updateDate(tmpCal.get(Calendar.YEAR), tmpCal.get(Calendar.MONTH), tmpCal.get(Calendar.DAY_OF_MONTH))
+//
+//                    startDatePickerDialog.datePicker.minDate = 0
+//                    startDatePickerDialog.datePicker.minDate = tmpCal.timeInMillis
 
                     val offset: String
                     if(TimeZone.getDefault() == TimeZone.getTimeZone(formattedTimeZone)) {
@@ -417,7 +430,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                                 return
                             }
                             with(selectedDays.filter { it > 0 }) {
-                                if(this.size == 1 && this[0] == startDate!!.get(Calendar.DAY_OF_WEEK) && startDate!!.timeInMillis <= today.timeInMillis) {
+                                if(this.size == 1 && this[0] == startDate?.get(Calendar.DAY_OF_WEEK) && startDate!!.timeInMillis <= today.timeInMillis) {
                                     Toast.makeText(applicationContext, getString(R.string.invalid_repeat), Toast.LENGTH_SHORT).show()
                                     return
                                 }
