@@ -44,7 +44,9 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         timeZoneArray = TimeZone.getAvailableIDs().map { it.replace("_", " ") }.toMutableList()
 
         // If list does not have system timezone, add it temporarily
-        if(!timeZoneArray.contains(TimeZone.getDefault().id)) timeZoneArray.add(TimeZone.getDefault().id)
+        with(TimeZone.getDefault().id.replace("_", " ")) {
+            if(!timeZoneArray.contains(this)) timeZoneArray.add(this)
+        }
 
         timeZoneAdapter = TimeZoneAdapter(resultArray, applicationContext)
         timeZoneAdapter.setOnItemClickListener(this)

@@ -21,7 +21,6 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
@@ -37,7 +36,6 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.*
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -111,9 +109,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             alarmAction = ACTION_MODIFY
             isNew = false
             existAlarmItem = intent.getParcelableExtra(AlarmReceiver.ITEM)
-            currentTimeZone = existAlarmItem!!.timeZone
-            val formattedTimeZone = existAlarmItem!!.timeZone.replace(" ", "_")
-            calendar = Calendar.getInstance(TimeZone.getTimeZone(formattedTimeZone)).apply {
+            currentTimeZone = existAlarmItem!!.timeZone.replace(" ", "_")
+            dateFormat.timeZone = TimeZone.getTimeZone(currentTimeZone)
+
+            calendar = Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone)).apply {
                 timeInMillis = existAlarmItem!!.timeSet.toLong()
                 set(Calendar.SECOND, 0)
             }
@@ -127,10 +126,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 time_picker.minute = calendar.get(Calendar.MINUTE)
             }
 
-            time_zone.text = existAlarmItem!!.timeZone
-            val difference = TimeZone.getTimeZone(formattedTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+            time_zone.text = existAlarmItem!!.timeZone.replace("_", " ")
+            val difference = TimeZone.getTimeZone(currentTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
             var offset = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
-            if(TimeZone.getDefault() == TimeZone.getTimeZone(formattedTimeZone)) {
+            if(TimeZone.getDefault() == TimeZone.getTimeZone(currentTimeZone)) {
                 offset = resources.getString(R.string.current_time_zone)
                 expectedTime.visibility = View.GONE
                 divider2.visibility = View.GONE
@@ -142,26 +141,35 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             }
             time_zone_offset.text = offset
 
+            val tmpCal = Calendar.getInstance().apply {
+                add(Calendar.MILLISECOND, difference)
+            }
+
             existAlarmItem?.startDate?.let {
                 if(it > 0) {
-                    startDate = Calendar.getInstance(TimeZone.getTimeZone(formattedTimeZone)).apply {
+                    startDate = Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone)).apply {
                         timeInMillis = it
                         set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY))
                         set(Calendar.MINUTE, calendar.get(Calendar.MINUTE))
                     }
                     startDatePickerDialog.updateDate(startDate!!.get(Calendar.YEAR), startDate!!.get(Calendar.MONTH), startDate!!.get(Calendar.DAY_OF_MONTH))
+                    startDatePickerDialog.datePicker.minDate = tmpCal.timeInMillis
+
                     range_start.text = dateFormat.format(startDate!!.time)
                 }
             }
 
             existAlarmItem?.endDate?.let {
                 if(it > 0) {
-                    endDate = Calendar.getInstance(TimeZone.getTimeZone(formattedTimeZone)).apply {
+                    endDate = Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone)).apply {
                         timeInMillis = it
                         set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY))
                         set(Calendar.MINUTE, calendar.get(Calendar.MINUTE))
                     }
                     endDatePickerDialog.updateDate(endDate!!.get(Calendar.YEAR), endDate!!.get(Calendar.MONTH), endDate!!.get(Calendar.DAY_OF_MONTH))
+                    tmpCal.add(Calendar.DAY_OF_YEAR, 1)
+                    endDatePickerDialog.datePicker.minDate = tmpCal.timeInMillis
+
                     range_end.text = dateFormat.format(endDate!!.time)
                 }
             }
@@ -187,7 +195,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 set(Calendar.SECOND, 0)
             }
             // If arrays don't contain default timezone id, add
-            time_zone.text = TimeZone.getDefault().id
+            time_zone.text = TimeZone.getDefault().id.replace("_", " ")
             time_zone_offset.text = resources.getString(R.string.current_time_zone)
             selectedDays = IntArray(7) { 0 }
             optionList = getDefaultOptionList()
@@ -199,8 +207,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         // Restore data
         if(savedInstanceState != null) {
             currentTimeZone = savedInstanceState.getString(STATE_TIME_ZONE_KEY) ?: TimeZone.getDefault().id
-            val formattedTimeZone = currentTimeZone.replace(" ", "_")
-            calendar = Calendar.getInstance(TimeZone.getTimeZone(formattedTimeZone))
+            calendar = Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone))
             calendar.time = savedInstanceState.getSerializable(STATE_DATE_KEY) as Date
             selectedDays = savedInstanceState.getIntArray(STATE_REPEAT_KEY) ?: IntArray(7) { 0 }
 
@@ -213,10 +220,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 time_picker.minute = calendar.get(Calendar.MINUTE)
             }
 
-            time_zone.text = currentTimeZone
-            val difference = TimeZone.getTimeZone(formattedTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+            time_zone.text = currentTimeZone.replace("_", " ")
+            val difference = TimeZone.getTimeZone(currentTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
             var offset = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
-            if(TimeZone.getDefault() == TimeZone.getTimeZone(formattedTimeZone)) {
+            if(TimeZone.getDefault() == TimeZone.getTimeZone(currentTimeZone)) {
                 offset = resources.getString(R.string.current_time_zone)
                 expectedTime.visibility = View.GONE
                 divider2.visibility = View.GONE
@@ -230,7 +237,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
             savedInstanceState.getLong(STATE_START_DATE_KEY).let {
                 if(it > 0) {
-                    startDate = Calendar.getInstance(TimeZone.getTimeZone(formattedTimeZone)).apply {
+//                    TimeZone.getTimeZone(currentTimeZone)
+                    startDate = Calendar.getInstance().apply {
                         timeInMillis = it
                     }
                     startDatePickerDialog.updateDate(startDate!!.get(Calendar.YEAR), startDate!!.get(Calendar.MONTH), startDate!!.get(Calendar.DAY_OF_MONTH))
@@ -239,7 +247,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             }
             savedInstanceState.getLong(STATE_END_DATE_KEY).let {
                 if(it > 0) {
-                    endDate = Calendar.getInstance(TimeZone.getTimeZone(formattedTimeZone)).apply {
+//                    TimeZone.getTimeZone(currentTimeZone)
+                    endDate = Calendar.getInstance().apply {
                         timeInMillis = it
                     }
                     endDatePickerDialog.updateDate(endDate!!.get(Calendar.YEAR), endDate!!.get(Calendar.MONTH), endDate!!.get(Calendar.DAY_OF_MONTH))
@@ -308,29 +317,45 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         when {
             requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    currentTimeZone = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)
-                    val formattedTimeZone = currentTimeZone.replace(" ", "_")
+                    currentTimeZone = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID).replace(" ", "_")
 
-                    with(TimeZone.getTimeZone(formattedTimeZone)) {
+                    with(TimeZone.getTimeZone(currentTimeZone)) {
                         calendar.timeZone = this
-                        startDate?.timeZone = this
-                        endDate?.timeZone = this
+//                        startDate?.timeZone = this
+//                        endDate?.timeZone = this
                         endDatePickerDialog.datePicker.minDate = calendar.timeInMillis
                         dateFormat.timeZone = this
                     }
 
-                    val difference = TimeZone.getTimeZone(formattedTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+                    val difference = TimeZone.getTimeZone(currentTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
 
-//                    val tmpCal = Calendar.getInstance().apply {
-//                        add(Calendar.MILLISECOND, difference)
-//                    }
-//                    if(tmpCal.after(startDate)) startDatePickerDialog.updateDate(tmpCal.get(Calendar.YEAR), tmpCal.get(Calendar.MONTH), tmpCal.get(Calendar.DAY_OF_MONTH))
-//
-//                    startDatePickerDialog.datePicker.minDate = 0
-//                    startDatePickerDialog.datePicker.minDate = tmpCal.timeInMillis
+                    val tmpCal = Calendar.getInstance().apply {
+                        add(Calendar.MILLISECOND, difference)
+                    }
+                    if(tmpCal.after(startDate)) startDatePickerDialog.updateDate(tmpCal.get(Calendar.YEAR), tmpCal.get(Calendar.MONTH), tmpCal.get(Calendar.DAY_OF_MONTH))
+
+                    // time can be yesterday or tomorrow, so apply new limit
+                    startDatePickerDialog = DatePickerDialog(this, startDatePickerListener, tmpCal.get(Calendar.YEAR), tmpCal.get(Calendar.MONTH), tmpCal.get(Calendar.DAY_OF_MONTH)).apply {
+                        datePicker.minDate = tmpCal.timeInMillis
+
+                        startDate?.let {
+                            this.updateDate(it.get(Calendar.YEAR), it.get(Calendar.MONTH), it.get(Calendar.DAY_OF_MONTH))
+                        }
+                    }
+
+                    val tmpNext = (tmpCal.clone() as Calendar).apply {
+                        add(Calendar.DAY_OF_YEAR, 1)
+                    }
+                    endDatePickerDialog = DatePickerDialog(this, endDatePickerListener, tmpNext.get(Calendar.YEAR), tmpNext.get(Calendar.MONTH), tmpNext.get(Calendar.DAY_OF_MONTH)).apply {
+                        datePicker.minDate = tmpNext.timeInMillis
+
+                        endDate?.let {
+                            this.updateDate(it.get(Calendar.YEAR), it.get(Calendar.MONTH), it.get(Calendar.DAY_OF_MONTH))
+                        }
+                    }
 
                     val offset: String
-                    if(TimeZone.getDefault() == TimeZone.getTimeZone(formattedTimeZone)) {
+                    if(TimeZone.getDefault() == TimeZone.getTimeZone(currentTimeZone)) {
                         offset = resources.getString(R.string.current_time_zone)
                         expectedTime.visibility = View.GONE
                         divider2.visibility = View.GONE

@@ -52,7 +52,7 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
         }
         else {
             val start = try {
-                Calendar.getInstance().apply {
+                Calendar.getInstance(TimeZone.getTimeZone(item.timeZone)).apply {
                     item.startDate?.let {
                         if(it > 0) timeInMillis = it
                         else throw NumberFormatException("Invalid value for calendar")
