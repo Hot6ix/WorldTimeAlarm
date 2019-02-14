@@ -48,7 +48,7 @@ public class AlarmController {
         Calendar end = Calendar.getInstance();
 
         if(type == TYPE_ALARM) {
-            if(item.getEndDate() != null) {
+            if(item.getEndDate() != null && item.getEndDate() > 0) {
                 end.setTimeInMillis(item.getEndDate());
 
                 if(end.before(today)) {
@@ -59,7 +59,7 @@ public class AlarmController {
             }
             else end = null;
 
-            if(item.getStartDate() != null)
+            if(item.getStartDate() != null && item.getStartDate() > 0)
                 start.setTimeInMillis(item.getStartDate());
 
             calendar.setTime(new Date(Long.valueOf(item.getTimeSet())));
@@ -131,7 +131,8 @@ public class AlarmController {
                     // currentDay is not contained in repeat
                     // If today is not after from repeated day back to current week
                     if(repeat.get(repeat.size()-1) < startIndex) {
-                        calendar.set(Calendar.WEEK_OF_YEAR, start.get(Calendar.WEEK_OF_YEAR) + 1);
+                        calendar.set(Calendar.WEEK_OF_YEAR, start.get(Calendar.WEEK_OF_YEAR));
+                        calendar.add(Calendar.WEEK_OF_YEAR, 1);
                     }
 
                     int expectedDay = start.get(Calendar.DAY_OF_WEEK);
@@ -141,7 +142,10 @@ public class AlarmController {
                         if(expectedDay > 7) expectedDay = 1;
                     }
                     calendar.set(Calendar.DAY_OF_WEEK, expectedDay);
-                    if(calendar.before(today)) calendar.add(Calendar.WEEK_OF_MONTH, 1);
+
+                    while(calendar.before(today)) {
+                        calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                    }
                 }
             }
 

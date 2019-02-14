@@ -86,7 +86,7 @@ class AlarmReceiver: BroadcastReceiver() {
                 with(item.endDate) {
                     try {
                         val endTimeInMillis = this
-                        if(endTimeInMillis != null) {
+                        if(endTimeInMillis != null && endTimeInMillis > 0) {
                             val endDate = Calendar.getInstance().apply {
                                 timeInMillis = endTimeInMillis
                             }
