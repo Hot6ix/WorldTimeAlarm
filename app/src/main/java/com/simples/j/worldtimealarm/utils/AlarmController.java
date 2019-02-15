@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import kotlin.jvm.Throws;
-
 /**
  * Created by j on 28/02/2018.
  *
@@ -44,7 +42,7 @@ public class AlarmController {
     public void scheduleAlarm(Context context, AlarmItem item, int type) {
         Calendar calendar = Calendar.getInstance();
         Calendar today = Calendar.getInstance();
-        Calendar start = Calendar.getInstance();
+        Calendar start = (Calendar) today.clone();
         Calendar end = Calendar.getInstance();
 
         if(type == TYPE_ALARM) {
@@ -64,7 +62,7 @@ public class AlarmController {
 
             calendar.setTime(new Date(Long.valueOf(item.getTimeSet())));
             if(start.after(today)) {
-                calendar.set(start.get(Calendar.YEAR), start.get(Calendar.MONTH), start.get(Calendar.DAY_OF_MONTH));
+                calendar.setTimeInMillis(start.getTimeInMillis());
             }
             else {
                 calendar.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
@@ -122,7 +120,7 @@ public class AlarmController {
                             calendar.set(Calendar.DAY_OF_WEEK, repeat.get(0));
                         }
                         else {
-                            calendar.set(Calendar.WEEK_OF_MONTH, today.get(Calendar.WEEK_OF_MONTH));
+                            calendar.set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR));
                             calendar.set(Calendar.DAY_OF_WEEK, repeat.get(repeat.indexOf(startIndex)+1));
                         }
                     }

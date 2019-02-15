@@ -30,7 +30,6 @@ class AlarmReceiver: BroadcastReceiver() {
             Log.d(C.TAG, "AlarmReceiver failed to get AlarmItem")
             return
         }
-//        Log.d(C.TAG, "Alarm triggered : Info(${option.getParcelable<AlarmItem>(ITEM)})")
         Log.d(C.TAG, "Alarm triggered : ID(${item.notiId+1})")
 
         // Only one alarm shows to user, even if several alarm triggered at same time.
@@ -46,7 +45,6 @@ class AlarmReceiver: BroadcastReceiver() {
             }
         }
         else {
-//            Log.d(C.TAG, "Missed alarm alert : Info($item)")
             Log.d(C.TAG, "Alarm missed : ID(${item.notiId+1})")
 
             val mainIntent = Intent(context, MainActivity::class.java)

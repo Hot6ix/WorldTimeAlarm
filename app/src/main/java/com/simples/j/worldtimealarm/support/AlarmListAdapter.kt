@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.support
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +13,6 @@ import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
-import java.lang.NumberFormatException
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -52,10 +52,10 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
         }
         else {
             val start = try {
-                Calendar.getInstance(TimeZone.getTimeZone(item.timeZone)).apply {
-                    item.startDate?.let {
-                        if(it > 0) timeInMillis = it
-                        else throw NumberFormatException("Invalid value for calendar")
+                Calendar.getInstance().apply {
+                    item.startDate.let {
+                        if(it != null && it > 0) timeInMillis = it
+                        else throw NumberFormatException("Invalid value for calendar : startDate")
                     }
                 }
             } catch (e: NumberFormatException) {
@@ -65,9 +65,9 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
 
             val end = try {
                 Calendar.getInstance().apply {
-                    item.endDate?.let {
-                        if(it > 0) timeInMillis = it
-                        else throw NumberFormatException("Invalid value for calendar")
+                    item.endDate.let {
+                        if(it != null && it > 0) timeInMillis = it
+                        else throw NumberFormatException("Invalid value for calendar : endDate")
                     }
                 }
             } catch (e: NumberFormatException) {
@@ -88,11 +88,16 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
                     context.getString(R.string.range_until).format(dateFormatter.format(end.time))
                 }
                 else -> {
-                    holder.range.visibility = View.GONE
                     null
                 }
             }
-            holder.range.text = rangeText
+
+            if(rangeText.isNullOrEmpty())
+                holder.range.visibility = View.GONE
+            else {
+                holder.range.visibility = View.VISIBLE
+                holder.range.text = rangeText
+            }
         }
 
         val colorTag = item.colorTag
