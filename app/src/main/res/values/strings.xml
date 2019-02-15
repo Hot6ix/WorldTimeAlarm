@@ -74,9 +74,9 @@
     <string name="start_date_removed">Start date removed.</string>
     <string name="end_date_removed">End date removed.</string>
     <string name="end_date_earlier_than_today">End date cannot be earlier than today.</string>
-    <string name="end_date_earlier_than_start_date">End date cannot be earlier than Start date.</string>
+    <string name="end_date_earlier_than_start_date">End date cannot be earlier than start date.</string>
     <string name="must_check_repeat">Must check repeat day at least one.</string>
-    <string name="invalid_repeat">Must check valid repeat if range is less than a week.</string>
+    <string name="invalid_repeat">Must check valid repeat day if range is less than a week.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>
