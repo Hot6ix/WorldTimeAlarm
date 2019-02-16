@@ -99,6 +99,7 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
                 }
                 else holder.switch.isEnabled = true
             }
+            else holder.switch.isEnabled = true
 
             val dateFormatter = DateFormat.getDateInstance(DateFormat.SHORT)
 
