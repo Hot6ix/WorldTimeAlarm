@@ -432,6 +432,23 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                             return
                         }
                     }
+
+                    val difference = endDate!!.timeInMillis - today.timeInMillis
+                    if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
+                        var isValid = false
+                        val tmpCal = today.clone() as Calendar
+                        while(!tmpCal.after(endDate)) {
+                            tmpCal.add(Calendar.DATE, 1)
+                            if(selectedDays.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
+                                isValid = true
+                                break
+                            }
+                        }
+                        if(!isValid) {
+                            Toast.makeText(applicationContext, getString(R.string.invalid_repeat), Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                    }
                 }
 
                 if(startDate != null && endDate != null) {
@@ -443,7 +460,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     // need to check repeat days that alarm makes sense
                     val difference = endDate!!.timeInMillis - startDate!!.timeInMillis
                     when(TimeUnit.MILLISECONDS.toDays(difference)) {
-                        in 1..5 -> {
+                        in 1..6 -> {
                             val copyOfRepeat = selectedDays.clone()
                             val tmpCal = startDate!!.clone() as Calendar
                             while(!tmpCal.after(endDate)) {

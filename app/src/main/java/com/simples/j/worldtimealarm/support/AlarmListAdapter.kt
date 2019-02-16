@@ -16,6 +16,7 @@ import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by j on 19/02/2018.
@@ -78,8 +79,24 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
             // disable switch if alarm is expired
             if(end != null) {
                 val today = Calendar.getInstance()
-                val isExpired = (today.get(Calendar.YEAR) == end.get(Calendar.YEAR) && today.get(Calendar.MONTH) == end.get(Calendar.MONTH) && today.get(Calendar.DAY_OF_MONTH) == end.get(Calendar.DAY_OF_MONTH)) || today.after(end)
-                holder.switch.isEnabled = !isExpired
+//                val isExpired = (today.get(Calendar.YEAR) == end.get(Calendar.YEAR) && today.get(Calendar.MONTH) == end.get(Calendar.MONTH) && today.get(Calendar.DAY_OF_MONTH) == end.get(Calendar.DAY_OF_MONTH)) || today.after(end)
+//                holder.switch.isEnabled = !isExpired
+
+                val difference = end.timeInMillis - today.timeInMillis
+                if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
+                    var isValid = false
+                    val tmpCal = today.clone() as Calendar
+                    while(!tmpCal.after(end)) {
+                        tmpCal.add(Calendar.DATE, 1)
+                        if(item.repeat.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
+                            isValid = true
+                            break
+                        }
+                    }
+
+                    holder.switch.isEnabled = isValid
+                }
+                else holder.switch.isEnabled = true
             }
 
             val dateFormatter = DateFormat.getDateInstance(DateFormat.SHORT)
