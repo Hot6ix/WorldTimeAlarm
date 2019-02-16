@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.OptionItem
 import kotlinx.android.synthetic.main.alarm_option_item.view.*
@@ -32,7 +33,7 @@ class AlarmOptionAdapter(private val options: ArrayList<OptionItem>, private var
         holder.summary.text = options[position].summary
         if(position == options.lastIndex) {
             if(options[position].summary == "0") {
-                holder.summary.text = context.resources.getString(R.string.not_selected)
+                holder.summary.text = context.resources.getString(R.string.not_set)
             }
             else {
                 holder.summary.visibility = View.GONE
@@ -49,9 +50,9 @@ class AlarmOptionAdapter(private val options: ArrayList<OptionItem>, private var
     }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        var title = view.option_title
-        var summary = view.option_summary
-        var colorTag = view.option_colorTag
+        var title: TextView = view.option_title
+        var summary: TextView = view.option_summary
+        var colorTag: View = view.option_colorTag
     }
 
     interface OnItemClickListener {

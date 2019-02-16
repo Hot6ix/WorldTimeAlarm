@@ -54,6 +54,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     private var player: MediaPlayer? = null
     private var vibrator: Vibrator? = null
     private var isMenuExpanded = false
+    private var isExpired = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,6 +97,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         if(intent.extras != null) {
             val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
             item = option.getParcelable(AlarmReceiver.ITEM)!!
+            isExpired = intent.getBooleanExtra(AlarmReceiver.EXPIRED, false)
 
             Log.d(C.TAG, "Alarm alerted : ID(${item.notiId+1})")
 
@@ -263,16 +265,29 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             notificationManager.createNotificationChannel(notificationChannel)
         }
 
+        val title = when {
+            isExpired && !item.label.isNullOrEmpty() -> {
+                resources.getString(R.string.last_alarm_with_time).format(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
+            }
+            !item.label.isNullOrEmpty() -> {
+                SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))
+            }
+            isExpired -> {
+                resources.getString(R.string.last_alarm)
+            }
+            else -> {
+                resources.getString(R.string.alarm)
+            }
+        }
         val notification = NotificationCompat.Builder(applicationContext, applicationContext.packageName)
                 .setVibrate(LongArray(0))
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
-                .setContentTitle(resources.getString(R.string.alarm))
+                .setContentTitle(title)
                 .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
                 .setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setOngoing(true)
 
         if(item.label != null && item.label!!.isNotEmpty()) {
-            notification.setContentTitle(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
             notification.setContentText(item.label)
             notification.setStyle(NotificationCompat.BigTextStyle().bigText(item.label))
         }

@@ -26,6 +26,7 @@
     <string name="select_vibration">振动</string>
     <string name="no_ringtone">没有铃声</string>
     <string name="no_vibrator">没有振动</string>
+    <string name="not_set">没有设置</string>
     <string name="timezone">时区</string>
     <string name="label">标签</string>
     <string name="slow">慢</string>
@@ -60,6 +61,8 @@
     <string name="range_text">%1$s ~ %2$s</string>
     <string name="range_until">直到%1$s</string>
     <string name="range_begin">从%1$s开始</string>
+    <string name="last_alarm">最后的警报</string>
+    <string name="last_alarm_with_time">%1$s - 最后的警报</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>

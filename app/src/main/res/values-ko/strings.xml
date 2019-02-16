@@ -24,8 +24,9 @@
     <string name="select_timezone">시간대</string>
     <string name="select_ringtone">벨소리</string>
     <string name="select_vibration">진동</string>
-    <string name="no_ringtone">사용 안함</string>
-    <string name="no_vibrator">사용 안함</string>
+    <string name="no_ringtone">사용 안 함</string>
+    <string name="no_vibrator">사용 안 함</string>
+    <string name="not_set">사용 안 함</string>
     <string name="timezone">시간대</string>
     <string name="label">라벨</string>
     <string name="slow">느림</string>
@@ -41,7 +42,7 @@
     <string name="everyday">매일</string>
     <string name="am">오전</string>
     <string name="pm">오후</string>
-    <string name="undo">실행취소</string>
+    <string name="undo">실행 취소</string>
     <string name="alarm">알람</string>
     <string name="snooze">다시 알림</string>
     <string name="dismiss">알람 해제</string>
@@ -56,10 +57,12 @@
     <string name="expected_time">%1$s에 알람이 울립니다.</string>
     <string name="range_start">시작일</string>
     <string name="range_end">종료일</string>
-    <string name="range_not_set">설정안됨</string>
+    <string name="range_not_set">설정 안 함</string>
     <string name="range_text">%1$s ~ %2$s</string>
     <string name="range_until">%1$s 까지</string>
     <string name="range_begin">%1$s 부터</string>
+    <string name="last_alarm">마지막 알람</string>
+    <string name="last_alarm_with_time">%1$s - 마지막 알람</string>
 
     <!-- Message -->
     <string name="alarm_removed">알람이 삭제되었습니다.</string>

@@ -32,38 +32,8 @@ class AlarmReceiver: BroadcastReceiver() {
         }
         Log.d(C.TAG, "Alarm triggered : ID(${item.notiId+1})")
 
-        // Only one alarm shows to user, even if several alarm triggered at same time.
-        // other alarms that lost in competition will be notified as missed.
-
-        // If alarm alerted to user and until dismiss or snooze, also upcoming alarms will be notified as missed.
-        if(!WakeUpActivity.isActivityRunning) {
-            Intent(context, WakeUpActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                action = intent.action
-                putExtra(OPTIONS, option)
-                context.startActivity(this)
-            }
-        }
-        else {
-            Log.d(C.TAG, "Alarm missed : ID(${item.notiId+1})")
-
-            val mainIntent = Intent(context, MainActivity::class.java)
-            val notification = NotificationCompat.Builder(context, context.packageName)
-                    .setAutoCancel(true)
-                    .setSmallIcon(R.drawable.ic_action_alarm_white)
-                    .setContentTitle(context.resources.getString(R.string.missed_alarm))
-                    .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
-                    .setContentIntent(PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT))
-
-            if(item.label != null && item.label!!.isNotEmpty()) {
-                notification.setStyle(NotificationCompat.BigTextStyle().bigText("${SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))} - ${item.label}"))
-            }
-
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.notify(item.notiId, notification.build())
-        }
-
         // If alarm type is snooze ignore, if not set alarm
+        var isExpired = false
         if(intent.action == AlarmReceiver.ACTION_ALARM) {
             dbCursor = DatabaseCursor(context)
 
@@ -80,7 +50,6 @@ class AlarmReceiver: BroadcastReceiver() {
                 context.sendBroadcast(requestIntent)
             }
             else {
-                var isExpired = false
                 with(item.endDate) {
                     try {
                         val endTimeInMillis = this
@@ -108,11 +77,44 @@ class AlarmReceiver: BroadcastReceiver() {
                     AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
             }
         }
+
+        // Only a single alarm are showing to user, even if several alarm triggered at same time.
+        // other alarms that lost in competition will be notified as missed.
+
+        // If alarm alerted to user and until dismiss or snooze, also upcoming alarms will be notified as missed.
+        if(!WakeUpActivity.isActivityRunning) {
+            Intent(context, WakeUpActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                action = intent.action
+                putExtra(OPTIONS, option)
+                putExtra(EXPIRED, isExpired)
+                context.startActivity(this)
+            }
+        }
+        else {
+            Log.d(C.TAG, "Alarm missed : ID(${item.notiId+1})")
+
+            val mainIntent = Intent(context, MainActivity::class.java)
+            val notification = NotificationCompat.Builder(context, context.packageName)
+                    .setAutoCancel(true)
+                    .setSmallIcon(R.drawable.ic_action_alarm_white)
+                    .setContentTitle(context.resources.getString(R.string.missed_alarm))
+                    .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
+                    .setContentIntent(PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT))
+
+            if(item.label != null && item.label!!.isNotEmpty()) {
+                notification.setStyle(NotificationCompat.BigTextStyle().bigText("${SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))} - ${item.label}"))
+            }
+
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.notify(item.notiId, notification.build())
+        }
     }
 
     companion object {
         const val WAKE_LONG = 10000
         const val OPTIONS = "OPTIONS"
+        const val EXPIRED = "EXPIRED"
         const val ITEM = "ITEM"
         const val ACTION_SNOOZE = "com.simples.j.worldtimealarm.ACTION_SNOOZE"
         const val ACTION_ALARM = "com.simples.j.worldtimealarm.ACTION_ALARM"

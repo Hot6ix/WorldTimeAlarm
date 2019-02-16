@@ -25,6 +25,7 @@
     <string name="select_vibration">Vibration</string>
     <string name="no_ringtone">No ringtone</string>
     <string name="no_vibrator">No vibration</string>
+    <string name="not_set">Not set</string>
     <string name="timezone">Time zone</string>
     <string name="label">Label</string>
     <string name="slow">slow</string>
@@ -59,6 +60,8 @@
     <string name="range_text">%1$s ~ %2$s</string>
     <string name="range_until">Until %1$s</string>
     <string name="range_begin">Start on %1$s</string>
+    <string name="last_alarm">Last alarm</string>
+    <string name="last_alarm_with_time">%1$s - Last alarm</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm removed.</string>

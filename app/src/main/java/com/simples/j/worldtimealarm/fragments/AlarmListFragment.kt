@@ -174,7 +174,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             dbCursor.updateAlarmOnOffByNotiId(item.notiId, true)
             alarmController.scheduleAlarm(context!!, item, AlarmController.TYPE_ALARM)
             showSnackBar(item)
-//            alarmListAdapter.notifyItemChanged(alarmItems.indexOf(item))
         }
         else {
             alarmItems.find { it.notiId == item.notiId }?.on_off = 0
