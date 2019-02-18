@@ -33,15 +33,17 @@ import com.simples.j.worldtimealarm.support.ClockListAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
 import kotlinx.android.synthetic.main.fragment_world_clock.*
+import kotlinx.coroutines.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A simple [Fragment] subclass.
  *
  */
-class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener {
+class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener, CoroutineScope {
 
     private lateinit var clockListAdapter: ClockListAdapter
     private lateinit var timeFormat: SimpleDateFormat
@@ -56,6 +58,10 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private var calendar = Calendar.getInstance()
     private var clockItems = ArrayList<ClockItem>()
     private var removedItem: ClockItem? = null
+
+    private val job = SupervisorJob()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -116,25 +122,30 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         time_zone.text = timeZone.id.replace("_", " ")
 
-        clockItems = DatabaseCursor(context!!).getClockList()
-        clockListAdapter = ClockListAdapter(context!!, clockItems, calendar)
-        recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
-        clockList.layoutManager = recyclerLayoutManager
-        clockList.adapter = clockListAdapter
-        clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
+        launch(coroutineContext) {
+            withContext(Dispatchers.IO) {
+                clockItems = DatabaseCursor(context!!).getClockList()
+            }
 
-        swipeController = ListSwipeController()
-        swipeController.setOnSwipeListener(this)
+            clockListAdapter = ClockListAdapter(context!!, clockItems, calendar)
+            recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
+            clockList.layoutManager = recyclerLayoutManager
+            clockList.adapter = clockListAdapter
+            clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
 
-        swipeHelper = ItemTouchHelper(swipeController)
-        swipeHelper.attachToRecyclerView(clockList)
+            swipeController = ListSwipeController()
+            swipeController.setOnSwipeListener(this@WorldClockFragment)
+
+            swipeHelper = ItemTouchHelper(swipeController)
+            swipeHelper.attachToRecyclerView(clockList)
+            setEmptyMessage()
+        }
 
         timeZoneChangedReceiver = UpdateRequestReceiver()
         val intentFilter = IntentFilter().apply {
             addAction(ACTION_TIME_ZONE_CHANGED)
         }
         context?.registerReceiver(timeZoneChangedReceiver, intentFilter)
-        setEmptyMessage()
     }
 
     override fun onDestroy() {

@@ -30,7 +30,6 @@ import kotlinx.android.synthetic.main.activity_wake_up.*
 class MainActivity : AppCompatActivity(){
 
     private lateinit var fragmentPagerAdapter: FragmentStatePagerAdapter
-    private var adisLoaded = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,24 +38,6 @@ class MainActivity : AppCompatActivity(){
 //        testWakeUpActivity()
 
         MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
-
-        adViewMain.adListener = object: AdListener() {
-
-            override fun onAdLoaded() {
-                super.onAdLoaded()
-                adisLoaded = true
-                adViewMain.visibility = View.VISIBLE
-//                organizeLayout()
-            }
-
-            override fun onAdFailedToLoad(errorCode: Int) {
-                super.onAdFailedToLoad(errorCode)
-                adisLoaded = false
-                adViewMain.visibility = View.INVISIBLE
-//                organizeLayout()
-            }
-
-        }
 
         adViewMain.loadAd(AdRequest.Builder().build())
 
@@ -107,37 +88,9 @@ class MainActivity : AppCompatActivity(){
         super.onSaveInstanceState(outState)
     }
 
-    override fun onResume() {
-        super.onResume()
-        if(!adisLoaded) {
-            adViewMain.visibility = View.VISIBLE
-            adViewMain.loadAd(AdRequest.Builder().build())
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         adViewMain.destroy()
-    }
-
-    fun organizeLayout() {
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(main_layout)
-
-        if(!adisLoaded) {
-            constraintSet.connect(fragment_pager.id, ConstraintSet.TOP, main_layout.id, ConstraintSet.TOP)
-        }
-        else {
-            constraintSet.connect(fragment_pager.id, ConstraintSet.TOP, adViewMain.id, ConstraintSet.BOTTOM)
-        }
-
-        val transition = AutoTransition()
-        transition.duration = 300
-        transition.interpolator = AccelerateDecelerateInterpolator()
-
-        TransitionManager.beginDelayedTransition(main_layout, transition)
-        constraintSet.applyTo(main_layout)
-
     }
 
     fun testWakeUpActivity() {
