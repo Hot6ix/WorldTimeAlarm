@@ -79,8 +79,8 @@
     <string name="end_date_removed">종료일이 제거되었습니다..</string>
     <string name="end_date_earlier_than_today">종료일은 오늘 이후로 설정해야 합니다.</string>
     <string name="end_date_earlier_than_start_date">종료일은 시작일 이후로 설정해야 합니다.</string>
-    <string name="must_check_repeat">하나 이상의 반복 요일을 선택해야 합니다.</string>
-    <string name="invalid_repeat">설정된 범위가 일주일 이하인 경우 범위 내 유효한 반복 요일을 선택해야 합니다.</string>
+    <string name="must_check_repeat">하나 이상의 반복할 요일을 선택해야 합니다.</string>
+    <string name="invalid_repeat">설정된 범위가 일주일 이하인 경우 범위 내 유효한 시간 또는 반복 요일을 선택해야 합니다.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>
@@ -112,7 +112,7 @@
     <string name="setting_source_title">GitHub 놀러가기</string>
 
     <string-array name="alarm_mute">
-        <item>사용 안함</item>
+        <item>사용 안 함</item>
         <item>1분</item>
         <item>2분</item>
         <item>5분</item>
@@ -264,7 +264,7 @@
     </array>
 
     <array name="snooze_array">
-        <item>사용 안함</item>
+        <item>사용 안 함</item>
         <item>5분</item>
         <item>10분</item>
         <item>15분</item>
