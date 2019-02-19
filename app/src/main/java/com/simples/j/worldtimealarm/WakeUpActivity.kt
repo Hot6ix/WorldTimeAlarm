@@ -147,8 +147,13 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 //                val difference = TimeZone.getTimeZone(timeZone).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(timeZone).dstSavings - TimeZone.getDefault().dstSavings
                 val difference = TimeZone.getTimeZone(timeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
                 time_zone_layout.visibility = View.VISIBLE
-                time_zone_name_wake.text = item.timeZone
+                val filteredTimeZone = item.timeZone.split("/").let {
+                    if(it.size > 1) it[it.lastIndex]
+                    else it[0]
+                }.replace("_", " ")
+                time_zone_name_wake.text = filteredTimeZone
                 time_zone_offset_wake.text = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
+                time_zone_time_wake_am_pm.timeZone = timeZone
                 time_zone_time_wake.timeZone = timeZone
             }
 
