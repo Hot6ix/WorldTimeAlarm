@@ -149,9 +149,12 @@ public class AlarmController {
 
             calendar.set(Calendar.SECOND, 0);
         }
-        else calendar.add(Calendar.MILLISECOND, (int) item.getSnooze());
+        else {
+            end = null;
+            calendar.add(Calendar.MILLISECOND, (int) item.getSnooze());
+        }
 
-        if(calendar.after(end)) {
+        if(end != null && calendar.after(end)) {
             // This alarm had been expired
             Log.d(C.TAG, "Alarm has been expired : ID("+item.getNotiId()+1+")");
             disableAlarm(context, item);
