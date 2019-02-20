@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.WindowManager
 import android.widget.EditText
 import com.simples.j.worldtimealarm.R
 
@@ -18,6 +19,12 @@ class LabelDialogFragment: DialogFragment() {
     private var currentLabel: String = ""
 
     private lateinit var labelEditor: EditText
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         if(savedInstanceState != null) {
