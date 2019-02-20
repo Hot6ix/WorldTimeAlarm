@@ -7,8 +7,8 @@ import android.content.DialogInterface
  *
  */
 interface OnDialogEventListener {
-    fun onItemSelected(inter: DialogInterface, index: Int)
-    fun onPositiveButtonClickListener(inter: DialogInterface, index: Int)
-    fun onNegativeButtonClickListener(inter: DialogInterface, index: Int)
-    fun onDialogDismissListener(inter: DialogInterface?)
+    fun onItemSelect(inter: DialogInterface?, index: Int)
+    fun onPositiveButtonClick(inter: DialogInterface, index: Int)
+    fun onNegativeButtonClick(inter: DialogInterface, index: Int)
+    fun onDialogDismiss(inter: DialogInterface?)
 }

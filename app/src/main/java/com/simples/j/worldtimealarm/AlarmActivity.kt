@@ -15,22 +15,22 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.support.design.widget.Snackbar
-import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.View
-import android.view.WindowManager
-import android.widget.*
+import android.widget.TimePicker
+import android.widget.Toast
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
 import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.fragments.ChoiceDialogFragment
+import com.simples.j.worldtimealarm.fragments.ColorTagDialogFragment
+import com.simples.j.worldtimealarm.fragments.LabelDialogFragment
+import com.simples.j.worldtimealarm.fragments.SnoozeDialogFragment
 import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
 import com.simples.j.worldtimealarm.support.AlarmDayAdapter
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
-import com.simples.j.worldtimealarm.support.ColorGridAdapter
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
@@ -40,7 +40,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
-class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, AlarmOptionAdapter.OnItemClickListener, View.OnClickListener, TimePicker.OnTimeChangedListener, ColorGridAdapter.OnItemClickListener, View.OnLongClickListener {
+class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, AlarmOptionAdapter.OnItemClickListener, View.OnClickListener, TimePicker.OnTimeChangedListener, View.OnLongClickListener {
 
     private lateinit var alarmDayAdapter: AlarmDayAdapter
     private lateinit var alarmOptionAdapter: AlarmOptionAdapter
@@ -56,9 +56,9 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private lateinit var currentVibrationPattern: PatternItem
     private lateinit var ringtoneDialog: ChoiceDialogFragment
     private lateinit var vibrationDialog: ChoiceDialogFragment
-    private lateinit var snoozeDialog: AlertDialog
-    private lateinit var labelDialog: AlertDialog
-    private lateinit var colorTagDialog: AlertDialog
+    private lateinit var snoozeDialog: SnoozeDialogFragment
+    private lateinit var labelDialog: LabelDialogFragment
+    private lateinit var colorTagDialog: ColorTagDialogFragment
     private lateinit var startDatePickerDialog: DatePickerDialog
     private lateinit var endDatePickerDialog: DatePickerDialog
     private lateinit var selectedDays: IntArray
@@ -69,12 +69,9 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private var currentSnooze: Long = 0
     private var currentLabel: String? = null
     private var currentColorTag: Int = 0
-    private var tempColorTag: Int = 0
     private var notiId = 0
     private var isNew = true
-    private lateinit var snoozeSeekBar: SeekBar
     private var existAlarmItem: AlarmItem? = null
-    private var labelEditor: EditText? = null
     private var ringtone: Ringtone? = null
     private var alarmAction = -1
     private var startDate: Calendar? = null
@@ -551,21 +548,17 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             1 -> { // Vibration
                 if(!vibrationDialog.isAdded) vibrationDialog.show(supportFragmentManager, TAG_FRAGMENT_VIBRATION)
             }
-            2 -> { // Snoose
-                if(!snoozeDialog.isShowing) snoozeDialog.show()
+            2 -> { // Snooze
+                if(!snoozeDialog.isAdded) snoozeDialog.show(supportFragmentManager, TAG_FRAGMENT_SNOOZE)
             }
             3 -> { // Label
-                labelDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-                if(!labelDialog.isShowing) labelDialog.show()
+//                labelDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                if(!labelDialog.isAdded) labelDialog.show(supportFragmentManager, TAG_FRAGMENT_LABEL)
             }
             4 -> { // Color Tag
-                if(!colorTagDialog.isShowing) colorTagDialog.show()
+                if(!colorTagDialog.isAdded) colorTagDialog.show(supportFragmentManager, TAG_FRAGMENT_COLOR_TAG)
             }
         }
-    }
-
-    override fun onColorItemClick(color: Int, view: View) {
-        tempColorTag = color
     }
 
     private fun getDefaultOptionList(defaultRingtone: RingtoneItem = ringtoneList[1], defaultVibration: PatternItem = vibratorPatternList[0], defaultSnooze: Long = snoozeValues[0], label: String = "", colorTag: Int = 0): ArrayList<OptionItem> {
@@ -591,7 +584,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         if(dialog == null) dialog = ChoiceDialogFragment.newInstance(resources.getString(R.string.select_ringtone), array)
         dialog.setLastChoice(selected)
         dialog.setOnDialogEventListener(object: OnDialogEventListener {
-            override fun onItemSelected(inter: DialogInterface, index: Int) {
+            override fun onItemSelect(inter: DialogInterface?, index: Int) {
                 selected = index
                 if(selected != 0) {
                     audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
@@ -608,16 +601,16 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 else ringtone?.stop()
             }
 
-            override fun onPositiveButtonClickListener(inter: DialogInterface, index: Int) {
-                currentRingtone = ringtoneList[selected]
-                optionList[0].summary = ringtoneList[selected].title
+            override fun onPositiveButtonClick(inter: DialogInterface, index: Int) {
+                currentRingtone = ringtoneList[index]
+                optionList[0].summary = ringtoneList[index].title
                 alarmOptionAdapter.notifyItemChanged(0)
-                ringtoneDialog.setLastChoice(selected)
+                ringtoneDialog.setLastChoice(index)
             }
 
-            override fun onNegativeButtonClickListener(inter: DialogInterface, index: Int) { inter.cancel() }
+            override fun onNegativeButtonClick(inter: DialogInterface, index: Int) { inter.cancel() }
 
-            override fun onDialogDismissListener(inter: DialogInterface?) {
+            override fun onDialogDismiss(inter: DialogInterface?) {
                 if(ringtone != null && ringtone!!.isPlaying) ringtone?.stop()
             }
         })
@@ -633,22 +626,22 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         if(dialog == null) dialog = ChoiceDialogFragment.newInstance(resources.getString(R.string.select_vibration), array)
         dialog.setLastChoice(selected)
         dialog.setOnDialogEventListener(object: OnDialogEventListener {
-            override fun onItemSelected(inter: DialogInterface, index: Int) {
+            override fun onItemSelect(inter: DialogInterface?, index: Int) {
                 selected = index
                 vibrator.cancel()
                 if(index != 0) vibrate(vibratorPatternList[index].array)
             }
 
-            override fun onPositiveButtonClickListener(inter: DialogInterface, index: Int) {
-                currentVibrationPattern = vibratorPatternList[selected]
-                optionList[1].summary = vibratorPatternList[selected].name
+            override fun onPositiveButtonClick(inter: DialogInterface, index: Int) {
+                currentVibrationPattern = vibratorPatternList[index]
+                optionList[1].summary = vibratorPatternList[index].name
                 alarmOptionAdapter.notifyItemChanged(1)
-                vibrationDialog.setLastChoice(selected)
+                vibrationDialog.setLastChoice(index)
             }
 
-            override fun onNegativeButtonClickListener(inter: DialogInterface, index: Int) { inter.cancel() }
+            override fun onNegativeButtonClick(inter: DialogInterface, index: Int) { inter.cancel() }
 
-            override fun onDialogDismissListener(inter: DialogInterface?) {
+            override fun onDialogDismiss(inter: DialogInterface?) {
                 if(vibrator.hasVibrator()) vibrator.cancel()
             }
         })
@@ -656,88 +649,80 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         return dialog
     }
 
-    private fun getSnoozeDialog(): AlertDialog {
-        val snoozeView = View.inflate(applicationContext, R.layout.snooze_dialog_view, null)
-        val snoozeTime = snoozeView.findViewById<TextView>(R.id.snooze_time)
-        snoozeTime.text = optionList[2].summary
-        snoozeSeekBar = snoozeView.findViewById(R.id.snooze)
-        if(!isNew) snoozeSeekBar.progress = snoozeValues.indexOf(existAlarmItem!!.snooze)
-        snoozeSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                currentSnooze = snoozeValues[progress]
-                snoozeTime.text = snoozeTimeList[progress]
+    private fun getSnoozeDialog(): SnoozeDialogFragment {
+        var selected = snoozeValues.indexOf(currentSnooze)
+
+        var dialog = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_SNOOZE) as? SnoozeDialogFragment
+        if(dialog == null) dialog = SnoozeDialogFragment.newInstance()
+        dialog.setLastChoice(selected)
+        dialog.setOnDialogEventListener(object: OnDialogEventListener {
+            override fun onItemSelect(inter: DialogInterface?, index: Int) {
+                selected = index
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            override fun onPositiveButtonClick(inter: DialogInterface, index: Int) {
+                currentSnooze = snoozeValues[index]
+                optionList[2].summary = snoozeTimeList[index]
+                alarmOptionAdapter.notifyItemChanged(2)
+                snoozeDialog.setLastChoice(index)
+            }
+
+            override fun onNegativeButtonClick(inter: DialogInterface, index: Int) { inter.cancel() }
+
+            override fun onDialogDismiss(inter: DialogInterface?) {}
+
         })
-
-        val dialog = AlertDialog.Builder(this)
-                .setView(snoozeView)
-                .setPositiveButton(resources.getString(R.string.ok)) { _, _ ->
-                    optionList[2].summary = snoozeTime.text.toString()
-                    alarmOptionAdapter.notifyItemChanged(2)
-                }
-                .setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
-                    dialogInterface.cancel()
-                }
-                .setOnCancelListener { snoozeSeekBar.progress = snoozeTimeList.indexOf(optionList[2].summary) }
-        return dialog.create()
+        return dialog
     }
 
-    private fun getLabelDialog(): AlertDialog {
-        val labelView = View.inflate(applicationContext, R.layout.label_dialog_view, null)
-        labelEditor = labelView.findViewById(R.id.label)
-        if(currentLabel != null && currentLabel!!.isNotEmpty()) {
-            labelEditor?.append(currentLabel)
+    private fun getLabelDialog(): LabelDialogFragment {
+        var dialog = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_LABEL) as? LabelDialogFragment
+        if(dialog == null) dialog = LabelDialogFragment.newInstance()
+        if(!currentLabel.isNullOrEmpty()) {
+            dialog.setLastLabel(currentLabel!!)
         }
-        val dialog = AlertDialog.Builder(this)
-                .setTitle(resources.getString(R.string.label))
-                .setView(labelView)
-                .setPositiveButton(resources.getString(R.string.ok)) { _, _ ->
-                    currentLabel = labelEditor?.text.toString()
-                    optionList[3].summary = currentLabel ?: ""
-                    alarmOptionAdapter.notifyItemChanged(3)
-                }
-                .setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
-                    dialogInterface.cancel()
-                }
-                .setNeutralButton(resources.getString(R.string.clear)) { dialogInterface, _ ->
-                    currentLabel = ""
-                    optionList[3].summary = ""
-                    alarmOptionAdapter.notifyItemChanged(3)
-                    dialogInterface.cancel()
-                }
-                .setOnCancelListener { labelEditor?.setText(optionList[3].summary) }
-        return dialog.create()
+        dialog.setOnDialogEventListener(object: LabelDialogFragment.OnDialogEventListener {
+            override fun onPositiveButtonClick(inter: DialogInterface, label: String) {
+                currentLabel = label
+                optionList[3].summary = currentLabel ?: ""
+                alarmOptionAdapter.notifyItemChanged(3)
+                dialog.setLastLabel(label)
+            }
+
+            override fun onNegativeButtonClick(inter: DialogInterface) { inter.cancel() }
+
+            override fun onNeutralButtonClick(inter: DialogInterface) {
+                currentLabel = ""
+                optionList[3].summary = ""
+                alarmOptionAdapter.notifyItemChanged(3)
+            }
+        })
+        return dialog
     }
 
-    private fun getColorTagChoiceDialog(): AlertDialog {
-        val colorPickerView = View.inflate(applicationContext, R.layout.color_tag_dialog_view, null)
-        val colorView: RecyclerView = colorPickerView.findViewById(R.id.colorPicker)
-        val adapter = ColorGridAdapter(applicationContext, currentColorTag)
-        adapter.setOnItemClickListener(this)
-        colorView.layoutManager = GridLayoutManager(applicationContext, 5)
-        colorView.adapter = adapter
+    private fun getColorTagChoiceDialog(): ColorTagDialogFragment {
+        var dialog = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_COLOR_TAG) as? ColorTagDialogFragment
+        if(dialog == null) dialog = ColorTagDialogFragment.newInstance()
+        dialog.setLastChoice(currentColorTag)
+        dialog.setOnDialogEventListener(object: ColorTagDialogFragment.OnDialogEventListener {
+            override fun onPositiveButtonClick(inter: DialogInterface, color: Int) {
+                currentColorTag = color
+                optionList[4].summary = color.toString()
+                alarmOptionAdapter.notifyItemChanged(4)
+                dialog.setLastChoice(color)
+            }
 
-        val dialog = AlertDialog.Builder(this)
-                .setTitle(R.string.select_color)
-                .setView(colorPickerView)
-                .setPositiveButton(resources.getString(R.string.ok)) { _, _ ->
-                    currentColorTag = tempColorTag
-                    optionList[4].summary = currentColorTag.toString()
-                    alarmOptionAdapter.notifyItemChanged(4)
-                }
-                .setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
-                    tempColorTag = currentColorTag
-                    dialogInterface.cancel()
-                }
-                .setNeutralButton(resources.getString(R.string.clear)) { _, _ ->
-                    currentColorTag = 0
-                    optionList[4].summary = currentColorTag.toString()
-                    alarmOptionAdapter.notifyItemChanged(4)
-                }
-        return dialog.create()
+            override fun onNegativeButtonClick(inter: DialogInterface, index: Int) { inter.cancel() }
+
+            override fun onNeutralButtonClick(inter: DialogInterface, index: Int) {
+                currentColorTag = 0
+                optionList[4].summary = currentColorTag.toString()
+                alarmOptionAdapter.notifyItemChanged(4)
+                dialog.setLastChoice(0)
+            }
+
+        })
+        return dialog
     }
 
     private fun vibrate(array: LongArray?) {
@@ -837,6 +822,9 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
         private const val TAG_FRAGMENT_RINGTONE = "TAG_FRAGMENT_RINGTONE"
         private const val TAG_FRAGMENT_VIBRATION = "TAG_FRAGMENT_VIBRATION"
+        private const val TAG_FRAGMENT_SNOOZE = "TAG_FRAGMENT_SNOOZE"
+        private const val TAG_FRAGMENT_LABEL = "TAG_FRAGMENT_LABEL"
+        private const val TAG_FRAGMENT_COLOR_TAG = "TAG_FRAGMENT_COLOR_TAG"
         private const val ACTION_NEW = 0
         private const val ACTION_MODIFY = 1
     }
