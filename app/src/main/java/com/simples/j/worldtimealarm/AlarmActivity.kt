@@ -695,6 +695,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 currentLabel = ""
                 optionList[3].summary = ""
                 alarmOptionAdapter.notifyItemChanged(3)
+                dialog.setLastLabel("")
             }
         })
         return dialog
