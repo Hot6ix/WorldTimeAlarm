@@ -7,6 +7,5 @@ class C {
     companion object {
         const val WAKE_TAG = "worldtime:alarm"
         const val TAG = "tagggggg"
-        const val ONE_DAY = 86400000
     }
 }

@@ -59,6 +59,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wake_up)
+        isActivityRunning = true
 
         // fix floating action button bugs on version 28
         interaction_button.scaleType = ImageView.ScaleType.CENTER
@@ -91,8 +92,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
         wakeLocker = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, C.WAKE_TAG)
         wakeLocker.acquire(AlarmReceiver.WAKE_LONG.toLong())
-
-        isActivityRunning = true
 
         if(intent.extras != null) {
             val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
@@ -191,7 +190,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     override fun onBackPressed() {
         super.onBackPressed()
 
-        Toast.makeText(applicationContext, "Alarm dismissed.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(applicationContext, getString(R.string.alarm_dismissed), Toast.LENGTH_SHORT).show()
     }
 
     override fun onClick(view: View) {

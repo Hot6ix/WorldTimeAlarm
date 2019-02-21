@@ -84,11 +84,6 @@ public class AlarmController {
                 while(calendar.getTimeInMillis() < System.currentTimeMillis()) {
                     calendar.add(Calendar.DAY_OF_YEAR, 1);
                 }
-                // If expected date is less than 24 hour from today
-                // Set to date of today
-                if(calendar.getTimeInMillis() - System.currentTimeMillis() > C.ONE_DAY) {
-                    calendar.set(Calendar.DAY_OF_YEAR, today.get(Calendar.DAY_OF_YEAR));
-                }
             }
             else {
                 // repeating alarm

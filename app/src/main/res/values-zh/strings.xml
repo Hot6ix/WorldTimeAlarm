@@ -76,6 +76,7 @@
     <string name="volume_is_muted">警报音量被静音。</string>
     <string name="exist_timezone">选定的时区已在列表中。</string>
     <string name="start_date_removed">开始日期已删除。</string>
+    <string name="start_date_and_time_is_wrong">如果仅设置开始日期，则设置时间必须晚于现在。</string>
     <string name="end_date_removed">结束日期已删除。</string>
     <string name="end_date_earlier_than_today">结束日期不能早于今天。</string>
     <string name="end_date_earlier_than_start_date">结束日期不能早于开始日期。</string>

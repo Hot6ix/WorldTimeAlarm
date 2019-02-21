@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.support
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,6 @@ import android.widget.Switch
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.C
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -21,9 +21,11 @@ import java.util.concurrent.TimeUnit
  * Created by j on 19/02/2018.
  *
  */
-class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
+class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
 
     private lateinit var listener: OnItemClickListener
+    private val today = Calendar.getInstance()
+    private val dateFormatter = DateFormat.getDateInstance(DateFormat.SHORT)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.alarm_list_item, parent, false))
@@ -42,9 +44,6 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
         calendar.time = Date(item.timeSet.toLong())
         while (calendar.timeInMillis < System.currentTimeMillis()) {
             calendar.add(Calendar.DAY_OF_YEAR, 1)
-        }
-        if (calendar.timeInMillis - System.currentTimeMillis() > C.ONE_DAY) {
-            calendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
         }
 
         if(item.startDate == null && item.endDate == null) {
@@ -75,10 +74,15 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
                 null
             }
 
+            // alarm is one-time and start date is set
+            // if start date passed, disable alarm
+            if(start != null && !item.repeat.any { it > 0 }) {
+                holder.switch.isEnabled = start.after(today)
+            }
+            else holder.switch.isEnabled = true
+
             // disable switch if alarm is expired
             if(end != null) {
-                val today = Calendar.getInstance()
-
                 val difference = end.timeInMillis - today.timeInMillis
                 if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
                     var isValid = false
@@ -98,16 +102,14 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
                 }
                 else holder.switch.isEnabled = true
             }
-            else holder.switch.isEnabled = true
-
-            val dateFormatter = DateFormat.getDateInstance(DateFormat.SHORT)
 
             val rangeText = when {
                 start != null && end != null -> {
                     context.getString(R.string.range_text).format(dateFormatter.format(start.time), dateFormatter.format(end.time))
                 }
                 start != null -> {
-                    context.getString(R.string.range_begin).format(dateFormatter.format(start.time))
+                    if(item.repeat.any { it > 0 }) context.getString(R.string.range_begin).format(dateFormatter.format(start.time))
+                    else null
                 }
                 end != null -> {
                     context.getString(R.string.range_until).format(dateFormatter.format(end.time))
@@ -151,10 +153,12 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
                     else repeatArray.joinToString()
         }
         else {
-            if(calendar.get(Calendar.DAY_OF_YEAR) == Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
-                holder.repeat.text = context.resources.getString(R.string.today)
-            else
-                holder.repeat.text = context.resources.getString(R.string.tomorrow)
+            holder.repeat.text =
+                    when {
+                        DateUtils.isToday(calendar.timeInMillis) -> context.resources.getString(R.string.today)
+                        DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) -> context.resources.getString(R.string.tomorrow) // this can make adapter to calendar date is tomorrow
+                        else -> dateFormatter.format(calendar.time)
+                    }
         }
 
         holder.itemView.setOnClickListener { listener.onItemClicked(it, item) }
