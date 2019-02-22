@@ -12,6 +12,7 @@
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">검색</string>
+    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/도움말</string>
 
     <!-- Show info -->
     <string name="alarm_empty">알람 없음</string>
@@ -58,9 +59,10 @@
     <string name="range_start">시작일</string>
     <string name="range_end">종료일</string>
     <string name="range_not_set">설정 안 함</string>
-    <string name="range_text">%1$s ~ %2$s</string>
-    <string name="range_until">%1$s 까지</string>
-    <string name="range_begin">%1$s 부터</string>
+    <string name="range_text">%1$s (%2$s) ~ %3$s (%4$s)</string>
+    <string name="range_until">%1$s (%2$s) 까지</string>
+    <string name="range_begin">%1$s (%2$s) 부터</string>
+    <string name="one_time_alarm">%1$s (%2$s)</string>
     <string name="last_alarm">마지막 알람</string>
     <string name="last_alarm_with_time">%1$s - 마지막 알람</string>
 
@@ -105,6 +107,8 @@
 
     <string name="setting_group_3_key">Others</string>
     <string name="setting_group_3">기타</string>
+    <string name="setting_help_key">HELP</string>
+    <string name="setting_help_title">도움말</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">버전</string>
     <string name="setting_license_key">LICENSE</string>

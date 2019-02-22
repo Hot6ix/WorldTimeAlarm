@@ -11,6 +11,7 @@
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">Search</string>
+    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Help</string>
 
     <!-- Show info -->
     <string name="alarm_empty">No alarm set</string>
@@ -57,9 +58,10 @@
     <string name="range_start">Start date</string>
     <string name="range_end">End date</string>
     <string name="range_not_set">Not set</string>
-    <string name="range_text">%1$s ~ %2$s</string>
-    <string name="range_until">Ends on %1$s</string>
-    <string name="range_begin">Starts on %1$s</string>
+    <string name="range_text">%1$s (%2$s) ~ %3$s (%4$s)</string>
+    <string name="range_until">Ends on %1$s (%2$s)</string>
+    <string name="range_begin">Starts on %1$s (%2$s)</string>
+    <string name="one_time_alarm">%1$s (%2$s)</string>
     <string name="last_alarm">Last alarm</string>
     <string name="last_alarm_with_time">%1$s - Last alarm</string>
 
@@ -79,8 +81,8 @@
     <string name="end_date_removed">End date removed.</string>
     <string name="end_date_earlier_than_today">End date cannot be earlier than today.</string>
     <string name="end_date_earlier_than_start_date">End date cannot be earlier than start date.</string>
-    <string name="must_check_repeat">Must check repeat day at least one.</string>
-    <string name="invalid_repeat">Must check valid time or repeat day if range is less than a week.</string>
+    <string name="must_check_repeat">Must check day repeat at least one.</string>
+    <string name="invalid_repeat">Must check valid time and repeat day if range is less than a week.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>
@@ -104,6 +106,8 @@
 
     <string name="setting_group_3_key">Others</string>
     <string name="setting_group_3">Others</string>
+    <string name="setting_help_key">HELP</string>
+    <string name="setting_help_title">Help</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">Version</string>
     <string name="setting_license_key">LICENSE</string>

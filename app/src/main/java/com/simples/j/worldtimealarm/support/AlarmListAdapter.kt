@@ -4,6 +4,7 @@ import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import android.widget.Switch
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.C
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -24,8 +26,10 @@ import java.util.concurrent.TimeUnit
 class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
 
     private lateinit var listener: OnItemClickListener
-    private val today = Calendar.getInstance()
-    private val dateFormatter = DateFormat.getDateInstance(DateFormat.SHORT)
+    private val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault())
+    private val dayOfWeekFormat = SimpleDateFormat("E", Locale.getDefault())
+    private var startDate: Calendar? = null
+    private var endDate: Calendar? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.alarm_list_item, parent, false))
@@ -46,73 +50,75 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
             calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
 
-        if(item.startDate == null && item.endDate == null) {
+        startDate = try {
+            Calendar.getInstance().apply {
+                item.startDate.let {
+                    if(it != null && it > 0) timeInMillis = it
+                    else throw NumberFormatException("Invalid value for calendar : startDate")
+                }
+            }
+        } catch (e: NumberFormatException) {
+            e.printStackTrace()
+            null
+        }
+
+        endDate = try {
+            Calendar.getInstance().apply {
+                item.endDate.let {
+                    if(it != null && it > 0) timeInMillis = it
+                    else throw NumberFormatException("Invalid value for calendar : endDate")
+                }
+            }
+        } catch (e: NumberFormatException) {
+            e.printStackTrace()
+            null
+        }
+
+        if(startDate == null && endDate == null) {
             holder.range.visibility = View.GONE
         }
         else {
-            val start = try {
-                Calendar.getInstance().apply {
-                    item.startDate.let {
-                        if(it != null && it > 0) timeInMillis = it
-                        else throw NumberFormatException("Invalid value for calendar : startDate")
-                    }
-                }
-            } catch (e: NumberFormatException) {
-                e.printStackTrace()
-                null
-            }
-
-            val end = try {
-                Calendar.getInstance().apply {
-                    item.endDate.let {
-                        if(it != null && it > 0) timeInMillis = it
-                        else throw NumberFormatException("Invalid value for calendar : endDate")
-                    }
-                }
-            } catch (e: NumberFormatException) {
-                e.printStackTrace()
-                null
-            }
-
             // alarm is one-time and start date is set
             // if start date passed, disable alarm
-            if(start != null && !item.repeat.any { it > 0 }) {
-                holder.switch.isEnabled = start.after(today)
+            if(startDate != null && !item.repeat.any { it > 0 }) {
+                holder.switch.isEnabled = startDate!!.timeInMillis > System.currentTimeMillis()
             }
             else holder.switch.isEnabled = true
 
             // disable switch if alarm is expired
-            if(end != null) {
-                val difference = end.timeInMillis - today.timeInMillis
-                if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
-                    var isValid = false
-                    val tmpCal = today.clone() as Calendar
-                    while(!tmpCal.after(end)) {
-                        tmpCal.add(Calendar.DATE, 1)
-                        if(item.repeat.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
-                            isValid = true
-                            break
+            with(endDate) {
+                if(this != null) {
+                    val difference = this.timeInMillis - System.currentTimeMillis()
+                    if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
+                        var isValid = false
+                        val tmpCal = Calendar.getInstance()
+                        while(!tmpCal.after(this)) {
+                            tmpCal.add(Calendar.DATE, 1)
+                            if(item.repeat.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
+                                isValid = true
+                                break
+                            }
                         }
+
+                        if(System.currentTimeMillis() >= this.timeInMillis)
+                            isValid = false
+
+                        holder.switch.isEnabled = isValid
                     }
-
-                    if((today.get(Calendar.YEAR) == end.get(Calendar.YEAR) && today.get(Calendar.MONTH) == end.get(Calendar.MONTH) && today.get(Calendar.DAY_OF_MONTH) == end.get(Calendar.DAY_OF_MONTH)) || today.after(end))
-                       isValid = false
-
-                    holder.switch.isEnabled = isValid
+                    else holder.switch.isEnabled = true
                 }
-                else holder.switch.isEnabled = true
             }
 
             val rangeText = when {
-                start != null && end != null -> {
-                    context.getString(R.string.range_text).format(dateFormatter.format(start.time), dateFormatter.format(end.time))
+                startDate != null && endDate != null -> {
+                    context.getString(R.string.range_text).format(dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time), dateFormat.format(endDate!!.time), dayOfWeekFormat.format(endDate!!.time))
                 }
-                start != null -> {
-                    if(item.repeat.any { it > 0 }) context.getString(R.string.range_begin).format(dateFormatter.format(start.time))
+                startDate != null -> {
+                    if(item.repeat.any { it > 0 }) context.getString(R.string.range_begin).format(dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time))
                     else null
                 }
-                end != null -> {
-                    context.getString(R.string.range_until).format(dateFormatter.format(end.time))
+                endDate != null -> {
+                    context.getString(R.string.range_until).format(dateFormat.format(endDate!!.time), dayOfWeekFormat.format(endDate!!.time))
                 }
                 else -> {
                     null
@@ -156,8 +162,8 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
             holder.repeat.text =
                     when {
                         DateUtils.isToday(calendar.timeInMillis) -> context.resources.getString(R.string.today)
-                        DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) -> context.resources.getString(R.string.tomorrow) // this can make adapter to calendar date is tomorrow
-                        else -> dateFormatter.format(calendar.time)
+                        DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) && startDate == null -> context.resources.getString(R.string.tomorrow) // this can make adapter to know calendar date is tomorrow
+                        else -> context.getString(R.string.one_time_alarm, dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time))
                     }
         }
 

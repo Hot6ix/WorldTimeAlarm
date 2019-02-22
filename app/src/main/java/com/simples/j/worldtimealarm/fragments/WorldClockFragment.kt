@@ -48,6 +48,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private lateinit var clockListAdapter: ClockListAdapter
     private lateinit var timeFormat: SimpleDateFormat
     private lateinit var dateFormat: DateFormat
+    private lateinit var dayOfWeekFormat: SimpleDateFormat
     private lateinit var swipeHelper: ItemTouchHelper
     private lateinit var swipeController: ListSwipeController
     private lateinit var recyclerLayoutManager: LinearLayoutManager
@@ -85,10 +86,11 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         timeFormat.timeZone = timeZone
         dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
         dateFormat.timeZone = timeZone
+        dayOfWeekFormat = SimpleDateFormat("E", Locale.getDefault())
 
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
-        world_date.text = dateFormat.format(calendar.time)
+        world_date.text = getString(R.string.one_time_alarm, dateFormat.format(calendar.time), dayOfWeekFormat.format(calendar.time))
 
         time_zone.setOnClickListener(this)
         new_timezone.setOnClickListener(this)
@@ -109,7 +111,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             calendar.set(Calendar.DAY_OF_MONTH, day)
             dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
             dateFormat.timeZone = timeZone
-            world_date.text = dateFormat.format(calendar.time)
+            world_date.text = getString(R.string.one_time_alarm, dateFormat.format(calendar.time), dayOfWeekFormat.format(calendar.time))
             clockListAdapter.notifyDataSetChanged()
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
 
@@ -235,7 +237,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
-        world_date.text = dateFormat.format(calendar.time)
+        world_date.text = getString(R.string.one_time_alarm, dateFormat.format(calendar.time), dayOfWeekFormat.format(calendar.time))
     }
 
     private fun setEmptyMessage() {

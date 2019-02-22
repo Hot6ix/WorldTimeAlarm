@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.simples.j.worldtimealarm.AlarmReceiver;
 import com.simples.j.worldtimealarm.MainActivity;
@@ -175,6 +176,9 @@ public class AlarmController {
         alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(), mainIntent), alarmIntent);
         Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance().format(calendar.getTime()) + ", Info(" + item + "), " + type);
         Log.d(C.TAG, "Alarm scheduled : ID(" + notiId+1 + ")");
+
+        // this toast message is just for debug
+        Toast.makeText(context, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance().format(calendar.getTime()) + ", Info(" + item + "), " + type, Toast.LENGTH_LONG).show();
     }
 
     public void cancelAlarm(Context context, int notiId) {

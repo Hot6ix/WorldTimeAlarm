@@ -12,6 +12,7 @@
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">搜索</string>
+    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/帮助</string>
 
     <!-- Show info -->
     <string name="alarm_empty">没有警报设置</string>
@@ -58,9 +59,10 @@
     <string name="range_start">开始日期</string>
     <string name="range_end">结束日期</string>
     <string name="range_not_set">没有设置</string>
-    <string name="range_text">%1$s ~ %2$s</string>
-    <string name="range_until">直到%1$s</string>
-    <string name="range_begin">从%1$s开始</string>
+    <string name="range_text">%1$s (%2$s) ~ %3$s (%4$s)</string>
+    <string name="range_until">直到%1$s (%2$s)</string>
+    <string name="range_begin">从%1$s (%2$s)开始</string>
+    <string name="one_time_alarm">%1$s (%2$s)</string>
     <string name="last_alarm">最后的警报</string>
     <string name="last_alarm_with_time">%1$s - 最后的警报</string>
 
@@ -104,8 +106,9 @@
     <string name="setting_converter_goto">更改日期和时间</string>
 
     <string name="setting_group_3_key">Others</string>
-
     <string name="setting_group_3">其他</string>
+    <string name="setting_help_key">HELP</string>
+    <string name="setting_help_title">帮助</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">版</string>
     <string name="setting_license_key">LICENSE</string>
