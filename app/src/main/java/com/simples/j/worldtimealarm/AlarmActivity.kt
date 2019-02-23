@@ -37,6 +37,7 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.*
 import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -79,6 +80,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private var endDate: Calendar? = null
     private val today = Calendar.getInstance()
     private val dateFormat = DateFormat.getDateInstance()
+    private val dayOfWeekFormat = SimpleDateFormat("E", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -153,7 +155,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     startDatePickerDialog.updateDate(startDate!!.get(Calendar.YEAR), startDate!!.get(Calendar.MONTH), startDate!!.get(Calendar.DAY_OF_MONTH))
                     startDatePickerDialog.datePicker.minDate = tmpCal.timeInMillis
 
-                    range_start.text = dateFormat.format(startDate!!.time)
+                    range_start.text = getString(R.string.one_time_alarm, dateFormat.format(startDate?.time), dayOfWeekFormat.format(startDate?.time))
                 }
             }
 
@@ -168,7 +170,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     tmpCal.add(Calendar.DAY_OF_YEAR, 1)
                     endDatePickerDialog.datePicker.minDate = tmpCal.timeInMillis
 
-                    range_end.text = dateFormat.format(endDate!!.time)
+                    range_end.text = getString(R.string.one_time_alarm, dateFormat.format(endDate?.time), dayOfWeekFormat.format(endDate?.time))
                 }
             }
 
@@ -240,7 +242,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         timeInMillis = it
                     }
                     startDatePickerDialog.updateDate(startDate!!.get(Calendar.YEAR), startDate!!.get(Calendar.MONTH), startDate!!.get(Calendar.DAY_OF_MONTH))
-                    range_start.text = dateFormat.format(startDate?.time)
+                    range_start.text = getString(R.string.one_time_alarm, dateFormat.format(startDate?.time), dayOfWeekFormat.format(startDate?.time))
                 }
             }
             savedInstanceState.getLong(STATE_END_DATE_KEY).let {
@@ -250,7 +252,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         timeInMillis = it
                     }
                     endDatePickerDialog.updateDate(endDate!!.get(Calendar.YEAR), endDate!!.get(Calendar.MONTH), endDate!!.get(Calendar.DAY_OF_MONTH))
-                    range_end.text = dateFormat.format(endDate?.time)
+                    range_end.text = getString(R.string.one_time_alarm, dateFormat.format(endDate?.time), dayOfWeekFormat.format(endDate?.time))
                 }
             }
 
@@ -800,13 +802,13 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private val startDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
         if(startDate == null) startDate = calendar.clone() as Calendar
         startDate?.set(year, month, dayOfMonth)
-        range_start.text = dateFormat.format(startDate?.time)
+        range_start.text = getString(R.string.one_time_alarm, dateFormat.format(startDate?.time), dayOfWeekFormat.format(startDate?.time))
     }
 
     private val endDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
         if(endDate == null) endDate = calendar.clone() as Calendar
         endDate?.set(year, month, dayOfMonth)
-        range_end.text = dateFormat.format(endDate?.time)
+        range_end.text = getString(R.string.one_time_alarm, dateFormat.format(endDate?.time), dayOfWeekFormat.format(endDate?.time))
     }
 
     companion object {

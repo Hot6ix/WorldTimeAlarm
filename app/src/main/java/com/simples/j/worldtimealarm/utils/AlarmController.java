@@ -16,7 +16,6 @@ import com.simples.j.worldtimealarm.etc.C;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by j on 28/02/2018.
@@ -60,12 +59,14 @@ public class AlarmController {
             if(item.getStartDate() != null && item.getStartDate() > 0)
                 start.setTimeInMillis(item.getStartDate());
 
-            calendar.setTime(new Date(Long.valueOf(item.getTimeSet())));
+            calendar.setTimeInMillis(Long.valueOf(item.getTimeSet()));
             if(start.after(today)) {
                 calendar.setTimeInMillis(start.getTimeInMillis());
             }
             else {
                 calendar.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+                calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
+                calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
             }
 
             // Check if alarm repeating
@@ -111,11 +112,11 @@ public class AlarmController {
                     if(today.getTimeInMillis() >= calendar.getTimeInMillis()) {
                         // If today is last repeat day, return to first repeat day
                         if(startIndex == repeat.get(repeat.size()-1)) {
-                            calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                            calendar.add(Calendar.WEEK_OF_MONTH, 1);
                             calendar.set(Calendar.DAY_OF_WEEK, repeat.get(0));
                         }
                         else {
-                            calendar.set(Calendar.WEEK_OF_YEAR, today.get(Calendar.WEEK_OF_YEAR));
+                            calendar.set(Calendar.WEEK_OF_MONTH, today.get(Calendar.WEEK_OF_MONTH));
                             calendar.set(Calendar.DAY_OF_WEEK, repeat.get(repeat.indexOf(startIndex)+1));
                         }
                     }
@@ -124,11 +125,11 @@ public class AlarmController {
                     // currentDay is not contained in repeat
                     // If today is not after from repeated day back to current week
                     if(repeat.get(repeat.size()-1) < startIndex) {
-                        calendar.set(Calendar.WEEK_OF_YEAR, start.get(Calendar.WEEK_OF_YEAR));
-                        calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                        calendar.set(Calendar.WEEK_OF_MONTH, start.get(Calendar.WEEK_OF_MONTH));
+                        calendar.add(Calendar.WEEK_OF_MONTH, 1);
                     }
 
-                    int expectedDay = start.get(Calendar.DAY_OF_WEEK);
+                    int expectedDay = startIndex;
                     while(!repeat.contains(expectedDay)) {
                         expectedDay++;
                         if(expectedDay > 7) expectedDay = 1;
@@ -136,7 +137,7 @@ public class AlarmController {
                     calendar.set(Calendar.DAY_OF_WEEK, expectedDay);
 
                     while(calendar.before(today)) {
-                        calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                        calendar.add(Calendar.WEEK_OF_MONTH, 1);
                     }
                 }
             }
