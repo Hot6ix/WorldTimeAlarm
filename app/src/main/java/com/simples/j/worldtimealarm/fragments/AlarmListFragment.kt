@@ -16,6 +16,7 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
+import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -31,14 +32,17 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.fragment_alarmlist.*
+import kotlinx.coroutines.*
 import java.text.DateFormat
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A simple [Fragment] subclass.
  *
  */
-class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, ListSwipeController.OnListControlListener {
+class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, ListSwipeController.OnListControlListener, CoroutineScope {
 
     private lateinit var alarmListAdapter: AlarmListAdapter
     private lateinit var updateRequestReceiver: UpdateRequestReceiver
@@ -54,6 +58,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private var muteStatusIsShown = false
     private var removedItem: AlarmItem? = null
 
+    private val job = SupervisorJob()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_alarmlist, container, false)
@@ -66,27 +74,31 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
         updateRequestReceiver = UpdateRequestReceiver()
         dbCursor = DatabaseCursor(context!!)
-        alarmController = AlarmController.getInstance(context!!)
+        alarmController = AlarmController.getInstance(context)
         audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        alarmItems = dbCursor.getAlarmList()
-        alarmListAdapter = AlarmListAdapter(alarmItems, context!!)
-        alarmListAdapter.setOnItemListener(this)
-        recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
+        launch(coroutineContext) {
+            progressBar.visibility = View.VISIBLE
+            withContext(Dispatchers.IO) {
+                alarmItems = dbCursor.getAlarmList()
+            }
 
-        new_alarm.setOnClickListener {
-            startActivityForResult(Intent(context!!, AlarmActivity::class.java), REQUEST_CODE_NEW)
+            alarmListAdapter = AlarmListAdapter(alarmItems, context!!)
+            alarmListAdapter.setOnItemListener(this@AlarmListFragment)
+            recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
+
+            alarmList.layoutManager = recyclerLayoutManager
+            alarmList.adapter = alarmListAdapter
+            alarmList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
+
+            swipeController = ListSwipeController()
+            swipeController.setOnSwipeListener(this@AlarmListFragment)
+
+            swipeHelper = ItemTouchHelper(swipeController)
+            swipeHelper.attachToRecyclerView(alarmList)
+            setEmptyMessage()
+            progressBar.visibility = View.GONE
         }
-
-        alarmList.layoutManager = recyclerLayoutManager
-        alarmList.adapter = alarmListAdapter
-        alarmList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
-
-        swipeController = ListSwipeController()
-        swipeHelper = ItemTouchHelper(swipeController)
-        swipeHelper.attachToRecyclerView(alarmList)
-        swipeController.setOnSwipeListener(this)
-        setEmptyMessage()
 
         // If alarm volume is muted, show snackBar
         if(savedInstanceState != null) muteStatusIsShown = savedInstanceState.getBoolean(STATE_SNACKBAR)
@@ -105,31 +117,30 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             }
         }
 
+        new_alarm.setOnClickListener {
+            startActivityForResult(Intent(context!!, AlarmActivity::class.java), REQUEST_CODE_NEW)
+        }
+
         val intentFilter = IntentFilter()
         intentFilter.addAction(ACTION_UPDATE_ALL)
         intentFilter.addAction(ACTION_UPDATE_SINGLE)
         context!!.registerReceiver(updateRequestReceiver, intentFilter)
-//        val intent =Intent(this, WakeUpActivity::class.java)
-//        val bundle = Bundle()
-////        bundle.putParcelable(AlarmReceiver.ITEM, AlarmItem(99, "America/Argentina/ComodRivadavia", Calendar.getInstance().time.time.toString(), intArrayOf(0,0,0,0,0,0,0), null, null, 3000, null, 1, 78788))
-//        bundle.putParcelable(AlarmReceiver.ITEM, AlarmItem(99, "Asia/Seoul", Calendar.getInstance().time.time.toString(), intArrayOf(0,0,0,0,0,0,0), null, null, 3000, null, 1, 78788))
-//        intent.putExtra(AlarmReceiver.OPTIONS, bundle)
-//        startActivity(intent)
     }
 
     override fun onResume() {
         super.onResume()
 
-        if(alarmItems.size != dbCursor.getAlarmListSize().toInt()) {
-            alarmItems.clear()
-            alarmItems.addAll(dbCursor.getAlarmList())
-            alarmListAdapter.notifyDataSetChanged()
-        }
+//        if(alarmItems.size != dbCursor.getAlarmListSize().toInt()) {
+//            alarmItems.clear()
+//            alarmItems.addAll(dbCursor.getAlarmList())
+//            alarmListAdapter.notifyDataSetChanged()
+//        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         context!!.unregisterReceiver(updateRequestReceiver)
+        coroutineContext.cancelChildren()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -179,7 +190,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             dbCursor.updateAlarmOnOffByNotiId(item.notiId, true)
             alarmController.scheduleAlarm(context!!, item, AlarmController.TYPE_ALARM)
             showSnackBar(item)
-//            alarmListAdapter.notifyItemChanged(alarmItems.indexOf(item))
         }
         else {
             alarmItems.find { it.notiId == item.notiId }?.on_off = 0
@@ -233,11 +243,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         val calendar = Calendar.getInstance()
         calendar.time = Date(item.timeSet.toLong())
 
-        if(item.repeat.any { it == 1 }) {
-
+        if(item.repeat.any { it > 0 }) {
             val dayArray = resources.getStringArray(R.array.day_of_week_full)
             val repeatArray = item.repeat.mapIndexed { index, i ->
-                if(i == 1) dayArray[index] else null
+                if(i > 0) dayArray[index] else null
             }.filter { it != null }
             val days = if(repeatArray.size == 7)
                 getString(R.string.everyday)
@@ -256,7 +265,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             while (calendar.timeInMillis < System.currentTimeMillis()) {
                 calendar.add(Calendar.DAY_OF_YEAR, 1)
             }
-            if (calendar.timeInMillis - System.currentTimeMillis() > C.ONE_DAY) {
+            if (calendar.timeInMillis - System.currentTimeMillis() > DateUtils.DAY_IN_MILLIS) {
                 calendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
             }
             snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(context!!, calendar)), Snackbar.LENGTH_LONG)
@@ -273,18 +282,28 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 ACTION_UPDATE_SINGLE -> {
                     val bundle = intent.getBundleExtra(AlarmReceiver.OPTIONS)
                     val item = bundle.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
-                    var index = 0
+                    if(item == null) {
+                        Log.d(C.TAG, "AlarmItem is null")
+                        return
+                    }
+                    var index = -1
                     alarmItems.forEachIndexed { i, it ->
                         if(it.notiId == item.notiId) index = i
                     }
 
-                    if(item.repeat.any { it == 1 }) {
+                    if(index > -1) {
+                        if(item.repeat.any { it > 0 }) {
+                            if(item.on_off == 0) alarmItems[index].on_off= 0
+                        }
+                        else {
+                            // One time alarm
+                            alarmItems[index].on_off = 0
+                        }
+                        alarmListAdapter.notifyItemChanged(index)
                     }
                     else {
-                        // One time alarm
-                        alarmItems[index].on_off = 0
+                        // wrong request
                     }
-                    alarmListAdapter.notifyItemChanged(index)
                 }
                 ACTION_UPDATE_ALL -> {
                     alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())

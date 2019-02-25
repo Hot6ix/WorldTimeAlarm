@@ -3,7 +3,7 @@ package com.simples.j.worldtimealarm.etc
 import android.os.Parcel
 import android.os.Parcelable
 
-data class ClockItem(var id: Int?, var timezone: String, var index: Int?) : Parcelable {
+data class ClockItem(var id: Int?, var timezone: String?, var index: Int?) : Parcelable {
     constructor(source: Parcel) : this(
             source.readValue(Int::class.java.classLoader) as Int?,
             source.readString(),

@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.support
 import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
+import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,18 +13,23 @@ import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by j on 19/02/2018.
  *
  */
-class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
+class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
 
     private lateinit var listener: OnItemClickListener
+    private val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault())
+    private val dayOfWeekFormat = SimpleDateFormat("E", Locale.getDefault())
+    private var startDate: Calendar? = null
+    private var endDate: Calendar? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.alarm_list_item, parent, false))
@@ -36,19 +42,102 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
     override fun getItemViewType(position: Int): Int = 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = list[holder.adapterPosition]
+
         val calendar = Calendar.getInstance()
-        calendar.time = Date(list[holder.adapterPosition].timeSet.toLong())
+        calendar.time = Date(item.timeSet.toLong())
         while (calendar.timeInMillis < System.currentTimeMillis()) {
             calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
-        if (calendar.timeInMillis - System.currentTimeMillis() > C.ONE_DAY) {
-            calendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
+
+        startDate = try {
+            Calendar.getInstance().apply {
+                item.startDate.let {
+                    if(it != null && it > 0) timeInMillis = it
+                    else throw NumberFormatException("Invalid value for calendar : startDate")
+                }
+            }
+        } catch (e: NumberFormatException) {
+            e.printStackTrace()
+            null
         }
 
-        val colorTag = list[holder.adapterPosition].colorTag
+        endDate = try {
+            Calendar.getInstance().apply {
+                item.endDate.let {
+                    if(it != null && it > 0) timeInMillis = it
+                    else throw NumberFormatException("Invalid value for calendar : endDate")
+                }
+            }
+        } catch (e: NumberFormatException) {
+            e.printStackTrace()
+            null
+        }
+
+        if(startDate == null && endDate == null) {
+            holder.range.visibility = View.GONE
+            holder.switch.isEnabled = true
+        }
+        else {
+            // alarm is one-time and start date is set
+            // if start date passed, disable alarm
+            if(startDate != null && !item.repeat.any { it > 0 }) {
+                holder.switch.isEnabled = startDate!!.timeInMillis > System.currentTimeMillis()
+            }
+            else holder.switch.isEnabled = true
+
+            // disable switch if alarm is expired
+            with(endDate) {
+                if(this != null) {
+                    val difference = this.timeInMillis - System.currentTimeMillis()
+                    if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
+                        var isValid = false
+                        val tmpCal = Calendar.getInstance()
+                        while(!tmpCal.after(this)) {
+                            tmpCal.add(Calendar.DATE, 1)
+                            if(item.repeat.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
+                                isValid = true
+                                break
+                            }
+                        }
+
+                        if(System.currentTimeMillis() >= this.timeInMillis)
+                            isValid = false
+
+                        holder.switch.isEnabled = isValid
+                    }
+                    else holder.switch.isEnabled = true
+                }
+            }
+
+            val rangeText = when {
+                startDate != null && endDate != null -> {
+                    context.getString(R.string.range_text).format(dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time), dateFormat.format(endDate!!.time), dayOfWeekFormat.format(endDate!!.time))
+                }
+                startDate != null -> {
+                    if(item.repeat.any { it > 0 }) context.getString(R.string.range_begin).format(dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time))
+                    else null
+                }
+                endDate != null -> {
+                    context.getString(R.string.range_until).format(dateFormat.format(endDate!!.time), dayOfWeekFormat.format(endDate!!.time))
+                }
+                else -> {
+                    null
+                }
+            }
+
+            if(rangeText.isNullOrEmpty())
+                holder.range.visibility = View.GONE
+            else {
+                holder.range.visibility = View.VISIBLE
+                holder.range.text = rangeText
+            }
+        }
+
+        val colorTag = item.colorTag
         if(colorTag != 0) {
             holder.colorTag.visibility = View.VISIBLE
-            holder.colorTag.setBackgroundColor(list[holder.adapterPosition].colorTag)
+            holder.colorTag.setBackgroundColor(colorTag)
         }
         else {
             holder.colorTag.visibility = View.GONE
@@ -59,53 +148,59 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
 
         val dayArray = context.resources.getStringArray(R.array.day_of_week_simple)
         val dayLongArray = context.resources.getStringArray(R.array.day_of_week_full)
-        val repeatArray = list[holder.adapterPosition].repeat.mapIndexed { index, i ->
-            if(i == 1) dayArray[index] else null
+        val repeatArray = item.repeat.mapIndexed { index, i ->
+            if(i > 0) dayArray[index] else null
         }.filter { it != null }
         if(repeatArray.isNotEmpty()) {
-            if(repeatArray.size == 7)
-                holder.repeat.text = context.resources.getString(R.string.everyday)
-            else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2)
-                holder.repeat.text = context.resources.getString(R.string.weekend)
-            else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5)
-                holder.repeat.text = context.resources.getString(R.string.weekday)
-            else if(repeatArray.size == 1)
-                holder.repeat.text = dayLongArray[list[holder.adapterPosition].repeat.indexOf(list[holder.adapterPosition].repeat.find { it == 1 }!!)]
-            else holder.repeat.text = repeatArray.joinToString()
+            holder.repeat.text =
+                    if(repeatArray.size == 7) context.resources.getString(R.string.everyday)
+                    else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2) context.resources.getString(R.string.weekend)
+                    else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5) context.resources.getString(R.string.weekday)
+                    else if(repeatArray.size == 1) dayLongArray[item.repeat.indexOf(item.repeat.find { it > 0 }!!)]
+                    else repeatArray.joinToString()
         }
         else {
-            if(calendar.get(Calendar.DAY_OF_YEAR) == Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
-                holder.repeat.text = context.resources.getString(R.string.today)
-            else
-                holder.repeat.text = context.resources.getString(R.string.tomorrow)
+            holder.repeat.text =
+                    when {
+                        DateUtils.isToday(calendar.timeInMillis) -> context.resources.getString(R.string.today)
+                        DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) && startDate == null -> context.resources.getString(R.string.tomorrow) // this can make adapter to know calendar date is tomorrow
+                        startDate != null -> context.getString(R.string.one_time_alarm, dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time))
+                        else -> dateFormat.format(calendar.time)
+                    }
         }
 
-        holder.itemView.setOnClickListener { listener.onItemClicked(it, list[holder.adapterPosition]) }
+        holder.itemView.setOnClickListener { listener.onItemClicked(it, item) }
         holder.switch.setOnCheckedChangeListener(null)
-        holder.switch.isChecked = list[holder.adapterPosition].on_off != 0
-        if(list[holder.adapterPosition].on_off != 0) {
+        holder.switch.isChecked = item.on_off != 0
+
+        if(item.on_off != 0) {
             holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
             holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
             holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
+            holder.range.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
         }
         else {
             holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
             holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
             holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
+            holder.range.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
         }
+
         holder.switch.setOnCheckedChangeListener { _, b ->
             if(!b) {
                 holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
                 holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
                 holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
+                holder.range.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
             }
             else {
                 holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
                 holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
                 holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
+                holder.range.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
             }
 
-            listener.onItemStatusChanged(b, list[holder.adapterPosition])
+            listener.onItemStatusChanged(b, item)
         }
     }
     fun removeItem(index: Int) {
@@ -130,6 +225,7 @@ class AlarmListAdapter(var list: ArrayList<AlarmItem>, var context: Context): Re
         var repeat: TextView = view.repeat
         var switch: Switch = view.on_off
         var colorTag: View = view.colorTag
+        var range: TextView = view.range
     }
 
     interface OnItemClickListener {

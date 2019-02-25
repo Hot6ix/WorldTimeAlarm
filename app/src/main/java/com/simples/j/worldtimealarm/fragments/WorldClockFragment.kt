@@ -33,28 +33,36 @@ import com.simples.j.worldtimealarm.support.ClockListAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
 import kotlinx.android.synthetic.main.fragment_world_clock.*
+import kotlinx.coroutines.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A simple [Fragment] subclass.
  *
  */
-class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener {
+class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener, CoroutineScope {
 
     private lateinit var clockListAdapter: ClockListAdapter
-    private lateinit var calendar: Calendar
-    private lateinit var timeFormat: DateFormat
+    private lateinit var timeFormat: SimpleDateFormat
     private lateinit var dateFormat: DateFormat
+    private lateinit var dayOfWeekFormat: SimpleDateFormat
     private lateinit var swipeHelper: ItemTouchHelper
     private lateinit var swipeController: ListSwipeController
     private lateinit var recyclerLayoutManager: LinearLayoutManager
     private lateinit var fragmentLayout: CoordinatorLayout
     private lateinit var timeZoneChangedReceiver: UpdateRequestReceiver
     private lateinit var timeZone: TimeZone
+
+    private var calendar = Calendar.getInstance()
     private var clockItems = ArrayList<ClockItem>()
     private var removedItem: ClockItem? = null
+
+    private val job = SupervisorJob()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -67,7 +75,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        calendar = Calendar.getInstance()
         val isUserTimeZoneEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(resources.getString(R.string.setting_converter_timezone_key), false)
         val converterTimezoneId = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), TimeZone.getDefault().id)
         timeZone =
@@ -79,10 +86,11 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         timeFormat.timeZone = timeZone
         dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
         dateFormat.timeZone = timeZone
+        dayOfWeekFormat = SimpleDateFormat("E", Locale.getDefault())
 
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
-        world_date.text = dateFormat.format(calendar.time)
+        world_date.text = getString(R.string.one_time_alarm, dateFormat.format(calendar.time), dayOfWeekFormat.format(calendar.time))
 
         time_zone.setOnClickListener(this)
         new_timezone.setOnClickListener(this)
@@ -103,7 +111,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             calendar.set(Calendar.DAY_OF_MONTH, day)
             dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
             dateFormat.timeZone = timeZone
-            world_date.text = dateFormat.format(calendar.time)
+            world_date.text = getString(R.string.one_time_alarm, dateFormat.format(calendar.time), dayOfWeekFormat.format(calendar.time))
             clockListAdapter.notifyDataSetChanged()
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
 
@@ -116,28 +124,35 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         time_zone.text = timeZone.id.replace("_", " ")
 
-        clockItems = DatabaseCursor(context!!).getClockList()
-        clockListAdapter = ClockListAdapter(context!!, clockItems, calendar)
-        recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
-        clockList.layoutManager = recyclerLayoutManager
-        clockList.adapter = clockListAdapter
-        clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
+        launch(coroutineContext) {
+            withContext(Dispatchers.IO) {
+                clockItems = DatabaseCursor(context!!).getClockList()
+            }
 
-        swipeController = ListSwipeController()
-        swipeHelper = ItemTouchHelper(swipeController)
-        swipeHelper.attachToRecyclerView(clockList)
-        swipeController.setOnSwipeListener(this)
+            clockListAdapter = ClockListAdapter(context!!, clockItems, calendar)
+            recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
+            clockList.layoutManager = recyclerLayoutManager
+            clockList.adapter = clockListAdapter
+            clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
+
+            swipeController = ListSwipeController()
+            swipeController.setOnSwipeListener(this@WorldClockFragment)
+
+            swipeHelper = ItemTouchHelper(swipeController)
+            swipeHelper.attachToRecyclerView(clockList)
+            setEmptyMessage()
+        }
 
         timeZoneChangedReceiver = UpdateRequestReceiver()
-        val intentFilter = IntentFilter()
-        intentFilter.addAction(ACTION_TIME_ZONE_CHANGED)
-        context!!.registerReceiver(timeZoneChangedReceiver, intentFilter)
-        setEmptyMessage()
+        val intentFilter = IntentFilter().apply {
+            addAction(ACTION_TIME_ZONE_CHANGED)
+        }
+        context?.registerReceiver(timeZoneChangedReceiver, intentFilter)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        context!!.unregisterReceiver(timeZoneChangedReceiver)
+        context?.unregisterReceiver(timeZoneChangedReceiver)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -222,7 +237,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
-        world_date.text = dateFormat.format(calendar.time)
+        world_date.text = getString(R.string.one_time_alarm, dateFormat.format(calendar.time), dayOfWeekFormat.format(calendar.time))
     }
 
     private fun setEmptyMessage() {

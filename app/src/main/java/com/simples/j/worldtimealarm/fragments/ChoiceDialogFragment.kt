@@ -1,9 +1,9 @@
 package com.simples.j.worldtimealarm.fragments
 
 import android.app.Dialog
-import android.app.DialogFragment
 import android.content.DialogInterface
 import android.os.Bundle
+import android.support.v4.app.DialogFragment
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import com.simples.j.worldtimealarm.R
@@ -16,31 +16,39 @@ import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
  */
 class ChoiceDialogFragment: DialogFragment() {
 
-    private lateinit var listener: OnDialogEventListener
+    private var listener: OnDialogEventListener? = null
     private var lastChoice: Int = -1
+    private var currentChoice: Int = -1
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        Log.d(C.TAG, "Dialog created")
-        val array = arguments.getStringArray(CONTENT_ARRAY)
-        var selected = lastChoice
+        val array = arguments?.getStringArray(CONTENT_ARRAY)
+        if(savedInstanceState != null) {
+            currentChoice = savedInstanceState.getInt(CURRENT_CHOICE)
+        }
 
-        val dialog = AlertDialog.Builder(activity)
-                .setTitle(arguments.getString(CONTENT_TITLE))
-                .setSingleChoiceItems(array, selected, { dialogInterface, index ->
-                    listener.onItemSelected(dialogInterface, index)
-                    selected = lastChoice
-                })
-                .setNegativeButton(R.string.cancel, { dialogInterface, index ->
-                    listener.onNegativeButtonClickListener(dialogInterface, index)
-                })
-                .setPositiveButton(R.string.ok, { dialogInterface, index ->
-                    listener.onPositiveButtonClickListener(dialogInterface, index)
-                })
+        val dialog = AlertDialog.Builder(context!!)
+                .setTitle(arguments?.getString(CONTENT_TITLE))
+                .setSingleChoiceItems(array, lastChoice) { dialogInterface, index ->
+                    listener?.onItemSelect(dialogInterface, index)
+                    currentChoice = index
+                }
+                .setPositiveButton(R.string.ok) { dialogInterface, _ ->
+                    listener?.onPositiveButtonClick(dialogInterface, currentChoice)
+                }
+                .setNegativeButton(R.string.cancel) { dialogInterface, index ->
+                    listener?.onNegativeButtonClick(dialogInterface, index)
+                }
         return dialog.create()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putInt(CURRENT_CHOICE, currentChoice)
+    }
+
     override fun onDismiss(dialog: DialogInterface?) {
-        listener.onDialogDismissListener(dialog)
+        listener?.onDialogDismiss(dialog)
         super.onDismiss(dialog)
     }
 
@@ -66,7 +74,7 @@ class ChoiceDialogFragment: DialogFragment() {
 
        const val CONTENT_TITLE = "CONTENT_TITLE"
        const val CONTENT_ARRAY = "CONTENT_ARRAY"
-
+       const val CURRENT_CHOICE = "CURRENT_CHOICE"
    }
 
 }

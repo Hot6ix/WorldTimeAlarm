@@ -13,7 +13,7 @@ import com.simples.j.worldtimealarm.R
 import kotlinx.android.synthetic.main.alarm_day_item.view.*
 import kotlinx.android.synthetic.main.color_tag_item.view.*
 
-class ColorGridAdapter(private val context: Context, private val defaultColor: Int): RecyclerView.Adapter<ColorGridAdapter.ViewHolder>() {
+class ColorGridAdapter(context: Context, private var defaultColor: Int): RecyclerView.Adapter<ColorGridAdapter.ViewHolder>() {
 
     private val colorList = context.resources.getIntArray(R.array.color_list)
     private var lastChecked: Button? = null
@@ -50,6 +50,10 @@ class ColorGridAdapter(private val context: Context, private val defaultColor: I
 
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.colorItemClickListener = listener
+    }
+
+    fun setSelected(color: Int) {
+        defaultColor = color
     }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {

@@ -4,7 +4,7 @@
     <string name="main_label">报警</string>
     <string name="action_settings">设置</string>
     <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
-    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/6060648491</string>
+    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/2970704508</string>
     <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">当前时区</string>
     <string name="set_time_zone">选定的时区</string>
@@ -12,6 +12,7 @@
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">搜索</string>
+    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/帮助</string>
 
     <!-- Show info -->
     <string name="alarm_empty">没有警报设置</string>
@@ -26,6 +27,7 @@
     <string name="select_vibration">振动</string>
     <string name="no_ringtone">没有铃声</string>
     <string name="no_vibrator">没有振动</string>
+    <string name="not_set">没有设置</string>
     <string name="timezone">时区</string>
     <string name="label">标签</string>
     <string name="slow">慢</string>
@@ -54,6 +56,15 @@
     <string name="new_alarm_long">新警报</string>
     <string name="new_alarm_short">新警报</string>
     <string name="expected_time">闹钟将设置为下午%1$s</string>
+    <string name="range_start">开始日期</string>
+    <string name="range_end">结束日期</string>
+    <string name="range_not_set">没有设置</string>
+    <string name="range_text">%1$s (%2$s) ~ %3$s (%4$s)</string>
+    <string name="range_until">直到%1$s (%2$s)</string>
+    <string name="range_begin">从%1$s (%2$s)开始</string>
+    <string name="one_time_alarm">%1$s (%2$s)</string>
+    <string name="last_alarm">最后的警报</string>
+    <string name="last_alarm_with_time">%1$s - 最后的警报</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>
@@ -65,7 +76,14 @@
     <string name="alarm_on_repeat_every">每天%1$s点设置闹钟。</string>
     <string name="alarm_dismissed">报警解除。</string>
     <string name="volume_is_muted">警报音量被静音。</string>
-    <string name="exist_timezone">The timezone is already exist.</string>
+    <string name="exist_timezone">选定的时区已在列表中。</string>
+    <string name="start_date_removed">开始日期已删除。</string>
+    <string name="start_date_and_time_is_wrong">如果仅设置开始日期，则设置时间必须晚于现在。</string>
+    <string name="end_date_removed">结束日期已删除。</string>
+    <string name="end_date_earlier_than_today">结束日期不能早于今天。</string>
+    <string name="end_date_earlier_than_start_date">结束日期不能早于开始日期。</string>
+    <string name="must_check_repeat">必须至少检查一天的重复日。</string>
+    <string name="invalid_repeat">必须检查有效时间或重复日，如果范围少于一周。</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>
@@ -88,8 +106,9 @@
     <string name="setting_converter_goto">更改日期和时间</string>
 
     <string name="setting_group_3_key">Others</string>
-
     <string name="setting_group_3">其他</string>
+    <string name="setting_help_key">HELP</string>
+    <string name="setting_help_title">帮助</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">版</string>
     <string name="setting_license_key">LICENSE</string>

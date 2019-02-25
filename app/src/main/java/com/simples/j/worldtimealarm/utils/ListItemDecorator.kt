@@ -14,7 +14,7 @@ import com.simples.j.worldtimealarm.R
  */
 class ListItemDecorator(private var context: Context, ori: Int, private var divider: Drawable): DividerItemDecoration(context, ori) {
 
-    override fun onDraw(c: Canvas?, parent: RecyclerView, state: RecyclerView.State?) {
+    override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         val left = context.resources.getDimensionPixelSize(R.dimen.padding20)
         val right = parent.width - context.resources.getDimensionPixelSize(R.dimen.padding20)
 

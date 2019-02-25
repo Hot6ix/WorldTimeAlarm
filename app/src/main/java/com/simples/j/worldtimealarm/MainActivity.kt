@@ -1,64 +1,37 @@
 package com.simples.j.worldtimealarm
 
-import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
-import android.os.Message
 import android.support.constraint.ConstraintLayout
-import android.support.constraint.ConstraintSet
 import android.support.design.widget.TabLayout
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.transition.AutoTransition
-import android.transition.TransitionManager
-import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.ImageView
-import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
-import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.fragments.AlarmListFragment
-import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.support.FragmentPagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_wake_up.*
+import kotlinx.coroutines.*
+import kotlin.coroutines.CoroutineContext
 
-class MainActivity : AppCompatActivity(){
+class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private lateinit var fragmentPagerAdapter: FragmentStatePagerAdapter
-    private var adisLoaded = true
+
+    private val job = SupervisorJob()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-//        testWakeUpActivity()
-
-        MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
-
-        adViewMain.adListener = object: AdListener() {
-
-            override fun onAdLoaded() {
-                super.onAdLoaded()
-                adisLoaded = true
-                adViewMain.visibility = View.VISIBLE
-//                organizeLayout()
+        launch(coroutineContext) {
+            withContext(Dispatchers.IO) {
+                MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
             }
-
-            override fun onAdFailedToLoad(errorCode: Int) {
-                super.onAdFailedToLoad(errorCode)
-                adisLoaded = false
-                adViewMain.visibility = View.INVISIBLE
-//                organizeLayout()
-            }
-
+            adViewMain.loadAd(AdRequest.Builder().build())
         }
-
-        adViewMain.loadAd(AdRequest.Builder().build())
 
         val tab01 = tab.newTab()
                 .setIcon(R.drawable.ic_action_alarm_white)
@@ -90,9 +63,11 @@ class MainActivity : AppCompatActivity(){
             Configuration.ORIENTATION_LANDSCAPE -> tab.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, (50 * resources.displayMetrics.density).toInt())
         }
 
-
         fragmentPagerAdapter = FragmentPagerAdapter(supportFragmentManager)
-        fragment_pager.adapter = fragmentPagerAdapter
+        fragment_pager.apply {
+            adapter = fragmentPagerAdapter
+            offscreenPageLimit = 3
+        }
 
         if(savedInstanceState != null) {
             tab.getTabAt(savedInstanceState.getInt(TAB_STATE, 0))?.select()
@@ -105,48 +80,9 @@ class MainActivity : AppCompatActivity(){
         super.onSaveInstanceState(outState)
     }
 
-    override fun onResume() {
-        super.onResume()
-        if(!adisLoaded) adViewMain.loadAd(AdRequest.Builder().build())
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         adViewMain.destroy()
-    }
-
-    fun organizeLayout() {
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(main_layout)
-
-        if(!adisLoaded) {
-            constraintSet.connect(fragment_pager.id, ConstraintSet.TOP, main_layout.id, ConstraintSet.TOP)
-        }
-        else {
-            constraintSet.connect(fragment_pager.id, ConstraintSet.TOP, adViewMain.id, ConstraintSet.BOTTOM)
-        }
-
-        val transition = AutoTransition()
-        transition.duration = 300
-        transition.interpolator = AccelerateDecelerateInterpolator()
-
-        TransitionManager.beginDelayedTransition(main_layout, transition)
-        constraintSet.applyTo(main_layout)
-
-    }
-
-    fun testWakeUpActivity() {
-        // Sample alarm item to start wakeup activity
-        val item = AlarmItem(999, "Asia/Taipei", "1532695080742", intArrayOf(0,0,0,0,0,0,0,0), null, null, 6000, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 0, 999999, -7508381, 999)
-
-        val wakeUpIntent = Intent(this, WakeUpActivity::class.java)
-        val bundle = Bundle()
-        bundle.putParcelable(AlarmReceiver.ITEM, item)
-        wakeUpIntent.putExtra(AlarmReceiver.OPTIONS, bundle)
-        wakeUpIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        wakeUpIntent.action = intent.action
-        wakeUpIntent.putExtra(AlarmReceiver.OPTIONS, bundle)
-        startActivity(wakeUpIntent)
     }
 
     companion object {

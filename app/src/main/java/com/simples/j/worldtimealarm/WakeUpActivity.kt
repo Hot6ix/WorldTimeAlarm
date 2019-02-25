@@ -25,6 +25,7 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ImageView
 import android.widget.Toast
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
@@ -53,10 +54,17 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     private var player: MediaPlayer? = null
     private var vibrator: Vibrator? = null
     private var isMenuExpanded = false
+    private var isExpired = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wake_up)
+        isActivityRunning = true
+
+        // fix floating action button bugs on version 28
+        interaction_button.scaleType = ImageView.ScaleType.CENTER
+        snooze.scaleType = ImageView.ScaleType.CENTER
+        dismiss.scaleType = ImageView.ScaleType.CENTER
 
         MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
         adViewWakeUp.loadAd(AdRequest.Builder().build())
@@ -77,19 +85,19 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             clear()
             Log.d(C.TAG, "Alarm muted : ID(${item.notiId+1})")
         }
-        if(sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0").toInt() != 0) {
-            timerHandler.postDelayed(handlerRunnable, sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0").toLong())
+
+        if(sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0")?.toInt() != 0) {
+            timerHandler.postDelayed(handlerRunnable, sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0")!!.toLong())
         }
 
         wakeLocker = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, C.WAKE_TAG)
         wakeLocker.acquire(AlarmReceiver.WAKE_LONG.toLong())
 
-        isActivityRunning = true
-
         if(intent.extras != null) {
             val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
-            item = option.getParcelable(AlarmReceiver.ITEM)
-//            Log.d(C.TAG, "Alarm alert : Info($item)")
+            item = option.getParcelable(AlarmReceiver.ITEM)!!
+            isExpired = intent.getBooleanExtra(AlarmReceiver.EXPIRED, false)
+
             Log.d(C.TAG, "Alarm alerted : ID(${item.notiId+1})")
 
             if(item.colorTag != 0) {
@@ -112,10 +120,11 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .setUsage(AudioAttributes.USAGE_ALARM)
             if(ringtoneUri != null && ringtoneUri.isNotEmpty() && ringtoneUri != "null") {
-                player = MediaPlayer()
-                player?.setDataSource(applicationContext, Uri.parse(item.ringtone))
-                player?.setAudioAttributes(audioAttrs.build())
-                player?.isLooping = true
+                player = MediaPlayer().apply {
+                    setDataSource(applicationContext, Uri.parse(item.ringtone))
+                    setAudioAttributes(audioAttrs.build())
+                    isLooping = true
+                }
                 player?.prepare()
                 player?.start()
 
@@ -137,8 +146,13 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 //                val difference = TimeZone.getTimeZone(timeZone).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(timeZone).dstSavings - TimeZone.getDefault().dstSavings
                 val difference = TimeZone.getTimeZone(timeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
                 time_zone_layout.visibility = View.VISIBLE
-                time_zone_name_wake.text = item.timeZone
+                val filteredTimeZone = item.timeZone.split("/").let {
+                    if(it.size > 1) it[it.lastIndex]
+                    else it[0]
+                }.replace("_", " ")
+                time_zone_name_wake.text = filteredTimeZone
                 time_zone_offset_wake.text = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
+                time_zone_time_wake_am_pm.timeZone = timeZone
                 time_zone_time_wake.timeZone = timeZone
             }
 
@@ -176,7 +190,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     override fun onBackPressed() {
         super.onBackPressed()
 
-        Toast.makeText(applicationContext, "Alarm dismissed.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(applicationContext, getString(R.string.alarm_dismissed), Toast.LENGTH_SHORT).show()
     }
 
     override fun onClick(view: View) {
@@ -255,16 +269,29 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             notificationManager.createNotificationChannel(notificationChannel)
         }
 
+        val title = when {
+            isExpired && !item.label.isNullOrEmpty() -> {
+                resources.getString(R.string.last_alarm_with_time).format(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
+            }
+            !item.label.isNullOrEmpty() -> {
+                SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))
+            }
+            isExpired -> {
+                resources.getString(R.string.last_alarm)
+            }
+            else -> {
+                resources.getString(R.string.alarm)
+            }
+        }
         val notification = NotificationCompat.Builder(applicationContext, applicationContext.packageName)
                 .setVibrate(LongArray(0))
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
-                .setContentTitle(resources.getString(R.string.alarm))
+                .setContentTitle(title)
                 .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
                 .setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setOngoing(true)
 
         if(item.label != null && item.label!!.isNotEmpty()) {
-            notification.setContentTitle(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
             notification.setContentText(item.label)
             notification.setStyle(NotificationCompat.BigTextStyle().bigText(item.label))
         }

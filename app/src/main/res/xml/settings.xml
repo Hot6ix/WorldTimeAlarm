@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
         android:key="@string/setting_group_1_key"
@@ -8,7 +9,7 @@
         <com.simples.j.worldtimealarm.support.SeekBarPreference
             android:key="@string/setting_alarm_volume_key"
             android:title="@string/setting_alarm_volume_title"
-            android:layout="@layout/preference_seekbar"/>
+            android:layout="@layout/preference_seekbar" />
 
         <SwitchPreference
             android:defaultValue="false"
@@ -38,6 +39,16 @@
 
     <PreferenceCategory
         android:title="@string/setting_group_3" >
+
+        <Preference
+            android:key="@string/setting_help_key"
+            android:title="@string/setting_help_title">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="@string/help_link"/>
+
+        </Preference>
 
         <Preference
             android:key="@string/setting_converter_goto_key"

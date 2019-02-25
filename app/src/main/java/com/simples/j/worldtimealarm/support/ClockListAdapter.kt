@@ -35,7 +35,7 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
     override fun getItemViewType(position: Int): Int = 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val timeZone = TimeZone.getTimeZone(list[holder.adapterPosition].timezone.replace(" ", "_"))
+        val timeZone = TimeZone.getTimeZone(list[holder.adapterPosition].timezone?.replace(" ", "_"))
         val expectedCalendar = Calendar.getInstance(timeZone)
         expectedCalendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
 
@@ -52,9 +52,11 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
         timeFormat.timeZone = timeZone
         val dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
         dateFormat.timeZone = timeZone
+        val dayOfWeekFormat = SimpleDateFormat("E", Locale.getDefault())
+        dayOfWeekFormat.timeZone = timeZone
         holder.amPm.text = if(expectedCalendar.get(Calendar.AM_PM) == 0) context.getString(R.string.am) else context.getString(R.string.pm)
         holder.timeZoneTime.text = timeFormat.format(expectedCalendar.time)
-        holder.timeZoneDate.text = dateFormat.format(expectedCalendar.time)
+        holder.timeZoneDate.text = context.getString(R.string.one_time_alarm, dateFormat.format(expectedCalendar.time), dayOfWeekFormat.format(expectedCalendar.time))
     }
 
     fun removeItem(index: Int) {

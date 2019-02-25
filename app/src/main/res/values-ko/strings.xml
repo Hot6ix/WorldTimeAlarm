@@ -4,7 +4,7 @@
     <string name="main_label">알람</string>
     <string name="action_settings">설정</string>
     <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
-    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/6060648491</string>
+    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/2970704508</string>
     <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">현재 시간대</string>
     <string name="set_time_zone">설정된 시간대</string>
@@ -12,6 +12,7 @@
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">검색</string>
+    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/도움말</string>
 
     <!-- Show info -->
     <string name="alarm_empty">알람 없음</string>
@@ -24,8 +25,9 @@
     <string name="select_timezone">시간대</string>
     <string name="select_ringtone">벨소리</string>
     <string name="select_vibration">진동</string>
-    <string name="no_ringtone">사용 안함</string>
-    <string name="no_vibrator">사용 안함</string>
+    <string name="no_ringtone">사용 안 함</string>
+    <string name="no_vibrator">사용 안 함</string>
+    <string name="not_set">사용 안 함</string>
     <string name="timezone">시간대</string>
     <string name="label">라벨</string>
     <string name="slow">느림</string>
@@ -41,7 +43,7 @@
     <string name="everyday">매일</string>
     <string name="am">오전</string>
     <string name="pm">오후</string>
-    <string name="undo">실행취소</string>
+    <string name="undo">실행 취소</string>
     <string name="alarm">알람</string>
     <string name="snooze">다시 알림</string>
     <string name="dismiss">알람 해제</string>
@@ -54,6 +56,15 @@
     <string name="new_alarm_long">새 알람</string>
     <string name="new_alarm_short">새 알람</string>
     <string name="expected_time">%1$s에 알람이 울립니다.</string>
+    <string name="range_start">시작일</string>
+    <string name="range_end">종료일</string>
+    <string name="range_not_set">설정 안 함</string>
+    <string name="range_text">%1$s (%2$s) ~ %3$s (%4$s)</string>
+    <string name="range_until">%1$s (%2$s) 까지</string>
+    <string name="range_begin">%1$s (%2$s) 부터</string>
+    <string name="one_time_alarm">%1$s (%2$s)</string>
+    <string name="last_alarm">마지막 알람</string>
+    <string name="last_alarm_with_time">%1$s - 마지막 알람</string>
 
     <!-- Message -->
     <string name="alarm_removed">알람이 삭제되었습니다.</string>
@@ -66,6 +77,13 @@
     <string name="alarm_dismissed">알람이 해제되었습니다.</string>
     <string name="volume_is_muted">알람 볼륨이 음소거 상태입니다.</string>
     <string name="exist_timezone">이미 존재하는 시간대입니다.</string>
+    <string name="start_date_removed">시작일이 제거되었습니다.</string>
+    <string name="start_date_and_time_is_wrong">시작일만 설정한 경우, 알람 시간을 현재 이후로 설정해야 합니다.</string>
+    <string name="end_date_removed">종료일이 제거되었습니다..</string>
+    <string name="end_date_earlier_than_today">종료일은 오늘 이후로 설정해야 합니다.</string>
+    <string name="end_date_earlier_than_start_date">종료일은 시작일 이후로 설정해야 합니다.</string>
+    <string name="must_check_repeat">하나 이상의 반복할 요일을 선택해야 합니다.</string>
+    <string name="invalid_repeat">설정된 범위가 일주일 이하인 경우 범위 내 유효한 시간 또는 반복 요일을 선택해야 합니다.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>
@@ -89,6 +107,8 @@
 
     <string name="setting_group_3_key">Others</string>
     <string name="setting_group_3">기타</string>
+    <string name="setting_help_key">HELP</string>
+    <string name="setting_help_title">도움말</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">버전</string>
     <string name="setting_license_key">LICENSE</string>
@@ -97,7 +117,7 @@
     <string name="setting_source_title">GitHub 놀러가기</string>
 
     <string-array name="alarm_mute">
-        <item>사용 안함</item>
+        <item>사용 안 함</item>
         <item>1분</item>
         <item>2분</item>
         <item>5분</item>
@@ -249,7 +269,7 @@
     </array>
 
     <array name="snooze_array">
-        <item>사용 안함</item>
+        <item>사용 안 함</item>
         <item>5분</item>
         <item>10분</item>
         <item>15분</item>
