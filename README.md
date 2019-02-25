@@ -29,12 +29,11 @@ Version 1.3
 - Add app license
 
 Version 1.4
-
-Fix alarm scheduling bug
-Add start/end date features
-Show day of week
-Improve app speed
-Add help page
+- Fix alarm scheduling bug
+- Add start/end date features
+- Show day of week
+- Improve app speed
+- Add help page
 
 FAQ
 
