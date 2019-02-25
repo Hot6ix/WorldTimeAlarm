@@ -13,9 +13,11 @@ import com.simples.j.worldtimealarm.R;
 import com.simples.j.worldtimealarm.etc.AlarmItem;
 import com.simples.j.worldtimealarm.etc.C;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * Created by j on 28/02/2018.
@@ -125,7 +127,7 @@ public class AlarmController {
                     // currentDay is not contained in repeat
                     // If today is not after from repeated day back to current week
                     if(repeat.get(repeat.size()-1) < startIndex) {
-                        calendar.set(Calendar.WEEK_OF_MONTH, start.get(Calendar.WEEK_OF_MONTH));
+//                        calendar.set(Calendar.WEEK_OF_MONTH, start.get(Calendar.WEEK_OF_MONTH));
                         calendar.add(Calendar.WEEK_OF_MONTH, 1);
                     }
 
@@ -173,7 +175,7 @@ public class AlarmController {
         PendingIntent mainIntent = PendingIntent.getActivity(context, notiId, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, notiId+1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(), mainIntent), alarmIntent);
-        Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance().format(calendar.getTime()) + ", Info(" + item + "), " + type);
+        Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.getDefault()).format(calendar.getTime()) + ", Info(" + item + "), " + type);
         Log.d(C.TAG, "Alarm scheduled : ID(" + notiId+1 + ")");
     }
 

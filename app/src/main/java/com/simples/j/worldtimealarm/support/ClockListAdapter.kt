@@ -52,9 +52,11 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
         timeFormat.timeZone = timeZone
         val dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
         dateFormat.timeZone = timeZone
+        val dayOfWeekFormat = SimpleDateFormat("E", Locale.getDefault())
+        dayOfWeekFormat.timeZone = timeZone
         holder.amPm.text = if(expectedCalendar.get(Calendar.AM_PM) == 0) context.getString(R.string.am) else context.getString(R.string.pm)
         holder.timeZoneTime.text = timeFormat.format(expectedCalendar.time)
-        holder.timeZoneDate.text = dateFormat.format(expectedCalendar.time)
+        holder.timeZoneDate.text = context.getString(R.string.one_time_alarm, dateFormat.format(expectedCalendar.time), dayOfWeekFormat.format(expectedCalendar.time))
     }
 
     fun removeItem(index: Int) {

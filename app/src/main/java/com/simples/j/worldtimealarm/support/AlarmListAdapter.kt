@@ -4,6 +4,7 @@ import android.content.Context
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import android.widget.Switch
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.C
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -162,7 +164,8 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
                     when {
                         DateUtils.isToday(calendar.timeInMillis) -> context.resources.getString(R.string.today)
                         DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) && startDate == null -> context.resources.getString(R.string.tomorrow) // this can make adapter to know calendar date is tomorrow
-                        else -> context.getString(R.string.one_time_alarm, dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time))
+                        startDate != null -> context.getString(R.string.one_time_alarm, dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time))
+                        else -> dateFormat.format(calendar.time)
                     }
         }
 

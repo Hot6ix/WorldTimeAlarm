@@ -563,7 +563,11 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         }
     }
 
-    private fun getDefaultOptionList(defaultRingtone: RingtoneItem = ringtoneList[1], defaultVibration: PatternItem = vibratorPatternList[0], defaultSnooze: Long = snoozeValues[0], label: String = "", colorTag: Int = 0): ArrayList<OptionItem> {
+    private fun getDefaultOptionList(defaultRingtone: RingtoneItem = ringtoneList[1],
+                                     defaultVibration: PatternItem = vibratorPatternList[0],
+                                     defaultSnooze: Long = snoozeValues[0],
+                                     label: String = "",
+                                     colorTag: Int = 0): ArrayList<OptionItem> {
         val array = ArrayList<OptionItem>()
         val options = resources.getStringArray(R.array.alarm_options)
         currentRingtone = defaultRingtone
