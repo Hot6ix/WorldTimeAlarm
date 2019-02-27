@@ -152,7 +152,13 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 if(item != null) {
 //                    item.id = dbCursor.getAlarmId(item.notiId)
                     alarmItems.add(item)
-                    alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
+                    if(::alarmListAdapter.isInitialized) alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
+                    else {
+                        launch(coroutineContext) {
+                            job.join()
+
+                        }
+                    }
                     alarmList.scrollToPosition(alarmItems.size - 1)
                     setEmptyMessage()
                     showSnackBar(item)
@@ -166,7 +172,13 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         if(it.notiId == item.notiId) index = i
                     }
                     alarmItems[index] = item
-                    alarmListAdapter.notifyItemChanged(index)
+                    if(::alarmListAdapter.isInitialized) alarmListAdapter.notifyItemChanged(index)
+                    else {
+                        launch(coroutineContext) {
+                            job.join()
+
+                        }
+                    }
                     showSnackBar(item)
                 }
             }

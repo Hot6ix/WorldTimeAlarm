@@ -173,7 +173,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
         }
 
-        clockListAdapter.notifyDataSetChanged()
+        if(::clockListAdapter.isInitialized) clockListAdapter.notifyDataSetChanged()
+        else {
+            launch(coroutineContext) {
+                job.join()
+                clockListAdapter.notifyDataSetChanged()
+            }
+        }
     }
 
     override fun onClick(view: View?) {

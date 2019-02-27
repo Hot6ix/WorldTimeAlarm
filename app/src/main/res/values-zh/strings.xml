@@ -84,6 +84,7 @@
     <string name="end_date_earlier_than_start_date">结束日期不能早于开始日期。</string>
     <string name="must_check_repeat">必须至少检查一天的重复日。</string>
     <string name="invalid_repeat">必须检查有效时间或重复日，如果范围少于一周。</string>
+    <string name="alarm_no_long_fires">警报(%1$s)不再触发。</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>

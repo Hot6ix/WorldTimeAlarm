@@ -84,6 +84,7 @@
     <string name="end_date_earlier_than_start_date">종료일은 시작일 이후로 설정해야 합니다.</string>
     <string name="must_check_repeat">하나 이상의 반복할 요일을 선택해야 합니다.</string>
     <string name="invalid_repeat">설정된 범위가 일주일 이하인 경우 범위 내 유효한 시간 또는 반복 요일을 선택해야 합니다.</string>
+    <string name="alarm_no_long_fires">알람(%1$s)이  더이상 울리지 않습니다.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>

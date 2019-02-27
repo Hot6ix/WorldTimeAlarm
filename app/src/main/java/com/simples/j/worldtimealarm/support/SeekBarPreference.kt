@@ -28,30 +28,28 @@ class SeekBarPreference(context: Context, attributeSet: AttributeSet): Preferenc
         super.onBindViewHolder(holder)
 
         val layout = holder!!.itemView
-        if(layout != null) {
-            image = layout.findViewById(R.id.volume_level)
-            seekBar = layout.findViewById(R.id.pref_seekbar)
-            seekBar.max = audioManager.getStreamMaxVolume(STREAM_ALARM)
-            seekBar.progress = audioManager.getStreamVolume(STREAM_ALARM)
-            image.setImageResource(if(audioManager.getStreamVolume(STREAM_ALARM) == 0) R.drawable.ic_volume_mute else R.drawable.ic_volume_high)
+        image = layout.findViewById(R.id.volume_level)
+        seekBar = layout.findViewById(R.id.pref_seekbar)
+        seekBar.max = audioManager.getStreamMaxVolume(STREAM_ALARM)
+        seekBar.progress = audioManager.getStreamVolume(STREAM_ALARM)
+        image.setImageResource(if(audioManager.getStreamVolume(STREAM_ALARM) == 0) R.drawable.ic_volume_mute else R.drawable.ic_volume_high)
 
-            val observer = object: ContentObserver(seekBar.handler) {
-                override fun onChange(selfChange: Boolean) {
-                    seekBar.progress = audioManager.getStreamVolume(STREAM_ALARM)
-                }
+        val observer = object: ContentObserver(seekBar.handler) {
+            override fun onChange(selfChange: Boolean) {
+                seekBar.progress = audioManager.getStreamVolume(STREAM_ALARM)
+            }
+        }
+
+        seekBar.addOnAttachStateChangeListener(object: View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(view: View?) {
+                context.contentResolver.registerContentObserver(Settings.System.CONTENT_URI, true, observer)
             }
 
-            seekBar.addOnAttachStateChangeListener(object: View.OnAttachStateChangeListener {
-                override fun onViewAttachedToWindow(view: View?) {
-                    context.contentResolver.registerContentObserver(Settings.System.CONTENT_URI, true, observer)
-                }
-
-                override fun onViewDetachedFromWindow(view: View?) {
-                    context.contentResolver.unregisterContentObserver(observer)
-                }
-            })
-            seekBar.setOnSeekBarChangeListener(this)
-        }
+            override fun onViewDetachedFromWindow(view: View?) {
+                context.contentResolver.unregisterContentObserver(observer)
+            }
+        })
+        seekBar.setOnSeekBarChangeListener(this)
     }
 
     override fun onProgressChanged(seekBar: SeekBar?, value: Int, bool: Boolean) {
