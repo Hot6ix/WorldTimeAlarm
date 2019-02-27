@@ -17,6 +17,7 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
+import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -34,7 +35,6 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
 import kotlinx.android.synthetic.main.fragment_world_clock.*
 import kotlinx.coroutines.*
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.coroutines.CoroutineContext
@@ -47,8 +47,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
     private lateinit var clockListAdapter: ClockListAdapter
     private lateinit var timeFormat: SimpleDateFormat
-    private lateinit var dateFormat: DateFormat
-    private lateinit var dayOfWeekFormat: SimpleDateFormat
     private lateinit var swipeHelper: ItemTouchHelper
     private lateinit var swipeController: ListSwipeController
     private lateinit var recyclerLayoutManager: LinearLayoutManager
@@ -84,13 +82,10 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         calendar.timeZone = timeZone
         timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
-        dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
-        dateFormat.timeZone = timeZone
-        dayOfWeekFormat = SimpleDateFormat("E", Locale.getDefault())
 
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
-        world_date.text = getString(R.string.one_time_alarm, dateFormat.format(calendar.time), dayOfWeekFormat.format(calendar.time))
+        world_date.text = DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
 
         time_zone.setOnClickListener(this)
         new_timezone.setOnClickListener(this)
@@ -109,9 +104,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             calendar.set(Calendar.YEAR, year)
             calendar.set(Calendar.MONTH, month)
             calendar.set(Calendar.DAY_OF_MONTH, day)
-            dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
-            dateFormat.timeZone = timeZone
-            world_date.text = getString(R.string.one_time_alarm, dateFormat.format(calendar.time), dayOfWeekFormat.format(calendar.time))
+            world_date.text = DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
             clockListAdapter.notifyDataSetChanged()
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
 
@@ -232,12 +225,10 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
-        dateFormat = DateFormat.getDateInstance(DateFormat.LONG)
-        dateFormat.timeZone = timeZone
 
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
-        world_date.text = getString(R.string.one_time_alarm, dateFormat.format(calendar.time), dayOfWeekFormat.format(calendar.time))
+        world_date.text = DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
     }
 
     private fun setEmptyMessage() {
