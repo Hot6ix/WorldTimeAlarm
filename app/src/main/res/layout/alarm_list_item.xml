@@ -23,7 +23,6 @@
         android:layout_height="wrap_content"
         android:padding="@dimen/padding20"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -32,6 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/range"
             app:layout_constraintStart_toStartOf="parent">
 
             <TextView
@@ -51,6 +51,7 @@
                 android:text="@string/test"
                 android:textSize="@dimen/text_xxlarge"
                 android:gravity="center"
+                android:includeFontPadding="false"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/am_pm"/>
@@ -59,29 +60,19 @@
 
         <TextView
             android:id="@+id/range"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/padding5"
-            android:layout_marginEnd="@dimen/padding5"
-            android:textSize="12sp"
-            android:gravity="end"
-            app:layout_constraintStart_toEndOf="@id/time_view"
-            app:layout_constraintEnd_toStartOf="@id/on_off"
-            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="@dimen/text_xsmall"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/time_view"
             app:layout_constraintBottom_toTopOf="@id/repeat"/>
 
         <TextView
             android:id="@+id/repeat"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/padding5"
-            android:layout_marginEnd="@dimen/padding5"
-            android:textSize="12sp"
-            android:ellipsize="marquee"
-            android:maxLength="30"
-            android:gravity="end"
-            app:layout_constraintStart_toEndOf="@id/time_view"
-            app:layout_constraintEnd_toStartOf="@id/on_off"
+            android:textSize="@dimen/text_xsmall"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/range"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
@@ -90,8 +81,52 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/time_view"
+            app:layout_constraintBottom_toTopOf="@id/time_view"/>
+
+        <ImageView
+            android:id="@+id/timezone"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_world_white"
+            android:contentDescription="@null"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintTop_toTopOf="@id/range"
+            app:layout_constraintBottom_toBottomOf="@id/repeat"
+            app:layout_constraintEnd_toStartOf="@id/ringtone"/>
+
+        <ImageView
+            android:id="@+id/ringtone"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_ringtone_white"
+            android:contentDescription="@null"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintTop_toTopOf="@id/range"
+            app:layout_constraintBottom_toBottomOf="@id/repeat"
+            app:layout_constraintEnd_toStartOf="@id/vibration"/>
+
+        <ImageView
+            android:id="@+id/vibration"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_vibration_white"
+            android:contentDescription="@null"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintTop_toTopOf="@id/range"
+            app:layout_constraintBottom_toBottomOf="@id/repeat"
+            app:layout_constraintEnd_toStartOf="@id/snooze"/>
+
+        <ImageView
+            android:id="@+id/snooze"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_snooze_white"
+            android:contentDescription="@null"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintTop_toTopOf="@id/range"
+            app:layout_constraintBottom_toBottomOf="@id/repeat"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     </android.support.constraint.ConstraintLayout>
 

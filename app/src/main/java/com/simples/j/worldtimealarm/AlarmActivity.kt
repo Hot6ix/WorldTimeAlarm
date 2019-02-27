@@ -198,7 +198,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             time_zone.text = TimeZone.getDefault().id.replace("_", " ")
             time_zone_offset.text = resources.getString(R.string.current_time_zone)
             selectedDays = IntArray(7) { 0 }
-            optionList = getDefaultOptionList()
+            val defaultRingtone = if(ringtoneList.size > 1) ringtoneList[1] else ringtoneList[0]
+            optionList = getDefaultOptionList(defaultRingtone)
             currentTimeZone = TimeZone.getDefault().id
             expectedTime.visibility = View.GONE
             divider2.visibility = View.GONE
@@ -563,7 +564,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         }
     }
 
-    private fun getDefaultOptionList(defaultRingtone: RingtoneItem = ringtoneList[1],
+    private fun getDefaultOptionList(defaultRingtone: RingtoneItem = ringtoneList[0],
                                      defaultVibration: PatternItem = vibratorPatternList[0],
                                      defaultSnooze: Long = snoozeValues[0],
                                      label: String = "",

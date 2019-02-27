@@ -141,13 +141,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             swipeHelper = ItemTouchHelper(swipeController)
             swipeHelper.attachToRecyclerView(clockList)
             setEmptyMessage()
-        }
 
-        timeZoneChangedReceiver = UpdateRequestReceiver()
-        val intentFilter = IntentFilter().apply {
-            addAction(ACTION_TIME_ZONE_CHANGED)
+            timeZoneChangedReceiver = UpdateRequestReceiver()
+            val intentFilter = IntentFilter().apply {
+                addAction(ACTION_TIME_ZONE_CHANGED)
+            }
+            context?.registerReceiver(timeZoneChangedReceiver, intentFilter)
         }
-        context?.registerReceiver(timeZoneChangedReceiver, intentFilter)
     }
 
     override fun onDestroy() {

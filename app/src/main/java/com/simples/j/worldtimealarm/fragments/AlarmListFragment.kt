@@ -257,9 +257,9 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             else repeatArray.joinToString()
 
             snackBar = if(repeatArray.size == 7)
-                Snackbar.make(fragmentLayout, getString(R.string.alarm_on_repeat_every, DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault()).format(calendar.time)), Snackbar.LENGTH_LONG)
+                Snackbar.make(fragmentLayout, getString(R.string.alarm_on_repeat_every, DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_TIME)), Snackbar.LENGTH_LONG)
             else
-                Snackbar.make(fragmentLayout, getString(R.string.alarm_on_repeat, days, DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault()).format(calendar.time)), Snackbar.LENGTH_LONG)
+                Snackbar.make(fragmentLayout, getString(R.string.alarm_on_repeat, days, DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_TIME)), Snackbar.LENGTH_LONG)
         }
         else {
             while (calendar.timeInMillis < System.currentTimeMillis()) {

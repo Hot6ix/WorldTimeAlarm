@@ -42,7 +42,7 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
         val differenceOriginal = calendar.timeZone.getOffset(System.currentTimeMillis()) - expectedCalendar.timeZone.getOffset(System.currentTimeMillis())
         expectedCalendar.add(Calendar.MILLISECOND, -differenceOriginal)
 
-        val offset = if(calendar.timeZone == timeZone) context.resources.getString(R.string.set_time_zone)
+        val offset = if(calendar.timeZone == timeZone) context.resources.getString(R.string.same_as_set)
         else MediaCursor.getOffsetOfDifference(context, -differenceOriginal, MediaCursor.TYPE_CONVERTER)
 
         holder.timeZoneName.text = expectedCalendar.timeZone.id.replace("_", " ")

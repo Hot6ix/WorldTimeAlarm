@@ -168,7 +168,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
             // if snooze is not set, interaction button will work like dismiss
             selector_layout.startRippleAnimation()
-            if(item.snooze == 0.toLong() || intent.action == AlarmReceiver.ACTION_SNOOZE) {
+            if(item.snooze == 0L || intent.action == AlarmReceiver.ACTION_SNOOZE) {
                 interaction_button.setImageDrawable(getDrawable(R.drawable.ic_action_alarm_off))
             }
         }
