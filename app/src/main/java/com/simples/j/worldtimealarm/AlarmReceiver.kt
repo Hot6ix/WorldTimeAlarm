@@ -1,12 +1,16 @@
 package com.simples.j.worldtimealarm
 
+import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.NotificationCompat
+import android.text.format.DateUtils
 import android.util.Log
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
@@ -109,6 +113,7 @@ class AlarmReceiver: BroadcastReceiver() {
         }
         else {
             Log.d(C.TAG, "Alarm missed : ID(${item.notiId+1})")
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             val mainIntent = Intent(context, MainActivity::class.java)
             val notification = NotificationCompat.Builder(context, context.packageName)
@@ -118,11 +123,27 @@ class AlarmReceiver: BroadcastReceiver() {
                     .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
                     .setContentIntent(PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT))
 
+            if(isExpired) {
+                notification
+                        .setContentTitle(context.resources.getString(R.string.missed_and_last_alarm))
+                        .setContentText(context.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(context, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME)))
+                        .setVibrate(LongArray(0))
+                        .setDefaults(Notification.DEFAULT_ALL)
+                        .priority = NotificationCompat.PRIORITY_MAX
+            }
+
             if(item.label != null && item.label!!.isNotEmpty()) {
                 notification.setStyle(NotificationCompat.BigTextStyle().bigText("${SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))} - ${item.label}"))
             }
 
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val notificationChannel = NotificationChannel(context.packageName, context.packageName+"/channel", NotificationManager.IMPORTANCE_HIGH).apply {
+                    enableVibration(true)
+                    vibrationPattern = LongArray(0)
+                }
+                notificationManager.createNotificationChannel(notificationChannel)
+            }
+
             notificationManager.notify(item.notiId, notification.build())
         }
     }

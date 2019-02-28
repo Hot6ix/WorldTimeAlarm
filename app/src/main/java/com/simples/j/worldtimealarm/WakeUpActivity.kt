@@ -304,6 +304,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
                 notification
                         .setDefaults(Notification.DEFAULT_ALL)
+                        .setAutoCancel(true)
                         .priority = NotificationCompat.PRIORITY_MAX
             }
             else -> {

@@ -50,6 +50,7 @@
     <string name="alarm_fired_title">알람</string>
     <string name="unmute">음소거 해제</string>
     <string name="missed_alarm">놓친 알람</string>
+    <string name="missed_and_last_alarm">놓친 마지막 알람</string>
     <string name="select_color">색상 선택</string>
     <string name="not_selected">선택 안됨</string>
     <string name="clear">지우기</string>

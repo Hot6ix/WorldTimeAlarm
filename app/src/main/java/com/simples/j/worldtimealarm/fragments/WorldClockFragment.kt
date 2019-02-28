@@ -43,7 +43,7 @@ import kotlin.coroutines.CoroutineContext
  * A simple [Fragment] subclass.
  *
  */
-class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener, CoroutineScope {
+class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener, CoroutineScope, DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 
     private lateinit var clockListAdapter: ClockListAdapter
     private lateinit var timeFormat: SimpleDateFormat
@@ -90,29 +90,23 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         time_zone.setOnClickListener(this)
         new_timezone.setOnClickListener(this)
 
-        val timeDialog = TimePickerDialog(context!!, { _: TimePicker, hour: Int, minute: Int ->
-            calendar.set(Calendar.HOUR_OF_DAY, hour)
-            calendar.set(Calendar.MINUTE, minute)
-            timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
-            timeFormat.timeZone = timeZone
-            world_time.text = timeFormat.format(calendar.time)
-            world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
-            clockListAdapter.notifyDataSetChanged()
-        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false)
+        val timeDialog =
+                fragmentManager?.findFragmentByTag(TAG_FRAGMENT_TIME_DIALOG) as? TimePickerDialogFragment ?:
+                TimePickerDialogFragment.newInstance()
+        timeDialog.setTimeSetListener(this)
 
-        val dateDialog = DatePickerDialog(context!!, { _: DatePicker, year: Int, month: Int, day: Int ->
-            calendar.set(Calendar.YEAR, year)
-            calendar.set(Calendar.MONTH, month)
-            calendar.set(Calendar.DAY_OF_MONTH, day)
-            world_date.text = DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
-            clockListAdapter.notifyDataSetChanged()
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
+        val dateDialog =
+                fragmentManager?.findFragmentByTag(TAG_FRAGMENT_DATE_DIALOG) as? DatePickerDialogFragment ?:
+                DatePickerDialogFragment.newInstance().apply {
+                    calendar = this@WorldClockFragment.calendar
+                }
+        dateDialog.setDateSetListener(this)
 
         world_time_layout.setOnClickListener {
-            timeDialog.show()
+            if(!timeDialog.isAdded) timeDialog.show(fragmentManager, TAG_FRAGMENT_TIME_DIALOG)
         }
         world_date.setOnClickListener {
-            dateDialog.show()
+            if(!dateDialog.isAdded) dateDialog.show(fragmentManager, TAG_FRAGMENT_DATE_DIALOG)
         }
 
         time_zone.text = timeZone.id.replace("_", " ")
@@ -222,6 +216,24 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         clockItems[to].index = tmp
     }
 
+    override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
+        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+        calendar.set(Calendar.MINUTE, minute)
+        timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+        timeFormat.timeZone = timeZone
+        world_time.text = timeFormat.format(calendar.time)
+        world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
+        clockListAdapter.notifyDataSetChanged()
+    }
+
+    override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
+        calendar.set(Calendar.YEAR, year)
+        calendar.set(Calendar.MONTH, month)
+        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+        world_date.text = DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
+        clockListAdapter.notifyDataSetChanged()
+    }
+
     private fun updateStandardTimeZone() {
         val formattedTimeZone = timeZone.id.replace("_", " ")
         calendar.timeZone = timeZone
@@ -268,5 +280,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         const val TIME_ZONE_CHANGED_KEY = "TIME_ZONE_ID"
         const val USER_SELECTED_TIMEZONE = "TIME_ZONE_ID"
         const val ACTION_TIME_ZONE_CHANGED = "com.simples.j.worldtimealarm.APP_TIMEZONE_CHANGED"
+
+        private const val TAG_FRAGMENT_TIME_DIALOG = "TAG_FRAGMENT_TIME_DIALOG"
+        private const val TAG_FRAGMENT_DATE_DIALOG = "TAG_FRAGMENT_DATE_DIALOG"
     }
 }

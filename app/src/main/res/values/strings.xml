@@ -49,6 +49,7 @@
     <string name="alarm_fired_title">Alarm</string>
     <string name="unmute">Unmute</string>
     <string name="missed_alarm">Missed Alarm</string>
+    <string name="missed_and_last_alarm">Missed last Alarm</string>
     <string name="select_color">Select a color</string>
     <string name="not_selected">Not selected</string>
     <string name="clear">Clear</string>

@@ -302,31 +302,38 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         Log.d(C.TAG, "AlarmItem is null")
                         return
                     }
-                    var index = -1
-                    alarmItems.forEachIndexed { i, it ->
-                        if(it.notiId == item.notiId) index = i
-                    }
-
-                    if(index > -1) {
-                        if(item.repeat.any { it > 0 }) {
-                            if(item.on_off == 0) alarmItems[index].on_off= 0
-                        }
-                        else {
-                            // One time alarm
-                            alarmItems[index].on_off = 0
-                        }
-                        alarmListAdapter.notifyItemChanged(index)
+                    if(::alarmListAdapter.isInitialized) {
+                        updateList(item)
                     }
                     else {
-                        // wrong request
+                        launch(coroutineContext) {
+                            job.join()
+                            updateList(item)
+                        }
                     }
                 }
                 ACTION_UPDATE_ALL -> {
-                    alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
+                    launch(coroutineContext) {
+                        job.join()
+                        alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
+                    }
                 }
             }
         }
 
+        private fun updateList(item: AlarmItem) {
+            val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
+            if(index > -1) {
+                if(item.repeat.any { it > 0 }) {
+                    if(item.on_off == 0) alarmItems[index].on_off= 0
+                }
+                else {
+                    // One time alarm
+                    alarmItems[index].on_off = 0
+                }
+                alarmListAdapter.notifyItemChanged(index)
+            }
+        }
     }
 
     companion object {
