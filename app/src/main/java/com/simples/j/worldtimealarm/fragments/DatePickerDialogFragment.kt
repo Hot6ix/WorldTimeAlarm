@@ -12,12 +12,23 @@ class DatePickerDialogFragment: DialogFragment() {
     private var listener: DatePickerDialog.OnDateSetListener? = null
 
     var calendar: Calendar = Calendar.getInstance()
-    var minDate: Long? = null
+    var minDate: Long = calendar.timeInMillis
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         dialog = DatePickerDialog(context!!, listener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
-        if(minDate != null) dialog.datePicker.minDate = minDate!!
+
+        if(savedInstanceState != null) {
+            minDate = savedInstanceState.getLong(CURRENT_MIN_DATE)
+        }
+
+        dialog.datePicker.minDate = minDate
         return dialog
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putLong(CURRENT_MIN_DATE, minDate)
     }
 
     fun setDateSetListener(listener: DatePickerDialog.OnDateSetListener) {
@@ -30,5 +41,7 @@ class DatePickerDialogFragment: DialogFragment() {
 
     companion object {
         fun newInstance() = DatePickerDialogFragment()
+
+        const val CURRENT_MIN_DATE = "CURRENT_MIN_DATE"
     }
 }
