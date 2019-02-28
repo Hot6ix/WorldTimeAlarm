@@ -24,11 +24,11 @@ import android.view.View
 import android.widget.TimePicker
 import android.widget.Toast
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
-import com.simples.j.worldtimealarm.etc.*
-import com.simples.j.worldtimealarm.fragments.ChoiceDialogFragment
-import com.simples.j.worldtimealarm.fragments.ColorTagDialogFragment
-import com.simples.j.worldtimealarm.fragments.LabelDialogFragment
-import com.simples.j.worldtimealarm.fragments.SnoozeDialogFragment
+import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.OptionItem
+import com.simples.j.worldtimealarm.etc.PatternItem
+import com.simples.j.worldtimealarm.etc.RingtoneItem
+import com.simples.j.worldtimealarm.fragments.*
 import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
 import com.simples.j.worldtimealarm.support.AlarmDayAdapter
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
@@ -37,7 +37,6 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.*
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -61,8 +60,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private lateinit var snoozeDialog: SnoozeDialogFragment
     private lateinit var labelDialog: LabelDialogFragment
     private lateinit var colorTagDialog: ColorTagDialogFragment
-    private lateinit var startDatePickerDialog: DatePickerDialog
-    private lateinit var endDatePickerDialog: DatePickerDialog
+    private lateinit var startDatePickerDialog: DatePickerDialogFragment
+    private lateinit var endDatePickerDialog: DatePickerDialogFragment
     private lateinit var selectedDays: IntArray
 
     private lateinit var vibrator: Vibrator
@@ -79,8 +78,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private var startDate: Calendar? = null
     private var endDate: Calendar? = null
     private val today = Calendar.getInstance()
-    private val dateFormat = DateFormat.getDateInstance()
-    private val dayOfWeekFormat = SimpleDateFormat("E", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,15 +91,22 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         snoozeTimeList = resources.getStringArray(R.array.snooze_array)
         snoozeValues = resources.getIntArray(R.array.snooze_values).map { it.toLong() }.toTypedArray()
 
-        startDatePickerDialog = DatePickerDialog(this, startDatePickerListener, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH)).apply {
-            datePicker.minDate = today.timeInMillis
-        }
+        startDatePickerDialog =
+                supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_START_DATE) as? DatePickerDialogFragment ?:
+                DatePickerDialogFragment.newInstance().apply {
+                    minDate = today.timeInMillis
+                }
+        startDatePickerDialog.setDateSetListener(startDatePickerListener)
         val tomorrow = (today.clone() as Calendar).apply {
             add(Calendar.DAY_OF_YEAR, 1)
         }
-        endDatePickerDialog = DatePickerDialog(this, endDatePickerListener, tomorrow.get(Calendar.YEAR), tomorrow.get(Calendar.MONTH), tomorrow.get(Calendar.DAY_OF_MONTH)).apply {
-            datePicker.minDate = tomorrow.timeInMillis
-        }
+        endDatePickerDialog =
+                supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_END_DATE) as? DatePickerDialogFragment ?:
+                DatePickerDialogFragment.newInstance().apply {
+                    setDate(tomorrow)
+                    minDate = tomorrow.timeInMillis
+                }
+        endDatePickerDialog.setDateSetListener(endDatePickerListener)
 
         if(intent.hasExtra(AlarmReceiver.ITEM)) {
             // Modify
@@ -110,7 +114,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             isNew = false
             existAlarmItem = intent.getParcelableExtra(AlarmReceiver.ITEM)
             currentTimeZone = existAlarmItem!!.timeZone.replace(" ", "_")
-            dateFormat.timeZone = TimeZone.getTimeZone(currentTimeZone)
 
             calendar = Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone)).apply {
                 timeInMillis = existAlarmItem!!.timeSet.toLong()
@@ -152,10 +155,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY))
                         set(Calendar.MINUTE, calendar.get(Calendar.MINUTE))
                     }
-                    startDatePickerDialog.updateDate(startDate!!.get(Calendar.YEAR), startDate!!.get(Calendar.MONTH), startDate!!.get(Calendar.DAY_OF_MONTH))
-                    startDatePickerDialog.datePicker.minDate = tmpCal.timeInMillis
+                    startDatePickerDialog.calendar = startDate!!
+                    startDatePickerDialog.minDate = tmpCal.timeInMillis
 
-                    range_start.text = getString(R.string.one_time_alarm, dateFormat.format(startDate?.time), dayOfWeekFormat.format(startDate?.time))
+                    range_start.text = DateUtils.formatDateTime(applicationContext, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
                 }
             }
 
@@ -166,11 +169,11 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY))
                         set(Calendar.MINUTE, calendar.get(Calendar.MINUTE))
                     }
-                    endDatePickerDialog.updateDate(endDate!!.get(Calendar.YEAR), endDate!!.get(Calendar.MONTH), endDate!!.get(Calendar.DAY_OF_MONTH))
+                    endDatePickerDialog.calendar = endDate!!
                     tmpCal.add(Calendar.DAY_OF_YEAR, 1)
-                    endDatePickerDialog.datePicker.minDate = tmpCal.timeInMillis
+                    endDatePickerDialog.minDate = tmpCal.timeInMillis
 
-                    range_end.text = getString(R.string.one_time_alarm, dateFormat.format(endDate?.time), dayOfWeekFormat.format(endDate?.time))
+                    range_end.text = DateUtils.formatDateTime(applicationContext, endDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
                 }
             }
 
@@ -238,22 +241,20 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
             savedInstanceState.getLong(STATE_START_DATE_KEY).let {
                 if(it > 0) {
-//                    TimeZone.getTimeZone(currentTimeZone)
                     startDate = Calendar.getInstance().apply {
                         timeInMillis = it
                     }
-                    startDatePickerDialog.updateDate(startDate!!.get(Calendar.YEAR), startDate!!.get(Calendar.MONTH), startDate!!.get(Calendar.DAY_OF_MONTH))
-                    range_start.text = getString(R.string.one_time_alarm, dateFormat.format(startDate?.time), dayOfWeekFormat.format(startDate?.time))
+                    startDatePickerDialog.setDate(startDate!!)
+                    range_start.text = DateUtils.formatDateTime(applicationContext, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
                 }
             }
             savedInstanceState.getLong(STATE_END_DATE_KEY).let {
                 if(it > 0) {
-//                    TimeZone.getTimeZone(currentTimeZone)
                     endDate = Calendar.getInstance().apply {
                         timeInMillis = it
                     }
-                    endDatePickerDialog.updateDate(endDate!!.get(Calendar.YEAR), endDate!!.get(Calendar.MONTH), endDate!!.get(Calendar.DAY_OF_MONTH))
-                    range_end.text = getString(R.string.one_time_alarm, dateFormat.format(endDate?.time), dayOfWeekFormat.format(endDate?.time))
+                    endDatePickerDialog.setDate(endDate!!)
+                    range_end.text = DateUtils.formatDateTime(applicationContext, endDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
                 }
             }
 
@@ -324,8 +325,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         calendar.timeZone = this
 //                        startDate?.timeZone = this
 //                        endDate?.timeZone = this
-                        endDatePickerDialog.datePicker.minDate = calendar.timeInMillis
-                        dateFormat.timeZone = this
+                        endDatePickerDialog.minDate = calendar.timeInMillis
                     }
 
                     val difference = TimeZone.getTimeZone(currentTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
@@ -333,25 +333,28 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     val tmpCal = Calendar.getInstance().apply {
                         add(Calendar.MILLISECOND, difference)
                     }
-                    if(tmpCal.after(startDate)) startDatePickerDialog.updateDate(tmpCal.get(Calendar.YEAR), tmpCal.get(Calendar.MONTH), tmpCal.get(Calendar.DAY_OF_MONTH))
+                    if(tmpCal.after(startDate)) calendar = tmpCal
 
                     // time can be yesterday or tomorrow, so apply new limit
-                    startDatePickerDialog = DatePickerDialog(this, startDatePickerListener, tmpCal.get(Calendar.YEAR), tmpCal.get(Calendar.MONTH), tmpCal.get(Calendar.DAY_OF_MONTH)).apply {
-                        datePicker.minDate = tmpCal.timeInMillis
+                    startDatePickerDialog = DatePickerDialogFragment.newInstance().apply {
+                        setDateSetListener(startDatePickerListener)
+                        minDate = tmpCal.timeInMillis
 
                         startDate?.let {
-                            this.updateDate(it.get(Calendar.YEAR), it.get(Calendar.MONTH), it.get(Calendar.DAY_OF_MONTH))
+                            calendar = it
                         }
                     }
 
                     val tmpNext = (tmpCal.clone() as Calendar).apply {
                         add(Calendar.DAY_OF_YEAR, 1)
                     }
-                    endDatePickerDialog = DatePickerDialog(this, endDatePickerListener, tmpNext.get(Calendar.YEAR), tmpNext.get(Calendar.MONTH), tmpNext.get(Calendar.DAY_OF_MONTH)).apply {
-                        datePicker.minDate = tmpNext.timeInMillis
+                    endDatePickerDialog = DatePickerDialogFragment.newInstance().apply {
+                        setDate(tmpNext)
+                        setDateSetListener(endDatePickerListener)
+                        minDate = tmpCal.timeInMillis
 
                         endDate?.let {
-                            this.updateDate(it.get(Calendar.YEAR), it.get(Calendar.MONTH), it.get(Calendar.DAY_OF_MONTH))
+                            calendar = it
                         }
                     }
 
@@ -511,10 +514,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 startActivityForResult(Intent(this, TimeZoneSearchActivity::class.java), TIME_ZONE_REQUEST_CODE)
             }
             R.id.time_range_start -> {
-                startDatePickerDialog.show()
+                if(!startDatePickerDialog.isAdded) startDatePickerDialog.show(supportFragmentManager, TAG_FRAGMENT_START_DATE)
             }
             R.id.time_range_end -> {
-                endDatePickerDialog.show()
+                if(!endDatePickerDialog.isAdded) endDatePickerDialog.show(supportFragmentManager, TAG_FRAGMENT_END_DATE)
             }
         }
     }
@@ -807,13 +810,15 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private val startDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
         if(startDate == null) startDate = calendar.clone() as Calendar
         startDate?.set(year, month, dayOfMonth)
-        range_start.text = getString(R.string.one_time_alarm, dateFormat.format(startDate?.time), dayOfWeekFormat.format(startDate?.time))
+        startDatePickerDialog.calendar = startDate!!
+        range_start.text = DateUtils.formatDateTime(applicationContext, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
     }
 
     private val endDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
         if(endDate == null) endDate = calendar.clone() as Calendar
         endDate?.set(year, month, dayOfMonth)
-        range_end.text = getString(R.string.one_time_alarm, dateFormat.format(endDate?.time), dayOfWeekFormat.format(endDate?.time))
+        endDatePickerDialog.calendar = endDate!!
+        range_end.text = DateUtils.formatDateTime(applicationContext, endDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
     }
 
     companion object {
@@ -833,6 +838,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         private const val TAG_FRAGMENT_SNOOZE = "TAG_FRAGMENT_SNOOZE"
         private const val TAG_FRAGMENT_LABEL = "TAG_FRAGMENT_LABEL"
         private const val TAG_FRAGMENT_COLOR_TAG = "TAG_FRAGMENT_COLOR_TAG"
+        private const val TAG_FRAGMENT_START_DATE = "TAG_FRAGMENT_START_DATE"
+        private const val TAG_FRAGMENT_END_DATE = "TAG_FRAGMENT_END_DATE"
         private const val ACTION_NEW = 0
         private const val ACTION_MODIFY = 1
     }

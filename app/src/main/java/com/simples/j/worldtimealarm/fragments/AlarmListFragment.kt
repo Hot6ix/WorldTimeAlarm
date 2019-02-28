@@ -21,6 +21,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.simples.j.worldtimealarm.AlarmActivity
 import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.R
@@ -58,9 +59,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private var muteStatusIsShown = false
     private var removedItem: AlarmItem? = null
 
-    private val job = SupervisorJob()
+    private lateinit var job: Job
+    private val supervisor = SupervisorJob()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+        get() = Dispatchers.Main + supervisor
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -77,7 +79,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         alarmController = AlarmController.getInstance(context)
         audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        launch(coroutineContext) {
+        job =launch(coroutineContext) {
             progressBar.visibility = View.VISIBLE
             withContext(Dispatchers.IO) {
                 alarmItems = dbCursor.getAlarmList()
@@ -140,7 +142,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     override fun onDestroy() {
         super.onDestroy()
         context!!.unregisterReceiver(updateRequestReceiver)
-        coroutineContext.cancelChildren()
+        supervisor.cancel()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -150,16 +152,17 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             requestCode == REQUEST_CODE_NEW && resultCode == Activity.RESULT_OK -> {
                 val item = data?.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
                 if(item != null) {
-//                    item.id = dbCursor.getAlarmId(item.notiId)
                     alarmItems.add(item)
-                    if(::alarmListAdapter.isInitialized) alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
+                    if(::alarmListAdapter.isInitialized) {
+                        alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
+                        alarmList.scrollToPosition(alarmItems.size - 1)
+                    }
                     else {
                         launch(coroutineContext) {
                             job.join()
-
+                            alarmList.scrollToPosition(alarmItems.size - 1)
                         }
                     }
-                    alarmList.scrollToPosition(alarmItems.size - 1)
                     setEmptyMessage()
                     showSnackBar(item)
                 }
@@ -167,16 +170,17 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             requestCode == REQUEST_CODE_MODIFY && resultCode == Activity.RESULT_OK -> {
                 val item = data?.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
                 if(item != null ) {
-                    var index = 0
-                    alarmItems.forEachIndexed { i, it ->
-                        if(it.notiId == item.notiId) index = i
+                    if(::alarmListAdapter.isInitialized) {
+                        val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
+                        alarmItems[index] = item
+                        alarmListAdapter.notifyItemChanged(index)
+                        alarmList.scrollToPosition(index)
                     }
-                    alarmItems[index] = item
-                    if(::alarmListAdapter.isInitialized) alarmListAdapter.notifyItemChanged(index)
                     else {
                         launch(coroutineContext) {
                             job.join()
-
+                            val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
+                            alarmList.scrollToPosition(index)
                         }
                     }
                     showSnackBar(item)

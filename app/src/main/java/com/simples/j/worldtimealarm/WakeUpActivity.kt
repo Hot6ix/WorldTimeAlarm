@@ -289,11 +289,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 }
 
                 notification
-                        .setVibrate(LongArray(0))
-                        .setSmallIcon(R.drawable.ic_action_alarm_white)
-                        .setContentTitle(title)
                         .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
-                        .setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
                         .setOngoing(true)
 
                 if(item.label != null && item.label!!.isNotEmpty()) {
@@ -307,12 +303,12 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 title = getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(applicationContext, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME))
 
                 notification
-                        .setVibrate(LongArray(0))
-                        .setSmallIcon(R.drawable.ic_action_alarm_white)
-                        .setContentTitle(title)
-                        .setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
                         .setDefaults(Notification.DEFAULT_ALL)
                         .priority = NotificationCompat.PRIORITY_MAX
+            }
+            else -> {
+                intent = Intent(this, MainActivity::class.java)
+                title = "Wrong type of notification"
             }
         }
 
@@ -323,6 +319,12 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             }
             notificationManager.createNotificationChannel(notificationChannel)
         }
+
+        notification
+                .setVibrate(LongArray(0))
+                .setSmallIcon(R.drawable.ic_action_alarm_white)
+                .setContentTitle(title)
+                .setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
 
         notificationManager.notify(ALARM_NOTIFICATION_ID, notification.build())
     }
