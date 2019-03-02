@@ -1,7 +1,6 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.RippleDrawable
 import android.os.Handler
@@ -49,7 +48,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
         if(highlightId == item.notiId) {
             val drawable = holder.mainView.background as RippleDrawable
             drawable.state = intArrayOf(android.R.attr.state_pressed, android.R.attr.state_enabled)
-            val handler = Handler().postDelayed({
+            Handler().postDelayed({
                 drawable.state = holder.mainView.drawableState
             }, 1000)
         }

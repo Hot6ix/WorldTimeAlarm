@@ -20,12 +20,14 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.View
 import android.widget.TimePicker
 import android.widget.Toast
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
-import com.simples.j.worldtimealarm.etc.*
+import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.OptionItem
+import com.simples.j.worldtimealarm.etc.PatternItem
+import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.fragments.*
 import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
 import com.simples.j.worldtimealarm.support.AlarmDayAdapter
@@ -176,15 +178,13 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             }
 
             selectedDays = existAlarmItem!!.repeat
-            if(!selectedDays.any { it > 1 }) {
+            if(selectedDays.any { it == 1 }) {
                 // old way of day repeat
                 // convert to new
-                Log.d(C.TAG, "before : ${selectedDays.joinToString()}")
                 selectedDays = selectedDays.mapIndexed { index, i ->
-                    if(i == 1) index + 1
+                    if(i > 0) index + 1
                     else 0
                 }.toIntArray()
-                Log.d(C.TAG, "after : ${selectedDays.joinToString()}")
             }
 
             currentRingtone = ringtoneList.find { it.uri.toString() == existAlarmItem!!.ringtone } ?: ringtoneList[1]
@@ -445,20 +445,21 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         }
                     }
 
-                    val difference = endDate!!.timeInMillis - today.timeInMillis
-                    if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
-                        var isValid = false
-                        val tmpCal = today.clone() as Calendar
-                        while(!tmpCal.after(endDate)) {
-                            tmpCal.add(Calendar.DATE, 1)
-                            if(selectedDays.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
-                                isValid = true
-                                break
+                    val difference = endDate!!.timeInMillis - System.currentTimeMillis()
+                    when(TimeUnit.MILLISECONDS.toDays(difference)) {
+                        in 1..4 -> {
+                            val copyOfRepeat = selectedDays.clone()
+                            val tmpCal = today.clone() as Calendar
+                            while(tmpCal.before(endDate)) {
+                                val index = copyOfRepeat.indexOf(tmpCal.get(Calendar.DAY_OF_WEEK))
+                                if(index > -1) copyOfRepeat[index] = 0
+                                tmpCal.add(Calendar.DATE, 1)
                             }
-                        }
-                        if(!isValid) {
-                            Toast.makeText(applicationContext, getString(R.string.invalid_repeat), Toast.LENGTH_SHORT).show()
-                            return
+
+                            if(copyOfRepeat.any { it > 0 }) {
+                                Toast.makeText(applicationContext, getString(R.string.invalid_repeat), Toast.LENGTH_SHORT).show()
+                                return
+                            }
                         }
                     }
                 }
@@ -472,10 +473,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     // need to check repeat days that alarm makes sense
                     val difference = endDate!!.timeInMillis - startDate!!.timeInMillis
                     when(TimeUnit.MILLISECONDS.toDays(difference)) {
-                        in 1..6 -> {
+                        in 1..4 -> {
                             val copyOfRepeat = selectedDays.clone()
                             val tmpCal = startDate!!.clone() as Calendar
-                            while(!tmpCal.after(endDate)) {
+                            while(tmpCal.before(endDate)) {
                                 val index = copyOfRepeat.indexOf(tmpCal.get(Calendar.DAY_OF_WEEK))
                                 if(index > -1) copyOfRepeat[index] = 0
                                 tmpCal.add(Calendar.DATE, 1)
@@ -486,7 +487,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                                 return
                             }
                             with(selectedDays.filter { it > 0 }) {
-                                if(this.size == 1 && this[0] == startDate?.get(Calendar.DAY_OF_WEEK) && startDate!!.timeInMillis <= today.timeInMillis) {
+                                if(this.size == 1 && this[0] == startDate?.get(Calendar.DAY_OF_WEEK) && startDate!!.timeInMillis <= System.currentTimeMillis()) {
                                     Toast.makeText(applicationContext, getString(R.string.invalid_repeat), Toast.LENGTH_SHORT).show()
                                     return
                                 }

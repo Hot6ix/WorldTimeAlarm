@@ -21,7 +21,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import com.simples.j.worldtimealarm.AlarmActivity
 import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.MainActivity
@@ -151,6 +150,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                             alarmListAdapter.notifyItemChanged(index)
                         }
                     }
+                    arguments?.remove(HIGHLIGHT_KEY) // remove id from bundle to prevent to be called again.
                 }
             }
         }

@@ -112,7 +112,7 @@ class AlarmReceiver: BroadcastReceiver() {
                 context.startActivity(this)
             }
         }
-        else {
+//        else {
             Log.d(C.TAG, "Alarm missed : ID(${item.notiId+1})")
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -148,7 +148,7 @@ class AlarmReceiver: BroadcastReceiver() {
             }
 
             notificationManager.notify(item.notiId, notification.build())
-        }
+//        }
     }
 
     companion object {

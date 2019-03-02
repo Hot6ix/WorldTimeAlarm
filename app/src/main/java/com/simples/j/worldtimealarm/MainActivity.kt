@@ -8,10 +8,8 @@ import android.support.design.widget.TabLayout
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.support.FragmentPagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
@@ -60,7 +58,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         })
         tab.setSelectedTabIndicatorColor(ContextCompat.getColor(applicationContext, R.color.blueGrayDark))
-        tab.minimumHeight = (8 * resources.displayMetrics.density).toInt()
+        tab.setSelectedTabIndicatorHeight((8 * resources.displayMetrics.density).toInt())
 
         when(resources.configuration.orientation) {
             Configuration.ORIENTATION_PORTRAIT -> tab.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, (60 * resources.displayMetrics.density).toInt())
@@ -105,6 +103,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
                     putInt(AlarmListFragment.HIGHLIGHT_KEY, this@with)
                 }
                 alarmListFragment.arguments = bundle
+                intent?.removeExtra(AlarmListFragment.HIGHLIGHT_KEY)
             }
         }
     }
