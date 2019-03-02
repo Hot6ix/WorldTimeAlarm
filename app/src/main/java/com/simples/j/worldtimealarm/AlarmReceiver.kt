@@ -120,7 +120,7 @@ class AlarmReceiver: BroadcastReceiver() {
                 putExtra(AlarmListFragment.HIGHLIGHT_KEY, item.notiId)
             }
             val notification = NotificationCompat.Builder(context, context.packageName)
-//                    .setAutoCancel(true)
+                    .setAutoCancel(true)
                     .setSmallIcon(R.drawable.ic_action_alarm_white)
                     .setContentTitle(context.resources.getString(R.string.missed_alarm))
                     .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))

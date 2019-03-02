@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.support
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.RippleDrawable
 import android.os.Handler
 import android.support.constraint.ConstraintLayout
 import android.support.v4.content.ContextCompat
@@ -38,7 +39,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
 
     override fun getItemCount() = list.size
 
-    override fun getItemId(position: Int): Long = position.toLong()
+    override fun getItemId(position: Int): Long = list[position].id!!.toLong()
 
     override fun getItemViewType(position: Int): Int = 0
 
@@ -46,14 +47,11 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
         val item = list[holder.adapterPosition]
 
         if(highlightId == item.notiId) {
-            holder.itemView.setBackgroundColor(Color.GREEN)
-            Handler().postDelayed({
-                notifyItemChanged(position)
+            val drawable = holder.mainView.background as RippleDrawable
+            drawable.state = intArrayOf(android.R.attr.state_pressed, android.R.attr.state_enabled)
+            val handler = Handler().postDelayed({
+                drawable.state = holder.mainView.drawableState
             }, 1000)
-            highlightId = -1
-        }
-        else {
-            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.background_dark))
         }
 
         val calendar = Calendar.getInstance()

@@ -20,14 +20,12 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.View
 import android.widget.TimePicker
 import android.widget.Toast
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
-import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.OptionItem
-import com.simples.j.worldtimealarm.etc.PatternItem
-import com.simples.j.worldtimealarm.etc.RingtoneItem
+import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.fragments.*
 import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
 import com.simples.j.worldtimealarm.support.AlarmDayAdapter
@@ -178,6 +176,16 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             }
 
             selectedDays = existAlarmItem!!.repeat
+            if(!selectedDays.any { it > 1 }) {
+                // old way of day repeat
+                // convert to new
+                Log.d(C.TAG, "before : ${selectedDays.joinToString()}")
+                selectedDays = selectedDays.mapIndexed { index, i ->
+                    if(i == 1) index + 1
+                    else 0
+                }.toIntArray()
+                Log.d(C.TAG, "after : ${selectedDays.joinToString()}")
+            }
 
             currentRingtone = ringtoneList.find { it.uri.toString() == existAlarmItem!!.ringtone } ?: ringtoneList[1]
             currentVibrationPattern = vibratorPatternList.find { it.array?.contentEquals(existAlarmItem!!.vibration ?: LongArray(0)) ?: false } ?: vibratorPatternList[0]
