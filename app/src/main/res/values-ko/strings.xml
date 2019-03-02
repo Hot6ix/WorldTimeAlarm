@@ -50,6 +50,7 @@
     <string name="alarm_fired_title">알람</string>
     <string name="unmute">음소거 해제</string>
     <string name="missed_alarm">놓친 알람</string>
+    <string name="missed_and_last_alarm">놓친 마지막 알람</string>
     <string name="select_color">색상 선택</string>
     <string name="not_selected">선택 안됨</string>
     <string name="clear">지우기</string>
@@ -60,8 +61,8 @@
     <string name="range_end">종료일</string>
     <string name="range_not_set">설정 안 함</string>
     <string name="range_text">%1$s (%2$s) ~ %3$s (%4$s)</string>
-    <string name="range_until">%1$s (%2$s) 까지</string>
-    <string name="range_begin">%1$s (%2$s) 부터</string>
+    <string name="range_until">%1$s 까지</string>
+    <string name="range_begin">%1$s 부터</string>
     <string name="one_time_alarm">%1$s (%2$s)</string>
     <string name="last_alarm">마지막 알람</string>
     <string name="last_alarm_with_time">%1$s - 마지막 알람</string>
@@ -84,6 +85,7 @@
     <string name="end_date_earlier_than_start_date">종료일은 시작일 이후로 설정해야 합니다.</string>
     <string name="must_check_repeat">하나 이상의 반복할 요일을 선택해야 합니다.</string>
     <string name="invalid_repeat">설정된 범위가 일주일 이하인 경우 범위 내 유효한 시간 또는 반복 요일을 선택해야 합니다.</string>
+    <string name="alarm_no_long_fires">알람(%1$s)이  더이상 울리지 않습니다.</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>

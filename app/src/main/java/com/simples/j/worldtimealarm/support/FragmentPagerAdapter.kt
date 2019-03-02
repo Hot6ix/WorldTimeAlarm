@@ -7,14 +7,18 @@ import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.fragments.SettingFragment
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 
-class FragmentPagerAdapter(private val fm: FragmentManager): FragmentStatePagerAdapter(fm) {
+class FragmentPagerAdapter(fm: FragmentManager): FragmentStatePagerAdapter(fm) {
+
+    private val alarmListFragment = AlarmListFragment()
+    private val worldClockListAdapter = WorldClockFragment()
+    private val settingFragment = SettingFragment()
 
     override fun getItem(position: Int): Fragment {
         return when(position) {
-            0  -> AlarmListFragment()
-            1 -> WorldClockFragment()
-            2 -> SettingFragment()
-            else -> AlarmListFragment()
+            0  -> alarmListFragment
+            1 -> worldClockListAdapter
+            2 -> settingFragment
+            else -> alarmListFragment
         }
     }
 

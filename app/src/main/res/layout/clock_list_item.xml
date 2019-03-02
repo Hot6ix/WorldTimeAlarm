@@ -13,12 +13,11 @@
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/time_zone_layout"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/clock_layout">
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/time_zone_name_clock"

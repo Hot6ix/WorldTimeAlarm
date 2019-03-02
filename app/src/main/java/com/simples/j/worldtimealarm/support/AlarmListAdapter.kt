@@ -1,20 +1,22 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
+import android.graphics.PorterDuff
+import android.graphics.drawable.RippleDrawable
+import android.os.Handler
+import android.support.constraint.ConstraintLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Switch
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.C
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -26,10 +28,9 @@ import java.util.concurrent.TimeUnit
 class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
 
     private lateinit var listener: OnItemClickListener
-    private val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault())
-    private val dayOfWeekFormat = SimpleDateFormat("E", Locale.getDefault())
     private var startDate: Calendar? = null
     private var endDate: Calendar? = null
+    private var highlightId: Int = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.alarm_list_item, parent, false))
@@ -37,12 +38,21 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
 
     override fun getItemCount() = list.size
 
-    override fun getItemId(position: Int): Long = position.toLong()
+    override fun getItemId(position: Int): Long = list[position].notiId.toLong()
 
     override fun getItemViewType(position: Int): Int = 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[holder.adapterPosition]
+
+        if(highlightId == item.notiId) {
+            Handler().postDelayed({
+                val drawable = holder.mainView.background as RippleDrawable
+                drawable.state = intArrayOf(android.R.attr.state_pressed, android.R.attr.state_enabled)
+                drawable.state = holder.mainView.drawableState
+            }, 500)
+            highlightId = -1
+        }
 
         val calendar = Calendar.getInstance()
         calendar.time = Date(item.timeSet.toLong())
@@ -112,14 +122,14 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
 
             val rangeText = when {
                 startDate != null && endDate != null -> {
-                    context.getString(R.string.range_text).format(dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time), dateFormat.format(endDate!!.time), dayOfWeekFormat.format(endDate!!.time))
+                    DateUtils.formatDateRange(context, startDate!!.timeInMillis, endDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_ALL)
                 }
                 startDate != null -> {
-                    if(item.repeat.any { it > 0 }) context.getString(R.string.range_begin).format(dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time))
+                    if(item.repeat.any { it > 0 }) context.getString(R.string.range_begin).format(DateUtils.formatDateTime(context, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
                     else null
                 }
                 endDate != null -> {
-                    context.getString(R.string.range_until).format(dateFormat.format(endDate!!.time), dayOfWeekFormat.format(endDate!!.time))
+                    context.getString(R.string.range_until).format(DateUtils.formatDateTime(context, endDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
                 }
                 else -> {
                     null
@@ -164,8 +174,8 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
                     when {
                         DateUtils.isToday(calendar.timeInMillis) -> context.resources.getString(R.string.today)
                         DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) && startDate == null -> context.resources.getString(R.string.tomorrow) // this can make adapter to know calendar date is tomorrow
-                        startDate != null -> context.getString(R.string.one_time_alarm, dateFormat.format(startDate!!.time), dayOfWeekFormat.format(startDate!!.time))
-                        else -> dateFormat.format(calendar.time)
+                        startDate != null -> DateUtils.formatDateTime(context, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
+                        else -> DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
                     }
         }
 
@@ -173,36 +183,41 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
         holder.switch.setOnCheckedChangeListener(null)
         holder.switch.isChecked = item.on_off != 0
 
-        if(item.on_off != 0) {
-            holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-            holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-            holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-            holder.range.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
+        if(item.timeZone != TimeZone.getDefault().id)
+            holder.timezone.visibility = View.VISIBLE
+        else
+            holder.timezone.visibility = View.GONE
+
+        with(item.ringtone) {
+            if(this != null && this.isNotEmpty() && this != "null") {
+                holder.ringtone.visibility = View.VISIBLE
+            }
+            else
+                holder.ringtone.visibility = View.GONE
         }
-        else {
-            holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-            holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-            holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-            holder.range.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
+
+        with(item.vibration) {
+            if(this != null && this.isNotEmpty()) {
+                holder.vibration.visibility = View.VISIBLE
+            }
+            else
+                holder.vibration.visibility = View.GONE
         }
+
+        if(item.snooze > 0L) {
+            holder.snooze.visibility = View.VISIBLE
+        }
+        else
+            holder.snooze.visibility = View.GONE
+
+        updateView(holder, item.on_off != 0)
 
         holder.switch.setOnCheckedChangeListener { _, b ->
-            if(!b) {
-                holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-                holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-                holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-                holder.range.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-            }
-            else {
-                holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-                holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-                holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-                holder.range.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-            }
-
+            updateView(holder, b)
             listener.onItemStatusChanged(b, item)
         }
     }
+
     fun removeItem(index: Int) {
         list.removeAt(index)
         notifyItemRemoved(index)
@@ -219,13 +234,45 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
         this.listener = listener
     }
 
+    fun setHighlightId(id: Int) {
+        this.highlightId = id
+    }
+
+    private fun updateView(holder: ViewHolder, b: Boolean) {
+        if(b) {
+            holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
+            holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
+            holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
+            holder.range.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
+            holder.timezone.setColorFilter(ContextCompat.getColor(context, R.color.darkerGray), PorterDuff.Mode.SRC_ATOP)
+            holder.ringtone.setColorFilter(ContextCompat.getColor(context, R.color.darkerGray), PorterDuff.Mode.SRC_ATOP)
+            holder.vibration.setColorFilter(ContextCompat.getColor(context, R.color.darkerGray), PorterDuff.Mode.SRC_ATOP)
+            holder.snooze.setColorFilter(ContextCompat.getColor(context, R.color.darkerGray), PorterDuff.Mode.SRC_ATOP)
+        }
+        else {
+            holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
+            holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
+            holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
+            holder.range.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
+            holder.timezone.setColorFilter(ContextCompat.getColor(context, R.color.lightGray), PorterDuff.Mode.SRC_ATOP)
+            holder.ringtone.setColorFilter(ContextCompat.getColor(context, R.color.lightGray), PorterDuff.Mode.SRC_ATOP)
+            holder.vibration.setColorFilter(ContextCompat.getColor(context, R.color.lightGray), PorterDuff.Mode.SRC_ATOP)
+            holder.snooze.setColorFilter(ContextCompat.getColor(context, R.color.lightGray), PorterDuff.Mode.SRC_ATOP)
+        }
+    }
+
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
+        var mainView: ConstraintLayout = view.list_item_layout
         var amPm: TextView = view.am_pm
         var localTime: TextView = view.local_time
         var repeat: TextView = view.repeat
         var switch: Switch = view.on_off
         var colorTag: View = view.colorTag
         var range: TextView = view.range
+        var timezone: ImageView = view.timezone
+        var ringtone: ImageView = view.ringtone
+        var vibration: ImageView = view.vibration
+        var snooze: ImageView = view.snooze
     }
 
     interface OnItemClickListener {

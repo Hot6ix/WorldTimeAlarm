@@ -1,5 +1,6 @@
 package com.simples.j.worldtimealarm
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
@@ -9,6 +10,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
+import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.support.FragmentPagerAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
@@ -64,6 +66,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
 
         fragmentPagerAdapter = FragmentPagerAdapter(supportFragmentManager)
+
+        sendHighlightRequest(intent)
+
         fragment_pager.apply {
             adapter = fragmentPagerAdapter
             offscreenPageLimit = 3
@@ -72,6 +77,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         if(savedInstanceState != null) {
             tab.getTabAt(savedInstanceState.getInt(TAB_STATE, 0))?.select()
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        sendHighlightRequest(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -85,9 +95,23 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         adViewMain.destroy()
     }
 
+    private fun sendHighlightRequest(intent: Intent?) {
+        with(intent?.getIntExtra(AlarmListFragment.HIGHLIGHT_KEY, 0)) {
+            if(this != null && this > 0) {
+                tab.getTabAt(0)?.select()
+                val alarmListFragment = fragmentPagerAdapter.getItem(0) as AlarmListFragment
+                val bundle = Bundle().apply {
+                    putInt(AlarmListFragment.HIGHLIGHT_KEY, this@with)
+                }
+                alarmListFragment.arguments = bundle
+                intent?.removeExtra(AlarmListFragment.HIGHLIGHT_KEY)
+            }
+        }
+    }
+
     companion object {
-        const val ACTION_UPDATE_SINGLE = "com.simples.j.worldtimealarm.ACTION_UPDATE_SINGLE"
-        const val ACTION_UPDATE_ALL = "com.simples.j.worldtimealarm.ACTION_UPDATE_ALL"
+        const val ACTION_UPDATE_SINGLE = "com.simples.j.world_time_alarm.ACTION_UPDATE_SINGLE"
+        const val ACTION_UPDATE_ALL = "com.simples.j.world_time_alarm.ACTION_UPDATE_ALL"
         const val TAB_STATE = "TAB_STATE"
     }
 }
