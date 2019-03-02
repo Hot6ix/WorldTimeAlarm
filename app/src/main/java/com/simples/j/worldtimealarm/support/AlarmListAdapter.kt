@@ -1,11 +1,13 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.PorterDuff
+import android.os.Handler
+import android.support.constraint.ConstraintLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +16,6 @@ import android.widget.Switch
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.C
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,6 +30,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
     private lateinit var listener: OnItemClickListener
     private var startDate: Calendar? = null
     private var endDate: Calendar? = null
+    private var highlightId: Int = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.alarm_list_item, parent, false))
@@ -42,6 +44,17 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[holder.adapterPosition]
+
+        if(highlightId == item.notiId) {
+            holder.itemView.setBackgroundColor(Color.GREEN)
+            Handler().postDelayed({
+                notifyItemChanged(position)
+            }, 1000)
+            highlightId = -1
+        }
+        else {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.background_dark))
+        }
 
         val calendar = Calendar.getInstance()
         calendar.time = Date(item.timeSet.toLong())
@@ -223,6 +236,10 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
         this.listener = listener
     }
 
+    fun setHighlightId(id: Int) {
+        this.highlightId = id
+    }
+
     private fun updateView(holder: ViewHolder, b: Boolean) {
         if(b) {
             holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
@@ -247,6 +264,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
     }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
+        var mainView: ConstraintLayout = view.list_item_layout
         var amPm: TextView = view.am_pm
         var localTime: TextView = view.local_time
         var repeat: TextView = view.repeat

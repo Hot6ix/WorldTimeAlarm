@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.simples.j.worldtimealarm.AlarmActivity
 import com.simples.j.worldtimealarm.AlarmReceiver
+import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
@@ -34,7 +35,6 @@ import com.simples.j.worldtimealarm.utils.ListSwipeController
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.fragment_alarmlist.*
 import kotlinx.coroutines.*
-import java.text.DateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
@@ -103,7 +103,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         // If alarm volume is muted, show snackBar
-        if(savedInstanceState != null) muteStatusIsShown = savedInstanceState.getBoolean(STATE_SNACKBAR)
+        if(savedInstanceState != null) muteStatusIsShown = savedInstanceState.getBoolean(STATE_SNACK_BAR)
         if(!muteStatusIsShown) {
             if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
                 Handler().postDelayed({
@@ -124,19 +124,36 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         val intentFilter = IntentFilter()
-        intentFilter.addAction(ACTION_UPDATE_ALL)
-        intentFilter.addAction(ACTION_UPDATE_SINGLE)
+        intentFilter.addAction(MainActivity.ACTION_UPDATE_ALL)
+        intentFilter.addAction(MainActivity.ACTION_UPDATE_SINGLE)
         context!!.registerReceiver(updateRequestReceiver, intentFilter)
     }
 
     override fun onResume() {
         super.onResume()
 
-//        if(alarmItems.size != dbCursor.getAlarmListSize().toInt()) {
-//            alarmItems.clear()
-//            alarmItems.addAll(dbCursor.getAlarmList())
-//            alarmListAdapter.notifyDataSetChanged()
-//        }
+        with(arguments) {
+            if(this != null) {
+                val id = this.getInt(HIGHLIGHT_KEY)
+                if(id > 0) {
+                    // highlight item
+                    if(::alarmListAdapter.isInitialized) {
+                        val index = alarmItems.indexOfFirst { it.notiId == id }
+                        alarmListAdapter.setHighlightId(id)
+                        alarmListAdapter.notifyItemChanged(index)
+                    }
+                    else {
+                        launch(coroutineContext) {
+                            job.join()
+
+                            val index = alarmItems.indexOfFirst { it.notiId == id }
+                            alarmListAdapter.setHighlightId(id)
+                            alarmListAdapter.notifyItemChanged(index)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -191,7 +208,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean(STATE_SNACKBAR, muteStatusIsShown)
+        outState.putBoolean(STATE_SNACK_BAR, muteStatusIsShown)
     }
 
     override fun onItemClicked(view: View, item: AlarmItem) {
@@ -290,12 +307,12 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         snackBar?.show()
     }
 
-    inner class UpdateRequestReceiver: BroadcastReceiver() {
+    private inner class UpdateRequestReceiver: BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
             Log.d(C.TAG, intent.action)
             when(intent.action) {
-                ACTION_UPDATE_SINGLE -> {
+                MainActivity.ACTION_UPDATE_SINGLE -> {
                     val bundle = intent.getBundleExtra(AlarmReceiver.OPTIONS)
                     val item = bundle.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
                     if(item == null) {
@@ -312,7 +329,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         }
                     }
                 }
-                ACTION_UPDATE_ALL -> {
+                MainActivity.ACTION_UPDATE_ALL -> {
                     launch(coroutineContext) {
                         job.join()
                         alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
@@ -339,8 +356,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     companion object {
         const val REQUEST_CODE_NEW = 10
         const val REQUEST_CODE_MODIFY = 20
-        const val STATE_SNACKBAR = "STATE_SNACKBAR"
-        const val ACTION_UPDATE_SINGLE = "com.simples.j.worldtimealarm.ACTION_UPDATE_SINGLE"
-        const val ACTION_UPDATE_ALL = "com.simples.j.worldtimealarm.ACTION_UPDATE_ALL"
+        const val STATE_SNACK_BAR = "STATE_SNACK_BAR"
+        const val HIGHLIGHT_KEY = "HIGHLIGHT_KEY"
     }
 }

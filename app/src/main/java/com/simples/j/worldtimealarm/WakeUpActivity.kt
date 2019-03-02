@@ -314,7 +314,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(application.packageName, application.packageName+"/channel", NotificationManager.IMPORTANCE_HIGH).apply {
+            val notificationChannel = NotificationChannel(application.packageName, application.packageName+"/channel", NotificationManager.IMPORTANCE_DEFAULT).apply {
                 enableVibration(true)
                 vibrationPattern = LongArray(0)
             }

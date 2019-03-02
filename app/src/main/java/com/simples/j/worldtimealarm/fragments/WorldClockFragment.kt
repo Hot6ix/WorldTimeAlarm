@@ -83,6 +83,9 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
 
+        if(savedInstanceState != null && !savedInstanceState.isEmpty) {
+            calendar.timeInMillis = savedInstanceState.getLong(USER_SELECTED_DATE_AND_TIME)
+        }
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
         world_date.text = DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
@@ -92,7 +95,9 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         val timeDialog =
                 fragmentManager?.findFragmentByTag(TAG_FRAGMENT_TIME_DIALOG) as? TimePickerDialogFragment ?:
-                TimePickerDialogFragment.newInstance()
+                TimePickerDialogFragment.newInstance().apply {
+                    calendar = this@WorldClockFragment.calendar
+                }
         timeDialog.setTimeSetListener(this)
 
         val dateDialog =
@@ -145,6 +150,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(USER_SELECTED_TIMEZONE, timeZone.id)
+        outState.putLong(USER_SELECTED_DATE_AND_TIME, calendar.timeInMillis)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -278,7 +284,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     companion object {
         const val TIME_ZONE_NEW_KEY = "REQUEST_KEY"
         const val TIME_ZONE_CHANGED_KEY = "TIME_ZONE_ID"
-        const val USER_SELECTED_TIMEZONE = "TIME_ZONE_ID"
+        const val USER_SELECTED_TIMEZONE = "USER_SELECTED_TIMEZONE"
+        const val USER_SELECTED_DATE_AND_TIME = "USER_SELECTED_DATE_AND_TIME"
         const val ACTION_TIME_ZONE_CHANGED = "com.simples.j.worldtimealarm.APP_TIMEZONE_CHANGED"
 
         private const val TAG_FRAGMENT_TIME_DIALOG = "TAG_FRAGMENT_TIME_DIALOG"

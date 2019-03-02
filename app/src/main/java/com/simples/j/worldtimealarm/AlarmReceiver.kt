@@ -14,6 +14,7 @@ import android.text.format.DateUtils
 import android.util.Log
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import java.text.SimpleDateFormat
@@ -115,9 +116,11 @@ class AlarmReceiver: BroadcastReceiver() {
             Log.d(C.TAG, "Alarm missed : ID(${item.notiId+1})")
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-            val mainIntent = Intent(context, MainActivity::class.java)
+            val mainIntent = Intent(context, MainActivity::class.java).apply {
+                putExtra(AlarmListFragment.HIGHLIGHT_KEY, item.notiId)
+            }
             val notification = NotificationCompat.Builder(context, context.packageName)
-                    .setAutoCancel(true)
+//                    .setAutoCancel(true)
                     .setSmallIcon(R.drawable.ic_action_alarm_white)
                     .setContentTitle(context.resources.getString(R.string.missed_alarm))
                     .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
