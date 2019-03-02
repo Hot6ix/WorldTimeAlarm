@@ -38,7 +38,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
 
     override fun getItemCount() = list.size
 
-    override fun getItemId(position: Int): Long = list[position].id!!.toLong()
+    override fun getItemId(position: Int): Long = list[position].notiId.toLong()
 
     override fun getItemViewType(position: Int): Int = 0
 
@@ -46,11 +46,12 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
         val item = list[holder.adapterPosition]
 
         if(highlightId == item.notiId) {
-            val drawable = holder.mainView.background as RippleDrawable
-            drawable.state = intArrayOf(android.R.attr.state_pressed, android.R.attr.state_enabled)
             Handler().postDelayed({
+                val drawable = holder.mainView.background as RippleDrawable
+                drawable.state = intArrayOf(android.R.attr.state_pressed, android.R.attr.state_enabled)
                 drawable.state = holder.mainView.drawableState
-            }, 1000)
+            }, 500)
+            highlightId = -1
         }
 
         val calendar = Calendar.getInstance()

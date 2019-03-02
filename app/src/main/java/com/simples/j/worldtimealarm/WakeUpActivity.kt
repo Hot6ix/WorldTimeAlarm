@@ -33,6 +33,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
@@ -298,7 +299,9 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
             TYPE_EXPIRED -> {
-                intent = Intent(this, MainActivity::class.java)
+                intent = Intent(this, MainActivity::class.java).apply {
+                    putExtra(AlarmListFragment.HIGHLIGHT_KEY, item.notiId)
+                }
 
                 title = getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(applicationContext, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME))
 

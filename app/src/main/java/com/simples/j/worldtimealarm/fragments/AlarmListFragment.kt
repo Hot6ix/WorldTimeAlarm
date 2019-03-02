@@ -15,6 +15,7 @@ import android.support.v4.app.Fragment
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.format.DateUtils
 import android.util.Log
@@ -84,8 +85,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 alarmItems = dbCursor.getAlarmList()
             }
 
-            alarmListAdapter = AlarmListAdapter(alarmItems, context!!)
-            alarmListAdapter.setOnItemListener(this@AlarmListFragment)
+            alarmListAdapter = AlarmListAdapter(alarmItems, context!!).apply {
+                setOnItemListener(this@AlarmListFragment)
+                setHasStableIds(true)
+            }
             recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
 
             alarmList.layoutManager = recyclerLayoutManager
@@ -138,6 +141,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                     // highlight item
                     if(::alarmListAdapter.isInitialized) {
                         val index = alarmItems.indexOfFirst { it.notiId == id }
+                        alarmList.smoothScrollToPosition(index)
                         alarmListAdapter.setHighlightId(id)
                         alarmListAdapter.notifyItemChanged(index)
                     }
@@ -146,6 +150,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                             job.join()
 
                             val index = alarmItems.indexOfFirst { it.notiId == id }
+                            alarmList.smoothScrollToPosition(index)
                             alarmListAdapter.setHighlightId(id)
                             alarmListAdapter.notifyItemChanged(index)
                         }

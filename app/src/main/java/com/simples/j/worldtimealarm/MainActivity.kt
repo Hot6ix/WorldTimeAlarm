@@ -98,6 +98,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private fun sendHighlightRequest(intent: Intent?) {
         with(intent?.getIntExtra(AlarmListFragment.HIGHLIGHT_KEY, 0)) {
             if(this != null && this > 0) {
+                tab.getTabAt(0)?.select()
                 val alarmListFragment = fragmentPagerAdapter.getItem(0) as AlarmListFragment
                 val bundle = Bundle().apply {
                     putInt(AlarmListFragment.HIGHLIGHT_KEY, this@with)
