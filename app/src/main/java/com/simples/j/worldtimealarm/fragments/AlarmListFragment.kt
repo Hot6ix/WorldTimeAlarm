@@ -103,23 +103,27 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 swipeHelper.attachToRecyclerView(alarmList)
                 setEmptyMessage()
                 progressBar.visibility = View.GONE
+            }
+        }
 
-                // If alarm volume is muted, show snackBar
-                if(savedInstanceState != null) muteStatusIsShown = savedInstanceState.getBoolean(STATE_SNACK_BAR)
-                if(!muteStatusIsShown) {
-                    if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0 && context != null) {
-                        Handler().postDelayed({
-                            Snackbar.make(fragmentLayout, getString(R.string.volume_is_muted), Snackbar.LENGTH_LONG).setAction(getString(R.string.unmute)) {
-                                audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
-                            }.addCallback(object: Snackbar.Callback() {
-                                override fun onShown(sb: Snackbar?) {
-                                    super.onShown(sb)
-                                    muteStatusIsShown = true
-                                }
-                            }).show()
-                        }, 500)
-                    }
-                }
+        // If alarm volume is muted, show snackBar
+        if(savedInstanceState != null) muteStatusIsShown = savedInstanceState.getBoolean(STATE_SNACK_BAR)
+        val muted = getString(R.string.volume_is_muted)
+        val unMute = getString(R.string.unmute)
+        if(!muteStatusIsShown) {
+            if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0 && context != null) {
+                Handler().postDelayed({
+                    Snackbar.make(fragmentLayout,
+                            muted, Snackbar.LENGTH_LONG)
+                            .setAction(unMute) {
+                        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
+                    }.addCallback(object: Snackbar.Callback() {
+                        override fun onShown(sb: Snackbar?) {
+                            super.onShown(sb)
+                            muteStatusIsShown = true
+                        }
+                    }).show()
+                }, 500)
             }
         }
 
