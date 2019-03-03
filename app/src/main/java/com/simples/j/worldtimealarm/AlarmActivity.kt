@@ -108,11 +108,12 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 }
         endDatePickerDialog.setDateSetListener(endDatePickerListener)
 
-        if(intent.hasExtra(AlarmReceiver.ITEM)) {
+        val bundle = intent.getBundleExtra(BUNDLE_KEY)
+        if(bundle != null) {
             // Modify
             alarmAction = ACTION_MODIFY
             isNew = false
-            existAlarmItem = intent.getParcelableExtra(AlarmReceiver.ITEM)
+            existAlarmItem = bundle.getParcelable(AlarmReceiver.ITEM)
             currentTimeZone = existAlarmItem!!.timeZone.replace(" ", "_")
 
             calendar = Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone)).apply {
@@ -849,7 +850,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         private const val TAG_FRAGMENT_COLOR_TAG = "TAG_FRAGMENT_COLOR_TAG"
         private const val TAG_FRAGMENT_START_DATE = "TAG_FRAGMENT_START_DATE"
         private const val TAG_FRAGMENT_END_DATE = "TAG_FRAGMENT_END_DATE"
+
         private const val ACTION_NEW = 0
         private const val ACTION_MODIFY = 1
+
+        const val BUNDLE_KEY = "BUNDLE_KEY"
     }
 }

@@ -59,12 +59,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private var removedItem: AlarmItem? = null
 
     private var job = Job()
-    private val supervisor = SupervisorJob()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+        get() = Dispatchers.Main
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_alarmlist, container, false)
         fragmentLayout = view.findViewById(R.id.fragment_list)
         return view
@@ -134,7 +132,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         val intentFilter = IntentFilter()
         intentFilter.addAction(MainActivity.ACTION_UPDATE_ALL)
         intentFilter.addAction(MainActivity.ACTION_UPDATE_SINGLE)
-        context!!.registerReceiver(updateRequestReceiver, intentFilter)
+        context?.registerReceiver(updateRequestReceiver, intentFilter)
     }
 
     override fun onResume() {
@@ -208,13 +206,14 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 if(item != null ) {
                     if(::alarmListAdapter.isInitialized) {
                         val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
+                        alarmList.scrollToPosition(index)
                         alarmItems[index] = item
                         alarmListAdapter.notifyItemChanged(index)
-                        alarmList.scrollToPosition(index)
                     }
                     else {
                         launch(coroutineContext) {
                             job.join()
+
                             val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
                             alarmList.scrollToPosition(index)
                         }
@@ -232,7 +231,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
     override fun onItemClicked(view: View, item: AlarmItem) {
         val intent = Intent(context!!, AlarmActivity::class.java)
-        intent.putExtra(AlarmReceiver.ITEM, item)
+        val bundle = Bundle().apply {
+            putParcelable(AlarmReceiver.ITEM, item)
+        }
+        intent.putExtra(AlarmActivity.BUNDLE_KEY, bundle)
         startActivityForResult(intent, REQUEST_CODE_MODIFY)
     }
 
@@ -349,9 +351,14 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                     }
                 }
                 MainActivity.ACTION_UPDATE_ALL -> {
-                    launch(coroutineContext) {
-                        job.join()
+                    if(::alarmListAdapter.isInitialized) {
                         alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
+                    }
+                    else {
+                        launch(coroutineContext) {
+                            job.join()
+                            alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
+                        }
                     }
                 }
             }

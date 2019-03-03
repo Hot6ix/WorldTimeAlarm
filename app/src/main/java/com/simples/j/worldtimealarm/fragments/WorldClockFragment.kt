@@ -60,9 +60,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private var removedItem: ClockItem? = null
 
     private var job = Job()
-    private val supervisor = SupervisorJob()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+        get() = Dispatchers.Main
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
