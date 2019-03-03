@@ -124,7 +124,7 @@ class AlarmReceiver: BroadcastReceiver() {
                     .setSmallIcon(R.drawable.ic_action_alarm_white)
                     .setContentTitle(context.resources.getString(R.string.missed_alarm))
                     .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
-                    .setContentIntent(PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT))
+                    .setContentIntent(PendingIntent.getActivity(context, item.notiId, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT))
 
             if(isExpired) {
                 notification

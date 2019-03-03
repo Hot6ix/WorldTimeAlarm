@@ -328,7 +328,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 .setVibrate(LongArray(0))
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
                 .setContentTitle(title)
-                .setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentIntent(PendingIntent.getActivity(this, item.notiId, intent, PendingIntent.FLAG_UPDATE_CURRENT))
 
         notificationManager.notify(ALARM_NOTIFICATION_ID, notification.build())
     }
