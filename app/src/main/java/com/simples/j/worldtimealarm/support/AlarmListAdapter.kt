@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
  * Created by j on 19/02/2018.
  *
  */
-class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
+class AlarmListAdapter(private var list: ArrayList<AlarmItem>, val context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
 
     private lateinit var listener: OnItemClickListener
     private var startDate: Calendar? = null

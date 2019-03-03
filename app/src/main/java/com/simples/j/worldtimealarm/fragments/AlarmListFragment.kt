@@ -15,7 +15,6 @@ import android.support.v4.app.Fragment
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.format.DateUtils
 import android.util.Log
@@ -59,10 +58,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private var muteStatusIsShown = false
     private var removedItem: AlarmItem? = null
 
-    private lateinit var job: Job
+    private var job = Job()
     private val supervisor = SupervisorJob()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + supervisor
+        get() = Dispatchers.Main + job
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -79,45 +78,48 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         alarmController = AlarmController.getInstance(context)
         audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        job =launch(coroutineContext) {
-            progressBar.visibility = View.VISIBLE
+        job = launch(coroutineContext) {
             withContext(Dispatchers.IO) {
                 alarmItems = dbCursor.getAlarmList()
             }
 
-            alarmListAdapter = AlarmListAdapter(alarmItems, context!!).apply {
-                setOnItemListener(this@AlarmListFragment)
-                setHasStableIds(true)
-            }
-            recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
+            if(context != null) {
+                alarmListAdapter = AlarmListAdapter(
+                        alarmItems,
+                        context!!).apply {
+                    setOnItemListener(this@AlarmListFragment)
+                    setHasStableIds(true)
+                }
+                recyclerLayoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
-            alarmList.layoutManager = recyclerLayoutManager
-            alarmList.adapter = alarmListAdapter
-            alarmList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
+                alarmList.layoutManager = recyclerLayoutManager
+                alarmList.adapter = alarmListAdapter
+                alarmList.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
-            swipeController = ListSwipeController()
-            swipeController.setOnSwipeListener(this@AlarmListFragment)
+                swipeController = ListSwipeController()
+                swipeController.setOnSwipeListener(this@AlarmListFragment)
 
-            swipeHelper = ItemTouchHelper(swipeController)
-            swipeHelper.attachToRecyclerView(alarmList)
-            setEmptyMessage()
-            progressBar.visibility = View.GONE
-        }
+                swipeHelper = ItemTouchHelper(swipeController)
+                swipeHelper.attachToRecyclerView(alarmList)
+                setEmptyMessage()
+                progressBar.visibility = View.GONE
 
-        // If alarm volume is muted, show snackBar
-        if(savedInstanceState != null) muteStatusIsShown = savedInstanceState.getBoolean(STATE_SNACK_BAR)
-        if(!muteStatusIsShown) {
-            if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
-                Handler().postDelayed({
-                    Snackbar.make(fragmentLayout, getString(R.string.volume_is_muted), Snackbar.LENGTH_LONG).setAction(getString(R.string.unmute)) {
-                        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
-                    }.addCallback(object: Snackbar.Callback() {
-                        override fun onShown(sb: Snackbar?) {
-                            super.onShown(sb)
-                            muteStatusIsShown = true
-                        }
-                    }).show()
-                }, 500)
+                // If alarm volume is muted, show snackBar
+                if(savedInstanceState != null) muteStatusIsShown = savedInstanceState.getBoolean(STATE_SNACK_BAR)
+                if(!muteStatusIsShown) {
+                    if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0 && context != null) {
+                        Handler().postDelayed({
+                            Snackbar.make(fragmentLayout, getString(R.string.volume_is_muted), Snackbar.LENGTH_LONG).setAction(getString(R.string.unmute)) {
+                                audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
+                            }.addCallback(object: Snackbar.Callback() {
+                                override fun onShown(sb: Snackbar?) {
+                                    super.onShown(sb)
+                                    muteStatusIsShown = true
+                                }
+                            }).show()
+                        }, 500)
+                    }
+                }
             }
         }
 
@@ -163,8 +165,16 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
     override fun onDestroy() {
         super.onDestroy()
-        context!!.unregisterReceiver(updateRequestReceiver)
-        supervisor.cancel()
+
+        if(::updateRequestReceiver.isInitialized)
+            context?.unregisterReceiver(updateRequestReceiver)
+        else {
+            launch(coroutineContext) {
+                job.cancelAndJoin()
+
+                context?.unregisterReceiver(updateRequestReceiver)
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

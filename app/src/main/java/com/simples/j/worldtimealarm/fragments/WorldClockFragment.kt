@@ -53,12 +53,14 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private lateinit var fragmentLayout: CoordinatorLayout
     private lateinit var timeZoneChangedReceiver: UpdateRequestReceiver
     private lateinit var timeZone: TimeZone
+    private lateinit var dbCursor: DatabaseCursor
 
     private var calendar = Calendar.getInstance()
     private var clockItems = ArrayList<ClockItem>()
     private var removedItem: ClockItem? = null
 
-    private val job = SupervisorJob()
+    private var job = Job()
+    private val supervisor = SupervisorJob()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
@@ -72,6 +74,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        dbCursor = DatabaseCursor(context!!)
 
         val isUserTimeZoneEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(resources.getString(R.string.setting_converter_timezone_key), false)
         val converterTimezoneId = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), TimeZone.getDefault().id)
@@ -116,35 +120,46 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         time_zone.text = timeZone.id.replace("_", " ")
 
-        launch(coroutineContext) {
+        job = launch(coroutineContext) {
             withContext(Dispatchers.IO) {
-                clockItems = DatabaseCursor(context!!).getClockList()
+                clockItems = dbCursor.getClockList()
             }
 
-            clockListAdapter = ClockListAdapter(context!!, clockItems, calendar)
-            recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
-            clockList.layoutManager = recyclerLayoutManager
-            clockList.adapter = clockListAdapter
-            clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
+            if(context != null) {
+                clockListAdapter = ClockListAdapter(context!!, clockItems, calendar)
+                recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
+                clockList.layoutManager = recyclerLayoutManager
+                clockList.adapter = clockListAdapter
+                clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
 
-            swipeController = ListSwipeController()
-            swipeController.setOnSwipeListener(this@WorldClockFragment)
+                swipeController = ListSwipeController()
+                swipeController.setOnSwipeListener(this@WorldClockFragment)
 
-            swipeHelper = ItemTouchHelper(swipeController)
-            swipeHelper.attachToRecyclerView(clockList)
-            setEmptyMessage()
+                swipeHelper = ItemTouchHelper(swipeController)
+                swipeHelper.attachToRecyclerView(clockList)
+                setEmptyMessage()
 
-            timeZoneChangedReceiver = UpdateRequestReceiver()
-            val intentFilter = IntentFilter().apply {
-                addAction(ACTION_TIME_ZONE_CHANGED)
+                timeZoneChangedReceiver = UpdateRequestReceiver()
+                val intentFilter = IntentFilter().apply {
+                    addAction(ACTION_TIME_ZONE_CHANGED)
+                }
+                context?.registerReceiver(timeZoneChangedReceiver, intentFilter)
             }
-            context?.registerReceiver(timeZoneChangedReceiver, intentFilter)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        context?.unregisterReceiver(timeZoneChangedReceiver)
+
+        if(::timeZoneChangedReceiver.isInitialized)
+            context?.unregisterReceiver(timeZoneChangedReceiver)
+        else {
+            launch(coroutineContext) {
+                job.cancelAndJoin()
+
+                context?.unregisterReceiver(timeZoneChangedReceiver)
+            }
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
