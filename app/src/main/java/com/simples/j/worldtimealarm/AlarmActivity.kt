@@ -507,12 +507,13 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     DatabaseCursor(applicationContext).updateAlarm(item)
                 }
 
-                AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
+                val scheduledTime = AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
 
-                if(isTaskRoot) showToast(item)
+                if(isTaskRoot) showToast(scheduledTime)
 
                 val intent = Intent()
                 intent.putExtra(AlarmReceiver.ITEM, item)
+                intent.putExtra(SCHEDULED_TIME, scheduledTime)
                 setResult(Activity.RESULT_OK, intent)
                 finish()
             }
@@ -784,37 +785,11 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         )
     }
 
-    private fun showToast(item: AlarmItem) {
-        val calendar = Calendar.getInstance()
-        calendar.time = Date(item.timeSet.toLong())
-
-        if(item.repeat.any { it == 1 }) {
-            val dayArray = resources.getStringArray(R.array.day_of_week_full)
-            val repeatArray = item.repeat.mapIndexed { index, i ->
-                if(i == 1) dayArray[index] else null
-            }.filter { it != null }
-            val days = if(repeatArray.size == 7)
-                getString(R.string.everyday)
-            else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2)
-                getString(R.string.weekend)
-            else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5)
-                getString(R.string.weekday)
-            else repeatArray.joinToString()
-
-            if(repeatArray.size == 7)
-                Toast.makeText(applicationContext, getString(R.string.alarm_on_repeat_every, DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault()).format(calendar.time)), Toast.LENGTH_LONG).show()
-            else
-                Toast.makeText(applicationContext, getString(R.string.alarm_on_repeat, days, DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault()).format(calendar.time)), Toast.LENGTH_LONG).show()
+    private fun showToast(scheduledTime: Long = -1) {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = scheduledTime
         }
-        else {
-            while (calendar.timeInMillis < System.currentTimeMillis()) {
-                calendar.add(Calendar.DAY_OF_YEAR, 1)
-            }
-            if (calendar.timeInMillis - System.currentTimeMillis() > DateUtils.DAY_IN_MILLIS) {
-                calendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
-            }
-            Toast.makeText(applicationContext, getString(R.string.alarm_on, MediaCursor.getRemainTime(applicationContext, calendar)), Snackbar.LENGTH_LONG).show()
-        }
+        Toast.makeText(applicationContext, getString(R.string.alarm_on, MediaCursor.getRemainTime(applicationContext, calendar)), Snackbar.LENGTH_LONG).show()
     }
 
     private val startDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
@@ -855,5 +830,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         private const val ACTION_MODIFY = 1
 
         const val BUNDLE_KEY = "BUNDLE_KEY"
+        const val SCHEDULED_TIME = "SCHEDULED_TIME"
     }
 }

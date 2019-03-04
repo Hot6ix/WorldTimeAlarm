@@ -69,29 +69,78 @@ class MediaCursor {
 
             return when {
                 hours > 0 && minutes > 0 -> context.getString(R.string.hours_minutes, hours, minutes) + offsetText // hours & minutes
-                hours.toInt() == 1 -> context.getString(R.string.hour, hours) + offsetText // hour
+                hours == 1L && minutes > 0 ->  context.getString(R.string.hour_minutes).format(hours, minutes) + offsetText // hour & minutes
+                hours == 1L -> context.getString(R.string.hour, hours) + offsetText // hour
                 hours > 0 && minutes.toInt() == 0 -> context.getString(R.string.hours, hours) + offsetText // hours
-                hours.toInt() == 0 && minutes > 0-> context.getString(R.string.minutes, minutes) + offsetText // minutes
-                hours.toInt() == 0 && minutes.toInt() == 0 && type == TYPE_CURRENT -> context.getString(R.string.same_as_current) // same as current
-                hours.toInt() == 0 && minutes.toInt() == 0 && type == TYPE_CONVERTER -> context.getString(R.string.same_as_set) // same as current
+                hours == 0L && minutes > 0-> context.getString(R.string.minutes, minutes) + offsetText // minutes
+                hours == 0L && minutes.toInt() == 0 && type == TYPE_CURRENT -> context.getString(R.string.same_as_current) // same as current
+                hours == 0L && minutes.toInt() == 0 && type == TYPE_CONVERTER -> context.getString(R.string.same_as_set) // same as current
                 else -> ""
             }
         }
 
         fun getRemainTime(context: Context, calendar: Calendar): String {
-            calendar.set(Calendar.SECOND, 0)
-            val difference = calendar.time.time - System.currentTimeMillis()
+            val today = Calendar.getInstance()
+            var difference = calendar.timeInMillis - today.timeInMillis
 
-            val hours = TimeUnit.MILLISECONDS.toHours(difference).absoluteValue
-            val minutes = (TimeUnit.MILLISECONDS.toMinutes(difference) - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(difference))).absoluteValue
-
-            return when {
-                hours > 0 && minutes > 0 -> context.getString(R.string.hours_minutes, hours, minutes)
-                hours > 0 && minutes.toInt() == 0 -> context.getString(R.string.hours, hours)
-                hours.toInt() == 0 && minutes > 0 -> context.getString(R.string.minutes, minutes)
-                hours.toInt() == 1 -> context.getString(R.string.hour, hours)
-                else -> context.getString(R.string.less_than_a_minute)
+            val daysInYear = if(calendar.get(Calendar.YEAR) != today.get(Calendar.YEAR)) {
+                val tmpCal = today.clone() as Calendar
+                var tmpMax = calendar.getActualMaximum(Calendar.DAY_OF_YEAR)
+                // this loop is for handle leap year
+                while(tmpCal.get(Calendar.YEAR) != calendar.get(Calendar.YEAR)) {
+                    if(tmpCal.getActualMaximum(Calendar.DAY_OF_YEAR) > tmpMax) {
+                        tmpMax = tmpCal.getActualMaximum(Calendar.DAY_OF_YEAR)
+                    }
+                    tmpCal.add(Calendar.YEAR, 1)
+                }
+                tmpMax
             }
+            else {
+                calendar.getActualMaximum(Calendar.DAY_OF_YEAR)
+            }
+
+            val years = difference / (daysInYear * 24 * 60 * 60 * 1000L)
+            difference %= (daysInYear * 24 * 60 * 60 * 1000L)
+            val days = difference / (24 * 60 * 60 * 1000)
+            difference %= (24 * 60 * 60 * 1000)
+
+            val hours = difference / (60 * 60 * 1000)
+            difference %= (60 * 60 * 1000)
+            val minutes = difference / (60 * 1000)
+            difference %= (60 * 1000)
+
+            val dateFormat = StringBuilder().apply {
+                append(
+                        when {
+                            years == 1L-> context.getString(R.string.year, years)
+                            years > 1 -> context.getString(R.string.years, years)
+                            else -> ""
+                        }
+                )
+                append(
+                        when {
+                            days == 1L -> context.getString(R.string.day, days)
+                            days > 1 -> context.getString(R.string.days, days)
+                            else -> ""
+                        }
+                )
+                append(
+                        when {
+                            hours == 1L -> context.getString(R.string.hour, hours)
+                            hours > 1 -> context.getString(R.string.hours, hours)
+                            else -> ""
+                        }
+                )
+                append(
+                        when {
+                            minutes == 1L -> context.getString(R.string.minute, minutes)
+                            minutes > 1 -> context.getString(R.string.minutes, minutes)
+                            else -> ""
+                        }
+                )
+            }
+
+            return dateFormat.toString()
         }
 
         fun makeDarker(color: Int, factor: Float): Int {

@@ -16,7 +16,6 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
-import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -185,6 +184,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         when {
             requestCode == REQUEST_CODE_NEW && resultCode == Activity.RESULT_OK -> {
                 val item = data?.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
+                val scheduledTime = data?.getLongExtra(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
                 if(item != null) {
                     alarmItems.add(item)
                     if(::alarmListAdapter.isInitialized) {
@@ -198,12 +198,13 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         }
                     }
                     setEmptyMessage()
-                    showSnackBar(item)
+                    showSnackBar(scheduledTime)
                 }
             }
             requestCode == REQUEST_CODE_MODIFY && resultCode == Activity.RESULT_OK -> {
                 val item = data?.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
-                if(item != null ) {
+                val scheduledTime = data?.getLongExtra(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
+                if(item != null) {
                     if(::alarmListAdapter.isInitialized) {
                         val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
                         alarmList.scrollToPosition(index)
@@ -218,7 +219,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                             alarmList.scrollToPosition(index)
                         }
                     }
-                    showSnackBar(item)
+                    showSnackBar(scheduledTime)
                 }
             }
         }
@@ -242,8 +243,8 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         if(b) {
             alarmItems.find { it.notiId == item.notiId }?.on_off = 1
             dbCursor.updateAlarmOnOffByNotiId(item.notiId, true)
-            alarmController.scheduleAlarm(context!!, item, AlarmController.TYPE_ALARM)
-            showSnackBar(item)
+            val scheduledTime = alarmController.scheduleAlarm(context!!, item, AlarmController.TYPE_ALARM)
+            showSnackBar(scheduledTime)
         }
         else {
             alarmItems.find { it.notiId == item.notiId }?.on_off = 0
@@ -293,37 +294,11 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
     }
 
-    private fun showSnackBar(item: AlarmItem) {
-        val calendar = Calendar.getInstance()
-        calendar.time = Date(item.timeSet.toLong())
-
-        if(item.repeat.any { it > 0 }) {
-            val dayArray = resources.getStringArray(R.array.day_of_week_full)
-            val repeatArray = item.repeat.mapIndexed { index, i ->
-                if(i > 0) dayArray[index] else null
-            }.filter { it != null }
-            val days = if(repeatArray.size == 7)
-                getString(R.string.everyday)
-            else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2)
-                getString(R.string.weekend)
-            else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5)
-                getString(R.string.weekday)
-            else repeatArray.joinToString()
-
-            snackBar = if(repeatArray.size == 7)
-                Snackbar.make(fragmentLayout, getString(R.string.alarm_on_repeat_every, DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_TIME)), Snackbar.LENGTH_LONG)
-            else
-                Snackbar.make(fragmentLayout, getString(R.string.alarm_on_repeat, days, DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_TIME)), Snackbar.LENGTH_LONG)
+    private fun showSnackBar(scheduledTime: Long = -1) {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = scheduledTime
         }
-        else {
-            while (calendar.timeInMillis < System.currentTimeMillis()) {
-                calendar.add(Calendar.DAY_OF_YEAR, 1)
-            }
-            if (calendar.timeInMillis - System.currentTimeMillis() > DateUtils.DAY_IN_MILLIS) {
-                calendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
-            }
-            snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(context!!, calendar)), Snackbar.LENGTH_LONG)
-        }
+        snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(context!!, calendar)), Snackbar.LENGTH_LONG)
 
         snackBar?.show()
     }
