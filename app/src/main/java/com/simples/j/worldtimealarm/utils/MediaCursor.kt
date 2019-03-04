@@ -135,7 +135,14 @@ class MediaCursor {
                         when {
                             minutes == 1L -> context.getString(R.string.minute, minutes)
                             minutes > 1 -> context.getString(R.string.minutes, minutes)
-                            else -> ""
+                            else -> {
+                                if(this.isEmpty()) {
+                                    context.getString(R.string.less_than_a_minute)
+                                }
+                                else {
+                                    ""
+                                }
+                            }
                         }
                 )
             }
