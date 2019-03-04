@@ -54,6 +54,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private lateinit var timeZoneChangedReceiver: UpdateRequestReceiver
     private lateinit var timeZone: TimeZone
     private lateinit var dbCursor: DatabaseCursor
+    private lateinit var timeDialog: TimePickerDialogFragment
+    private lateinit var dateDialog: DatePickerDialogFragment
 
     private var calendar = Calendar.getInstance()
     private var clockItems = ArrayList<ClockItem>()
@@ -96,17 +98,17 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         time_zone.setOnClickListener(this)
         new_timezone.setOnClickListener(this)
 
-        val timeDialog =
+        timeDialog =
                 fragmentManager?.findFragmentByTag(TAG_FRAGMENT_TIME_DIALOG) as? TimePickerDialogFragment ?:
                 TimePickerDialogFragment.newInstance().apply {
-                    calendar = this@WorldClockFragment.calendar
+                    calendar.timeInMillis = this@WorldClockFragment.calendar.timeInMillis
                 }
         timeDialog.setTimeSetListener(this)
 
-        val dateDialog =
+        dateDialog =
                 fragmentManager?.findFragmentByTag(TAG_FRAGMENT_DATE_DIALOG) as? DatePickerDialogFragment ?:
                 DatePickerDialogFragment.newInstance().apply {
-                    calendar = this@WorldClockFragment.calendar
+                    calendar.timeInMillis = this@WorldClockFragment.calendar.timeInMillis
                 }
         dateDialog.setDateSetListener(this)
 
@@ -187,11 +189,11 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
         }
 
-        if(::clockListAdapter.isInitialized) clockListAdapter.notifyDataSetChanged()
+        if(::clockListAdapter.isInitialized) clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
         else {
             launch(coroutineContext) {
                 job.join()
-                clockListAdapter.notifyDataSetChanged()
+                clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
             }
         }
     }
