@@ -245,7 +245,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         timeFormat.timeZone = timeZone
         world_time.text = timeFormat.format(calendar.time)
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
-        clockListAdapter.notifyDataSetChanged()
+        clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
     }
 
     override fun onDateSet(view: DatePicker?, year: Int, month: Int, dayOfMonth: Int) {
@@ -253,7 +253,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         calendar.set(Calendar.MONTH, month)
         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
         world_date.text = DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
-        clockListAdapter.notifyDataSetChanged()
+        clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
     }
 
     private fun updateStandardTimeZone() {
@@ -290,7 +290,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                 ACTION_TIME_ZONE_CHANGED -> {
                     timeZone = TimeZone.getTimeZone(intent.getStringExtra(TIME_ZONE_CHANGED_KEY))
                     updateStandardTimeZone()
-                    clockListAdapter.notifyDataSetChanged()
+                    clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
                 }
             }
         }
