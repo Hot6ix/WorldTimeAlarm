@@ -40,7 +40,7 @@ public class AlarmController {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
-    public void scheduleAlarm(Context context, AlarmItem item, int type) {
+    public Long scheduleAlarm(Context context, AlarmItem item, int type) {
         Calendar calendar = Calendar.getInstance();
         Calendar today = Calendar.getInstance();
         Calendar start = (Calendar) today.clone();
@@ -53,7 +53,7 @@ public class AlarmController {
                 if(end.before(today)) {
                     Log.d(C.TAG, "Alarm had been expired : ID("+item.getNotiId()+1+")");
                     disableAlarm(context, item);
-                    return;
+                    return -1L;
                 }
             }
             else end = null;
@@ -127,7 +127,6 @@ public class AlarmController {
                     // currentDay is not contained in repeat
                     // If today is not after from repeated day back to current week
                     if(repeat.get(repeat.size()-1) < startIndex) {
-//                        calendar.set(Calendar.WEEK_OF_MONTH, start.get(Calendar.WEEK_OF_MONTH));
                         calendar.add(Calendar.WEEK_OF_MONTH, 1);
                     }
 
@@ -155,7 +154,7 @@ public class AlarmController {
             // This alarm had been expired
             Log.d(C.TAG, "Alarm has been expired : ID("+item.getNotiId()+1+")");
             disableAlarm(context, item);
-            return;
+            return -1L;
         }
 
         int notiId = item.getNotiId();
@@ -177,6 +176,8 @@ public class AlarmController {
         alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(), mainIntent), alarmIntent);
         Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.getDefault()).format(calendar.getTime()) + ", Info(" + item + "), " + type);
         Log.d(C.TAG, "Alarm scheduled : ID(" + notiId+1 + ")");
+
+        return calendar.getTimeInMillis();
     }
 
     public void cancelAlarm(Context context, int notiId) {

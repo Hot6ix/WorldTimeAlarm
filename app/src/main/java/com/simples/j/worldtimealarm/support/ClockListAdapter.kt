@@ -3,24 +3,18 @@ package com.simples.j.worldtimealarm.support
 import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.text.format.DateUtils
-import android.util.Log
-import android.util.TimeFormatException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.clock_list_item.view.*
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.math.exp
 
 /**
  * Created by j on 19/02/2018.
@@ -42,22 +36,25 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val timeZone = TimeZone.getTimeZone(list[holder.adapterPosition].timezone?.replace(" ", "_"))
-        val expectedCalendar = Calendar.getInstance()
-        expectedCalendar.timeInMillis = calendar.timeInMillis
+        val expectedCalendar = Calendar.getInstance(timeZone)
+        expectedCalendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
 
-        val differenceOriginal = timeZone.getOffset(System.currentTimeMillis()) - calendar.timeZone.getOffset(System.currentTimeMillis())
-        expectedCalendar.add(Calendar.MILLISECOND, differenceOriginal)
+        val differenceOriginal = calendar.timeZone.getOffset(System.currentTimeMillis()) - expectedCalendar.timeZone.getOffset(System.currentTimeMillis())
+        expectedCalendar.add(Calendar.MILLISECOND, -differenceOriginal)
 
         val offset = if(calendar.timeZone == timeZone) context.resources.getString(R.string.same_as_set)
         else MediaCursor.getOffsetOfDifference(context, differenceOriginal, MediaCursor.TYPE_CONVERTER)
 
-        holder.timeZoneName.text = timeZone.id.replace("_", " ")
+        holder.timeZoneName.text = expectedCalendar.timeZone.id.replace("_", " ")
         holder.timeZoneOffset.text = offset
 
         val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+        timeFormat.timeZone = timeZone
+        val dateFormat = DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault())
+        dateFormat.timeZone = timeZone
         holder.amPm.text = if(expectedCalendar.get(Calendar.AM_PM) == 0) context.getString(R.string.am) else context.getString(R.string.pm)
         holder.timeZoneTime.text = timeFormat.format(expectedCalendar.time)
-        holder.timeZoneDate.text = DateUtils.formatDateTime(context, expectedCalendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
+        holder.timeZoneDate.text = dateFormat.format(expectedCalendar.time)
     }
 
     fun removeItem(index: Int) {

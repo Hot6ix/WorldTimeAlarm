@@ -32,10 +32,16 @@
     <string name="label">标签</string>
     <string name="slow">慢</string>
     <string name="fast">快速</string>
-    <string name="hours">%1$d小时</string>
-    <string name="hour">%1$d小时</string>
+    <string name="hour_minutes">%1$d小时 %2$d分钟&#160;</string>
+    <string name="hours_minutes">%1$d小时 %2$d分钟&#160;</string>
+    <string name="hour">%1$d小时&#160;</string>
+    <string name="hours">%1$d小时&#160;</string>
+    <string name="minute">%1$d分钟</string>
     <string name="minutes">%1$d分钟</string>
-    <string name="hours_minutes">%1$d小时 %2$d分钟</string>
+    <string name="day">%1$d天&#160;</string>
+    <string name="days">%1$d天&#160;</string>
+    <string name="year">%1$d年&#160;</string>
+    <string name="years">%1$d年&#160;</string>
     <string name="weekend">周末</string>
     <string name="weekday">平日</string>
     <string name="tomorrow">明天</string>
@@ -84,7 +90,7 @@
     <string name="end_date_earlier_than_today">结束日期不能早于今天。</string>
     <string name="end_date_earlier_than_start_date">结束日期不能早于开始日期。</string>
     <string name="must_check_repeat">必须至少检查一天的重复日。</string>
-    <string name="invalid_repeat">必须检查有效时间或重复日，如果范围少于一周。</string>
+    <string name="invalid_repeat">如果范围小于一周，必须检查有效时间和重复日。</string>
     <string name="alarm_no_long_fires">警报(%1$s)不再触发。</string>
 
     <!-- Settings -->

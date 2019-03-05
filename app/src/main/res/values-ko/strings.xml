@@ -32,10 +32,16 @@
     <string name="label">라벨</string>
     <string name="slow">느림</string>
     <string name="fast">빠름</string>
-    <string name="hours">%1$d시간&#160;</string>
-    <string name="hour">%1$d시간&#160;</string>
-    <string name="minutes">%1$d분&#160;</string>
+    <string name="hour_minutes">%1$d시간 %2$d분&#160;</string>
     <string name="hours_minutes">%1$d시간 %2$d분&#160;</string>
+    <string name="hour">%1$d시간&#160;</string>
+    <string name="hours">%1$d시간&#160;</string>
+    <string name="minute">%1$d분&#160;</string>
+    <string name="minutes">%1$d분&#160;</string>
+    <string name="day">%1$d일&#160;</string>
+    <string name="days">%1$d일&#160;</string>
+    <string name="year">%1$d년&#160;</string>
+    <string name="years">%1$d년&#160;</string>
     <string name="weekend">주말</string>
     <string name="weekday">주중</string>
     <string name="tomorrow">내일</string>
@@ -52,7 +58,7 @@
     <string name="missed_alarm">놓친 알람</string>
     <string name="missed_and_last_alarm">놓친 마지막 알람</string>
     <string name="select_color">색상 선택</string>
-    <string name="not_selected">선택 안됨</string>
+    <string name="not_selected">선택 안 됨</string>
     <string name="clear">지우기</string>
     <string name="new_alarm_long">새 알람</string>
     <string name="new_alarm_short">새 알람</string>
@@ -69,22 +75,22 @@
 
     <!-- Message -->
     <string name="alarm_removed">알람이 삭제되었습니다.</string>
-    <string name="less_than_a_minute">1분</string>
+    <string name="less_than_a_minute">1분&#160;</string>
     <string name="same_as_current">현재 시간대와 동일</string>
     <string name="same_as_set">설정된 시간대와 동일</string>
-    <string name="alarm_on">알람이 %1$s 후 울립니다.</string>
+    <string name="alarm_on">알람이 %1$s후 울립니다.</string>
     <string name="alarm_on_repeat">매주 %1$s %2$s에 알람이 울립니다.</string>
     <string name="alarm_on_repeat_every">매일 %1$s에 알람이 울립니다.</string>
     <string name="alarm_dismissed">알람이 해제되었습니다.</string>
     <string name="volume_is_muted">알람 볼륨이 음소거 상태입니다.</string>
     <string name="exist_timezone">이미 존재하는 시간대입니다.</string>
     <string name="start_date_removed">시작일이 제거되었습니다.</string>
-    <string name="start_date_and_time_is_wrong">시작일만 설정한 경우, 알람 시간을 현재 이후로 설정해야 합니다.</string>
+    <string name="start_date_and_time_is_wrong">시작일만 설정한 경우, 알람 시간을 현재 시각 이후로 설정해야 합니다.</string>
     <string name="end_date_removed">종료일이 제거되었습니다..</string>
-    <string name="end_date_earlier_than_today">종료일은 오늘 이후로 설정해야 합니다.</string>
-    <string name="end_date_earlier_than_start_date">종료일은 시작일 이후로 설정해야 합니다.</string>
-    <string name="must_check_repeat">하나 이상의 반복할 요일을 선택해야 합니다.</string>
-    <string name="invalid_repeat">설정된 범위가 일주일 이하인 경우 범위 내 유효한 시간 또는 반복 요일을 선택해야 합니다.</string>
+    <string name="end_date_earlier_than_today">종료일은 내일부터 설정 가능 합니다.</string>
+    <string name="end_date_earlier_than_start_date">종료일은 시작일 이후부터 설정 가능 합니다.</string>
+    <string name="must_check_repeat">반드시 요일 반복을 설정해야 합니다.</string>
+    <string name="invalid_repeat">설정된 범위가 일주일 이하인 경우 범위 내 유효한 시간 또는 요일 반복을 설정해야 합니다.</string>
     <string name="alarm_no_long_fires">알람(%1$s)이  더이상 울리지 않습니다.</string>
 
     <!-- Settings -->

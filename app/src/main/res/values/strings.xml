@@ -31,10 +31,16 @@
     <string name="label">Label</string>
     <string name="slow">slow</string>
     <string name="fast">fast</string>
-    <string name="hours">%1$d hours&#160;</string>
-    <string name="hour">%1$d hour&#160;</string>
-    <string name="minutes">%1$d minutes&#160;</string>
+    <string name="hour_minutes">%1$d hour %2$d minutes&#160;</string>
     <string name="hours_minutes">%1$d hours %2$d minutes&#160;</string>
+    <string name="hour">%1$d hour&#160;</string>
+    <string name="hours">%1$d hours&#160;</string>
+    <string name="minute">%1$d minute</string>
+    <string name="minutes">%1$d minutes</string>
+    <string name="day">%1$d day&#160;</string>
+    <string name="days">%1$d days&#160;</string>
+    <string name="year">%1$d year&#160;</string>
+    <string name="years">%1$d years&#160;</string>
     <string name="weekend">Weekend</string>
     <string name="weekday">Weekday</string>
     <string name="tomorrow">Tomorrow</string>
@@ -75,7 +81,7 @@
     <string name="alarm_on_repeat">Alarm set for every %1$s at %2$s.</string>
     <string name="alarm_on_repeat_every">Alarm set for everyday at %1$s.</string>
     <string name="alarm_dismissed">Alarm dismissed.</string>
-    <string name="volume_is_muted">Alarm volume is muted.</string>
+    <string name="volume_is_muted">Alarm volume muted.</string>
     <string name="exist_timezone">Selected timezone already in list.</string>
     <string name="start_date_removed">Start date removed.</string>
     <string name="start_date_and_time_is_wrong">The set time must be later than now if only set start date.</string>
@@ -90,7 +96,7 @@
     <string name="setting_group_1_key">ALARM</string>
     <string name="setting_group_1">Alarm</string>
     <string name="setting_alarm_mute_key">ALARM_MUTE_KEY</string>
-    <string name="setting_alarm_mute_title">Mute alarm</string>
+    <string name="setting_alarm_mute_title">Silence after</string>
     <string name="setting_alarm_volume_key">ALARM_VOLUME_KEY</string>
     <string name="setting_alarm_volume_title">Alarm Volume</string>
     <string name="setting_alarm_volume_increase_key">ALARM_INCREASE_KEY</string>

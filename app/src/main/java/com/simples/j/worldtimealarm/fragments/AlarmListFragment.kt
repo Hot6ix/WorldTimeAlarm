@@ -15,9 +15,7 @@ import android.support.v4.app.Fragment
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.SimpleItemAnimator
 import android.support.v7.widget.helper.ItemTouchHelper
-import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -59,13 +57,11 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private var muteStatusIsShown = false
     private var removedItem: AlarmItem? = null
 
-    private lateinit var job: Job
-    private val supervisor = SupervisorJob()
+    private var job = Job()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + supervisor
+        get() = Dispatchers.Main
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_alarmlist, container, false)
         fragmentLayout = view.findViewById(R.id.fragment_list)
         return view
@@ -79,37 +75,44 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         alarmController = AlarmController.getInstance(context)
         audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        job =launch(coroutineContext) {
-            progressBar.visibility = View.VISIBLE
+        job = launch(coroutineContext) {
             withContext(Dispatchers.IO) {
                 alarmItems = dbCursor.getAlarmList()
             }
 
-            alarmListAdapter = AlarmListAdapter(alarmItems, context!!).apply {
-                setOnItemListener(this@AlarmListFragment)
-                setHasStableIds(true)
+            if(context != null) {
+                alarmListAdapter = AlarmListAdapter(
+                        alarmItems,
+                        context!!).apply {
+                    setOnItemListener(this@AlarmListFragment)
+                    setHasStableIds(true)
+                }
+                recyclerLayoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+
+                alarmList.layoutManager = recyclerLayoutManager
+                alarmList.adapter = alarmListAdapter
+                alarmList.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+
+                swipeController = ListSwipeController()
+                swipeController.setOnSwipeListener(this@AlarmListFragment)
+
+                swipeHelper = ItemTouchHelper(swipeController)
+                swipeHelper.attachToRecyclerView(alarmList)
+                setEmptyMessage()
+                progressBar.visibility = View.GONE
             }
-            recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
-
-            alarmList.layoutManager = recyclerLayoutManager
-            alarmList.adapter = alarmListAdapter
-            alarmList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
-
-            swipeController = ListSwipeController()
-            swipeController.setOnSwipeListener(this@AlarmListFragment)
-
-            swipeHelper = ItemTouchHelper(swipeController)
-            swipeHelper.attachToRecyclerView(alarmList)
-            setEmptyMessage()
-            progressBar.visibility = View.GONE
         }
 
         // If alarm volume is muted, show snackBar
         if(savedInstanceState != null) muteStatusIsShown = savedInstanceState.getBoolean(STATE_SNACK_BAR)
+        val muted = getString(R.string.volume_is_muted)
+        val unMute = getString(R.string.unmute)
         if(!muteStatusIsShown) {
-            if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
+            if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0 && context != null) {
                 Handler().postDelayed({
-                    Snackbar.make(fragmentLayout, getString(R.string.volume_is_muted), Snackbar.LENGTH_LONG).setAction(getString(R.string.unmute)) {
+                    Snackbar.make(fragmentLayout,
+                            muted, Snackbar.LENGTH_LONG)
+                            .setAction(unMute) {
                         audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
                     }.addCallback(object: Snackbar.Callback() {
                         override fun onShown(sb: Snackbar?) {
@@ -128,7 +131,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         val intentFilter = IntentFilter()
         intentFilter.addAction(MainActivity.ACTION_UPDATE_ALL)
         intentFilter.addAction(MainActivity.ACTION_UPDATE_SINGLE)
-        context!!.registerReceiver(updateRequestReceiver, intentFilter)
+        context?.registerReceiver(updateRequestReceiver, intentFilter)
     }
 
     override fun onResume() {
@@ -163,8 +166,16 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
     override fun onDestroy() {
         super.onDestroy()
-        context!!.unregisterReceiver(updateRequestReceiver)
-        supervisor.cancel()
+
+        if(::updateRequestReceiver.isInitialized)
+            context?.unregisterReceiver(updateRequestReceiver)
+        else {
+            launch(coroutineContext) {
+                job.cancelAndJoin()
+
+                context?.unregisterReceiver(updateRequestReceiver)
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -173,6 +184,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         when {
             requestCode == REQUEST_CODE_NEW && resultCode == Activity.RESULT_OK -> {
                 val item = data?.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
+                val scheduledTime = data?.getLongExtra(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
                 if(item != null) {
                     alarmItems.add(item)
                     if(::alarmListAdapter.isInitialized) {
@@ -186,26 +198,28 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         }
                     }
                     setEmptyMessage()
-                    showSnackBar(item)
+                    showSnackBar(scheduledTime)
                 }
             }
             requestCode == REQUEST_CODE_MODIFY && resultCode == Activity.RESULT_OK -> {
                 val item = data?.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
-                if(item != null ) {
+                val scheduledTime = data?.getLongExtra(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
+                if(item != null) {
                     if(::alarmListAdapter.isInitialized) {
                         val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
+                        alarmList.scrollToPosition(index)
                         alarmItems[index] = item
                         alarmListAdapter.notifyItemChanged(index)
-                        alarmList.scrollToPosition(index)
                     }
                     else {
                         launch(coroutineContext) {
                             job.join()
+
                             val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
                             alarmList.scrollToPosition(index)
                         }
                     }
-                    showSnackBar(item)
+                    showSnackBar(scheduledTime)
                 }
             }
         }
@@ -218,7 +232,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
     override fun onItemClicked(view: View, item: AlarmItem) {
         val intent = Intent(context!!, AlarmActivity::class.java)
-        intent.putExtra(AlarmReceiver.ITEM, item)
+        val bundle = Bundle().apply {
+            putParcelable(AlarmReceiver.ITEM, item)
+        }
+        intent.putExtra(AlarmActivity.BUNDLE_KEY, bundle)
         startActivityForResult(intent, REQUEST_CODE_MODIFY)
     }
 
@@ -226,8 +243,8 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         if(b) {
             alarmItems.find { it.notiId == item.notiId }?.on_off = 1
             dbCursor.updateAlarmOnOffByNotiId(item.notiId, true)
-            alarmController.scheduleAlarm(context!!, item, AlarmController.TYPE_ALARM)
-            showSnackBar(item)
+            val scheduledTime = alarmController.scheduleAlarm(context!!, item, AlarmController.TYPE_ALARM)
+            showSnackBar(scheduledTime)
         }
         else {
             alarmItems.find { it.notiId == item.notiId }?.on_off = 0
@@ -277,37 +294,11 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
     }
 
-    private fun showSnackBar(item: AlarmItem) {
-        val calendar = Calendar.getInstance()
-        calendar.time = Date(item.timeSet.toLong())
-
-        if(item.repeat.any { it > 0 }) {
-            val dayArray = resources.getStringArray(R.array.day_of_week_full)
-            val repeatArray = item.repeat.mapIndexed { index, i ->
-                if(i > 0) dayArray[index] else null
-            }.filter { it != null }
-            val days = if(repeatArray.size == 7)
-                getString(R.string.everyday)
-            else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2)
-                getString(R.string.weekend)
-            else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5)
-                getString(R.string.weekday)
-            else repeatArray.joinToString()
-
-            snackBar = if(repeatArray.size == 7)
-                Snackbar.make(fragmentLayout, getString(R.string.alarm_on_repeat_every, DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_TIME)), Snackbar.LENGTH_LONG)
-            else
-                Snackbar.make(fragmentLayout, getString(R.string.alarm_on_repeat, days, DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_TIME)), Snackbar.LENGTH_LONG)
+    private fun showSnackBar(scheduledTime: Long = -1) {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = scheduledTime
         }
-        else {
-            while (calendar.timeInMillis < System.currentTimeMillis()) {
-                calendar.add(Calendar.DAY_OF_YEAR, 1)
-            }
-            if (calendar.timeInMillis - System.currentTimeMillis() > DateUtils.DAY_IN_MILLIS) {
-                calendar.set(Calendar.DAY_OF_YEAR, Calendar.getInstance().get(Calendar.DAY_OF_YEAR))
-            }
-            snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(context!!, calendar)), Snackbar.LENGTH_LONG)
-        }
+        snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(context!!, calendar)), Snackbar.LENGTH_LONG)
 
         snackBar?.show()
     }
@@ -335,9 +326,14 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                     }
                 }
                 MainActivity.ACTION_UPDATE_ALL -> {
-                    launch(coroutineContext) {
-                        job.join()
+                    if(::alarmListAdapter.isInitialized) {
                         alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
+                    }
+                    else {
+                        launch(coroutineContext) {
+                            job.join()
+                            alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
+                        }
                     }
                 }
             }

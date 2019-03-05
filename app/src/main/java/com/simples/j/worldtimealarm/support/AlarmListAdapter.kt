@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
  * Created by j on 19/02/2018.
  *
  */
-class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
+class AlarmListAdapter(private var list: ArrayList<AlarmItem>, val context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
 
     private lateinit var listener: OnItemClickListener
     private var startDate: Calendar? = null
@@ -60,29 +60,25 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, var context: Cont
             calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
 
-        startDate = try {
-            Calendar.getInstance().apply {
+        startDate =
                 item.startDate.let {
-                    if(it != null && it > 0) timeInMillis = it
-                    else throw NumberFormatException("Invalid value for calendar : startDate")
+                    if(it != null && it > 0) {
+                        Calendar.getInstance().apply {
+                            timeInMillis = it
+                        }
+                    }
+                    else null
                 }
-            }
-        } catch (e: NumberFormatException) {
-            e.printStackTrace()
-            null
-        }
 
-        endDate = try {
-            Calendar.getInstance().apply {
+        endDate =
                 item.endDate.let {
-                    if(it != null && it > 0) timeInMillis = it
-                    else throw NumberFormatException("Invalid value for calendar : endDate")
+                    if(it != null && it > 0) {
+                        Calendar.getInstance().apply {
+                            timeInMillis = it
+                        }
+                    }
+                    else null
                 }
-            }
-        } catch (e: NumberFormatException) {
-            e.printStackTrace()
-            null
-        }
 
         if(startDate == null && endDate == null) {
             holder.range.visibility = View.GONE
