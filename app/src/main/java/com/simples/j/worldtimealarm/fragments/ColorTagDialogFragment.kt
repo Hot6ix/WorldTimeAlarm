@@ -61,6 +61,7 @@ class ColorTagDialogFragment: DialogFragment(), ColorGridAdapter.OnItemClickList
 
     fun setLastChoice(lastChoice: Int) {
         this.lastChoice = lastChoice
+        this.currentChoice = lastChoice
     }
 
     fun setOnDialogEventListener(listener: OnDialogEventListener) {

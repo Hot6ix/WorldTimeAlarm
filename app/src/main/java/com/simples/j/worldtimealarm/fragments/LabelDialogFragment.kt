@@ -76,6 +76,7 @@ class LabelDialogFragment: DialogFragment() {
 
     fun setLastLabel(label: String) {
         this.lastLabel = label
+        this.currentLabel = label
     }
 
     interface OnDialogEventListener {
