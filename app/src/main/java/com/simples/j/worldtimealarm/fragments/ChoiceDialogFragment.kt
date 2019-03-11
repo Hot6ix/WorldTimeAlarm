@@ -17,8 +17,8 @@ import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
 class ChoiceDialogFragment: DialogFragment() {
 
     private var listener: OnDialogEventListener? = null
-    private var lastChoice: Int = -1
-    private var currentChoice: Int = -1
+    private var lastChoice: Int = 0
+    private var currentChoice: Int = 0
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val array = arguments?.getStringArray(CONTENT_ARRAY)
@@ -35,8 +35,8 @@ class ChoiceDialogFragment: DialogFragment() {
                 .setPositiveButton(R.string.ok) { dialogInterface, _ ->
                     listener?.onPositiveButtonClick(dialogInterface, currentChoice)
                 }
-                .setNegativeButton(R.string.cancel) { dialogInterface, index ->
-                    listener?.onNegativeButtonClick(dialogInterface, index)
+                .setNegativeButton(R.string.cancel) { dialogInterface, which ->
+                    listener?.onNegativeButtonClick(dialogInterface, which)
                 }
         return dialog.create()
     }
