@@ -35,6 +35,7 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
 import kotlinx.android.synthetic.main.fragment_world_clock.*
 import kotlinx.coroutines.*
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.coroutines.CoroutineContext
@@ -46,7 +47,6 @@ import kotlin.coroutines.CoroutineContext
 class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener, CoroutineScope, DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 
     private lateinit var clockListAdapter: ClockListAdapter
-    private lateinit var timeFormat: SimpleDateFormat
     private lateinit var swipeHelper: ItemTouchHelper
     private lateinit var swipeController: ListSwipeController
     private lateinit var recyclerLayoutManager: LinearLayoutManager
@@ -57,6 +57,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private lateinit var timeDialog: TimePickerDialogFragment
     private lateinit var dateDialog: DatePickerDialogFragment
 
+    private var timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+    private var dateFormat = DateFormat.getDateInstance(DateFormat.FULL)
     private var calendar = Calendar.getInstance()
     private var clockItems = ArrayList<ClockItem>()
     private var removedItem: ClockItem? = null
@@ -85,8 +87,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                 else if(!isUserTimeZoneEnabled) calendar.timeZone
                 else TimeZone.getTimeZone(converterTimezoneId)
         calendar.timeZone = timeZone
-        timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
+        dateFormat.timeZone = timeZone
 
         if(savedInstanceState != null && !savedInstanceState.isEmpty) {
             calendar.timeInMillis = savedInstanceState.getLong(USER_SELECTED_DATE_AND_TIME)
@@ -109,6 +111,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                 fragmentManager?.findFragmentByTag(TAG_FRAGMENT_DATE_DIALOG) as? DatePickerDialogFragment ?:
                 DatePickerDialogFragment.newInstance().apply {
                     calendar.timeInMillis = this@WorldClockFragment.calendar.timeInMillis
+                    minDate = 0
                 }
         dateDialog.setDateSetListener(this)
 
@@ -241,7 +244,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
         calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
         calendar.set(Calendar.MINUTE, minute)
-        timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
         world_time.text = timeFormat.format(calendar.time)
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
@@ -263,12 +265,12 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         calendar.set(Calendar.SECOND, 0)
 
-        timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
         timeFormat.timeZone = timeZone
+        dateFormat.timeZone = timeZone
 
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
-        world_date.text = DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
+        world_date.text = dateFormat.format(calendar.time)
     }
 
     private fun setEmptyMessage() {

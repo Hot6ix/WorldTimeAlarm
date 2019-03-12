@@ -2,12 +2,14 @@ package com.simples.j.worldtimealarm.support
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.clock_list_item.view.*
@@ -38,11 +40,12 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
         val expectedCalendar = Calendar.getInstance(timeZone)
         expectedCalendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
 
-        val differenceOriginal = calendar.timeZone.getOffset(System.currentTimeMillis()) - expectedCalendar.timeZone.getOffset(System.currentTimeMillis())
-        expectedCalendar.add(Calendar.MILLISECOND, -differenceOriginal)
+        val difference = expectedCalendar.timeZone.getOffset(System.currentTimeMillis()) - calendar.timeZone.getOffset(System.currentTimeMillis())
+        expectedCalendar.add(Calendar.MILLISECOND, difference)
 
-        val offset = if(calendar.timeZone == timeZone) context.resources.getString(R.string.same_as_set)
-        else MediaCursor.getOffsetOfDifference(context, differenceOriginal, MediaCursor.TYPE_CONVERTER)
+        val offset =
+                if(calendar.timeZone == timeZone) context.resources.getString(R.string.same_as_set)
+                else MediaCursor.getOffsetOfDifference(context, difference, MediaCursor.TYPE_CONVERTER)
 
         holder.timeZoneName.text = expectedCalendar.timeZone.id.replace("_", " ")
         holder.timeZoneOffset.text = offset
