@@ -29,13 +29,6 @@ class TimeZoneAdapter(private var tzs: ArrayList<String>, private val context: C
     override fun getItemId(position: Int): Long = super.getItemId(position)
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-//        Log.d("taggg1", TimeZone.getTimeZone(tzs[position].replace(" ", "_")).rawOffset.toString())
-//        Log.d("taggg1", TimeZone.getDefault().rawOffset.toString())
-//        Log.d("taggg2", TimeZone.getTimeZone(tzs[position].replace(" ", "_")).dstSavings.toString())
-//        Log.d("taggg2", TimeZone.getDefault().dstSavings.toString())
-//        Log.d("taggg3", TimeZone.getTimeZone(tzs[position].replace(" ", "_")).getOffset(System.currentTimeMillis()).toString())
-//        Log.d("taggg3", TimeZone.getDefault().getOffset(System.currentTimeMillis()).toString())
-//        val difference = TimeZone.getTimeZone(tzs[position].replace(" ", "_")).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(tzs[position].replace(" ", "_")).dstSavings - TimeZone.getDefault().dstSavings
         val difference = TimeZone.getTimeZone(tzs[position].replace(" ", "_")).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
 
         val offset = if(TimeZone.getDefault() == TimeZone.getTimeZone(tzs[position].replace(" ", "_"))) context.resources.getString(R.string.current_time_zone)
