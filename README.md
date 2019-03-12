@@ -35,6 +35,9 @@ Version 1.4
 - Improve app speed
 - Add help page
 
+Version 1.4.1
+- Fix dialog crash
+
 FAQ
 
 Q : How to change order of alarm or time?
