@@ -38,6 +38,9 @@ Version 1.4
 Version 1.4.1
 - Fix dialog crash
 
+Version 1.4.2
+- Fix showing wrong date in time conversion
+
 FAQ
 
 Q : How to change order of alarm or time?
