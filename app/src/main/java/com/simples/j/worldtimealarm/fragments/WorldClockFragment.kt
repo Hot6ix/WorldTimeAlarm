@@ -244,7 +244,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
         calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
         calendar.set(Calendar.MINUTE, minute)
-        timeFormat.timeZone = timeZone
+        timeDialog.setTime(calendar)
         world_time.text = timeFormat.format(calendar.time)
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
@@ -254,17 +254,18 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         calendar.set(Calendar.YEAR, year)
         calendar.set(Calendar.MONTH, month)
         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-        world_date.text = DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
+        dateDialog.setDate(calendar)
+        world_date.text = dateFormat.format(calendar.time)
         clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
     }
 
     private fun updateStandardTimeZone() {
         val formattedTimeZone = timeZone.id.replace("_", " ")
-        calendar.timeZone = timeZone
         time_zone.text = formattedTimeZone
 
         calendar.set(Calendar.SECOND, 0)
 
+        calendar.timeZone = timeZone
         timeFormat.timeZone = timeZone
         dateFormat.timeZone = timeZone
 
