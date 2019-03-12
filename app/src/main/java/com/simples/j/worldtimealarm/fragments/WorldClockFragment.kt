@@ -17,7 +17,6 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.helper.ItemTouchHelper
-import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -95,7 +94,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         }
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
-        world_date.text = DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_WEEKDAY)
+        world_date.text = dateFormat.format(calendar.time)
 
         time_zone.setOnClickListener(this)
         new_timezone.setOnClickListener(this)
@@ -103,14 +102,14 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         timeDialog =
                 fragmentManager?.findFragmentByTag(TAG_FRAGMENT_TIME_DIALOG) as? TimePickerDialogFragment ?:
                 TimePickerDialogFragment.newInstance().apply {
-                    calendar.timeInMillis = this@WorldClockFragment.calendar.timeInMillis
+                    setTime(this@WorldClockFragment.calendar)
                 }
         timeDialog.setTimeSetListener(this)
 
         dateDialog =
                 fragmentManager?.findFragmentByTag(TAG_FRAGMENT_DATE_DIALOG) as? DatePickerDialogFragment ?:
                 DatePickerDialogFragment.newInstance().apply {
-                    calendar.timeInMillis = this@WorldClockFragment.calendar.timeInMillis
+                    setDate(this@WorldClockFragment.calendar)
                     minDate = 0
                 }
         dateDialog.setDateSetListener(this)
@@ -256,18 +255,18 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
         dateDialog.setDate(calendar)
         world_date.text = dateFormat.format(calendar.time)
-        clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
+        clockListAdapter.notifyItemRangeChanged( 0, clockItems.count())
     }
 
     private fun updateStandardTimeZone() {
         val formattedTimeZone = timeZone.id.replace("_", " ")
         time_zone.text = formattedTimeZone
 
-        calendar.set(Calendar.SECOND, 0)
-
         calendar.timeZone = timeZone
         timeFormat.timeZone = timeZone
         dateFormat.timeZone = timeZone
+
+        calendar.set(Calendar.SECOND, 0)
 
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)

@@ -19,7 +19,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
-import android.text.format.DateUtils
 import android.view.View
 import android.widget.TimePicker
 import android.widget.Toast
@@ -78,6 +77,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private var startDate: Calendar? = null
     private var endDate: Calendar? = null
     private val today = Calendar.getInstance()
+    private var dateFormat = DateFormat.getDateInstance(DateFormat.FULL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,6 +121,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 set(Calendar.SECOND, 0)
             }
 
+            dateFormat.timeZone = TimeZone.getTimeZone(currentTimeZone)
+
             if(Build.VERSION.SDK_INT < 23) {
                 time_picker.currentHour = calendar.get(Calendar.HOUR_OF_DAY)
                 time_picker.currentMinute = calendar.get(Calendar.MINUTE)
@@ -159,7 +161,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     startDatePickerDialog.calendar = startDate!!
                     startDatePickerDialog.minDate = tmpCal.timeInMillis
 
-                    range_start.text = DateUtils.formatDateTime(applicationContext, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
+                    range_start.text = dateFormat.format(startDate?.time)
                 }
             }
 
@@ -174,7 +176,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     tmpCal.add(Calendar.DAY_OF_YEAR, 1)
                     endDatePickerDialog.minDate = tmpCal.timeInMillis
 
-                    range_end.text = DateUtils.formatDateTime(applicationContext, endDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
+                    range_end.text = dateFormat.format(endDate?.time)
                 }
             }
 
@@ -223,6 +225,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             calendar = Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone))
             calendar.time = savedInstanceState.getSerializable(STATE_DATE_KEY) as Date
             selectedDays = savedInstanceState.getIntArray(STATE_REPEAT_KEY) ?: IntArray(7) { 0 }
+            dateFormat.timeZone = TimeZone.getTimeZone(currentTimeZone)
 
             if(Build.VERSION.SDK_INT < 23) {
                 time_picker.currentHour = calendar.get(Calendar.HOUR_OF_DAY)
@@ -254,7 +257,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         timeInMillis = it
                     }
                     startDatePickerDialog.setDate(startDate!!)
-                    range_start.text = DateUtils.formatDateTime(applicationContext, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
+                    range_start.text = dateFormat.format(startDate?.time)
                 }
             }
             savedInstanceState.getLong(STATE_END_DATE_KEY).let {
@@ -263,7 +266,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         timeInMillis = it
                     }
                     endDatePickerDialog.setDate(endDate!!)
-                    range_end.text = DateUtils.formatDateTime(applicationContext, endDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
+                    range_end.text = dateFormat.format(endDate?.time)
                 }
             }
 
@@ -334,6 +337,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         calendar.timeZone = this
 //                        startDate?.timeZone = this
 //                        endDate?.timeZone = this
+                        dateFormat.timeZone = this
                         endDatePickerDialog.minDate = calendar.timeInMillis
                     }
 
@@ -796,14 +800,14 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         if(startDate == null) startDate = calendar.clone() as Calendar
         startDate?.set(year, month, dayOfMonth)
         startDatePickerDialog.calendar = startDate!!
-        range_start.text = DateUtils.formatDateTime(applicationContext, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
+        range_start.text = dateFormat.format(startDate?.time)
     }
 
     private val endDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
         if(endDate == null) endDate = calendar.clone() as Calendar
         endDate?.set(year, month, dayOfMonth)
         endDatePickerDialog.calendar = endDate!!
-        range_end.text = DateUtils.formatDateTime(applicationContext, endDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_ABBREV_ALL)
+        range_end.text = dateFormat.format(endDate?.time)
     }
 
     companion object {
