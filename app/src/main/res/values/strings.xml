@@ -92,6 +92,13 @@
     <string name="invalid_repeat">Must check valid time and repeat day if range is less than a week.</string>
     <string name="alarm_no_long_fires">Alarm (%1$s) no longer fires.</string>
 
+    <!-- Text -->
+    <string name="timezone_fragment_title">Select time zone</string>
+    <string name="timezone_country">Country</string>
+    <string name="timezone_region">Time zone</string>
+    <string name="timezone_format">%1$s (%2$s)</string>
+    <string name="unknown_timezone">Unknown time zone</string>
+
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>
     <string name="setting_group_1">Alarm</string>

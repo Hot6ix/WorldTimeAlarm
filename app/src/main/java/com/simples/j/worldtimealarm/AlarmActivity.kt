@@ -293,6 +293,15 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
         time_picker.setOnTimeChangedListener(this)
         time_zone_view.setOnClickListener(this)
+        // TODO : Compare Android version
+        time_zone_view.setOnLongClickListener {
+            val i = Intent(this, TimeZonePickerActivity::class.java).apply {
+                putExtra(TimeZonePickerActivity.TIME_ZONE_ID, currentTimeZone)
+            }
+            startActivity(i)
+
+            true
+        }
         alarm_save.setOnClickListener(this)
         alarm_cancel.setOnClickListener(this)
 

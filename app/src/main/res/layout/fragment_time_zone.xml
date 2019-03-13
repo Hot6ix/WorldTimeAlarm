@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.TimeZoneFragment">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/time_zone_country_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        android:padding="@dimen/padding15"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/time_zone_country_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/timezone_country"
+            android:textSize="@dimen/text_large"
+            android:textColor="@android:color/black"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/time_zone_country_summary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/timezone_country"
+            android:textSize="@dimen/text_small"
+            android:textColor="@color/darkerGray"
+            app:layout_constraintTop_toBottomOf="@id/time_zone_country_title"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <View
+        android:id="@+id/divider0"
+        style="@style/Divider_white"
+        android:layout_marginStart="@dimen/padding15"
+        android:layout_marginEnd="@dimen/padding15"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/time_zone_country_layout" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/time_zone_region_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        android:padding="@dimen/padding15"
+        app:layout_constraintTop_toBottomOf="@id/divider0">
+
+        <TextView
+            android:id="@+id/time_zone_region_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/timezone_region"
+            android:textSize="@dimen/text_large"
+            android:textColor="@android:color/black"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/time_zone_region_summary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/timezone_region"
+            android:textSize="@dimen/text_small"
+            android:textColor="@color/darkerGray"
+            app:layout_constraintTop_toBottomOf="@id/time_zone_region_title"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.constraint.ConstraintLayout>

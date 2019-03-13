@@ -2,13 +2,29 @@ package com.simples.j.worldtimealarm.utils
 
 import android.content.Context
 import android.graphics.Color
+import android.icu.text.LocaleDisplayNames
+import android.icu.text.SimpleDateFormat
+import android.icu.text.TimeZoneNames
+import android.icu.util.TimeZone
+import android.icu.util.ULocale
 import android.media.RingtoneManager
+import android.os.Build
+import android.support.annotation.RequiresApi
+import android.text.BidiFormatter
+import android.text.TextDirectionHeuristics
+import android.text.TextUtils
+import android.util.Log
+import android.view.View
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
+import com.simples.j.worldtimealarm.etc.TimeZoneInfo
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
+
 
 /**
  * Created by j on 06/03/2018.
@@ -156,6 +172,47 @@ class MediaCursor {
             val g = Math.round(Color.green(color) * factor)
             val b = Math.round(Color.blue(color) * factor)
             return Color.argb(c, r, g, b)
+        }
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        fun getTimeZoneLocales(): List<ULocale> {
+            // filter duplicate and only has timezones
+            return ULocale.getAvailableLocales().distinctBy { it.country }.filter { TimeZone.getAvailableIDs(it.country).isNotEmpty() }
+        }
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        fun getCountryNameByTimeZone(timeZone: TimeZone?, uLocale: ULocale = ULocale.getDefault()): String {
+            if(timeZone == null) {
+                Log.d(C.TAG, "Given timeZone is empty, so return nothing.")
+                return ""
+            }
+            return LocaleDisplayNames.getInstance(uLocale).regionDisplayName(TimeZone.getRegion(timeZone.id))
+        }
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        fun getTimeZoneInfoList(country: String, uLocale: ULocale = ULocale.getDefault()): ArrayList<TimeZoneInfo> {
+            val list = ArrayList<TimeZoneInfo>()
+            val timeZoneNames = TimeZoneNames.getInstance(uLocale)
+            TimeZone.getAvailableIDs(country).forEach {
+                val timeZone = TimeZone.getTimeZone(it)
+                val timeZoneInfo = TimeZoneInfo.Formatter(uLocale.toLocale(), Date()).format(timeZone)
+                list.add(timeZoneInfo)
+            }
+            return list
+        }
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        fun getGmtOffsetString(locale: Locale, timeZone: TimeZone, now: Date): String {
+            val gmtFormatter = SimpleDateFormat("ZZZZ").apply {
+                this.timeZone = timeZone
+            }
+            var gmtString = gmtFormatter.format(now)
+
+            val bidiFormatter = BidiFormatter.getInstance()
+            val isRtl = TextUtils.getLayoutDirectionFromLocale(locale) == View.LAYOUT_DIRECTION_RTL
+
+            gmtString = bidiFormatter.unicodeWrap(gmtString, if(isRtl) TextDirectionHeuristics.RTL else TextDirectionHeuristics.LTR)
+            return gmtString
         }
     }
 

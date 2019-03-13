@@ -36,7 +36,13 @@
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
-        <item name="android:background">@android:color/darker_gray</item>
+        <item name="android:background">@color/lightGray</item>
+    </style>
+
+    <style name="Divider_white">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/whiteGray</item>
     </style>
 
     <style name="SeekBarNoTickMark" parent="Base.Widget.AppCompat.SeekBar.Discrete">
