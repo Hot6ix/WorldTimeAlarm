@@ -1,7 +1,6 @@
 package com.simples.j.worldtimealarm.fragments
 
 
-import android.app.SearchManager
 import android.content.Context
 import android.icu.text.Collator
 import android.icu.util.ULocale
@@ -11,14 +10,10 @@ import android.support.annotation.RequiresApi
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.widget.LinearLayoutManager
-import android.text.TextUtils
-import android.util.Log
 import android.view.*
 import android.widget.SearchView
-import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.support.BaseTimeZonePickerAdapter
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.fragment_time_zone_picker.*
@@ -79,18 +74,18 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
                 if(mRequestType == TimeZonePickerActivity.REQUEST_COUNTRY) createCountryListAdapterItem()
                 else createTimeZoneListAdapterItem()
             }
+
             mAdapter = when(mRequestType) {
                 TimeZonePickerActivity.REQUEST_COUNTRY -> {
-                    BaseTimeZonePickerAdapter(list, false, null, mLocaleChangeListener)
+                    BaseTimeZonePickerAdapter(context, list, false, null, mLocaleChangeListener)
                 }
                 TimeZonePickerActivity.REQUEST_TIME_ZONE -> {
-                    BaseTimeZonePickerAdapter(list, true, "test", mTimeZoneInfoChangeListener)
+                    BaseTimeZonePickerAdapter(context, list, true, "test", mTimeZoneInfoChangeListener)
                 }
                 else -> {
                     throw IllegalStateException("Unexpected request type : $mRequestType")
                 }
             }
-            BaseTimeZonePickerAdapter(list, false, null, null)
 
             time_zone_base_recycler_view.adapter = mAdapter
             time_zone_base_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -221,7 +216,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
                     if(timeZoneInfo.mTimeZone.inDaylightTime(Date())) timeZoneInfo.mDaylightName
                     else timeZoneInfo.mStandardName
             }
-            items.add(PickerItem(index.toLong(), timeZoneInfo.mTimeZone.id, name ?: timeZoneInfo.mGmtOffset, timeZoneInfo.mGmtOffset))
+            items.add(PickerItem(index.toLong(), timeZoneInfo.mTimeZone.id, name ?: timeZoneInfo.mTimeZone.id, timeZoneInfo.mGmtOffset))
         }
         return ArrayList(items)
     }

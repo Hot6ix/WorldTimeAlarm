@@ -105,9 +105,8 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                             if(this.mTimeZone.inDaylightTime(mDate)) this.mDaylightName
                             else this.mStandardName
                 }
-                time_zone_region_summary.text =
-                        if(regionName == null) this.mGmtOffset
-                        else getString(R.string.timezone_format, regionName, this.mGmtOffset)
+                if(regionName == null) regionName = this.mTimeZone.id
+                time_zone_region_summary.text = getString(R.string.timezone_format, regionName, this.mGmtOffset)
 
                 val found = MediaCursor.getULocaleByTimeZoneId(mTimeZone.id)
                 val isSingleTimeZone = found != null && (MediaCursor.getTimeZoneListByCountry(found.country).size == 1)

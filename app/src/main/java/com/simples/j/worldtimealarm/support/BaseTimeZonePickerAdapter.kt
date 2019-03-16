@@ -1,7 +1,9 @@
 package com.simples.j.worldtimealarm.support
 
+import android.content.Context
 import android.os.Build
 import android.support.annotation.RequiresApi
+import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -9,11 +11,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.utils.MediaCursor
 import java.util.*
 import kotlin.collections.ArrayList
 
 @RequiresApi(Build.VERSION_CODES.N)
-class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(list: List<T>, showItemSummary: Boolean, headerText: String?, listener: OnListItemClickListener<T>?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(private val context: Context?, list: List<T>, showItemSummary: Boolean, headerText: String?, listener: OnListItemClickListener<T>?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var mOriginal: List<T> = list
     private var mList: List<T> = list
@@ -60,9 +63,15 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(list:
                 val item = getData(position)
                 holder.title.text = item.title
                 if(mShowItemSummary) {
-                    holder.summary.visibility = View.VISIBLE
+                    holder.summaryLayout.visibility = View.VISIBLE
                     holder.summary.text = item.summary
+
+                    val difference = TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+
+                    holder.difference.text = MediaCursor.getOffsetOfDifference(context!!, difference, MediaCursor.TYPE_CURRENT)
                 }
+                else holder.summaryLayout.visibility = View.GONE
+
                 holder.itemView.setOnClickListener {
                     mListener?.onListItemClick(item)
                 }
@@ -76,7 +85,9 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(list:
 
     private class ItemViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.time_zone_picker_title)
+        val summaryLayout: ConstraintLayout = view.findViewById(R.id.time_zone_picker_summary_layout)
         val summary: TextView = view.findViewById(R.id.time_zone_picker_summary)
+        val difference: TextView = view.findViewById(R.id.time_zone_picker_difference)
     }
 
     private class HeaderViewHolder(view: View): RecyclerView.ViewHolder(view) {
