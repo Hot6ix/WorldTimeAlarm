@@ -4,6 +4,6 @@
     <item android:id="@+id/search_timezone"
         android:title="@string/search_title"
         android:icon="@drawable/ic_search_white"
-        app:showAsAction="always"
+        app:showAsAction="always|collapseActionView"
         app:actionViewClass="android.widget.SearchView" />
 </menu>

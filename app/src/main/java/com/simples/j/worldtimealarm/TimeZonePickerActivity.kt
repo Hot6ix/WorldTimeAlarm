@@ -11,7 +11,7 @@ import com.simples.j.worldtimealarm.fragments.TimeZonePickerFragment
 @RequiresApi(Build.VERSION_CODES.N)
 class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTimeZoneChangeListener {
 
-    private var mTimeZoneId: String? = null
+    var mTimeZoneId: String? = null
     private lateinit var mTimeZoneFragment: TimeZoneFragment
     private lateinit var mTimeZonePickerFragment: TimeZonePickerFragment
 
@@ -19,7 +19,6 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_time_zone_picker)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = getString(R.string.timezone_fragment_title)
 
         mTimeZoneId = intent.getStringExtra(TIME_ZONE_ID)
 
@@ -34,37 +33,48 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
         else {
             mTimeZoneFragment = supportFragmentManager.findFragmentByTag(TIME_ZONE_FRAGMENT_TAG) as TimeZoneFragment
         }
-        mTimeZonePickerFragment = supportFragmentManager.findFragmentByTag(TIME_ZONE_PICKER_FRAGMENT_TAG) as? TimeZonePickerFragment ?: TimeZonePickerFragment.newInstance()
-        mTimeZonePickerFragment.setListener(this)
-    }
-
-    fun startPickerFragment() {
-        supportFragmentManager.beginTransaction()
-                .add(R.id.time_zone_picker_fragment_container, mTimeZonePickerFragment, TIME_ZONE_PICKER_FRAGMENT_TAG)
-                .hide(mTimeZoneFragment)
-                .addToBackStack(TIME_ZONE_PICKER_FRAGMENT_TAG)
-                .commit()
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when(item?.itemId) {
             android.R.id.home -> {
-                finish()
+                if(supportFragmentManager.backStackEntryCount > 0) {
+                    supportFragmentManager.popBackStack()
+                }
+                else finish()
+
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    override fun onCountryChanged(country: String) {
+    fun startPickerFragment(bundle: Bundle? = null, tag: String) {
+        mTimeZonePickerFragment = supportFragmentManager.findFragmentByTag(tag) as? TimeZonePickerFragment ?: TimeZonePickerFragment.newInstance(this)
+        mTimeZonePickerFragment.arguments = bundle
+        supportFragmentManager.beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
+                .replace(R.id.time_zone_picker_fragment_container, mTimeZonePickerFragment, tag)
+                .addToBackStack(tag)
+                .commit()
     }
 
     override fun onTimeZoneChanged(timeZone: String) {
+        val bundle = Bundle().apply {
+            putString(TIME_ZONE_ID, timeZone)
+        }
+        mTimeZoneFragment.arguments = bundle
     }
 
     companion object {
         const val TIME_ZONE_ID = "TIME_ZONE_ID"
         const val TIME_ZONE_FRAGMENT_TAG = "TIME_ZONE_FRAGMENT_TAG"
-        const val TIME_ZONE_PICKER_FRAGMENT_TAG = "TIME_ZONE_PICKER_FRAGMENT_TAG"
+        const val TIME_ZONE_PICKER_FRAGMENT_COUNTRY_TAG = "TIME_ZONE_PICKER_FRAGMENT_COUNTRY_TAG"
+        const val TIME_ZONE_PICKER_FRAGMENT_TIME_ZONE_TAG = "TIME_ZONE_PICKER_FRAGMENT_TIME_ZONE_TAG"
+
+        const val REQUEST_TYPE = "REQUEST_TYPE"
+        const val GIVEN_COUNTRY = "GIVEN_COUNTRY"
+        const val REQUEST_COUNTRY = 0
+        const val REQUEST_TIME_ZONE = 1
     }
 }

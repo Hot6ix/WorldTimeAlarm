@@ -32,6 +32,10 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, val context: Cont
     private var endDate: Calendar? = null
     private var highlightId: Int = -1
 
+    init {
+        setHasStableIds(true)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.alarm_list_item, parent, false))
     }
@@ -41,6 +45,10 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, val context: Cont
     override fun getItemId(position: Int): Long = list[position].notiId.toLong()
 
     override fun getItemViewType(position: Int): Int = 0
+
+    override fun setHasStableIds(hasStableIds: Boolean) {
+        super.setHasStableIds(hasStableIds)
+    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[holder.adapterPosition]

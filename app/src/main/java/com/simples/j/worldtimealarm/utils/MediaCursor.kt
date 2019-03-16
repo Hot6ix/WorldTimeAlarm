@@ -177,7 +177,8 @@ class MediaCursor {
         @RequiresApi(Build.VERSION_CODES.N)
         fun getTimeZoneLocales(): List<ULocale> {
             // filter duplicate and only has timezones
-            return ULocale.getAvailableLocales().distinctBy { it.country }.filter { TimeZone.getAvailableIDs(it.country).isNotEmpty() }
+            // TODO : 중복된 로케일이 제거된 경우 인도나 쿠바같은 국가의 도시가 표시가 안되는 경우가 있음
+            return ULocale.getAvailableLocales().distinctBy { it.country }.filter { TimeZone.getAvailableIDs(it.country).isNotEmpty() }.sortedBy { it.displayCountry }
         }
 
         @RequiresApi(Build.VERSION_CODES.N)
@@ -190,16 +191,21 @@ class MediaCursor {
         }
 
         @RequiresApi(Build.VERSION_CODES.N)
-        fun getTimeZoneInfoList(country: String, uLocale: ULocale = ULocale.getDefault()): ArrayList<TimeZoneInfo> {
-            val list = ArrayList<TimeZoneInfo>()
-            val timeZoneNames = TimeZoneNames.getInstance(uLocale)
-            TimeZone.getAvailableIDs(country).forEach {
-                val timeZone = TimeZone.getTimeZone(it)
-                val timeZoneInfo = TimeZoneInfo.Formatter(uLocale.toLocale(), Date()).format(timeZone)
-                list.add(timeZoneInfo)
+        fun getULocaleByTimeZoneId(id: String?): ULocale? {
+            return ULocale.getAvailableLocales().find {
+                it.displayCountry == LocaleDisplayNames.getInstance(ULocale.getDefault()).regionDisplayName(TimeZone.getRegion(id))
             }
-            return list
         }
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        fun getTimeZoneListByCountry(country: String?, uLocale: ULocale = ULocale.getDefault()): List<TimeZoneInfo> {
+            val timeZoneNames = TimeZoneNames.getInstance(uLocale)
+            return TimeZone.getAvailableIDs(country).map {
+                val timeZone = TimeZone.getTimeZone(it)
+                TimeZoneInfo.Formatter(uLocale.toLocale(), Date()).format(timeZone)
+            }
+        }
+
 
         @RequiresApi(Build.VERSION_CODES.N)
         fun getGmtOffsetString(locale: Locale, timeZone: TimeZone, now: Date): String {

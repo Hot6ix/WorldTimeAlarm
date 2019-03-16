@@ -94,10 +94,14 @@
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>
+    <string name="timezone_fragment_country_title">Country</string>
+    <string name="timezone_fragment_time_zone_title">Time zone</string>
     <string name="timezone_country">Country</string>
     <string name="timezone_region">Time zone</string>
     <string name="timezone_format">%1$s (%2$s)</string>
-    <string name="unknown_timezone">Unknown time zone</string>
+    <string name="time_zone_search_hint">Los Angeles, Seoul, etc&#8230;</string>
+    <string name="time_zone_unknown">Unknown time zone</string>
+    <string name="time_zone_apply">Apply</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>

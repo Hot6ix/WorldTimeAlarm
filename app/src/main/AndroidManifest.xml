@@ -17,7 +17,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".TimeZonePickerActivity"></activity>
+
+        <activity android:name=".TimeZonePickerActivity"/>
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"

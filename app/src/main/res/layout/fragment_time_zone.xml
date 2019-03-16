@@ -13,7 +13,7 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackground"
-        android:padding="@dimen/padding15"
+        android:padding="@dimen/padding20"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -54,7 +54,7 @@
         android:clickable="true"
         android:focusable="true"
         android:background="?attr/selectableItemBackground"
-        android:padding="@dimen/padding15"
+        android:padding="@dimen/padding20"
         app:layout_constraintTop_toBottomOf="@id/divider0">
 
         <TextView
@@ -63,7 +63,8 @@
             android:layout_height="wrap_content"
             android:text="@string/timezone_region"
             android:textSize="@dimen/text_large"
-            android:textColor="@android:color/black"
+            android:textColor="@color/text_color_state_title"
+            android:duplicateParentState="true"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
 
@@ -73,10 +74,35 @@
             android:layout_height="wrap_content"
             android:text="@string/timezone_region"
             android:textSize="@dimen/text_small"
-            android:textColor="@color/darkerGray"
+            android:textColor="@color/text_color_state_summary"
+            android:duplicateParentState="true"
             app:layout_constraintTop_toBottomOf="@id/time_zone_region_title"
             app:layout_constraintStart_toStartOf="parent"/>
 
     </android.support.constraint.ConstraintLayout>
+
+    <View
+        android:id="@+id/divider1"
+        style="@style/Divider_white"
+        android:layout_marginStart="@dimen/padding15"
+        android:layout_marginEnd="@dimen/padding15"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/time_zone_region_layout" />
+
+    <Button
+        android:id="@+id/time_zone_apply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/time_zone_apply"
+        android:textColor="@android:color/white"
+        android:background="@drawable/ripple_button_with_color"
+        android:paddingStart="@dimen/padding40"
+        android:paddingEnd="@dimen/padding40"
+        android:layout_marginTop="@dimen/padding20"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/divider1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

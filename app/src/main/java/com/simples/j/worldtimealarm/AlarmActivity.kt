@@ -298,7 +298,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             val i = Intent(this, TimeZonePickerActivity::class.java).apply {
                 putExtra(TimeZonePickerActivity.TIME_ZONE_ID, currentTimeZone)
             }
-            startActivity(i)
+            startActivityForResult(i, TIME_ZONE_REQUEST_CODE)
 
             true
         }
@@ -344,10 +344,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
                     with(TimeZone.getTimeZone(currentTimeZone)) {
                         calendar.timeZone = this
-//                        startDate?.timeZone = this
-//                        endDate?.timeZone = this
                         dateFormat.timeZone = this
                         endDatePickerDialog.minDate = calendar.timeInMillis
+//                        startDate?.timeZone = this
+//                        endDate?.timeZone = this
                     }
 
                     val difference = TimeZone.getTimeZone(currentTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())

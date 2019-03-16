@@ -16,7 +16,7 @@ class TimeZoneInfo(builder: Builder) {
     val mDaylightName: String?
     val mStandardName: String?
     val mExemplarName: String?
-    val mGmtOffset: String?
+    val mGmtOffset: String
 
     init {
         mTimeZone = builder.timeZone
@@ -41,7 +41,7 @@ class TimeZoneInfo(builder: Builder) {
             private set
         var mExemplarName: String? = null
             private set
-        var mGmtOffset: String? = null
+        var mGmtOffset: String = ""
             private set
 
         fun setGenericName(name: String?) = apply { this.mGenericName = name }
@@ -52,7 +52,7 @@ class TimeZoneInfo(builder: Builder) {
 
         fun setExemplarName(name: String?) = apply { this.mExemplarName = name }
 
-        fun setGmtOffset(offset: String?) = apply { this.mGmtOffset = offset }
+        fun setGmtOffset(offset: String) = apply { this.mGmtOffset = offset }
 
         fun build() = TimeZoneInfo(this)
     }

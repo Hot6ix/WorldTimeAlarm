@@ -2,14 +2,12 @@ package com.simples.j.worldtimealarm.support
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.clock_list_item.view.*
@@ -25,15 +23,23 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
 
     private lateinit var listener: OnItemClickListener
 
+    init {
+        setHasStableIds(true)
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.clock_list_item, parent, false))
     }
 
     override fun getItemCount() = list.size
 
-    override fun getItemId(position: Int): Long = position.toLong()
+    override fun getItemId(position: Int): Long = list[position].hashCode().toLong()
 
     override fun getItemViewType(position: Int): Int = 0
+
+    override fun setHasStableIds(hasStableIds: Boolean) {
+        super.setHasStableIds(hasStableIds)
+    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val timeZone = TimeZone.getTimeZone(list[holder.adapterPosition].timezone?.replace(" ", "_"))
