@@ -107,7 +107,7 @@
     <string name="setting_group_0_key">GENERAL</string>
     <string name="setting_group_0">General</string>
     <string name="setting_time_zone_selector_key">TIME_ZONE_SELECTOR_KEY</string>
-    <string name="setting_time_zone_selector_title">Time zone selector</string>
+    <string name="setting_time_zone_selector_title">Select time zone by</string>
 
     <string name="setting_group_1_key">ALARM</string>
     <string name="setting_group_1">Alarm</string>
@@ -140,8 +140,8 @@
     <string name="setting_source_title">Visit GitHub</string>
 
     <string-array name="time_selector">
-        <item>Old</item>
-        <item>New</item>
+        <item>Old way</item>
+        <item>New way (recommended)</item>
     </string-array>
 
     <string-array name="time_selector_values">

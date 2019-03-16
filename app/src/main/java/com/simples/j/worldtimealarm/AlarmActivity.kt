@@ -140,7 +140,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 time_picker.minute = calendar.get(Calendar.MINUTE)
             }
 
-            time_zone.text = existAlarmItem!!.timeZone.replace("_", " ")
+            time_zone.text = getNameForTimeZone(existAlarmItem?.timeZone)
             val difference = TimeZone.getTimeZone(currentTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
             var offset = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
             if(TimeZone.getDefault() == TimeZone.getTimeZone(currentTimeZone)) {
@@ -217,7 +217,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 set(Calendar.SECOND, 0)
             }
             // If arrays don't contain default timezone id, add
-            time_zone.text = TimeZone.getDefault().id.replace("_", " ")
+            time_zone.text = getNameForTimeZone(TimeZone.getDefault().id)
             time_zone_offset.text = resources.getString(R.string.current_time_zone)
             selectedDays = IntArray(7) { 0 }
             val defaultRingtone = if(ringtoneList.size > 1) ringtoneList[1] else ringtoneList[0]
@@ -244,7 +244,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 time_picker.minute = calendar.get(Calendar.MINUTE)
             }
 
-            time_zone.text = currentTimeZone.replace("_", " ")
+            time_zone.text = getNameForTimeZone(currentTimeZone)
             val difference = TimeZone.getTimeZone(currentTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
             var offset = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
             if(TimeZone.getDefault() == TimeZone.getTimeZone(currentTimeZone)) {
@@ -397,7 +397,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         expectedTime.text = getString(R.string.expected_time, DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time))
                     }
 
-                    time_zone.text = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)
+                    time_zone.text = getNameForTimeZone(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID))
                     time_zone_offset.text = offset
 
                 }
@@ -808,6 +808,13 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             timeInMillis = scheduledTime
         }
         Toast.makeText(applicationContext, getString(R.string.alarm_on, MediaCursor.getRemainTime(applicationContext, calendar)), Snackbar.LENGTH_LONG).show()
+    }
+
+    private fun getNameForTimeZone(timeZoneId: String?): String {
+        return if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(timeZoneId))
+        }
+        else timeZoneId ?: getString(R.string.time_zone_unknown)
     }
 
     private val startDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->

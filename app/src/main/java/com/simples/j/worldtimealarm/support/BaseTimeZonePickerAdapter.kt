@@ -65,13 +65,7 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
                 if(timeZone != null) {
                     val timeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), Date()).format(timeZone)
 
-                    var name = timeZoneInfo.mExemplarName
-                    if(name == null) {
-                        name =
-                                if(timeZoneInfo.mTimeZone.inDaylightTime(Date())) timeZoneInfo.mDaylightName
-                                else timeZoneInfo.mStandardName
-                    }
-                    if(name == null) name = timeZone.id
+                    val name = MediaCursor.getBestNameForTimeZone(timeZone)
 
                     holder.title.text = name
                     holder.summary.text = timeZoneInfo.mGmtOffset

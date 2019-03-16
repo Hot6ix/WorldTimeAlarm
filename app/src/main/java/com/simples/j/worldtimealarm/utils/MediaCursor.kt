@@ -220,6 +220,19 @@ class MediaCursor {
             gmtString = bidiFormatter.unicodeWrap(gmtString, if(isRtl) TextDirectionHeuristics.RTL else TextDirectionHeuristics.LTR)
             return gmtString
         }
+
+        @RequiresApi(Build.VERSION_CODES.N)
+        fun getBestNameForTimeZone(timeZone: TimeZone): String {
+            val timeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), Date()).format(timeZone)
+
+            var name = timeZoneInfo.mExemplarName
+            if(name == null) {
+                name =
+                        if(timeZoneInfo.mTimeZone.inDaylightTime(Date())) timeZoneInfo.mDaylightName
+                        else timeZoneInfo.mStandardName
+            }
+            return name ?: timeZone.id
+        }
     }
 
 }

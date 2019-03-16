@@ -123,14 +123,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
             }
             else {
                 time_zone_region_layout.isEnabled = true
-                var regionName = this.mExemplarName
-                if(regionName == null) {
-                    regionName =
-                            if(this.mTimeZone.inDaylightTime(mDate)) this.mDaylightName
-                            else this.mStandardName
-                }
-                if(regionName == null) regionName = this.mTimeZone.id
-                time_zone_region_summary.text = getString(R.string.timezone_format, regionName, this.mGmtOffset)
+                time_zone_region_summary.text = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), this.mGmtOffset)
 
                 val found = MediaCursor.getULocaleByTimeZoneId(mTimeZone.id)
                 val isSingleTimeZone = found != null && (MediaCursor.getTimeZoneListByCountry(found.country).size == 1)

@@ -17,6 +17,7 @@ import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment.Companion.TIME_ZONE_CHANGED_KEY
+import com.simples.j.worldtimealarm.utils.MediaCursor
 import java.util.*
 
 class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChangeListener, Preference.OnPreferenceChangeListener {
@@ -28,7 +29,7 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
         activity?.volumeControlStream = AudioManager.STREAM_ALARM
 
         with(findPreference(getString(R.string.setting_time_zone_selector_key)) as ListPreference) {
-            if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) isEnabled = false
+            isEnabled = Build.VERSION.SDK_INT > Build.VERSION_CODES.M
             if(this.value.isNullOrEmpty()) {
                 value =
                         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) SELECTOR_NEW
@@ -60,8 +61,8 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
 
         val converterTimezoneId = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), "")
         converterTimezone.summary =
-                if(converterTimezoneId.isNullOrEmpty()) TimeZone.getDefault().id.replace("_", " ")
-                else converterTimezoneId.replace("_", " ")
+                if(converterTimezoneId.isNullOrEmpty()) getNameForTimeZone(TimeZone.getDefault().id)
+                else getNameForTimeZone(converterTimezoneId)
 
         converterTimezone.setOnPreferenceClickListener {
             if(converterTimezone.isChecked)
@@ -142,6 +143,13 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
         }
 
         return true
+    }
+
+    private fun getNameForTimeZone(timeZoneId: String?): String {
+        return if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(timeZoneId))
+        }
+        else timeZoneId ?: getString(R.string.time_zone_unknown)
     }
 
     companion object {

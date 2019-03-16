@@ -31,6 +31,7 @@ import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.support.ClockListAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
+import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.fragment_world_clock.*
 import kotlinx.coroutines.*
 import java.text.DateFormat
@@ -127,7 +128,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             if(!dateDialog.isAdded) dateDialog.show(fragmentManager, TAG_FRAGMENT_DATE_DIALOG)
         }
 
-        time_zone.text = timeZone.id.replace("_", " ")
+        time_zone.text = getNameForTimeZone(timeZone.id)
 
         job = launch(coroutineContext) {
             withContext(Dispatchers.IO) {
@@ -281,8 +282,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     }
 
     private fun updateStandardTimeZone() {
-        val formattedTimeZone = timeZone.id.replace("_", " ")
-        time_zone.text = formattedTimeZone
+        time_zone.text = getNameForTimeZone(timeZone.id)
 
         calendar.timeZone = timeZone
         timeFormat.timeZone = timeZone
@@ -304,6 +304,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             clockList.visibility = View.VISIBLE
             list_empty.visibility = View.GONE
         }
+    }
+
+    private fun getNameForTimeZone(timeZoneId: String?): String {
+        return if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(timeZoneId))
+        }
+        else timeZoneId ?: getString(R.string.time_zone_unknown)
     }
 
     inner class UpdateRequestReceiver: BroadcastReceiver() {
