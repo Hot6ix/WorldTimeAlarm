@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.etc.TimeZoneInfo
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import java.util.*
 import kotlin.collections.ArrayList
@@ -33,7 +34,7 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
         val inflater = LayoutInflater.from(parent.context)
         return when(type) {
             TYPE_HEADER -> {
-                val view = inflater.inflate(android.R.layout.preference_category, parent, false)
+                val view = inflater.inflate(R.layout.time_zone_picker_header, parent, false)
                 HeaderViewHolder(view)
             }
             TYPE_ITEM -> {
@@ -57,7 +58,24 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when(holder) {
             is HeaderViewHolder -> {
-                holder.title.text = mHeaderText
+                val timeZone = mHeaderText.let {
+                    if(it.isNullOrEmpty()) null
+                    else android.icu.util.TimeZone.getTimeZone(it)
+                }
+                if(timeZone != null) {
+                    val timeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), Date()).format(timeZone)
+
+                    var name = timeZoneInfo.mExemplarName
+                    if(name == null) {
+                        name =
+                                if(timeZoneInfo.mTimeZone.inDaylightTime(Date())) timeZoneInfo.mDaylightName
+                                else timeZoneInfo.mStandardName
+                    }
+                    if(name == null) name = timeZone.id
+
+                    holder.title.text = name
+                    holder.summary.text = timeZoneInfo.mGmtOffset
+                }
             }
             is ItemViewHolder -> {
                 val item = getData(position)
@@ -91,7 +109,8 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
     }
 
     private class HeaderViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        val title: TextView = view.findViewById(android.R.id.title)
+        val title: TextView = view.findViewById(R.id.time_zone_picker_header_title)
+        val summary: TextView = view.findViewById(R.id.time_zone_picker_header_summary)
     }
 
     private fun getHeaderCount(): Int = if(mShowHeader) 1 else 0

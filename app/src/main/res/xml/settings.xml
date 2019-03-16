@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="@string/setting_group_0_key"
+        android:title="@string/setting_group_0">
+
+        <ListPreference
+            android:key="@string/setting_time_zone_selector_key"
+            android:title="@string/setting_time_zone_selector_title"
+            android:entries="@array/time_selector"
+            android:entryValues="@array/time_selector_values"/>
+
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:key="@string/setting_group_1_key"

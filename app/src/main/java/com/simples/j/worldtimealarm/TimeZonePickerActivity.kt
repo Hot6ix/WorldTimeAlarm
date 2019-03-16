@@ -12,6 +12,7 @@ import com.simples.j.worldtimealarm.fragments.TimeZonePickerFragment
 class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTimeZoneChangeListener {
 
     var mTimeZoneId: String? = null
+    private var mAction: Int = -1
     private lateinit var mTimeZoneFragment: TimeZoneFragment
     private lateinit var mTimeZonePickerFragment: TimeZonePickerFragment
 
@@ -21,11 +22,14 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mTimeZoneId = intent.getStringExtra(TIME_ZONE_ID)
+        mAction = intent.getIntExtra(ACTION, 0)
 
         if(supportFragmentManager.findFragmentByTag(TIME_ZONE_FRAGMENT_TAG) == null) {
             mTimeZoneFragment = TimeZoneFragment.newInstance().apply {
-                val bundle = Bundle()
-                bundle.putString(TIME_ZONE_ID, mTimeZoneId)
+                val bundle = Bundle().apply {
+                    putString(TIME_ZONE_ID, mTimeZoneId)
+                    putInt(ACTION, mAction)
+                }
                 arguments = bundle
             }
             supportFragmentManager.beginTransaction().add(R.id.time_zone_picker_fragment_container, mTimeZoneFragment, TIME_ZONE_FRAGMENT_TAG).commit()
@@ -62,6 +66,7 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
     override fun onTimeZoneChanged(timeZone: String) {
         val bundle = Bundle().apply {
             putString(TIME_ZONE_ID, timeZone)
+            putInt(ACTION, mAction)
         }
         mTimeZoneFragment.arguments = bundle
     }
@@ -74,7 +79,11 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
 
         const val REQUEST_TYPE = "REQUEST_TYPE"
         const val GIVEN_COUNTRY = "GIVEN_COUNTRY"
+        const val ORIGINAL_TIME_ZONE_ID = "ORIGINAL_TIME_ZONE_ID"
         const val REQUEST_COUNTRY = 0
         const val REQUEST_TIME_ZONE = 1
+
+        const val ACTION = "ACTION"
+        const val ACTION_ADD = 1
     }
 }

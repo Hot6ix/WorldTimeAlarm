@@ -11,10 +11,12 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
 import com.simples.j.worldtimealarm.etc.TimeZoneInfo
+import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.fragment_time_zone.*
 import java.util.*
@@ -26,6 +28,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
     private var mTimeZone: TimeZone? = null
     private var mTimeZoneInfo: TimeZoneInfo? = null
     private val mDate = Date()
+    private var mAction: Int = -1
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -48,10 +51,15 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                 mTimeZone = this
                 mTimeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), mDate).format(this)
             }
+
+            mAction = it.getInt(TimeZonePickerActivity.ACTION)
         }
 
-        if(mPreviousTimeZone != mTimeZone) {
+        if(mPreviousTimeZone != mTimeZone || mAction == TimeZonePickerActivity.ACTION_ADD) {
             time_zone_apply.visibility = View.VISIBLE
+            if(mAction == TimeZonePickerActivity.ACTION_ADD) {
+                time_zone_apply.text = "Add"
+            }
         }
 
         updateSummariesByTimeZone()
@@ -62,7 +70,9 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onClick(v: View) {
-        val bundle = Bundle()
+        val bundle = Bundle().apply {
+            putString(TimeZonePickerActivity.ORIGINAL_TIME_ZONE_ID, mPreviousTimeZone?.id)
+        }
         when(v.id) {
             R.id.time_zone_country_layout -> {
                 (activity as? TimeZonePickerActivity).run {
@@ -80,6 +90,20 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                 }
             }
             R.id.time_zone_apply -> {
+                if(mAction == TimeZonePickerActivity.ACTION_ADD) {
+                    val clockList = DatabaseCursor(context!!).getClockList()
+                    var isExist = false
+                    clockList.forEach {
+                        if(it.timezone == mTimeZone?.id) {
+                            isExist = true
+                        }
+                    }
+                    if(isExist) {
+                        Toast.makeText(context, resources.getString(R.string.exist_timezone), Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                }
+
                 activity?.run {
                     val intent = Intent()
                     intent.putExtra(TimeZoneSearchActivity.TIME_ZONE_ID, mTimeZone?.id)

@@ -30,6 +30,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
     private var mCountry: String? = null
     private var mQuery: String = ""
     private var mAdapter: BaseTimeZonePickerAdapter<BaseTimeZonePickerAdapter.AdapterItem>? = null
+    private var mOriginalTimeZoneId: String? = null
 
     private var mIsSearchViewExpanded: Boolean = false
     private var mSearchMenu: MenuItem? = null
@@ -50,6 +51,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
 
         arguments?.let {
             mRequestType = it.getInt(TimeZonePickerActivity.REQUEST_TYPE)
+            mOriginalTimeZoneId = it.getString(TimeZonePickerActivity.ORIGINAL_TIME_ZONE_ID)
             when(mRequestType) {
                 TimeZonePickerActivity.REQUEST_COUNTRY -> {
                     setHasOptionsMenu(true)
@@ -80,7 +82,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
                     BaseTimeZonePickerAdapter(context, list, false, null, mLocaleChangeListener)
                 }
                 TimeZonePickerActivity.REQUEST_TIME_ZONE -> {
-                    BaseTimeZonePickerAdapter(context, list, true, "test", mTimeZoneInfoChangeListener)
+                    BaseTimeZonePickerAdapter(context, list, true, mOriginalTimeZoneId, mTimeZoneInfoChangeListener)
                 }
                 else -> {
                     throw IllegalStateException("Unexpected request type : $mRequestType")
@@ -172,6 +174,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
                     val bundle = Bundle().apply {
                         putInt(TimeZonePickerActivity.REQUEST_TYPE, TimeZonePickerActivity.REQUEST_TIME_ZONE)
                         putString(TimeZonePickerActivity.GIVEN_COUNTRY, item.id)
+                        putString(TimeZonePickerActivity.ORIGINAL_TIME_ZONE_ID, mOriginalTimeZoneId)
                     }
                     mSearchView?.clearFocus()
                     (activity as TimeZonePickerActivity).startPickerFragment(bundle, TimeZonePickerActivity.TIME_ZONE_PICKER_FRAGMENT_TIME_ZONE_TAG)

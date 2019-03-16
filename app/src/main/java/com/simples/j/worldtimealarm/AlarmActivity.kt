@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.Ringtone
@@ -14,6 +15,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.preference.PreferenceManager
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
@@ -79,9 +81,15 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private val today = Calendar.getInstance()
     private var dateFormat = DateFormat.getDateInstance(DateFormat.FULL)
 
+    private lateinit var mPrefManager: SharedPreferences
+    private var mTimeZoneSelectorOption: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alarm)
+
+        mPrefManager = PreferenceManager.getDefaultSharedPreferences(this)
+        mTimeZoneSelectorOption = mPrefManager.getString(resources.getString(R.string.setting_time_zone_selector_key), SettingFragment.SELECTOR_OLD) ?: SettingFragment.SELECTOR_OLD
 
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -293,15 +301,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
         time_picker.setOnTimeChangedListener(this)
         time_zone_view.setOnClickListener(this)
-        // TODO : Compare Android version
-        time_zone_view.setOnLongClickListener {
-            val i = Intent(this, TimeZonePickerActivity::class.java).apply {
-                putExtra(TimeZonePickerActivity.TIME_ZONE_ID, currentTimeZone)
-            }
-            startActivityForResult(i, TIME_ZONE_REQUEST_CODE)
-
-            true
-        }
         alarm_save.setOnClickListener(this)
         alarm_cancel.setOnClickListener(this)
 
@@ -535,7 +534,13 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 finish()
             }
             R.id.time_zone_view -> {
-                startActivityForResult(Intent(this, TimeZoneSearchActivity::class.java), TIME_ZONE_REQUEST_CODE)
+                if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M && mTimeZoneSelectorOption == SettingFragment.SELECTOR_NEW) {
+                    val i = Intent(this, TimeZonePickerActivity::class.java).apply {
+                        putExtra(TimeZonePickerActivity.TIME_ZONE_ID, currentTimeZone)
+                    }
+                    startActivityForResult(i, TIME_ZONE_REQUEST_CODE)
+                }
+                else startActivityForResult(Intent(this, TimeZoneSearchActivity::class.java), TIME_ZONE_REQUEST_CODE)
             }
             R.id.time_range_start -> {
                 if(!startDatePickerDialog.isAdded) startDatePickerDialog.show(supportFragmentManager, TAG_FRAGMENT_START_DATE)
