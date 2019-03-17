@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import android.icu.text.LocaleDisplayNames
 import android.icu.text.SimpleDateFormat
-import android.icu.text.TimeZoneNames
 import android.icu.util.TimeZone
 import android.icu.util.ULocale
 import android.media.RingtoneManager
@@ -184,7 +183,7 @@ class MediaCursor {
         @RequiresApi(Build.VERSION_CODES.N)
         fun getCountryNameByTimeZone(timeZone: TimeZone?, uLocale: ULocale = ULocale.getDefault()): String {
             if(timeZone == null) {
-                Log.d(C.TAG, "Given timeZone is empty, so return nothing.")
+                Log.d(C.TAG, "Given timeZone is empty, return nothing.")
                 return ""
             }
             return LocaleDisplayNames.getInstance(uLocale).regionDisplayName(TimeZone.getRegion(timeZone.id))
@@ -199,13 +198,16 @@ class MediaCursor {
 
         @RequiresApi(Build.VERSION_CODES.N)
         fun getTimeZoneListByCountry(country: String?, uLocale: ULocale = ULocale.getDefault()): List<TimeZoneInfo> {
-            val timeZoneNames = TimeZoneNames.getInstance(uLocale)
-            return TimeZone.getAvailableIDs(country).map {
-                val timeZone = TimeZone.getTimeZone(it)
-                TimeZoneInfo.Formatter(uLocale.toLocale(), Date()).format(timeZone)
+            val javaTimeZone = java.util.TimeZone.getAvailableIDs()
+            val list = ArrayList<TimeZoneInfo>()
+            TimeZone.getAvailableIDs(country).forEach {
+                if(javaTimeZone.contains(it)) {
+                    val timeZone = TimeZone.getTimeZone(it)
+                    list.add(TimeZoneInfo.Formatter(uLocale.toLocale(), Date()).format(timeZone))
+                }
             }
+            return list
         }
-
 
         @RequiresApi(Build.VERSION_CODES.N)
         fun getGmtOffsetString(locale: Locale, timeZone: TimeZone, now: Date): String {

@@ -32,7 +32,7 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
                 }
                 arguments = bundle
             }
-            supportFragmentManager.beginTransaction().add(R.id.time_zone_picker_fragment_container, mTimeZoneFragment, TIME_ZONE_FRAGMENT_TAG).commit()
+            supportFragmentManager.beginTransaction().replace(R.id.time_zone_picker_fragment_container, mTimeZoneFragment, TIME_ZONE_FRAGMENT_TAG).commit()
         }
         else {
             mTimeZoneFragment = supportFragmentManager.findFragmentByTag(TIME_ZONE_FRAGMENT_TAG) as TimeZoneFragment
@@ -57,7 +57,7 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
         mTimeZonePickerFragment = supportFragmentManager.findFragmentByTag(tag) as? TimeZonePickerFragment ?: TimeZonePickerFragment.newInstance(this)
         mTimeZonePickerFragment.arguments = bundle
         supportFragmentManager.beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
+                .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out, android.R.animator.fade_in, android.R.animator.fade_out)
                 .replace(R.id.time_zone_picker_fragment_container, mTimeZonePickerFragment, tag)
                 .addToBackStack(tag)
                 .commit()

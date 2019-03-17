@@ -11,6 +11,10 @@
             android:entries="@array/time_selector"
             android:entryValues="@array/time_selector_values"/>
 
+        <Preference
+            android:key="@string/setting_converter_goto_key"
+            android:title="@string/setting_converter_goto"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -60,10 +64,6 @@
                 android:data="@string/help_link"/>
 
         </Preference>
-
-        <Preference
-            android:key="@string/setting_converter_goto_key"
-            android:title="@string/setting_converter_goto"/>
 
         <Preference
             android:key="@string/setting_version_key"

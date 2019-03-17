@@ -41,24 +41,27 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
         (activity as TimeZonePickerActivity).apply {
             supportActionBar?.title = getString(R.string.timezone_fragment_title)
-            mPreviousTimeZone = TimeZone.getTimeZone(mTimeZoneId)
+            if(!mTimeZoneId.isNullOrEmpty()) mPreviousTimeZone = TimeZone.getTimeZone(mTimeZoneId)
         }
 
         arguments?.let {
-            val id = it.getString(TimeZonePickerActivity.TIME_ZONE_ID, TimeZone.getDefault().id)
+            val id = it.getString(TimeZonePickerActivity.TIME_ZONE_ID)
 
-            with(TimeZone.getTimeZone(id)) {
-                mTimeZone = this
-                mTimeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), mDate).format(this)
+            with(id) {
+                if(!this.isNullOrEmpty()) {
+                    val timeZone = TimeZone.getTimeZone(this)
+                    mTimeZone = timeZone
+                    mTimeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), mDate).format(timeZone)
+                }
             }
 
             mAction = it.getInt(TimeZonePickerActivity.ACTION)
         }
 
-        if(mPreviousTimeZone != mTimeZone || mAction == TimeZonePickerActivity.ACTION_ADD) {
+        if(mTimeZone != null && (mPreviousTimeZone != mTimeZone || mAction == TimeZonePickerActivity.ACTION_ADD)) {
             time_zone_apply.visibility = View.VISIBLE
             if(mAction == TimeZonePickerActivity.ACTION_ADD) {
-                time_zone_apply.text = "Add"
+                time_zone_apply.text = getString(R.string.time_zone_add)
             }
         }
 
@@ -91,6 +94,11 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
             }
             R.id.time_zone_apply -> {
                 if(mAction == TimeZonePickerActivity.ACTION_ADD) {
+                    if(mTimeZone == null) {
+                        Toast.makeText(context, resources.getString(R.string.time_zone_select), Toast.LENGTH_SHORT).show()
+                        return
+                    }
+
                     val clockList = DatabaseCursor(context!!).getClockList()
                     var isExist = false
                     clockList.forEach {
@@ -115,11 +123,13 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
     }
 
     private fun updateSummariesByTimeZone() {
-        time_zone_country_summary.text = MediaCursor.getCountryNameByTimeZone(mTimeZone)
+        with(MediaCursor.getCountryNameByTimeZone(mTimeZone)) {
+            if(!this.isEmpty()) time_zone_country_summary.text = this
+        }
+
         with(mTimeZoneInfo) {
             if(this == null) {
                 time_zone_region_layout.isEnabled = false
-                time_zone_region_summary.text = getString(R.string.time_zone_unknown)
             }
             else {
                 time_zone_region_layout.isEnabled = true

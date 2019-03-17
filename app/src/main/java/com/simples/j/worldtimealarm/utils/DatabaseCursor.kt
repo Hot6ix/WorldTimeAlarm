@@ -318,7 +318,11 @@ class DatabaseCursor(context: Context) {
 
     fun removeClock(item: ClockItem) {
         val db = dbManager.writableDatabase
-        db.delete(DatabaseManager.TABLE_CLOCK_LIST, DatabaseManager.COLUMN_TIME_ZONE + "= ?", arrayOf(item.timezone))
+        val itemId = item.id
+        if(itemId != null)
+            db.delete(DatabaseManager.TABLE_CLOCK_LIST, DatabaseManager.COLUMN_ID + "= ?", arrayOf(itemId.toString()))
+        else
+            db.delete(DatabaseManager.TABLE_CLOCK_LIST, DatabaseManager.COLUMN_TIME_ZONE + "= ?", arrayOf(item.timezone))
         db.close()
     }
 

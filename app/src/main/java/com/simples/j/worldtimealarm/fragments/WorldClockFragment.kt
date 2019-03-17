@@ -32,6 +32,7 @@ import com.simples.j.worldtimealarm.support.ClockListAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
 import com.simples.j.worldtimealarm.utils.MediaCursor
+import kotlinx.android.synthetic.main.activity_wake_up.*
 import kotlinx.android.synthetic.main.fragment_world_clock.*
 import kotlinx.coroutines.*
 import java.text.DateFormat
@@ -199,11 +200,16 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
         }
 
-        if(::clockListAdapter.isInitialized) clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
+        if(::clockListAdapter.isInitialized) {
+            clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
+            if(clockItems.isNotEmpty())
+                clockList.smoothScrollToPosition(clockItems.count() - 1)
+        }
         else {
             launch(coroutineContext) {
                 job.join()
                 clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
+                clockList.smoothScrollToPosition(clockItems.count() - 1)
             }
         }
     }
@@ -222,7 +228,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             R.id.new_timezone -> {
                 if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M && mTimeZoneSelectorOption == SettingFragment.SELECTOR_NEW) {
                     val i = Intent(context, TimeZonePickerActivity::class.java).apply {
-                        putExtra(TimeZonePickerActivity.TIME_ZONE_ID, timeZone.id)
                         putExtra(TimeZonePickerActivity.ACTION, TimeZonePickerActivity.ACTION_ADD)
                     }
                     startActivityForResult(i, TIME_ZONE_NEW_CODE)

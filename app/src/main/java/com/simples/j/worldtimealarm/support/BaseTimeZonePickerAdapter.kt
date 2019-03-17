@@ -1,6 +1,7 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
+import android.icu.util.TimeZone
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.constraint.ConstraintLayout
@@ -17,14 +18,14 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 @RequiresApi(Build.VERSION_CODES.N)
-class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(private val context: Context?, list: List<T>, showItemSummary: Boolean, headerText: String?, listener: OnListItemClickListener<T>?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(private val context: Context?,
+                                                                           private var list: List<T>, showItemSummary: Boolean,
+                                                                           private var headerText: String?,
+                                                                           private var listener: OnListItemClickListener<T>?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var mOriginal: List<T> = list
-    private var mList: List<T> = list
-    private var mHeaderText: String? = headerText
     private var mShowHeader: Boolean = headerText != null
     private var mShowItemSummary: Boolean = showItemSummary
-    private var mListener: OnListItemClickListener<T>? = listener
 
     init {
         setHasStableIds(true)
@@ -45,7 +46,7 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
         }
     }
 
-    override fun getItemCount(): Int = mList.size + getHeaderCount()
+    override fun getItemCount(): Int = list.size + getHeaderCount()
 
     override fun getItemId(position: Int): Long = if(isPositionHeader(position)) -1 else getData(position).itemId
 
@@ -58,7 +59,7 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when(holder) {
             is HeaderViewHolder -> {
-                val timeZone = mHeaderText.let {
+                val timeZone = headerText.let {
                     if(it.isNullOrEmpty()) null
                     else android.icu.util.TimeZone.getTimeZone(it)
                 }
@@ -78,21 +79,24 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
                     holder.summaryLayout.visibility = View.VISIBLE
                     holder.summary.text = item.summary
 
-                    val difference = TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
 
-                    holder.difference.text = MediaCursor.getOffsetOfDifference(context!!, difference, MediaCursor.TYPE_CURRENT)
+                    val difference =
+                            if(mShowHeader) TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getTimeZone(headerText).getOffset(System.currentTimeMillis())
+                            else TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+
+                    holder.difference.text = MediaCursor.getOffsetOfDifference(context!!, difference, MediaCursor.TYPE_CONVERTER)
                 }
                 else holder.summaryLayout.visibility = View.GONE
 
                 holder.itemView.setOnClickListener {
-                    mListener?.onListItemClick(item)
+                    listener?.onListItemClick(item)
                 }
             }
         }
     }
 
     private fun getData(position: Int): T {
-        return mList[position - getHeaderCount()]
+        return list[position - getHeaderCount()]
     }
 
     private class ItemViewHolder(view: View): RecyclerView.ViewHolder(view) {
@@ -123,14 +127,14 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
             mOriginal.forEach {
                 for(key in it.searchKeys) {
                     val lower = key.toLowerCase(locale)
-                    if(lower.contains(text)) {
-                        (list as ArrayList<T>).add(it)
+                    if(lower.contains(prefix)) {
+                        list.add(it)
                         return@forEach
                     }
                 }
             }
         }
-        mList = list
+        this.list = list
         notifyDataSetChanged()
     }
 

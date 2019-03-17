@@ -99,9 +99,13 @@
     <string name="timezone_country">Country</string>
     <string name="timezone_region">Time zone</string>
     <string name="timezone_format">%1$s (%2$s)</string>
-    <string name="time_zone_search_hint">Los Angeles, Seoul, etc&#8230;</string>
+    <string name="time_zone_search_hint">Search country</string>
     <string name="time_zone_unknown">Unknown time zone</string>
     <string name="time_zone_apply">Apply</string>
+    <string name="time_zone_empty">Click to select time zone</string>
+    <string name="time_zone_add">Add</string>
+    <string name="time_zone_select">Please select time zone</string>
+    <string name="time_zone_wrong">Wrong time zone</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>
@@ -140,8 +144,8 @@
     <string name="setting_source_title">Visit GitHub</string>
 
     <string-array name="time_selector">
-        <item>Old way</item>
-        <item>New way (recommended)</item>
+        <item>Search time zone</item>
+        <item>Search country-time zone (recommended)</item>
     </string-array>
 
     <string-array name="time_selector_values">

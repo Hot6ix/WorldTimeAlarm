@@ -32,7 +32,6 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
     private var mAdapter: BaseTimeZonePickerAdapter<BaseTimeZonePickerAdapter.AdapterItem>? = null
     private var mOriginalTimeZoneId: String? = null
 
-    private var mIsSearchViewExpanded: Boolean = false
     private var mSearchMenu: MenuItem? = null
     private var mSearchView: SearchView? = null
 
@@ -92,6 +91,8 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
             time_zone_base_recycler_view.adapter = mAdapter
             time_zone_base_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             progressBar.visibility = View.GONE
+
+            mSearchView?.setQuery(mQuery, false)
         }
     }
 
@@ -123,11 +124,8 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
         mSearchView?.queryHint = resources.getString(R.string.time_zone_search_hint)
         mSearchView?.setOnQueryTextListener(this)
 
-        mIsSearchViewExpanded = mSearchMenu?.expandActionView() ?: true
         mSearchView?.apply {
             isIconified = false
-            isActivated = true
-            setQuery("", true)
         }
     }
 
@@ -139,7 +137,6 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
     }
 
     override fun onQueryTextSubmit(query: String): Boolean {
-        mAdapter?.filterByText(query)
         return false
     }
 
@@ -164,20 +161,25 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
 
     private var mLocaleChangeListener = object : BaseTimeZonePickerAdapter.OnListItemClickListener<BaseTimeZonePickerAdapter.AdapterItem> {
         override fun onListItemClick(item: BaseTimeZonePickerAdapter.AdapterItem) {
-            with(MediaCursor.getTimeZoneListByCountry(item.id)) {
-                if(this.size == 1) {
-                    // selected country has only a single time zone
-                    mListener?.onTimeZoneChanged(this@with[0].mTimeZone.id)
-                    activity?.supportFragmentManager?.popBackStack()
+            launch(coroutineContext) {
+                val list = withContext(Dispatchers.IO) {
+                    MediaCursor.getTimeZoneListByCountry(item.id)
                 }
-                else {
-                    val bundle = Bundle().apply {
-                        putInt(TimeZonePickerActivity.REQUEST_TYPE, TimeZonePickerActivity.REQUEST_TIME_ZONE)
-                        putString(TimeZonePickerActivity.GIVEN_COUNTRY, item.id)
-                        putString(TimeZonePickerActivity.ORIGINAL_TIME_ZONE_ID, mOriginalTimeZoneId)
+                with(list) {
+                    if(this.size == 1) {
+                        // selected country has only a single time zone
+                        mListener?.onTimeZoneChanged(this@with[0].mTimeZone.id)
+                        activity?.supportFragmentManager?.popBackStack()
                     }
-                    mSearchView?.clearFocus()
-                    (activity as TimeZonePickerActivity).startPickerFragment(bundle, TimeZonePickerActivity.TIME_ZONE_PICKER_FRAGMENT_TIME_ZONE_TAG)
+                    else {
+                        val bundle = Bundle().apply {
+                            putInt(TimeZonePickerActivity.REQUEST_TYPE, TimeZonePickerActivity.REQUEST_TIME_ZONE)
+                            putString(TimeZonePickerActivity.GIVEN_COUNTRY, item.id)
+                            putString(TimeZonePickerActivity.ORIGINAL_TIME_ZONE_ID, mOriginalTimeZoneId)
+                        }
+                        mSearchView?.clearFocus()
+                        (activity as TimeZonePickerActivity).startPickerFragment(bundle, TimeZonePickerActivity.TIME_ZONE_PICKER_FRAGMENT_TIME_ZONE_TAG)
+                    }
                 }
             }
         }
