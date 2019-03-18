@@ -94,12 +94,12 @@
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>
-    <string name="timezone_fragment_country_title">Country</string>
+    <string name="timezone_fragment_country_title">Region</string>
     <string name="timezone_fragment_time_zone_title">Time zone</string>
-    <string name="timezone_country">Country</string>
+    <string name="timezone_country">Region</string>
     <string name="timezone_region">Time zone</string>
     <string name="timezone_format">%1$s (%2$s)</string>
-    <string name="time_zone_search_hint">Search country</string>
+    <string name="time_zone_search_hint">Search region</string>
     <string name="time_zone_unknown">Unknown time zone</string>
     <string name="time_zone_apply">Apply</string>
     <string name="time_zone_empty">Click to select time zone</string>
@@ -140,12 +140,14 @@
     <string name="setting_version_title">Version</string>
     <string name="setting_license_key">LICENSE</string>
     <string name="setting_license_title">Open source license</string>
+    <string name="setting_privacy_policy_key">PRIVACY</string>
+    <string name="setting_privacy_policy_title">Privacy policy</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">Visit GitHub</string>
 
     <string-array name="time_selector">
-        <item>Search time zone</item>
-        <item>Search country-time zone (recommended)</item>
+        <item>ID</item>
+        <item>Region - time zone (recommended)</item>
     </string-array>
 
     <string-array name="time_selector_values">

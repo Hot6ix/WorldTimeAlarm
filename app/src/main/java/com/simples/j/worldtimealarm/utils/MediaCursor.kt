@@ -192,7 +192,7 @@ class MediaCursor {
         @RequiresApi(Build.VERSION_CODES.N)
         fun getULocaleByTimeZoneId(id: String?): ULocale? {
             return ULocale.getAvailableLocales().find {
-                it.displayCountry == LocaleDisplayNames.getInstance(ULocale.getDefault()).regionDisplayName(TimeZone.getRegion(id))
+                it.displayCountry.toLowerCase() == LocaleDisplayNames.getInstance(ULocale.getDefault()).regionDisplayName(TimeZone.getRegion(id)).toLowerCase()
             }
         }
 

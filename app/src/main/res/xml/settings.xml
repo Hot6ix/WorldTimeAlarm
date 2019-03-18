@@ -76,16 +76,26 @@
         </Preference>
 
         <Preference
-            android:key="@string/setting_license_key"
-            android:title="@string/setting_license_title"/>
-
-        <Preference
             android:key="@string/setting_source_key"
             android:title="@string/setting_source_title">
 
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="https://github.com/Hot6ix/WorldTimeAlarm"/>
+
+        </Preference>
+
+        <Preference
+            android:key="@string/setting_license_key"
+            android:title="@string/setting_license_title"/>
+
+        <Preference
+            android:key="@string/setting_privacy_policy_key"
+            android:title="@string/setting_privacy_policy_title">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://github.com/Hot6ix/WorldTimeAlarm/blob/master/privacy_policy.md"/>
 
         </Preference>
 

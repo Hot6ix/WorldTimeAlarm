@@ -95,12 +95,12 @@
 
     <!-- Text -->
     <string name="timezone_fragment_title">시간대 선택</string>
-    <string name="timezone_fragment_country_title">국가</string>
+    <string name="timezone_fragment_country_title">지역</string>
     <string name="timezone_fragment_time_zone_title">시간대</string>
-    <string name="timezone_country">국가</string>
+    <string name="timezone_country">지역</string>
     <string name="timezone_region">시간대</string>
     <string name="timezone_format">%1$s (%2$s)</string>
-    <string name="time_zone_search_hint">국가 검색</string>
+    <string name="time_zone_search_hint">지역 검색</string>
     <string name="time_zone_unknown">알 수 없는 시간대</string>
     <string name="time_zone_apply">적용</string>
     <string name="time_zone_empty">여기를 눌러 선택해주세요.</string>
@@ -112,7 +112,7 @@
     <string name="setting_group_0_key">GENERAL</string>
     <string name="setting_group_0">일반</string>
     <string name="setting_time_zone_selector_key">TIME_ZONE_SELECTOR_KEY</string>
-    <string name="setting_time_zone_selector_title">시간대 선택 방법</string>
+    <string name="setting_time_zone_selector_title">시간대 검색 방법</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>
@@ -142,12 +142,14 @@
     <string name="setting_version_title">버전</string>
     <string name="setting_license_key">LICENSE</string>
     <string name="setting_license_title">오픈 소스 라이센스</string>
+    <string name="setting_privacy_policy_key">PRIVACY</string>
+    <string name="setting_privacy_policy_title">개인정보취급방침</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">GitHub 놀러가기</string>
 
     <string-array name="time_selector">
-        <item>시간대 검색</item>
-        <item>국가-시간대 검색 (권장)</item>
+        <item>ID</item>
+        <item>지역 - 시간대 (권장)</item>
     </string-array>
 
     <string-array name="time_selector_values">

@@ -228,6 +228,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             R.id.new_timezone -> {
                 if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M && mTimeZoneSelectorOption == SettingFragment.SELECTOR_NEW) {
                     val i = Intent(context, TimeZonePickerActivity::class.java).apply {
+                        putExtra(TimeZonePickerActivity.TIME_ZONE_ID, timeZone.id)
                         putExtra(TimeZonePickerActivity.ACTION, TimeZonePickerActivity.ACTION_ADD)
                     }
                     startActivityForResult(i, TIME_ZONE_NEW_CODE)

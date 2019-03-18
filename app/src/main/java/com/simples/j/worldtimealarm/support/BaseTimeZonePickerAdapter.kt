@@ -1,6 +1,7 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
+import android.icu.text.LocaleDisplayNames
 import android.icu.util.TimeZone
 import android.os.Build
 import android.support.annotation.RequiresApi
@@ -26,6 +27,7 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
     private var mOriginal: List<T> = list
     private var mShowHeader: Boolean = headerText != null
     private var mShowItemSummary: Boolean = showItemSummary
+    private var mIsValidTimeZone: Boolean = false
 
     init {
         setHasStableIds(true)
@@ -59,17 +61,21 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when(holder) {
             is HeaderViewHolder -> {
-                val timeZone = headerText.let {
-                    if(it.isNullOrEmpty()) null
-                    else android.icu.util.TimeZone.getTimeZone(it)
-                }
-                if(timeZone != null) {
+                val availableTimeZones = TimeZone.getAvailableIDs()
+                if(availableTimeZones.contains(headerText)) {
+                    mIsValidTimeZone = true
+                    val timeZone = TimeZone.getTimeZone(headerText)
                     val timeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), Date()).format(timeZone)
 
                     val name = MediaCursor.getBestNameForTimeZone(timeZone)
 
                     holder.title.text = name
                     holder.summary.text = timeZoneInfo.mGmtOffset
+                }
+                else {
+                    mIsValidTimeZone = false
+                    holder.title.text = LocaleDisplayNames.getInstance(Locale.getDefault()).regionDisplayName(headerText)
+                    holder.summary.visibility = View.GONE
                 }
             }
             is ItemViewHolder -> {
@@ -81,7 +87,7 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
 
 
                     val difference =
-                            if(mShowHeader) TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getTimeZone(headerText).getOffset(System.currentTimeMillis())
+                            if(mIsValidTimeZone) TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getTimeZone(headerText).getOffset(System.currentTimeMillis())
                             else TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
 
                     holder.difference.text = MediaCursor.getOffsetOfDifference(context!!, difference, MediaCursor.TYPE_CONVERTER)
@@ -122,7 +128,7 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
             list = mOriginal
         }
         else {
-            list = ArrayList<T>()
+            list = ArrayList()
             val prefix = text.toLowerCase(locale)
             mOriginal.forEach {
                 for(key in it.searchKeys) {

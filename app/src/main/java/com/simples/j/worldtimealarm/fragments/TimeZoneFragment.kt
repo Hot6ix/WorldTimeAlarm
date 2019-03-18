@@ -47,6 +47,10 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
         arguments?.let {
             val id = it.getString(TimeZonePickerActivity.TIME_ZONE_ID)
 
+            mAction = it.getInt(TimeZonePickerActivity.ACTION)
+
+            if(mAction == TimeZonePickerActivity.ACTION_ADD) return@let
+
             with(id) {
                 if(!this.isNullOrEmpty()) {
                     val timeZone = TimeZone.getTimeZone(this)
@@ -54,8 +58,6 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                     mTimeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), mDate).format(timeZone)
                 }
             }
-
-            mAction = it.getInt(TimeZonePickerActivity.ACTION)
         }
 
         if(mTimeZone != null && (mPreviousTimeZone != mTimeZone || mAction == TimeZonePickerActivity.ACTION_ADD)) {
@@ -74,7 +76,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
     override fun onClick(v: View) {
         val bundle = Bundle().apply {
-            putString(TimeZonePickerActivity.ORIGINAL_TIME_ZONE_ID, mPreviousTimeZone?.id)
+            if(mAction != TimeZonePickerActivity.ACTION_ADD) putString(TimeZonePickerActivity.ORIGINAL_TIME_ZONE_ID, mPreviousTimeZone?.id)
         }
         when(v.id) {
             R.id.time_zone_country_layout -> {

@@ -95,12 +95,12 @@
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>
-    <string name="timezone_fragment_country_title">国家</string>
+    <string name="timezone_fragment_country_title">区域</string>
     <string name="timezone_fragment_time_zone_title">时区</string>
-    <string name="timezone_country">国家</string>
+    <string name="timezone_country">区域</string>
     <string name="timezone_region">时区</string>
     <string name="timezone_format">%1$s (%2$s)</string>
-    <string name="time_zone_search_hint">搜索国家</string>
+    <string name="time_zone_search_hint">搜索区域</string>
     <string name="time_zone_unknown">未知时区</string>
     <string name="time_zone_apply">应用</string>
     <string name="time_zone_empty">请点击这里选择。</string>
@@ -142,12 +142,14 @@
     <string name="setting_version_title">版</string>
     <string name="setting_license_key">LICENSE</string>
     <string name="setting_license_title">开源许可证</string>
+    <string name="setting_privacy_policy_key">PRIVACY</string>
+    <string name="setting_privacy_policy_title">隐私政策</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">访问GitHub</string>
 
     <string-array name="time_selector">
-        <item>时区搜索</item>
-        <item>国家-时区搜索 (推荐的)</item>
+        <item>ID</item>
+        <item>区域 - 时区 (推荐的)</item>
     </string-array>
 
     <string-array name="time_selector_values">

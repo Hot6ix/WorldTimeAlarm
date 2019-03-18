@@ -76,23 +76,25 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
                 else createTimeZoneListAdapterItem()
             }
 
-            mAdapter = when(mRequestType) {
-                TimeZonePickerActivity.REQUEST_COUNTRY -> {
-                    BaseTimeZonePickerAdapter(context, list, false, null, mLocaleChangeListener)
+            if(context != null) {
+                mAdapter = when(mRequestType) {
+                    TimeZonePickerActivity.REQUEST_COUNTRY -> {
+                        BaseTimeZonePickerAdapter(context, list, false, null, mLocaleChangeListener)
+                    }
+                    TimeZonePickerActivity.REQUEST_TIME_ZONE -> {
+                        BaseTimeZonePickerAdapter(context, list, true, if(mOriginalTimeZoneId.isNullOrEmpty()) mCountry else mOriginalTimeZoneId, mTimeZoneInfoChangeListener)
+                    }
+                    else -> {
+                        throw IllegalStateException("Unexpected request type : $mRequestType")
+                    }
                 }
-                TimeZonePickerActivity.REQUEST_TIME_ZONE -> {
-                    BaseTimeZonePickerAdapter(context, list, true, mOriginalTimeZoneId, mTimeZoneInfoChangeListener)
-                }
-                else -> {
-                    throw IllegalStateException("Unexpected request type : $mRequestType")
-                }
+
+                time_zone_base_recycler_view.adapter = mAdapter
+                time_zone_base_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                progressBar.visibility = View.GONE
+
+                mSearchView?.setQuery(mQuery, false)
             }
-
-            time_zone_base_recycler_view.adapter = mAdapter
-            time_zone_base_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            progressBar.visibility = View.GONE
-
-            mSearchView?.setQuery(mQuery, false)
         }
     }
 
@@ -214,7 +216,6 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
         val items = TreeSet(PickerItemComparator(collator))
 
         list.forEachIndexed { index, timeZoneInfo ->
-
             var name = timeZoneInfo.mExemplarName
             if(name == null) {
                 name =
