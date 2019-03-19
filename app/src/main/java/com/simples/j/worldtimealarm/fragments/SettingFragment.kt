@@ -79,7 +79,6 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
                         val i = Intent(context, TimeZonePickerActivity::class.java).apply {
                             putExtra(TimeZonePickerActivity.ACTION, TimeZonePickerActivity.ACTION_CHANGE)
                             putExtra(TimeZonePickerActivity.TIME_ZONE_ID, timezone)
-                            putExtra(TimeZonePickerActivity.TYPE, TimeZonePickerActivity.TYPE_WORLD_CLOCK)
                         }
                         startActivityForResult(i, TIME_ZONE_REQUEST_CODE)
                     }
@@ -113,8 +112,11 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
                     val timeZone = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)
                     val formattedTimeZone = timeZone.replace(" ", "_")
-                    converterTimezone.summary = timeZone
+
+                    converterTimezone.summary = getNameForTimeZone(formattedTimeZone)
+
                     PreferenceManager.getDefaultSharedPreferences(context).edit().putString(resources.getString(R.string.setting_converter_timezone_id_key), formattedTimeZone).apply()
+
                     val intent = Intent(WorldClockFragment.ACTION_TIME_ZONE_CHANGED)
                     intent.putExtra(TIME_ZONE_CHANGED_KEY, formattedTimeZone)
                     context?.sendBroadcast(intent)
