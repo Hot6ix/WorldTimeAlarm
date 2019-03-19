@@ -106,6 +106,7 @@
     <string name="time_zone_add">Add</string>
     <string name="time_zone_select">Please select time zone</string>
     <string name="time_zone_wrong">Wrong time zone</string>
+    <string name="time_zone_change_info">Changes from %1$s to %2$s.</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>

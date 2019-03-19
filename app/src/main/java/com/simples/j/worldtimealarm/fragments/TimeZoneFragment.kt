@@ -29,6 +29,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
     private var mTimeZoneInfo: TimeZoneInfo? = null
     private val mDate = Date()
     private var mAction: Int = -1
+    private var mType: Int = -1
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -48,8 +49,9 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
             val id = it.getString(TimeZonePickerActivity.TIME_ZONE_ID)
 
             mAction = it.getInt(TimeZonePickerActivity.ACTION)
+            mType = it.getInt(TimeZonePickerActivity.TYPE)
 
-            if(mAction == TimeZonePickerActivity.ACTION_ADD) return@let
+            if(mAction == TimeZonePickerActivity.ACTION_ADD && id.isNullOrEmpty()) return@let
 
             with(id) {
                 if(!this.isNullOrEmpty()) {
@@ -62,8 +64,18 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
         if(mTimeZone != null && (mPreviousTimeZone != mTimeZone || mAction == TimeZonePickerActivity.ACTION_ADD)) {
             time_zone_apply.visibility = View.VISIBLE
-            if(mAction == TimeZonePickerActivity.ACTION_ADD) {
-                time_zone_apply.text = getString(R.string.time_zone_add)
+            when(mAction) {
+                TimeZonePickerActivity.ACTION_ADD -> {
+                    time_zone_apply.text = getString(R.string.time_zone_add)
+                }
+                TimeZonePickerActivity.ACTION_CHANGE -> {
+                    time_zone_change_info.visibility = View.VISIBLE
+
+                    val locale = Locale.getDefault()
+                    val previous = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mPreviousTimeZone), MediaCursor.getGmtOffsetString(locale, mPreviousTimeZone, mDate))
+                    val current = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), MediaCursor.getGmtOffsetString(locale, mTimeZone, mDate))
+                    time_zone_change_info.text = getString(R.string.time_zone_change_info, previous, current)
+                }
             }
         }
 
@@ -76,7 +88,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
     override fun onClick(v: View) {
         val bundle = Bundle().apply {
-            if(mAction != TimeZonePickerActivity.ACTION_ADD) putString(TimeZonePickerActivity.ORIGINAL_TIME_ZONE_ID, mPreviousTimeZone?.id)
+            this.putInt(TimeZonePickerActivity.TYPE, mType)
         }
         when(v.id) {
             R.id.time_zone_country_layout -> {

@@ -536,7 +536,9 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             R.id.time_zone_view -> {
                 if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M && mTimeZoneSelectorOption == SettingFragment.SELECTOR_NEW) {
                     val i = Intent(this, TimeZonePickerActivity::class.java).apply {
+                        putExtra(TimeZonePickerActivity.ACTION, TimeZonePickerActivity.ACTION_CHANGE)
                         putExtra(TimeZonePickerActivity.TIME_ZONE_ID, currentTimeZone)
+                        putExtra(TimeZonePickerActivity.TYPE, TimeZonePickerActivity.TYPE_ALARM_CLOCK)
                     }
                     startActivityForResult(i, TIME_ZONE_REQUEST_CODE)
                 }

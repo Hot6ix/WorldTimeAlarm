@@ -90,6 +90,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/time_zone_region_layout" />
 
+    <TextView
+        android:id="@+id/time_zone_change_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_small"
+        android:textColor="@color/darkerGray"
+        android:visibility="gone"
+        android:layout_marginTop="@dimen/padding20"
+        android:layout_marginStart="@dimen/padding20"
+        android:layout_marginEnd="@dimen/padding20"
+        app:layout_constraintTop_toBottomOf="@id/divider1"
+        app:layout_constraintStart_toStartOf="parent"/>
+
     <Button
         android:id="@+id/time_zone_apply"
         android:layout_width="wrap_content"
@@ -101,7 +114,7 @@
         android:paddingEnd="@dimen/padding40"
         android:layout_marginTop="@dimen/padding20"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/divider1"
+        app:layout_constraintTop_toBottomOf="@id/time_zone_change_info"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 

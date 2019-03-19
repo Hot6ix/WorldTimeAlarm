@@ -13,21 +13,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
-import com.simples.j.worldtimealarm.etc.TimeZoneInfo
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import java.util.*
 import kotlin.collections.ArrayList
 
 @RequiresApi(Build.VERSION_CODES.N)
 class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(private val context: Context?,
-                                                                           private var list: List<T>, showItemSummary: Boolean,
+                                                                           private var list: List<T>,
+                                                                           private val showItemSummary: Boolean,
+                                                                           private val showItemDifference: Boolean,
                                                                            private var headerText: String?,
                                                                            private var listener: OnListItemClickListener<T>?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var mOriginal: List<T> = list
     private var mShowHeader: Boolean = headerText != null
-    private var mShowItemSummary: Boolean = showItemSummary
-    private var mIsValidTimeZone: Boolean = false
 
     init {
         setHasStableIds(true)
@@ -61,36 +60,24 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when(holder) {
             is HeaderViewHolder -> {
-                val availableTimeZones = TimeZone.getAvailableIDs()
-                if(availableTimeZones.contains(headerText)) {
-                    mIsValidTimeZone = true
-                    val timeZone = TimeZone.getTimeZone(headerText)
-                    val timeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), Date()).format(timeZone)
-
-                    val name = MediaCursor.getBestNameForTimeZone(timeZone)
-
-                    holder.title.text = name
-                    holder.summary.text = timeZoneInfo.mGmtOffset
-                }
-                else {
-                    mIsValidTimeZone = false
-                    holder.title.text = LocaleDisplayNames.getInstance(Locale.getDefault()).regionDisplayName(headerText)
-                    holder.summary.visibility = View.GONE
-                }
+                holder.title.text = LocaleDisplayNames.getInstance(Locale.getDefault()).regionDisplayName(headerText)
+                holder.summary.visibility = View.GONE
             }
             is ItemViewHolder -> {
                 val item = getData(position)
                 holder.title.text = item.title
-                if(mShowItemSummary) {
+                if(showItemSummary) {
                     holder.summaryLayout.visibility = View.VISIBLE
                     holder.summary.text = item.summary
 
-
-                    val difference =
-                            if(mIsValidTimeZone) TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getTimeZone(headerText).getOffset(System.currentTimeMillis())
-                            else TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-
-                    holder.difference.text = MediaCursor.getOffsetOfDifference(context!!, difference, MediaCursor.TYPE_CONVERTER)
+                    if(showItemDifference) {
+                        val difference = TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+                        holder.difference.visibility = View.VISIBLE
+                        holder.difference.text = MediaCursor.getOffsetOfDifference(context!!, difference, MediaCursor.TYPE_CONVERTER)
+                    }
+                    else {
+                        holder.difference.visibility = View.GONE
+                    }
                 }
                 else holder.summaryLayout.visibility = View.GONE
 

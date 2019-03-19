@@ -107,6 +107,7 @@
     <string name="time_zone_add">加</string>
     <string name="time_zone_select">请选择时区</string>
     <string name="time_zone_wrong">错误的时区</string>
+    <string name="time_zone_change_info">从%1$s到%2$s的变化。</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>

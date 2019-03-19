@@ -210,7 +210,8 @@ class MediaCursor {
         }
 
         @RequiresApi(Build.VERSION_CODES.N)
-        fun getGmtOffsetString(locale: Locale, timeZone: TimeZone, now: Date): String {
+        fun getGmtOffsetString(locale: Locale, timeZone: TimeZone?, now: Date): String {
+            if(timeZone == null) return ""
             val gmtFormatter = SimpleDateFormat("ZZZZ").apply {
                 this.timeZone = timeZone
             }
@@ -224,7 +225,9 @@ class MediaCursor {
         }
 
         @RequiresApi(Build.VERSION_CODES.N)
-        fun getBestNameForTimeZone(timeZone: TimeZone): String {
+        fun getBestNameForTimeZone(timeZone: TimeZone?): String {
+            if(timeZone == null) return ""
+
             val timeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), Date()).format(timeZone)
 
             var name = timeZoneInfo.mExemplarName
