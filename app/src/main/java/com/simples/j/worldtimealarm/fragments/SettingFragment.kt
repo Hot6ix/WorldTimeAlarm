@@ -11,11 +11,14 @@ import android.provider.Settings
 import android.support.v7.preference.ListPreference
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
+import android.util.Log
 import android.widget.CompoundButton
 import com.simples.j.worldtimealarm.LicenseActivity
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
+import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment.Companion.TIME_ZONE_CHANGED_KEY
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import java.util.*
@@ -23,12 +26,13 @@ import java.util.*
 class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChangeListener, Preference.OnPreferenceChangeListener {
 
     private lateinit var converterTimezone: com.simples.j.worldtimealarm.support.SwitchPreference
+    private var mTimeZoneSelectorPref: ListPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.settings)
         activity?.volumeControlStream = AudioManager.STREAM_ALARM
 
-        with(findPreference(getString(R.string.setting_time_zone_selector_key)) as ListPreference) {
+        mTimeZoneSelectorPref = with(findPreference(getString(R.string.setting_time_zone_selector_key)) as ListPreference) {
             isEnabled = Build.VERSION.SDK_INT > Build.VERSION_CODES.M
             if(this.value.isNullOrEmpty()) {
                 value =
@@ -41,6 +45,7 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
                     PreferenceManager
                             .getDefaultSharedPreferences(this.context)
                             .getString(this.key, ""))
+            this
         }
 
         with(findPreference(getString(R.string.setting_alarm_mute_key)) as ListPreference) {
@@ -65,8 +70,24 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
                 else getNameForTimeZone(converterTimezoneId)
 
         converterTimezone.setOnPreferenceClickListener {
-            if(converterTimezone.isChecked)
-                startActivityForResult(Intent(activity, TimeZoneSearchActivity::class.java), TIME_ZONE_REQUEST_CODE)
+            if(converterTimezone.isChecked) {
+                var timezone = PreferenceManager.getDefaultSharedPreferences(context).getString(resources.getString(R.string.setting_converter_timezone_id_key), "")?.replace(" ", "_")
+                if(timezone.isNullOrEmpty()) timezone = TimeZone.getDefault().id
+
+                when {
+                    Build.VERSION.SDK_INT > Build.VERSION_CODES.M && mTimeZoneSelectorPref?.value == SettingFragment.SELECTOR_NEW -> {
+                        val i = Intent(context, TimeZonePickerActivity::class.java).apply {
+                            putExtra(TimeZonePickerActivity.ACTION, TimeZonePickerActivity.ACTION_CHANGE)
+                            putExtra(TimeZonePickerActivity.TIME_ZONE_ID, timezone)
+                            putExtra(TimeZonePickerActivity.TYPE, TimeZonePickerActivity.TYPE_WORLD_CLOCK)
+                        }
+                        startActivityForResult(i, TIME_ZONE_REQUEST_CODE)
+                    }
+                    else -> {
+                        startActivityForResult(Intent(activity, TimeZoneSearchActivity::class.java), TIME_ZONE_REQUEST_CODE)
+                    }
+                }
+            }
             true
         }
 
@@ -152,10 +173,26 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
         else timeZoneId ?: getString(R.string.time_zone_unknown)
     }
 
+    private fun updateDefaultMuteAlarmValue() {
+        val pref = PreferenceManager.getDefaultSharedPreferences(context)
+        val alarmMutePref = findPreference(getString(R.string.setting_alarm_mute_key)) as ListPreference
+        Log.d(C.TAG, alarmMutePref.value)
+        if(alarmMutePref.value != "0") {
+            pref.edit().putBoolean(INTERNAL_MUTE_ALARM_BOOL, true).apply()
+        }
+
+        if(!pref.getBoolean(INTERNAL_MUTE_ALARM_BOOL, false)) {
+            alarmMutePref.value = "300000"
+            bindPreferenceSummaryToValue(alarmMutePref)
+        }
+    }
+
     companion object {
 
         const val SELECTOR_NEW = "1"
         const val SELECTOR_OLD = "0"
+
+        const val INTERNAL_MUTE_ALARM_BOOL = "INTERNAL_MUTE_ALARM_BOOL"
 
         /**
          * A preference value change listener that updates the preference's summary

@@ -72,6 +72,7 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
         val bundle = Bundle().apply {
             putString(TIME_ZONE_ID, timeZone)
             putInt(ACTION, mAction)
+            putInt(TYPE, mType)
         }
         mTimeZoneFragment.arguments = bundle
     }
