@@ -8,6 +8,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.AnimationDrawable
+import android.graphics.drawable.GradientDrawable
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -19,6 +22,7 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
+import android.text.format.DateFormat
 import android.text.format.DateUtils
 import android.text.method.ScrollingMovementMethod
 import android.transition.AutoTransition
@@ -70,7 +74,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         dismiss.scaleType = ImageView.ScaleType.CENTER
 
         MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
-        adViewWakeUp.loadAd(AdRequest.Builder().build())
+        adViewWakeUp.loadAd(AdRequest.Builder().addTestDevice("6EF4925B538C754B535FCB7177FCAC3D").build())
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
@@ -96,6 +100,8 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         wakeLocker = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, C.WAKE_TAG)
         wakeLocker.acquire(AlarmReceiver.WAKE_LONG.toLong())
 
+        clock_date.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyyMMMdEEEE")
+
         if(intent.extras != null) {
             val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
             item = option.getParcelable(AlarmReceiver.ITEM)!!
@@ -103,19 +109,19 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
             Log.d(C.TAG, "Alarm alerted : ID(${item.notiId+1})")
 
-            if(item.colorTag != 0) {
-                wake_up_layout.setBackgroundColor(item.colorTag)
-                window.statusBarColor = item.colorTag
+            var color = item.colorTag
+            if(color == 0) color = ContextCompat.getColor(applicationContext, R.color.blueGray)
 
-                val darken =
-                        if(item.colorTag == ContextCompat.getColor(applicationContext, android.R.color.black))
-                            ContextCompat.getColor(applicationContext, R.color.blueGray)
-                        else MediaCursor.makeDarker(item.colorTag, 0.85f)
-                ViewCompat.setBackgroundTintList(interaction_button, ColorStateList.valueOf(darken))
-                ViewCompat.setBackgroundTintList(dismiss, ColorStateList.valueOf(darken))
-                ViewCompat.setBackgroundTintList(snooze, ColorStateList.valueOf(darken))
-            }
-            else wake_up_layout.setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.blueGray))
+            window.statusBarColor = color
+            gradientEffect(color)
+
+            val darken =
+                    if(item.colorTag == ContextCompat.getColor(applicationContext, android.R.color.black))
+                        ContextCompat.getColor(applicationContext, R.color.darkerGray)
+                    else convertColor(item.colorTag, 0.85f)
+            ViewCompat.setBackgroundTintList(interaction_button, ColorStateList.valueOf(darken))
+            ViewCompat.setBackgroundTintList(dismiss, ColorStateList.valueOf(darken))
+            ViewCompat.setBackgroundTintList(snooze, ColorStateList.valueOf(darken))
 
             // Play ringtone
             val ringtoneUri = item.ringtone
@@ -146,17 +152,13 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             // Show selected time zone's time, but not print if time zone is default
             val timeZone = item.timeZone.replace(" ", "_")
             if(TimeZone.getDefault() != TimeZone.getTimeZone(timeZone)) {
-//                val difference = TimeZone.getTimeZone(timeZone).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(timeZone).dstSavings - TimeZone.getDefault().dstSavings
-                val difference = TimeZone.getTimeZone(timeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-                time_zone_layout.visibility = View.VISIBLE
-                val filteredTimeZone = item.timeZone.split("/").let {
-                    if(it.size > 1) it[it.lastIndex]
-                    else it[0]
-                }.replace("_", " ")
-                time_zone_name_wake.text = filteredTimeZone
-                time_zone_offset_wake.text = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
-                time_zone_time_wake_am_pm.timeZone = timeZone
-                time_zone_time_wake.timeZone = timeZone
+                time_zone_clock_layout.visibility = View.VISIBLE
+                val name = getNameForTimeZone(item.timeZone)
+                time_zone_clock_title.text = name
+
+                time_zone_clock_am_pm.timeZone = timeZone
+                time_zone_clock_time.timeZone = timeZone
+                time_zone_clock_date.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
             }
 
             // Show label
@@ -331,6 +333,49 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 .setContentIntent(PendingIntent.getActivity(this, item.notiId, intent, PendingIntent.FLAG_UPDATE_CURRENT))
 
         notificationManager.notify(ALARM_NOTIFICATION_ID, notification.build())
+    }
+
+    private fun getNameForTimeZone(timeZoneId: String?): String {
+        return if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(timeZoneId))
+        }
+        else timeZoneId?.split("/").let {
+            if(it != null) {
+                if(it.size > 1) it[it.lastIndex]
+                else it[0]
+            }
+            else null
+        }?.replace("_", " ") ?: getString(R.string.time_zone_unknown)
+    }
+
+    private fun gradientEffect(color: Int) {
+
+        val mid = convertColor(color, 0.5f)
+        val end = convertColor(color, 1.5f)
+
+        val gradient1 = GradientDrawable(GradientDrawable.Orientation.BR_TL, intArrayOf(color, mid, end))
+        val gradient2 = GradientDrawable(GradientDrawable.Orientation.BR_TL, intArrayOf(end, color, mid))
+        val gradient3 = GradientDrawable(GradientDrawable.Orientation.BR_TL, intArrayOf(mid, end, color))
+
+        val animList = AnimationDrawable().apply {
+            addFrame(gradient1, 500)
+            addFrame(gradient2, 5000)
+            addFrame(gradient3, 5000)
+            addFrame(gradient1, 5000)
+        }
+        wake_up_layout.background = animList
+
+        animList.setEnterFadeDuration(10)
+        animList.setExitFadeDuration(5000)
+        animList.start()
+    }
+
+    private fun convertColor(color: Int, value: Float): Int {
+        val array = FloatArray(3)
+        Color.colorToHSV(color, array)
+        array[2] *= value
+
+        return Color.HSVToColor(array)
     }
 
     companion object {
