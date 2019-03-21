@@ -207,12 +207,12 @@ class DatabaseCursor(context: Context) {
         // Change from item order
         val contentValues = ContentValues()
         contentValues.put(DatabaseManager.COLUMN_INDEX, toOrder)
-        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(from.id!!.toString()))
+        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(from.id.toString()))
 
         // Change from item order
         contentValues.clear()
         contentValues.put(DatabaseManager.COLUMN_INDEX, fromOrder)
-        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(to.id!!.toString()))
+        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(to.id.toString()))
 
         db.close()
     }
@@ -282,12 +282,12 @@ class DatabaseCursor(context: Context) {
         // Change from item order
         val contentValues = ContentValues()
         contentValues.put(DatabaseManager.COLUMN_INDEX, toOrder)
-        db.update(DatabaseManager.TABLE_CLOCK_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(from.id!!.toString()))
+        db.update(DatabaseManager.TABLE_CLOCK_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(from.id.toString()))
 
         // Change from item order
         contentValues.clear()
         contentValues.put(DatabaseManager.COLUMN_INDEX, fromOrder)
-        db.update(DatabaseManager.TABLE_CLOCK_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(to.id!!.toString()))
+        db.update(DatabaseManager.TABLE_CLOCK_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(to.id.toString()))
 
         db.close()
     }

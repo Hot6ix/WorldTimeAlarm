@@ -511,6 +511,9 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
                 val item = createAlarm()
 
+                val scheduledTime = AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
+                item.timeSet = scheduledTime.toString()
+
                 if(isNew) {
                     item.id = DatabaseCursor(applicationContext).insertAlarm(item).toInt()
                     item.index = item.id
@@ -518,8 +521,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 else {
                     DatabaseCursor(applicationContext).updateAlarm(item)
                 }
-
-                val scheduledTime = AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
 
                 if(isTaskRoot) showToast(scheduledTime)
 

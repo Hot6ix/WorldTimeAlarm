@@ -118,7 +118,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             val darken =
                     if(color == ContextCompat.getColor(applicationContext, android.R.color.black))
                         ContextCompat.getColor(applicationContext, R.color.darkerGray)
-                    else convertColor(color, 0.5f)
+                    else convertColor(color, 0.75f)
             ViewCompat.setBackgroundTintList(interaction_button, ColorStateList.valueOf(darken))
             ViewCompat.setBackgroundTintList(dismiss, ColorStateList.valueOf(darken))
             ViewCompat.setBackgroundTintList(snooze, ColorStateList.valueOf(darken))
