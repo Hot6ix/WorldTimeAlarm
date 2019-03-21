@@ -92,6 +92,7 @@
     <string name="must_check_repeat">Must check day repeat at least one.</string>
     <string name="invalid_repeat">Must check valid time and repeat day if range is less than a week.</string>
     <string name="alarm_no_long_fires">Alarm (%1$s) no longer fires.</string>
+    <string name="error_occurred">Error occurred.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>

@@ -14,6 +14,7 @@ import android.graphics.drawable.GradientDrawable
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.*
 import android.preference.PreferenceManager
@@ -130,9 +131,19 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                     .setUsage(AudioAttributes.USAGE_ALARM)
             if(ringtoneUri != null && ringtoneUri.isNotEmpty() && ringtoneUri != "null") {
                 player = MediaPlayer().apply {
-                    setDataSource(applicationContext, Uri.parse(item.ringtone))
                     setAudioAttributes(audioAttrs.build())
                     isLooping = true
+                }
+
+                try {
+                    player?.setDataSource(applicationContext, Uri.parse(ringtoneUri))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(applicationContext, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
+
+                    // play default alarm sound if error occurred.
+                    val sound = RingtoneManager.getActualDefaultRingtoneUri(applicationContext, RingtoneManager.TYPE_ALARM)
+                    player?.setDataSource(applicationContext, sound)
                 }
                 player?.prepare()
                 player?.start()

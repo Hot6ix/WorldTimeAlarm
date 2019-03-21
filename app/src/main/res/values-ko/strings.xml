@@ -93,6 +93,7 @@
     <string name="must_check_repeat">반드시 요일 반복을 설정해야 합니다.</string>
     <string name="invalid_repeat">설정된 범위가 일주일 이하인 경우 범위 내 유효한 시간 또는 요일 반복을 설정해야 합니다.</string>
     <string name="alarm_no_long_fires">알람(%1$s)이  더이상 울리지 않습니다.</string>
+    <string name="error_occurred">오류가 발생하였습니다.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">시간대 선택</string>
