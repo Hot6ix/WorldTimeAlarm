@@ -24,10 +24,6 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
 
     private lateinit var listener: OnItemClickListener
 
-    init {
-        setHasStableIds(true)
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.clock_list_item, parent, false))
     }
@@ -37,10 +33,6 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
     override fun getItemId(position: Int): Long = list[position].hashCode().toLong()
 
     override fun getItemViewType(position: Int): Int = 0
-
-    override fun setHasStableIds(hasStableIds: Boolean) {
-        super.setHasStableIds(hasStableIds)
-    }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[holder.adapterPosition].timezone?.replace(" ", "_")
@@ -101,6 +93,5 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
 
     interface OnItemClickListener {
         fun onItemClicked(view: View, item: AlarmItem)
-        fun onItemStatusChanged(b: Boolean, item: AlarmItem)
     }
 }
