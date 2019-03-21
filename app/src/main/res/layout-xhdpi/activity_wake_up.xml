@@ -23,9 +23,9 @@
             android:id="@+id/clock_am_pm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/padding20"
+            android:paddingTop="@dimen/padding10"
             android:gravity="end"
-            android:textSize="@dimen/text_mlarge"
+            android:textSize="@dimen/text_large"
             android:textColor="@android:color/white"
             android:format12Hour="a"
             android:layout_marginEnd="@dimen/padding5"
@@ -39,8 +39,8 @@
             android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="@dimen/padding20"
-            android:textSize="@dimen/text_clock_size_big"
+            android:paddingTop="@dimen/padding10"
+            android:textSize="@dimen/text_clock_size"
             android:textColor="@android:color/white"
             android:format12Hour="hh:mm"
             app:layout_constraintHorizontal_weight="1"
@@ -53,7 +53,7 @@
             android:id="@+id/clock_date"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/text_large"
+            android:textSize="@dimen/text_middle"
             android:textColor="@android:color/white"
             android:gravity="center"
             app:layout_constraintStart_toStartOf="parent"
@@ -68,7 +68,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="@dimen/text_middle"
+        android:textSize="@dimen/text_small"
         android:textColor="@android:color/white"
         android:layout_marginEnd="@dimen/padding20"
         android:layout_marginStart="@dimen/padding20"
@@ -84,7 +84,7 @@
         android:id="@+id/time_zone_clock_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/padding20"
+        android:layout_marginTop="@dimen/padding10"
         android:paddingStart="@dimen/padding10"
         android:paddingEnd="@dimen/padding10"
         android:visibility="gone"
@@ -99,7 +99,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/text_middle"
+            android:textSize="@dimen/text_small"
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -111,7 +111,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:textSize="@dimen/text_small"
+            android:textSize="@dimen/text_xsmall"
             android:textColor="@android:color/white"
             android:format12Hour="a"
             android:layout_marginEnd="@dimen/padding5"
@@ -125,7 +125,7 @@
             android:id="@+id/time_zone_clock_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/text_xxxlarge"
+            android:textSize="@dimen/text_mxlarge"
             android:textColor="@android:color/white"
             android:format12Hour="hh:mm"
             android:includeFontPadding="false"
@@ -142,6 +142,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
+            android:textSize="@dimen/text_small"
             android:gravity="center"
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintEnd_toEndOf="parent"
@@ -150,67 +151,55 @@
 
     </android.support.constraint.ConstraintLayout>
 
-    <com.skyfishjy.library.RippleBackground
-        android:id="@+id/selector_layout"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/selector"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/padding10"
         android:layout_marginEnd="@dimen/padding20"
         android:layout_marginStart="@dimen/padding20"
-        app:rb_color="@android:color/white"
-        app:rb_radius="@dimen/padding35"
-        app:rb_rippleAmount="1"
-        app:rb_duration="1200"
-        app:rb_scale="2.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/time_zone_clock_layout"
         app:layout_constraintBottom_toTopOf="@id/adViewWakeUp">
 
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/selector"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/snooze"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="center"
+            app:backgroundTint="@color/blueGrayDark"
+            app:srcCompat="@drawable/ic_action_alarm_snooze"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/snooze"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:scaleType="center"
-                app:backgroundTint="@color/blueGrayDark"
-                app:srcCompat="@drawable/ic_action_alarm_snooze"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/dismiss"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="center"
+            app:backgroundTint="@color/blueGrayDark"
+            app:srcCompat="@drawable/ic_action_alarm_off"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/dismiss"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:scaleType="center"
-                app:backgroundTint="@color/blueGrayDark"
-                app:srcCompat="@drawable/ic_action_alarm_off"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/interaction_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="center"
+            app:backgroundTint="@color/blueGrayDark"
+            app:srcCompat="@drawable/ic_action_menu_white"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/interaction_button"
-                android:layout_width="85dp"
-                android:layout_height="85dp"
-                android:scaleType="center"
-                app:backgroundTint="@color/blueGrayDark"
-                app:srcCompat="@drawable/ic_action_menu_white"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-        </android.support.constraint.ConstraintLayout>
-
-    </com.skyfishjy.library.RippleBackground>
+    </android.support.constraint.ConstraintLayout>
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adViewWakeUp"

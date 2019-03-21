@@ -173,7 +173,8 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             showAlarmNotification(TYPE_ALARM)
 
             // if snooze is not set, interaction button will work like dismiss
-            selector_layout.startRippleAnimation()
+            // ripple background won't start animation under xhdpi layout
+            selector_layout?.startRippleAnimation()
             if(item.snooze == 0L || intent.action == AlarmReceiver.ACTION_SNOOZE) {
                 interaction_button.setImageDrawable(getDrawable(R.drawable.ic_action_alarm_off))
             }
