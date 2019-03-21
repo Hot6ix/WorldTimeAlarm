@@ -75,6 +75,7 @@
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>
+    <string name="clock_removed">时区(%1$s)删除。</string>
     <string name="less_than_a_minute">不到一分钟</string>
     <string name="same_as_current">与当前时区相同</string>
     <string name="same_as_set">与设置时区相同</string>

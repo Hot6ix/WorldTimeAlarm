@@ -74,6 +74,7 @@
 
     <!-- Message -->
     <string name="alarm_removed">Alarm removed.</string>
+    <string name="clock_removed">Time zone (%1$s) removed.</string>
     <string name="less_than_a_minute">less than a minute</string>
     <string name="same_as_current">Same as current time zone</string>
     <string name="same_as_set">Same as set time zone</string>

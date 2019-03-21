@@ -252,7 +252,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         dbCursor.removeClock(removedItem!!)
         setEmptyMessage()
 
-        Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
+        Snackbar.make(fragmentLayout, resources.getString(R.string.clock_removed, getNameForTimeZone(removedItem?.timezone)), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
             val id = dbCursor.insertClock(removedItem!!)
             removedItem!!.id = id.toInt()
             clockListAdapter.addItem(itemPosition, removedItem!!)
