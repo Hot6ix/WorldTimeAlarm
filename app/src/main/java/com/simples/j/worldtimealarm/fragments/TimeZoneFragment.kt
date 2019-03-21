@@ -90,6 +90,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
         val bundle = Bundle().apply {
             this.putInt(TimeZonePickerActivity.TYPE, mType)
         }
+
         when(v.id) {
             R.id.time_zone_country_layout -> {
                 (activity as? TimeZonePickerActivity).run {

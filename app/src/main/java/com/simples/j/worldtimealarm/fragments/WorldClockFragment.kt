@@ -182,6 +182,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
+        var scrollToLast = false
+
         when {
             requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
@@ -194,6 +196,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                     dbCursor.insertClock(ClockItem(null, data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID), -1))
                     clockItems.clear()
                     clockItems.addAll(dbCursor.getClockList())
+                    scrollToLast = true
                     setEmptyMessage()
                 }
             }
@@ -201,7 +204,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         if(::clockListAdapter.isInitialized) {
             clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
-            if(clockItems.isNotEmpty())
+
+            if(clockItems.isNotEmpty() && scrollToLast)
                 clockList.smoothScrollToPosition(clockItems.count() - 1)
         }
         else {
