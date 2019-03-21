@@ -47,6 +47,7 @@ Version 1.5
 - Fix wrong prints, error, bugs
 - Change wake up ui
 - Set default value of muting alarm
+- Add privacy policy
 
 FAQ
 
