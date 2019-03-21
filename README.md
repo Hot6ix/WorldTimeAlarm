@@ -41,6 +41,13 @@ Version 1.4.1
 Version 1.4.2
 - Fix showing wrong date in time conversion
 
+Version 1.5
+- Support localized time zone name
+- Add new way to select time zone
+- Fix wrong prints, error, bugs
+- Change wake up ui
+- Set default value of muting alarm
+
 FAQ
 
 Q : How to change order of alarm or time?
