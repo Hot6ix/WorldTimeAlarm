@@ -191,9 +191,9 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
             requestCode == TIME_ZONE_NEW_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    DatabaseCursor(context!!).insertClock(ClockItem(null, data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID), -1))
+                    dbCursor.insertClock(ClockItem(null, data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID), -1))
                     clockItems.clear()
-                    clockItems.addAll(DatabaseCursor(context!!).getClockList())
+                    clockItems.addAll(dbCursor.getClockList())
                     setEmptyMessage()
                 }
             }
@@ -249,11 +249,11 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         removedItem = clockItems[itemPosition]
         clockListAdapter.removeItem(itemPosition)
-        DatabaseCursor(context!!).removeClock(removedItem!!)
+        dbCursor.removeClock(removedItem!!)
         setEmptyMessage()
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
-            val id = DatabaseCursor(context!!).insertClock(removedItem!!)
+            val id = dbCursor.insertClock(removedItem!!)
             removedItem!!.id = id.toInt()
             clockListAdapter.addItem(itemPosition, removedItem!!)
             recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
@@ -264,7 +264,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onItemMove(from: Int, to: Int) {
         Collections.swap(clockItems, from, to)
         clockListAdapter.notifyItemMoved(from, to)
-        DatabaseCursor(context!!).swapClockOrder(clockItems[from], clockItems[to])
+        dbCursor.swapClockOrder(clockItems[from], clockItems[to])
         val tmp = clockItems[from].index
         clockItems[from].index = clockItems[to].index
         clockItems[to].index = tmp

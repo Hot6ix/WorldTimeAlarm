@@ -116,9 +116,9 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             gradientEffect(color)
 
             val darken =
-                    if(item.colorTag == ContextCompat.getColor(applicationContext, android.R.color.black))
+                    if(color == ContextCompat.getColor(applicationContext, android.R.color.black))
                         ContextCompat.getColor(applicationContext, R.color.darkerGray)
-                    else convertColor(item.colorTag, 0.85f)
+                    else convertColor(color, 0.5f)
             ViewCompat.setBackgroundTintList(interaction_button, ColorStateList.valueOf(darken))
             ViewCompat.setBackgroundTintList(dismiss, ColorStateList.valueOf(darken))
             ViewCompat.setBackgroundTintList(snooze, ColorStateList.valueOf(darken))
@@ -159,6 +159,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 time_zone_clock_am_pm.timeZone = timeZone
                 time_zone_clock_time.timeZone = timeZone
                 time_zone_clock_date.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
+                time_zone_clock_date.timeZone = timeZone
             }
 
             // Show label
