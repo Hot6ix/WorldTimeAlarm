@@ -1,6 +1,5 @@
 package com.simples.j.worldtimealarm.fragments
 
-
 import android.content.Context
 import android.icu.text.Collator
 import android.icu.util.ULocale
@@ -10,8 +9,8 @@ import android.support.annotation.RequiresApi
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.SearchView
 import android.view.*
-import android.widget.SearchView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.support.BaseTimeZonePickerAdapter
@@ -107,6 +106,14 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
                 time_zone_base_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
                 progressBar.visibility = View.GONE
             }
+
+            mSearchView?.apply {
+                if(isIconified) isIconified = false
+
+                val query = mQuery
+                setQuery("", false)
+                setQuery(query, false)
+            }
         }
     }
 
@@ -131,7 +138,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.menu_time_zone_search, menu)
+        inflater?.inflate(R.menu.menu_time_zone_picker_search, menu)
 
         mSearchMenu = menu.findItem(R.id.search_timezone)
         mSearchView = mSearchMenu?.actionView as SearchView
