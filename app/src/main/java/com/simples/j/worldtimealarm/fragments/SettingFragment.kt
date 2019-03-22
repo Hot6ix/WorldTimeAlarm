@@ -13,13 +13,12 @@ import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
 import android.util.Log
 import android.widget.CompoundButton
-import com.simples.j.worldtimealarm.LicenseActivity
-import com.simples.j.worldtimealarm.R
-import com.simples.j.worldtimealarm.TimeZonePickerActivity
-import com.simples.j.worldtimealarm.TimeZoneSearchActivity
+import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment.Companion.TIME_ZONE_CHANGED_KEY
+import com.simples.j.worldtimealarm.utils.AlarmController
+import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import java.util.*
 
@@ -60,6 +59,8 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
 
         val version = findPreference(resources.getString(R.string.setting_version_key))
         version.summary = pName
+
+        findPreference(getString(R.string.setting_time_zone_affect_repetition_key)).onPreferenceChangeListener = this
 
         converterTimezone = findPreference(resources.getString(R.string.setting_converter_timezone_key)) as com.simples.j.worldtimealarm.support.SwitchPreference
         converterTimezone.setSwitchListener(this)
@@ -162,6 +163,17 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
             getString(R.string.setting_converter_timezone_key) -> {
                 val isEnabled = preference.isEnabled
                 if(!isEnabled) converterTimezone.summary = TimeZone.getDefault().id
+            }
+            getString(R.string.setting_time_zone_affect_repetition_key) -> {
+                val intent = Intent(MainActivity.ACTION_UPDATE_ALL)
+                context?.sendBroadcast(intent)
+
+                val dbCursor = DatabaseCursor(context!!)
+                val alarmController = AlarmController.getInstance(context)
+                dbCursor.getActivatedAlarms().forEach {
+                    alarmController.cancelAlarm(context, it.notiId)
+                    alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
+                }
             }
         }
 

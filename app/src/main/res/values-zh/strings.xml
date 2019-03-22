@@ -110,7 +110,7 @@
     <string name="time_zone_select">请选择时区</string>
     <string name="time_zone_wrong">错误的时区</string>
     <string name="time_zone_change_info">从%1$s到%2$s的变化。</string>
-    <string name="time_zone_change_warning">更改时区会影响以下项目。\n- 时间\n- 日期 (包括开始/结束日期)\n- 重复的一天</string>
+    <string name="time_zone_change_warning">更改时区会影响以下项目。\n- 时间\n- 日期 (包括开始/结束日期)\n- (选项)重复的一天</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>

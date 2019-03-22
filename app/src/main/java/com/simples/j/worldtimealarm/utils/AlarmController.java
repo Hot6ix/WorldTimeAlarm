@@ -4,7 +4,9 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.simples.j.worldtimealarm.AlarmReceiver;
@@ -95,22 +97,20 @@ public class AlarmController {
                 // get repeat information
                 int[] repeatValues = context.getResources().getIntArray(R.array.day_of_week_values);
                 ArrayList<Integer> repeat = new ArrayList<>();
-                for(int i=0; i<item.getRepeat().length; i++) {
-                    Log.d(C.TAG, String.valueOf(item.getRepeat()[i]));
-                }
 
                 long difference = TimeZone.getTimeZone(item.getTimeZone()).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis());
                 Calendar tmp = (Calendar) calendar.clone();
                 tmp.add(Calendar.MILLISECOND, (int) difference);
-                Log.d(C.TAG, tmp.getTime().toString());
-                Log.d(C.TAG, calendar.getTime().toString());
-                Log.d(C.TAG, String.valueOf(difference));
+
+                SharedPreferences prefManager = PreferenceManager.getDefaultSharedPreferences(context);
+                boolean applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false);
+                applyDayRepetition = !applyDayRepetition;
 
                 for(int i=0; i<item.getRepeat().length; i++) {
                     if(item.getRepeat()[i] > 0) {
                         int dayOfWeek = i;
 
-                        if(difference != 0 && !MediaCursor.Companion.isSameDay(tmp, calendar)) {
+                        if(difference != 0 && !MediaCursor.Companion.isSameDay(tmp, calendar) && applyDayRepetition) {
                             if (tmp.getTimeInMillis() > calendar.getTimeInMillis())
                                 dayOfWeek -= 1;
                             else if (tmp.getTimeInMillis() < calendar.getTimeInMillis())
@@ -124,7 +124,6 @@ public class AlarmController {
                     }
                 }
                 Collections.sort(repeat);
-                Log.d(C.TAG, repeat.toString());
 
                 // Check if today contained in repeats
                 int startIndex;

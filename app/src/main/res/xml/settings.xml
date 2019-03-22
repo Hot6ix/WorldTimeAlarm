@@ -38,6 +38,11 @@
             android:entries="@array/alarm_mute"
             android:entryValues="@array/alarm_mute_values"/>
 
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/setting_time_zone_affect_repetition_key"
+            android:title="@string/setting_time_zone_affect_repetition_title"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

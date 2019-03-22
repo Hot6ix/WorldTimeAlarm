@@ -4,11 +4,11 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.drawable.RippleDrawable
 import android.os.Handler
+import android.preference.PreferenceManager
 import android.support.constraint.ConstraintLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +17,6 @@ import android.widget.Switch
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import java.text.SimpleDateFormat
@@ -28,12 +27,13 @@ import java.util.concurrent.TimeUnit
  * Created by j on 19/02/2018.
  *
  */
-class AlarmListAdapter(private var list: ArrayList<AlarmItem>, val context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
+class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val context: Context): RecyclerView.Adapter<AlarmListAdapter.ViewHolder>() {
 
     private lateinit var listener: OnItemClickListener
     private var startDate: Calendar? = null
     private var endDate: Calendar? = null
     private var highlightId: Int = -1
+    private var prefManager = PreferenceManager.getDefaultSharedPreferences(context)
 
     init {
         setHasStableIds(true)
@@ -176,15 +176,12 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, val context: Cont
         // for support old version of app
         val repeat = item.repeat.mapIndexed { index, i -> if(i > 0) index + 1 else 0 }
 
-        Log.d(C.TAG, tmp.time.toString())
-        Log.d(C.TAG, calendar.time.toString())
-        Log.d(C.TAG, difference.toString())
-        Log.d(C.TAG, repeat.joinToString())
+        val applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
         val repeatArray = repeat.mapIndexed { _, i ->
             if(i > 0) {
                 var dayOfWeek = i
 
-                if(difference != 0 && !MediaCursor.isSameDay(tmp, calendar)) {
+                if(difference != 0 && !MediaCursor.isSameDay(tmp, calendar) && applyDayRepetition) {
                     if (tmp.timeInMillis > itemCalendar.timeInMillis)
                         dayOfWeek -= 1
                     else if (tmp.timeInMillis < itemCalendar.timeInMillis)
