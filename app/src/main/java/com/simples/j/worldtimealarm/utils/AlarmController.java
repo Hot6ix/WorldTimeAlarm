@@ -117,8 +117,8 @@ public class AlarmController {
                                 dayOfWeek += 1;
                         }
 
-                        if(dayOfWeek > 7) dayOfWeek = 1;
-                        if(dayOfWeek < 1) dayOfWeek = 7;
+                        if(dayOfWeek > 6) dayOfWeek = 0;
+                        if(dayOfWeek < 0) dayOfWeek = 6;
 
                         repeat.add(repeatValues[dayOfWeek]);
                     }
