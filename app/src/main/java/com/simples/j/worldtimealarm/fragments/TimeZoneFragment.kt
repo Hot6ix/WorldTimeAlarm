@@ -51,6 +51,11 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
             mAction = it.getInt(TimeZonePickerActivity.ACTION)
             mType = it.getInt(TimeZonePickerActivity.TYPE)
 
+            if(mType == TimeZonePickerActivity.TYPE_ALARM_CLOCK) {
+                time_zone_change_info.visibility = View.VISIBLE
+                time_zone_change_info.text = getString(R.string.time_zone_change_warning)
+            }
+
             if(mAction == TimeZonePickerActivity.ACTION_ADD && id.isNullOrEmpty()) return@let
 
             with(id) {

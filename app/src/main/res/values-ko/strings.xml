@@ -62,7 +62,7 @@
     <string name="clear">지우기</string>
     <string name="new_alarm_long">새 알람</string>
     <string name="new_alarm_short">새 알람</string>
-    <string name="expected_time">%1$s에 알람이 울립니다.</string>
+    <string name="expected_time">현지 시각 %1$s에 알람이 울립니다.</string>
     <string name="range_start">시작일</string>
     <string name="range_end">종료일</string>
     <string name="range_not_set">설정 안 함</string>
@@ -110,6 +110,7 @@
     <string name="time_zone_select">시간대를 선택해주세요.</string>
     <string name="time_zone_wrong">잘못된 시간대</string>
     <string name="time_zone_change_info">%1$s에서 %2$s(으)로 변경됩니다.</string>
+    <string name="time_zone_change_warning">시간대 변경 시 다음 항목에 영향을 줍니다.\n- 시간\n- 날짜 (시작일/종료일 포함)\n- 반복되는 요일</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>

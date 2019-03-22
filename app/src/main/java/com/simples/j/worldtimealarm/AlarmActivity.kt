@@ -21,6 +21,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
+import android.text.format.DateUtils
 import android.view.View
 import android.widget.TimePicker
 import android.widget.Toast
@@ -344,7 +345,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     with(TimeZone.getTimeZone(currentTimeZone)) {
                         calendar.timeZone = this
                         dateFormat.timeZone = this
-                        endDatePickerDialog.minDate = calendar.timeInMillis
 //                        startDate?.timeZone = this
 //                        endDate?.timeZone = this
                     }
@@ -369,10 +369,11 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     val tmpNext = (tmpCal.clone() as Calendar).apply {
                         add(Calendar.DAY_OF_YEAR, 1)
                     }
+
                     endDatePickerDialog = DatePickerDialogFragment.newInstance().apply {
-                        setDate(tmpNext)
+                        setDate(Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) })
+                        minDate = tmpNext.timeInMillis
                         setDateSetListener(endDatePickerListener)
-                        minDate = tmpCal.timeInMillis
 
                         endDate?.let {
                             calendar = it
@@ -446,6 +447,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         }
                     }
                 }
+
                 if(endDate != null) {
                     when {
                         endDate!!.timeInMillis < System.currentTimeMillis() -> {
@@ -460,7 +462,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
                     val difference = endDate!!.timeInMillis - System.currentTimeMillis()
                     when(TimeUnit.MILLISECONDS.toDays(difference)) {
-                        in 1..4 -> {
+                        in 1..5 -> {
                             val copyOfRepeat = selectedDays.clone()
                             val tmpCal = today.clone() as Calendar
                             while(tmpCal.before(endDate)) {
@@ -486,7 +488,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     // need to check repeat days that alarm makes sense
                     val difference = endDate!!.timeInMillis - startDate!!.timeInMillis
                     when(TimeUnit.MILLISECONDS.toDays(difference)) {
-                        in 1..4 -> {
+                        in 1..5 -> {
                             val copyOfRepeat = selectedDays.clone()
                             val tmpCal = startDate!!.clone() as Calendar
                             while(tmpCal.before(endDate)) {

@@ -62,7 +62,7 @@
     <string name="clear">未选中</string>
     <string name="new_alarm_long">新警报</string>
     <string name="new_alarm_short">新警报</string>
-    <string name="expected_time">闹钟将设置为下午%1$s</string>
+    <string name="expected_time">闹钟将设置为当地时间%1$s</string>
     <string name="range_start">开始日期</string>
     <string name="range_end">结束日期</string>
     <string name="range_not_set">没有设置</string>
@@ -110,6 +110,7 @@
     <string name="time_zone_select">请选择时区</string>
     <string name="time_zone_wrong">错误的时区</string>
     <string name="time_zone_change_info">从%1$s到%2$s的变化。</string>
+    <string name="time_zone_change_warning">更改时区会影响以下项目。\n- 时间\n- 日期 (包括开始/结束日期)\n- 重复的一天</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>

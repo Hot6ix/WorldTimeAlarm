@@ -17,7 +17,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * Created by j on 28/02/2018.
@@ -94,8 +96,35 @@ public class AlarmController {
                 int[] repeatValues = context.getResources().getIntArray(R.array.day_of_week_values);
                 ArrayList<Integer> repeat = new ArrayList<>();
                 for(int i=0; i<item.getRepeat().length; i++) {
-                    if(item.getRepeat()[i] > 0) repeat.add(repeatValues[i]);
+                    Log.d(C.TAG, String.valueOf(item.getRepeat()[i]));
                 }
+
+                long difference = TimeZone.getTimeZone(item.getTimeZone()).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis());
+                Calendar tmp = (Calendar) calendar.clone();
+                tmp.add(Calendar.MILLISECOND, (int) difference);
+                Log.d(C.TAG, tmp.getTime().toString());
+                Log.d(C.TAG, calendar.getTime().toString());
+                Log.d(C.TAG, String.valueOf(difference));
+
+                for(int i=0; i<item.getRepeat().length; i++) {
+                    if(item.getRepeat()[i] > 0) {
+                        int dayOfWeek = i;
+
+                        if(difference != 0 && !MediaCursor.Companion.isSameDay(tmp, calendar)) {
+                            if (tmp.getTimeInMillis() > calendar.getTimeInMillis())
+                                dayOfWeek -= 1;
+                            else if (tmp.getTimeInMillis() < calendar.getTimeInMillis())
+                                dayOfWeek += 1;
+                        }
+
+                        if(dayOfWeek > 7) dayOfWeek = 1;
+                        if(dayOfWeek < 1) dayOfWeek = 7;
+
+                        repeat.add(repeatValues[dayOfWeek]);
+                    }
+                }
+                Collections.sort(repeat);
+                Log.d(C.TAG, repeat.toString());
 
                 // Check if today contained in repeats
                 int startIndex;
