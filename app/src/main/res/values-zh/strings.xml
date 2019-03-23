@@ -130,6 +130,8 @@
     <string name="setting_alarm_volume_increase_title">逐渐增加卷</string>
     <string name="setting_time_zone_change_key">TIME_ZONE_CHANGE</string>
     <string name="setting_time_zone_change_title">当时区变化时通知</string>
+    <string name="setting_time_zone_affect_repetition_key">TIME_ZONE_AFFECT_REPETITION</string>
+    <string name="setting_time_zone_affect_repetition_title">将时间差应用于重复天数</string>
     <string name="setting_time_zone_affect_repetition_summary">将重新安排所有已激活的警报，并可以更改重复日期。</string>
 
     <string name="setting_group_2_key">CONVERTER</string>
