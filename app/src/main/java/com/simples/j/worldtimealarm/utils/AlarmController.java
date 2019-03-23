@@ -31,6 +31,7 @@ import java.util.TimeZone;
 public class AlarmController {
 
     private AlarmManager alarmManager;
+    private SharedPreferences prefManager;
     private static AlarmController ourInstance;
     public static final int TYPE_ALARM = 0;
     public static final int TYPE_SNOOZE = 1;
@@ -42,6 +43,7 @@ public class AlarmController {
 
     private AlarmController(Context context) {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        prefManager = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public Long scheduleAlarm(Context context, AlarmItem item, int type) {
@@ -102,9 +104,10 @@ public class AlarmController {
                 Calendar tmp = (Calendar) calendar.clone();
                 tmp.add(Calendar.MILLISECOND, (int) difference);
 
-                SharedPreferences prefManager = PreferenceManager.getDefaultSharedPreferences(context);
+                long diff = tmp.getTimeInMillis() - calendar.getTimeInMillis();
+                long dayDiff = Math.abs(MediaCursor.Companion.getDayDifference(tmp, calendar, false));
+
                 boolean applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false);
-                applyDayRepetition = !applyDayRepetition;
 
                 for(int i=0; i<item.getRepeat().length; i++) {
                     if(item.getRepeat()[i] > 0) {
@@ -112,9 +115,9 @@ public class AlarmController {
 
                         if(difference != 0 && !MediaCursor.Companion.isSameDay(tmp, calendar) && applyDayRepetition) {
                             if (tmp.getTimeInMillis() > calendar.getTimeInMillis())
-                                dayOfWeek -= 1;
+                                dayOfWeek -= dayDiff;
                             else if (tmp.getTimeInMillis() < calendar.getTimeInMillis())
-                                dayOfWeek += 1;
+                                dayOfWeek += dayDiff;
                         }
 
                         if(dayOfWeek > 6) dayOfWeek = 0;

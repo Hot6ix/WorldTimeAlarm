@@ -109,7 +109,7 @@
     <string name="time_zone_select">Please select time zone</string>
     <string name="time_zone_wrong">Wrong time zone</string>
     <string name="time_zone_change_info">Changes from %1$s to %2$s.</string>
-    <string name="time_zone_change_warning">Changing the time zone affects the following items.\n- Time\n- Date (includes start/end date)\n- (Optional) Repeat day(s)</string>
+    <string name="time_zone_change_warning">Changing the time zone affects the following items.\n- Time\n- Date (includes start/end date)\n- Repeat days (Activate in the setting tab)</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>
@@ -128,7 +128,8 @@
     <string name="setting_time_zone_change_key">TIME_ZONE_CHANGE</string>
     <string name="setting_time_zone_change_title">Notify when time zone changes</string>
     <string name="setting_time_zone_affect_repetition_key">TIME_ZONE_AFFECT_REPETITION</string>
-    <string name="setting_time_zone_affect_repetition_title">Apply time difference to repeat day(s).</string>
+    <string name="setting_time_zone_affect_repetition_title">Apply time difference to repeat day(s)</string>
+    <string name="setting_time_zone_affect_repetition_summary">All activated alarms will be rescheduled and repeat days can be changed.</string>
 
     <string name="setting_group_2_key">CONVERTER</string>
     <string name="setting_group_2">Time conversion</string>

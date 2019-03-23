@@ -172,6 +172,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         }
         val tmp = itemCalendar.clone() as Calendar
         tmp.add(Calendar.MILLISECOND, difference)
+        val dayDiff = Math.abs(MediaCursor.getDayDifference(tmp, itemCalendar, true))
 
         // for support old version of app
         val repeat = item.repeat.mapIndexed { index, i -> if(i > 0) index + 1 else 0 }
@@ -183,9 +184,9 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
                 if(difference != 0 && !MediaCursor.isSameDay(tmp, calendar) && applyDayRepetition) {
                     if (tmp.timeInMillis > itemCalendar.timeInMillis)
-                        dayOfWeek -= 1
+                        dayOfWeek -= dayDiff.toInt()
                     else if (tmp.timeInMillis < itemCalendar.timeInMillis)
-                        dayOfWeek += 1
+                        dayOfWeek += dayDiff.toInt()
                 }
 
                 if(dayOfWeek > 7) dayOfWeek = 1
@@ -204,11 +205,11 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                         repeat.find { it > 0 }!!.let {
                             var dayOfWeek = it
 
-                            if(difference != 0 && !MediaCursor.isSameDay(tmp, calendar)) {
+                            if(difference != 0 && !MediaCursor.isSameDay(tmp, calendar) && applyDayRepetition) {
                                 if (tmp.timeInMillis > itemCalendar.timeInMillis)
-                                    dayOfWeek -= 1
+                                    dayOfWeek -= dayDiff.toInt()
                                 else if (tmp.timeInMillis < itemCalendar.timeInMillis)
-                                    dayOfWeek += 1
+                                    dayOfWeek += dayDiff.toInt()
                             }
 
                             if(dayOfWeek > 7) dayOfWeek = 1

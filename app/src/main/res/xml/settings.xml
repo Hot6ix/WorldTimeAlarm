@@ -41,7 +41,8 @@
         <SwitchPreference
             android:defaultValue="false"
             android:key="@string/setting_time_zone_affect_repetition_key"
-            android:title="@string/setting_time_zone_affect_repetition_title"/>
+            android:title="@string/setting_time_zone_affect_repetition_title"
+            android:summary="@string/setting_time_zone_affect_repetition_summary"/>
 
     </PreferenceCategory>
 

@@ -242,6 +242,22 @@ class MediaCursor {
         fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {
             return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) && cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH)
         }
+
+        fun getDayDifference(cal1: Calendar, cal2: Calendar, ignoreTime: Boolean): Long {
+            Log.d(C.TAG, cal1.timeInMillis.toString())
+            Log.d(C.TAG, cal2.timeInMillis.toString())
+            if(cal1.timeInMillis != cal2.timeInMillis && ignoreTime) {
+                cal1.set(Calendar.HOUR_OF_DAY, cal2.get(Calendar.HOUR_OF_DAY))
+                cal1.set(Calendar.MINUTE, cal2.get(Calendar.MINUTE))
+                cal1.set(Calendar.SECOND, cal2.get(Calendar.SECOND))
+                cal1.set(Calendar.MILLISECOND, cal2.get(Calendar.MILLISECOND))
+            }
+            Log.d(C.TAG, cal1.timeInMillis.toString())
+            Log.d(C.TAG, cal2.timeInMillis.toString())
+
+            val diff = cal1.timeInMillis - cal2.timeInMillis
+            return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)
+        }
     }
 
 }

@@ -110,7 +110,7 @@
     <string name="time_zone_select">请选择时区</string>
     <string name="time_zone_wrong">错误的时区</string>
     <string name="time_zone_change_info">从%1$s到%2$s的变化。</string>
-    <string name="time_zone_change_warning">更改时区会影响以下项目。\n- 时间\n- 日期 (包括开始/结束日期)\n- (选项)重复的一天</string>
+    <string name="time_zone_change_warning">更改时区会影响以下项目。\n- 时间\n- 日期 (包括开始/结束日期)\n- 重复的一天 (在“设置”选项卡中激活)</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>
@@ -129,6 +129,7 @@
     <string name="setting_alarm_volume_increase_title">逐渐增加卷</string>
     <string name="setting_time_zone_change_key">TIME_ZONE_CHANGE</string>
     <string name="setting_time_zone_change_title">当时区变化时通知</string>
+    <string name="setting_time_zone_affect_repetition_summary">将重新安排所有已激活的警报，并可以更改重复日期。</string>
 
     <string name="setting_group_2_key">CONVERTER</string>
     <string name="setting_group_2">时间转换</string>

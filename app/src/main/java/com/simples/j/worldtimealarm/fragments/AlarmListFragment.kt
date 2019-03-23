@@ -131,6 +131,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         val intentFilter = IntentFilter()
         intentFilter.addAction(MainActivity.ACTION_UPDATE_ALL)
         intentFilter.addAction(MainActivity.ACTION_UPDATE_SINGLE)
+        intentFilter.addAction(MainActivity.ACTION_RESCHEDULE_ACTIVATED)
         context?.registerReceiver(updateRequestReceiver, intentFilter)
     }
 
@@ -333,6 +334,15 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         launch(coroutineContext) {
                             job.join()
                             alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
+                        }
+                    }
+                }
+                MainActivity.ACTION_RESCHEDULE_ACTIVATED -> {
+                    launch(Dispatchers.IO) {
+                        val alarmController = AlarmController.getInstance(context)
+                        dbCursor.getActivatedAlarms().forEach {
+                            alarmController.cancelAlarm(context, it.notiId)
+                            alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
                         }
                     }
                 }

@@ -161,19 +161,11 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
                             null)
             }
             getString(R.string.setting_converter_timezone_key) -> {
-                val isEnabled = preference.isEnabled
-                if(!isEnabled) converterTimezone.summary = TimeZone.getDefault().id
+                if(newValue == false) converterTimezone.summary = TimeZone.getDefault().id
             }
             getString(R.string.setting_time_zone_affect_repetition_key) -> {
-                val intent = Intent(MainActivity.ACTION_UPDATE_ALL)
-                context?.sendBroadcast(intent)
-
-                val dbCursor = DatabaseCursor(context!!)
-                val alarmController = AlarmController.getInstance(context)
-                dbCursor.getActivatedAlarms().forEach {
-                    alarmController.cancelAlarm(context, it.notiId)
-                    alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
-                }
+                context?.sendBroadcast(Intent(MainActivity.ACTION_UPDATE_ALL))
+                context?.sendBroadcast(Intent(MainActivity.ACTION_RESCHEDULE_ACTIVATED))
             }
         }
 

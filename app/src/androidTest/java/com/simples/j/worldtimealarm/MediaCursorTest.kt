@@ -58,4 +58,17 @@ class MediaCursorTest {
 
     }
 
+    @Test
+    fun testDayDiff() {
+        val cal1 = Calendar.getInstance()
+        val cal2 = Calendar.getInstance()
+        cal2.add(Calendar.MINUTE, -1)
+        cal2.add(Calendar.DAY_OF_MONTH, 6)
+
+        val a = MediaCursor.getDayDifference(cal2, cal1, false)
+        assertEquals(a, 5)
+        val b = MediaCursor.getDayDifference(cal2, cal1, true)
+        assertEquals(b, 6)
+    }
+
 }
