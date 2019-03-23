@@ -52,6 +52,8 @@ public class AlarmController {
         Calendar start = (Calendar) today.clone();
         Calendar end = Calendar.getInstance();
 
+        if(item == null) return -1L;
+
         if(type == TYPE_ALARM) {
             if(item.getEndDate() != null && item.getEndDate() > 0) {
                 end.setTimeInMillis(item.getEndDate());
@@ -105,7 +107,7 @@ public class AlarmController {
                 tmp.add(Calendar.MILLISECOND, (int) difference);
 
                 long diff = tmp.getTimeInMillis() - calendar.getTimeInMillis();
-                long dayDiff = Math.abs(MediaCursor.Companion.getDayDifference(tmp, calendar, false));
+                long dayDiff = Math.abs(MediaCursor.Companion.getDayDifference(tmp, calendar, true));
 
                 boolean applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false);
 

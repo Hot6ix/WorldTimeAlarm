@@ -94,6 +94,7 @@
     <string name="invalid_repeat">如果范围小于一周，必须检查有效时间和重复日。</string>
     <string name="alarm_no_long_fires">警报(%1$s)不再触发。</string>
     <string name="error_occurred">发生了错误。</string>
+    <string name="error_message">呼叫无效。 如果继续，请重新创建警报。 对造成的不便表示歉意。</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>

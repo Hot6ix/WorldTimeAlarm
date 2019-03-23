@@ -94,6 +94,7 @@
     <string name="invalid_repeat">설정된 범위가 일주일 이하인 경우 범위 내 유효한 시간 또는 요일 반복을 설정해야 합니다.</string>
     <string name="alarm_no_long_fires">알람(%1$s)이  더이상 울리지 않습니다.</string>
     <string name="error_occurred">오류가 발생하였습니다.</string>
+    <string name="error_message">잘못된 호출입니다. 계속 발생할 경우, 알람을 재생성해 주십시오. 불편을 드려 죄송합니다.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">시간대 선택</string>
