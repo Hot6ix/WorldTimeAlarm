@@ -189,8 +189,8 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                         dayOfWeek += dayDiff.toInt()
                 }
 
-                if(dayOfWeek > 7) dayOfWeek = 1
-                if(dayOfWeek < 1) dayOfWeek = 7
+                if(dayOfWeek > 7) dayOfWeek -= 7
+                if(dayOfWeek < 1) dayOfWeek += 7
 
                 dayArray[dayOfWeek-1]
             } else null
@@ -212,8 +212,8 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                                     dayOfWeek += dayDiff.toInt()
                             }
 
-                            if(dayOfWeek > 7) dayOfWeek = 1
-                            if(dayOfWeek < 1) dayOfWeek = 7
+                            if(dayOfWeek > 7) dayOfWeek -= 7
+                            if(dayOfWeek < 1) dayOfWeek += 7
 
                             dayLongArray[dayOfWeek-1]
                         }

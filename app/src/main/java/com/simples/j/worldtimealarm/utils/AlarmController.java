@@ -46,13 +46,13 @@ public class AlarmController {
         prefManager = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public Long scheduleAlarm(Context context, AlarmItem item, int type) {
+    private Calendar calculateDate(Context context, AlarmItem item, int type) {
         Calendar calendar = Calendar.getInstance();
         Calendar today = Calendar.getInstance();
         Calendar start = (Calendar) today.clone();
         Calendar end = Calendar.getInstance();
 
-        if(item == null) return -1L;
+        if(item == null) return null;
 
         if(type == TYPE_ALARM) {
             if(item.getEndDate() != null && item.getEndDate() > 0) {
@@ -60,8 +60,7 @@ public class AlarmController {
 
                 if(end.before(today)) {
                     Log.d(C.TAG, "Alarm had been expired : ID("+item.getNotiId()+1+")");
-                    disableAlarm(context, item);
-                    return -1L;
+                    return null;
                 }
             }
             else end = null;
@@ -106,7 +105,6 @@ public class AlarmController {
                 Calendar tmp = (Calendar) calendar.clone();
                 tmp.add(Calendar.MILLISECOND, (int) difference);
 
-                long diff = tmp.getTimeInMillis() - calendar.getTimeInMillis();
                 long dayDiff = Math.abs(MediaCursor.Companion.getDayDifference(tmp, calendar, true));
 
                 boolean applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false);
@@ -122,8 +120,12 @@ public class AlarmController {
                                 dayOfWeek += dayDiff;
                         }
 
-                        if(dayOfWeek > 6) dayOfWeek = 0;
-                        if(dayOfWeek < 0) dayOfWeek = 6;
+                        if(dayOfWeek > 6) {
+                            dayOfWeek = dayOfWeek - 7;
+                        }
+                        if(dayOfWeek < 0) {
+                            dayOfWeek = dayOfWeek + 7;
+                        }
 
                         repeat.add(repeatValues[dayOfWeek]);
                     }
@@ -186,6 +188,16 @@ public class AlarmController {
         if(end != null && calendar.after(end)) {
             // This alarm had been expired
             Log.d(C.TAG, "Alarm has been expired : ID("+item.getNotiId()+1+")");
+            return null;
+        }
+
+        return calendar;
+    }
+
+    public Long scheduleAlarm(Context context, AlarmItem item, int type) {
+
+        Calendar alarm = calculateDate(context, item, type);
+        if(alarm == null) {
             disableAlarm(context, item);
             return -1L;
         }
@@ -206,11 +218,11 @@ public class AlarmController {
 
         PendingIntent mainIntent = PendingIntent.getActivity(context, notiId, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, notiId+1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(), mainIntent), alarmIntent);
-        Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.getDefault()).format(calendar.getTime()) + ", Info(" + item + "), " + type);
+        alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(alarm.getTimeInMillis(), mainIntent), alarmIntent);
+        Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.getDefault()).format(alarm.getTime()) + ", Info(" + item + "), " + type);
         Log.d(C.TAG, "Alarm scheduled : ID(" + notiId+1 + ")");
 
-        return calendar.getTimeInMillis();
+        return alarm.getTimeInMillis();
     }
 
     public void cancelAlarm(Context context, int notiId) {

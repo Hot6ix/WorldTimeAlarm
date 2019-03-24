@@ -3,12 +3,15 @@ package com.simples.j.worldtimealarm
 import android.content.Context
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
+import android.util.Log
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.utils.AlarmController
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.lang.StringBuilder
 import java.text.DateFormat
 import java.util.*
 
@@ -108,6 +111,21 @@ class AlarmControllerTest {
         assert(isSameDay(scheduledCal, answer4))
 
         ////////////////////////////////////////////////////////////////////////////////////////
+    }
+
+    private fun calendarToString(cal: Calendar, includeTime: Boolean, separator: String = "/"): String {
+        val arr = arrayOf(Calendar.YEAR, Calendar.MONTH, Calendar.DAY_OF_MONTH, Calendar.HOUR, Calendar.MINUTE)
+        val builder = StringBuilder()
+        val until =
+                if(includeTime) arr.size
+                else arr.size - 3
+
+        for(index in 0..until) {
+            builder.append(cal.get(arr[index]))
+            builder.append(separator)
+        }
+
+        return builder.toString()
     }
 
     private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {
