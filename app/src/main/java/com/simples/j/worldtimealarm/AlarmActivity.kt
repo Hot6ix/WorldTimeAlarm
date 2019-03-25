@@ -513,7 +513,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
                 val item = createAlarm()
 
-                val scheduledTime = AlarmController.getInstance(this).scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
+                val scheduledTime = AlarmController.getInstance().scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
                 item.timeSet = scheduledTime.toString()
 
                 if(isNew) {

@@ -31,19 +31,13 @@ import java.util.TimeZone;
 public class AlarmController {
 
     private AlarmManager alarmManager;
-    private SharedPreferences prefManager;
     private static AlarmController ourInstance;
     public static final int TYPE_ALARM = 0;
     public static final int TYPE_SNOOZE = 1;
 
-    public static AlarmController getInstance(Context context) {
-        if(ourInstance == null) ourInstance = new AlarmController(context);
+    public static AlarmController getInstance() {
+        if(ourInstance == null) ourInstance = new AlarmController();
         return ourInstance;
-    }
-
-    private AlarmController(Context context) {
-        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        prefManager = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     private Calendar calculateDate(Context context, AlarmItem item, int type, boolean applyDayRepetition) {
@@ -193,6 +187,8 @@ public class AlarmController {
     }
 
     public Long scheduleAlarm(Context context, AlarmItem item, int type) {
+        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        SharedPreferences prefManager = PreferenceManager.getDefaultSharedPreferences(context);
 
         boolean applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false);
 
@@ -226,6 +222,8 @@ public class AlarmController {
     }
 
     public void cancelAlarm(Context context, int notiId) {
+        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
         Intent intent = new Intent(context, AlarmReceiver.class);
         intent.setAction(AlarmReceiver.ACTION_ALARM);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, notiId+1, intent, PendingIntent.FLAG_UPDATE_CURRENT);

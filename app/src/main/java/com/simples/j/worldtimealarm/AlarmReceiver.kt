@@ -99,7 +99,7 @@ class AlarmReceiver: BroadcastReceiver() {
                     context.sendBroadcast(requestIntent)
                 }
                 else
-                    AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+                    AlarmController.getInstance().scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
             }
         }
 

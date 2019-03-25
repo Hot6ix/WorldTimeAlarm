@@ -257,7 +257,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 finish()
             }
             R.id.snooze -> {
-                AlarmController.getInstance(applicationContext).scheduleAlarm(applicationContext, item, AlarmController.TYPE_SNOOZE)
+                AlarmController.getInstance().scheduleAlarm(applicationContext, item, AlarmController.TYPE_SNOOZE)
 
                 val minutes = getString(R.string.minutes, item?.snooze?.div((60 * 1000)))
                 Toast.makeText(applicationContext, getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()

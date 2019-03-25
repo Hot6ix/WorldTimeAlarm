@@ -72,7 +72,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
         updateRequestReceiver = UpdateRequestReceiver()
         dbCursor = DatabaseCursor(context!!)
-        alarmController = AlarmController.getInstance(context)
+        alarmController = AlarmController.getInstance()
         audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         job = launch(coroutineContext) {
@@ -224,7 +224,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                             job.join()
 
                             val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
-
                             if(index > -1) alarmList.scrollToPosition(index)
                         }
                     }
@@ -267,19 +266,23 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         val itemPosition = viewHolder.adapterPosition
         val previousPosition = recyclerLayoutManager.findFirstCompletelyVisibleItemPosition()
 
-        removedItem = alarmItems[itemPosition]
-        if(removedItem!!.on_off == 1) alarmController.cancelAlarm(context!!, removedItem!!.notiId)
-        alarmListAdapter.removeItem(itemPosition)
-        dbCursor.removeAlarm(removedItem!!.notiId)
-        setEmptyMessage()
+        alarmItems[itemPosition].let {
+            removedItem = it
+            if(it.on_off == 1) alarmController.cancelAlarm(context!!, it.notiId)
+            alarmListAdapter.removeItem(itemPosition)
+            dbCursor.removeAlarm(it.notiId)
+            setEmptyMessage()
+        }
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
-            val id = dbCursor.insertAlarm(removedItem!!)
-            removedItem!!.id = id.toInt()
-            if(removedItem?.on_off == 1) alarmController.scheduleAlarm(context!!, removedItem!!, AlarmController.TYPE_ALARM)
-            alarmListAdapter.addItem(itemPosition, removedItem!!)
-            recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
-            setEmptyMessage()
+            removedItem?.let {
+                val id = dbCursor.insertAlarm(it)
+                it.id = id.toInt()
+                if(removedItem?.on_off == 1) alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
+                alarmListAdapter.addItem(itemPosition, it)
+                recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
+                setEmptyMessage()
+            }
         }.show()
     }
 
@@ -347,7 +350,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 }
                 MainActivity.ACTION_RESCHEDULE_ACTIVATED -> {
                     launch(Dispatchers.IO) {
-                        val alarmController = AlarmController.getInstance(context)
                         dbCursor.getActivatedAlarms().forEach {
                             alarmController.cancelAlarm(context, it.notiId)
                             alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
