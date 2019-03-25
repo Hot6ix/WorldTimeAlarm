@@ -116,7 +116,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             ViewCompat.setBackgroundTintList(snooze, ColorStateList.valueOf(darken))
 
             // Play ringtone
-            val ringtoneUri = it?.ringtone ?: RingtoneManager.getActualDefaultRingtoneUri(applicationContext, RingtoneManager.TYPE_ALARM).toString()
+            val ringtoneUri = it?.ringtone
             val audioAttrs = AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .setUsage(AudioAttributes.USAGE_ALARM)

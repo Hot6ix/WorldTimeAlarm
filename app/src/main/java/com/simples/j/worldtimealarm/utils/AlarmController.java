@@ -46,7 +46,7 @@ public class AlarmController {
         prefManager = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    private Calendar calculateDate(Context context, AlarmItem item, int type) {
+    private Calendar calculateDate(Context context, AlarmItem item, int type, boolean applyDayRepetition) {
         Calendar calendar = Calendar.getInstance();
         Calendar today = Calendar.getInstance();
         Calendar start = (Calendar) today.clone();
@@ -106,8 +106,6 @@ public class AlarmController {
                 tmp.add(Calendar.MILLISECOND, (int) difference);
 
                 long dayDiff = Math.abs(MediaCursor.Companion.getDayDifference(tmp, calendar, true));
-
-                boolean applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false);
 
                 for(int i=0; i<item.getRepeat().length; i++) {
                     if(item.getRepeat()[i] > 0) {
@@ -196,7 +194,9 @@ public class AlarmController {
 
     public Long scheduleAlarm(Context context, AlarmItem item, int type) {
 
-        Calendar alarm = calculateDate(context, item, type);
+        boolean applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false);
+
+        Calendar alarm = calculateDate(context, item, type, applyDayRepetition);
         if(alarm == null) {
             disableAlarm(context, item);
             return -1L;

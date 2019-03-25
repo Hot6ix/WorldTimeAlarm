@@ -1,121 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/padding20"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.TimeZoneFragment">
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/time_zone_country_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        android:padding="@dimen/padding20"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="wrap_content">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/time_zone_country_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:padding="@dimen/padding20"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/time_zone_country_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/timezone_country"
+                android:textSize="@dimen/text_large"
+                android:textColor="@android:color/black"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <TextView
+                android:id="@+id/time_zone_country_summary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/time_zone_empty"
+                android:textSize="@dimen/text_small"
+                android:textColor="@color/darkerGray"
+                app:layout_constraintTop_toBottomOf="@id/time_zone_country_title"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+        </android.support.constraint.ConstraintLayout>
+
+        <View
+            android:id="@+id/divider0"
+            style="@style/Divider_white"
+            android:layout_marginStart="@dimen/padding15"
+            android:layout_marginEnd="@dimen/padding15"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/time_zone_country_layout" />
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/time_zone_region_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:padding="@dimen/padding20"
+            app:layout_constraintTop_toBottomOf="@id/divider0">
+
+            <TextView
+                android:id="@+id/time_zone_region_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/timezone_region"
+                android:textSize="@dimen/text_large"
+                android:textColor="@color/text_color_state_title"
+                android:duplicateParentState="true"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <TextView
+                android:id="@+id/time_zone_region_summary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/time_zone_empty"
+                android:textSize="@dimen/text_small"
+                android:textColor="@color/text_color_state_summary"
+                android:duplicateParentState="true"
+                app:layout_constraintTop_toBottomOf="@id/time_zone_region_title"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+        </android.support.constraint.ConstraintLayout>
+
+        <View
+            android:id="@+id/divider1"
+            style="@style/Divider_white"
+            android:layout_marginStart="@dimen/padding15"
+            android:layout_marginEnd="@dimen/padding15"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/time_zone_region_layout" />
 
         <TextView
-            android:id="@+id/time_zone_country_title"
-            android:layout_width="wrap_content"
+            android:id="@+id/time_zone_change_info"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/timezone_country"
-            android:textSize="@dimen/text_large"
-            android:textColor="@android:color/black"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <TextView
-            android:id="@+id/time_zone_country_summary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/time_zone_empty"
             android:textSize="@dimen/text_small"
             android:textColor="@color/darkerGray"
-            app:layout_constraintTop_toBottomOf="@id/time_zone_country_title"
+            android:visibility="gone"
+            android:layout_marginTop="@dimen/padding20"
+            android:layout_marginStart="@dimen/padding20"
+            android:layout_marginEnd="@dimen/padding20"
+            app:layout_constraintTop_toBottomOf="@id/divider1"
             app:layout_constraintStart_toStartOf="parent"/>
+
+        <Button
+            android:id="@+id/time_zone_apply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time_zone_apply"
+            android:textColor="@android:color/white"
+            android:background="@drawable/ripple_button_with_color"
+            android:paddingStart="@dimen/padding40"
+            android:paddingEnd="@dimen/padding40"
+            android:layout_marginTop="@dimen/padding20"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/time_zone_change_info"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     </android.support.constraint.ConstraintLayout>
 
-    <View
-        android:id="@+id/divider0"
-        style="@style/Divider_white"
-        android:layout_marginStart="@dimen/padding15"
-        android:layout_marginEnd="@dimen/padding15"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/time_zone_country_layout" />
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/time_zone_region_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        android:padding="@dimen/padding20"
-        app:layout_constraintTop_toBottomOf="@id/divider0">
-
-        <TextView
-            android:id="@+id/time_zone_region_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/timezone_region"
-            android:textSize="@dimen/text_large"
-            android:textColor="@color/text_color_state_title"
-            android:duplicateParentState="true"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-        <TextView
-            android:id="@+id/time_zone_region_summary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/time_zone_empty"
-            android:textSize="@dimen/text_small"
-            android:textColor="@color/text_color_state_summary"
-            android:duplicateParentState="true"
-            app:layout_constraintTop_toBottomOf="@id/time_zone_region_title"
-            app:layout_constraintStart_toStartOf="parent"/>
-
-    </android.support.constraint.ConstraintLayout>
-
-    <View
-        android:id="@+id/divider1"
-        style="@style/Divider_white"
-        android:layout_marginStart="@dimen/padding15"
-        android:layout_marginEnd="@dimen/padding15"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/time_zone_region_layout" />
-
-    <TextView
-        android:id="@+id/time_zone_change_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/text_small"
-        android:textColor="@color/darkerGray"
-        android:visibility="gone"
-        android:layout_marginTop="@dimen/padding20"
-        android:layout_marginStart="@dimen/padding20"
-        android:layout_marginEnd="@dimen/padding20"
-        app:layout_constraintTop_toBottomOf="@id/divider1"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <Button
-        android:id="@+id/time_zone_apply"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/time_zone_apply"
-        android:textColor="@android:color/white"
-        android:background="@drawable/ripple_button_with_color"
-        android:paddingStart="@dimen/padding40"
-        android:paddingEnd="@dimen/padding40"
-        android:layout_marginTop="@dimen/padding20"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/time_zone_change_info"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-</android.support.constraint.ConstraintLayout>
+</ScrollView>

@@ -178,21 +178,22 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         val repeat = item.repeat.mapIndexed { index, i -> if(i > 0) index + 1 else 0 }
 
         val applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
-        val repeatArray = repeat.mapIndexed { _, i ->
-            if(i > 0) {
-                var dayOfWeek = i
 
-                if(difference != 0 && !MediaCursor.isSameDay(tmp, calendar) && applyDayRepetition) {
+        val repeatArray = repeat.mapIndexed { index, i ->
+            if(i > 0) {
+                var dayOfWeek = index
+
+                if(difference != 0 && !MediaCursor.isSameDay(tmp, itemCalendar) && applyDayRepetition) {
                     if (tmp.timeInMillis > itemCalendar.timeInMillis)
                         dayOfWeek -= dayDiff.toInt()
                     else if (tmp.timeInMillis < itemCalendar.timeInMillis)
                         dayOfWeek += dayDiff.toInt()
                 }
 
-                if(dayOfWeek > 7) dayOfWeek -= 7
-                if(dayOfWeek < 1) dayOfWeek += 7
+                if(dayOfWeek > 6) dayOfWeek -= 7
+                if(dayOfWeek < 0) dayOfWeek += 7
 
-                dayArray[dayOfWeek-1]
+                dayArray[dayOfWeek]
             } else null
         }.filter { it != null }
 
@@ -202,20 +203,20 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                     else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2) context.resources.getString(R.string.weekend)
                     else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5) context.resources.getString(R.string.weekday)
                     else if(repeatArray.size == 1) {
-                        repeat.find { it > 0 }!!.let {
-                            var dayOfWeek = it
+                        repeat.find { it > 0 }?.let {
+                            var dayOfWeek = it - 1
 
-                            if(difference != 0 && !MediaCursor.isSameDay(tmp, calendar) && applyDayRepetition) {
+                            if(difference != 0 && !MediaCursor.isSameDay(tmp, itemCalendar) && applyDayRepetition) {
                                 if (tmp.timeInMillis > itemCalendar.timeInMillis)
                                     dayOfWeek -= dayDiff.toInt()
                                 else if (tmp.timeInMillis < itemCalendar.timeInMillis)
                                     dayOfWeek += dayDiff.toInt()
                             }
 
-                            if(dayOfWeek > 7) dayOfWeek -= 7
-                            if(dayOfWeek < 1) dayOfWeek += 7
+                            if(dayOfWeek > 6) dayOfWeek -= 7
+                            if(dayOfWeek < 0) dayOfWeek += 7
 
-                            dayLongArray[dayOfWeek-1]
+                            dayLongArray[dayOfWeek]
                         }
                     }
                     else repeatArray.joinToString()

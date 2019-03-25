@@ -6,6 +6,8 @@ import android.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.utils.AlarmController
+import org.hamcrest.CoreMatchers
+import org.hamcrest.core.AnyOf
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -27,10 +29,20 @@ class AndroidScheduleTest {
 
     @Test
     fun test() {
-        val a = TimeZone.getDefault()
 
-        val eCal = Calendar.getInstance().apply { set(Calendar.HOUR, 0) }
-        val item = createAlarm(timeZone = "Asia/Taipei", repeat = intArrayOf(0,0,0,1,0,0,0), timeSet = eCal)
+        /*
+            test case 01
+            ---------------
+            system time zone : Asia/Seoul
+            alarm time zone : Asia/Taipei
+            alarm repeat : Wed only
+            alarm time (24 hours) : 0
+            time diff : 1 hour
+        */
+
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"))
+        var eCal = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 0) }
+        var item = createAlarm(timeZone = "Asia/Taipei", repeat = intArrayOf(0,0,0,1,0,0,0), timeSet = eCal)
 
         sharedPref.edit().putBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false).apply()
         var time = AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
@@ -41,7 +53,7 @@ class AndroidScheduleTest {
         Assert.assertEquals(4, cal.get(Calendar.DAY_OF_WEEK))
         Assert.assertEquals("2019/3/27/", calendarToString(cal, false))
 
-        // mock 'Apply time difference to repeat day(s)' option
+        // enable 'Apply time difference to repeat day(s)' option
         sharedPref.edit().putBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), true).apply()
         time = AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
         cal = Calendar.getInstance().apply { timeInMillis = time }
@@ -49,7 +61,105 @@ class AndroidScheduleTest {
         // time zone affects day repeat
         System.out.println(cal.time.toString())
         Assert.assertEquals(5, cal.get(Calendar.DAY_OF_WEEK))
-//        Assert.assertEquals("2019/3/27/", calendarToString(cal, false))
+        Assert.assertEquals("2019/3/28/", calendarToString(cal, false))
+
+        /*
+            test case 02
+            ---------------
+            system time zone : Pacific/Niue
+            alarm time zone : Pacific/Kiritimati
+            alarm repeat : Tue, Thur
+            alarm time (24 hours) : 23
+            time diff : 25 hours
+        */
+
+        TimeZone.setDefault(TimeZone.getTimeZone("Pacific/Niue"))
+        eCal = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 23) }
+        item = createAlarm(timeZone = "Pacific/Kiritimati", repeat = intArrayOf(0,0,3,0,5,0,0), timeSet = eCal)
+
+        sharedPref.edit().putBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false).apply()
+        time = AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+        cal = Calendar.getInstance().apply { timeInMillis = time }
+
+        // time zone doesn't affect day repeat
+        System.out.println(cal.time.toString())
+        Assert.assertThat(cal.get(Calendar.DAY_OF_WEEK), AnyOf.anyOf(CoreMatchers.`is`(3), CoreMatchers.`is`(5)))
+        Assert.assertEquals("2019/3/26/", calendarToString(cal, false))
+
+        // enable 'Apply time difference to repeat day(s)' option
+        sharedPref.edit().putBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), true).apply()
+        time = AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+        cal = Calendar.getInstance().apply { timeInMillis = time }
+
+        // time zone affects day repeat
+        System.out.println(cal.time.toString())
+        Assert.assertThat(cal.get(Calendar.DAY_OF_WEEK), AnyOf.anyOf(CoreMatchers.`is`(1), CoreMatchers.`is`(3)))
+        Assert.assertEquals("2019/3/26/", calendarToString(cal, false))
+
+        /*
+            test case 03
+            ---------------
+            system time zone : Asia/Seoul
+            alarm time zone : Asia/Seoul
+            alarm repeat : Sat, Sun
+            alarm time (24 hours) : 23
+        */
+
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"))
+        eCal = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 23) }
+        item = createAlarm(timeZone = "Asia/Seoul", repeat = intArrayOf(1,0,0,0,0,0,1), timeSet = eCal)
+
+        sharedPref.edit().putBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false).apply()
+        time = AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+        cal = Calendar.getInstance().apply { timeInMillis = time }
+
+        // time zone doesn't affect day repeat
+        System.out.println(cal.time.toString())
+        Assert.assertThat(cal.get(Calendar.DAY_OF_WEEK), AnyOf.anyOf(CoreMatchers.`is`(1), CoreMatchers.`is`(7)))
+        Assert.assertEquals("2019/3/30/", calendarToString(cal, false))
+
+        // enable 'Apply time difference to repeat day(s)' option
+        sharedPref.edit().putBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), true).apply()
+        time = AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+        cal = Calendar.getInstance().apply { timeInMillis = time }
+
+        // time zone affects day repeat
+        System.out.println(cal.time.toString())
+        Assert.assertThat(cal.get(Calendar.DAY_OF_WEEK), AnyOf.anyOf(CoreMatchers.`is`(1), CoreMatchers.`is`(7)))
+        Assert.assertEquals("2019/3/30/", calendarToString(cal, false))
+
+        /*
+            test case 04
+            ---------------
+            system time zone : Asia/Seoul
+            alarm time zone : Asia/Los_Angeles
+            alarm repeat : Mon
+            alarm time (24 hours) : 0
+            time diff : 16 hours
+        */
+
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"))
+        eCal = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 3) }
+        item = createAlarm(timeZone = "Asia/Los_Angeles", repeat = intArrayOf(0,1,0,0,0,0,0), timeSet = eCal)
+
+        sharedPref.edit().putBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false).apply()
+        time = AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+        cal = Calendar.getInstance().apply { timeInMillis = time }
+
+        // time zone doesn't affect day repeat
+        System.out.println(cal.time.toString())
+        Assert.assertEquals(cal.get(Calendar.DAY_OF_WEEK), 2)
+        Assert.assertEquals("2019/4/1/", calendarToString(cal, false))
+
+        // enable 'Apply time difference to repeat day(s)' option
+        sharedPref.edit().putBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), true).apply()
+        time = AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+        cal = Calendar.getInstance().apply { timeInMillis = time }
+
+        // time zone affects day repeat
+        System.out.println(cal.time.toString())
+        Assert.assertEquals(cal.get(Calendar.DAY_OF_WEEK), 3)
+        Assert.assertEquals("2019/3/26/", calendarToString(cal, false))
     }
 
     private fun createAlarm(timeZone: String = TimeZone.getDefault().id,
