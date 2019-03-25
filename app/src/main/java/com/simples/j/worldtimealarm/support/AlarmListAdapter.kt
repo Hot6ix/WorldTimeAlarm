@@ -163,72 +163,74 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         holder.amPm.text = if(calendar.get(Calendar.AM_PM) == 0) context.getString(R.string.am) else context.getString(R.string.pm)
         holder.localTime.text = SimpleDateFormat("hh:mm", Locale.getDefault()).format(calendar.time)
 
-        val dayArray = context.resources.getStringArray(R.array.day_of_week_simple)
-        val dayLongArray = context.resources.getStringArray(R.array.day_of_week_full)
+        with(item.repeat) {
+            if(this.any { it > 0 }) {
+                val dayArray = context.resources.getStringArray(R.array.day_of_week_simple)
+                val dayLongArray = context.resources.getStringArray(R.array.day_of_week_full)
 
-        val difference = TimeZone.getTimeZone(item.timeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-        val itemCalendar = Calendar.getInstance().apply {
-            timeInMillis = item.timeSet.toLong()
-        }
-        val tmp = itemCalendar.clone() as Calendar
-        tmp.add(Calendar.MILLISECOND, difference)
-        val dayDiff = Math.abs(MediaCursor.getDayDifference(tmp, itemCalendar, true))
-
-        // for support old version of app
-        val repeat = item.repeat.mapIndexed { index, i -> if(i > 0) index + 1 else 0 }
-
-        val applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
-
-        val repeatArray = repeat.mapIndexed { index, i ->
-            if(i > 0) {
-                var dayOfWeek = index
-
-                if(difference != 0 && !MediaCursor.isSameDay(tmp, itemCalendar) && applyDayRepetition) {
-                    if (tmp.timeInMillis > itemCalendar.timeInMillis)
-                        dayOfWeek -= dayDiff.toInt()
-                    else if (tmp.timeInMillis < itemCalendar.timeInMillis)
-                        dayOfWeek += dayDiff.toInt()
+                val difference = TimeZone.getTimeZone(item.timeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+                val itemCalendar = Calendar.getInstance().apply {
+                    timeInMillis = item.timeSet.toLong()
                 }
+                val tmp = itemCalendar.clone() as Calendar
+                tmp.add(Calendar.MILLISECOND, difference)
+                val dayDiff = Math.abs(MediaCursor.getDayDifference(tmp, itemCalendar, true))
 
-                if(dayOfWeek > 6) dayOfWeek -= 7
-                if(dayOfWeek < 0) dayOfWeek += 7
+                // for support old version of app
+                val repeat = item.repeat.mapIndexed { index, i -> if(i > 0) index + 1 else 0 }
 
-                dayArray[dayOfWeek]
-            } else null
-        }.filter { it != null }
+                val applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
 
-        if(repeatArray.isNotEmpty()) {
-            holder.repeat.text =
-                    if(repeatArray.size == 7) context.resources.getString(R.string.everyday)
-                    else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2) context.resources.getString(R.string.weekend)
-                    else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5) context.resources.getString(R.string.weekday)
-                    else if(repeatArray.size == 1) {
-                        repeat.find { it > 0 }?.let {
-                            var dayOfWeek = it - 1
+                val repeatArray = repeat.mapIndexed { index, i ->
+                    if(i > 0) {
+                        var dayOfWeek = index
 
-                            if(difference != 0 && !MediaCursor.isSameDay(tmp, itemCalendar) && applyDayRepetition) {
-                                if (tmp.timeInMillis > itemCalendar.timeInMillis)
-                                    dayOfWeek -= dayDiff.toInt()
-                                else if (tmp.timeInMillis < itemCalendar.timeInMillis)
-                                    dayOfWeek += dayDiff.toInt()
-                            }
-
-                            if(dayOfWeek > 6) dayOfWeek -= 7
-                            if(dayOfWeek < 0) dayOfWeek += 7
-
-                            dayLongArray[dayOfWeek]
+                        if(difference != 0 && !MediaCursor.isSameDay(tmp, itemCalendar) && applyDayRepetition) {
+                            if (tmp.timeInMillis > itemCalendar.timeInMillis)
+                                dayOfWeek -= dayDiff.toInt()
+                            else if (tmp.timeInMillis < itemCalendar.timeInMillis)
+                                dayOfWeek += dayDiff.toInt()
                         }
-                    }
-                    else repeatArray.joinToString()
-        }
-        else {
-            holder.repeat.text =
-                    when {
-                        DateUtils.isToday(calendar.timeInMillis) -> context.resources.getString(R.string.today)
-                        DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) && startDate == null -> context.resources.getString(R.string.tomorrow) // this can make adapter to know calendar date is tomorrow
-                        startDate != null -> DateUtils.formatDateTime(context, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
-                        else -> DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
-                    }
+
+                        if(dayOfWeek > 6) dayOfWeek -= 7
+                        if(dayOfWeek < 0) dayOfWeek += 7
+
+                        dayArray[dayOfWeek]
+                    } else null
+                }.filter { it != null }
+
+                holder.repeat.text =
+                        if(repeatArray.size == 7) context.resources.getString(R.string.everyday)
+                        else if(repeatArray.contains(dayArray[6]) && repeatArray.contains(dayArray[0]) && repeatArray.size  == 2) context.resources.getString(R.string.weekend)
+                        else if(repeatArray.contains(dayArray[1]) && repeatArray.contains(dayArray[2]) && repeatArray.contains(dayArray[3]) && repeatArray.contains(dayArray[4]) && repeatArray.contains(dayArray[5]) && repeatArray.size == 5) context.resources.getString(R.string.weekday)
+                        else if(repeatArray.size == 1) {
+                            repeat.find { it > 0 }?.let {
+                                var dayOfWeek = it - 1
+
+                                if(difference != 0 && !MediaCursor.isSameDay(tmp, itemCalendar) && applyDayRepetition) {
+                                    if (tmp.timeInMillis > itemCalendar.timeInMillis)
+                                        dayOfWeek -= dayDiff.toInt()
+                                    else if (tmp.timeInMillis < itemCalendar.timeInMillis)
+                                        dayOfWeek += dayDiff.toInt()
+                                }
+
+                                if(dayOfWeek > 6) dayOfWeek -= 7
+                                if(dayOfWeek < 0) dayOfWeek += 7
+
+                                dayLongArray[dayOfWeek]
+                            }
+                        }
+                        else repeatArray.joinToString()
+            }
+            else {
+                holder.repeat.text =
+                        when {
+                            DateUtils.isToday(calendar.timeInMillis) -> context.resources.getString(R.string.today)
+                            DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) && startDate == null -> context.resources.getString(R.string.tomorrow) // this can make adapter to know calendar date is tomorrow
+                            startDate != null -> DateUtils.formatDateTime(context, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
+                            else -> DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
+                        }
+            }
         }
 
         holder.itemView.setOnClickListener { listener.onItemClicked(it, item) }
