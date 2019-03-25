@@ -45,7 +45,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
     override fun getItemCount() = list.size
 
-    override fun getItemId(position: Int): Long = list[position].notiId.toLong()
+    override fun getItemId(position: Int): Long = list[position].id?.toLong() ?: -1
 
     override fun getItemViewType(position: Int): Int = 0
 

@@ -55,7 +55,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private var alarmItems = ArrayList<AlarmItem>()
     private var snackBar: Snackbar? = null
     private var muteStatusIsShown = false
-    private var removedItem: AlarmItem? = null
 
     private var job = Job()
     override val coroutineContext: CoroutineContext
@@ -265,6 +264,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     override fun onSwipe(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         val itemPosition = viewHolder.adapterPosition
         val previousPosition = recyclerLayoutManager.findFirstCompletelyVisibleItemPosition()
+        val removedItem: AlarmItem
 
         alarmItems[itemPosition].let {
             removedItem = it
@@ -275,10 +275,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
-            removedItem?.let {
+            removedItem.let {
                 val id = dbCursor.insertAlarm(it)
                 it.id = id.toInt()
-                if(removedItem?.on_off == 1) alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
+                if(removedItem.on_off == 1) alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
                 alarmListAdapter.addItem(itemPosition, it)
                 recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
                 setEmptyMessage()
