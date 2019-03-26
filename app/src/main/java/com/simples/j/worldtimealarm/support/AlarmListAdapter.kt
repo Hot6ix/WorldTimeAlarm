@@ -17,8 +17,10 @@ import android.widget.Switch
 import android.widget.TextView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
+import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -34,6 +36,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
     private var endDate: Calendar? = null
     private var highlightId: Int = -1
     private var prefManager = PreferenceManager.getDefaultSharedPreferences(context)
+    private val applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
 
     init {
         setHasStableIds(true)
@@ -108,20 +111,15 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                 if(this != null) {
                     val difference = this.timeInMillis - System.currentTimeMillis()
                     if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
-                        var isValid = false
-                        val tmpCal = Calendar.getInstance()
-                        while(!tmpCal.after(this)) {
-                            tmpCal.add(Calendar.DATE, 1)
-                            if(item.repeat.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
-                                isValid = true
-                                break
-                            }
+                        val expect = try {
+                            AlarmController.getInstance().calculateDate(item, AlarmController.TYPE_ALARM, applyDayRepetition)
+                        } catch (e: IllegalStateException) {
+                            null
                         }
 
-                        if(System.currentTimeMillis() >= this.timeInMillis)
-                            isValid = false
-
-                        holder.switch.isEnabled = isValid
+                        holder.switch.isEnabled =
+                                if(expect == null) false
+                                else expect.timeInMillis <= this.timeInMillis
                     }
                     else holder.switch.isEnabled = true
                 }
@@ -179,7 +177,6 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                 // for support old version of app
                 val repeat = item.repeat.mapIndexed { index, i -> if(i > 0) index + 1 else 0 }
 
-                val applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
 
                 val repeatArray = repeat.mapIndexed { index, i ->
                     if(i > 0) {

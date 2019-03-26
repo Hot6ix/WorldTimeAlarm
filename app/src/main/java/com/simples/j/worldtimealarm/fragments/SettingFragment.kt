@@ -17,8 +17,6 @@ import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment.Companion.TIME_ZONE_CHANGED_KEY
-import com.simples.j.worldtimealarm.utils.AlarmController
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import java.util.*
 
@@ -164,8 +162,8 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
                 if(newValue == false) converterTimezone.summary = TimeZone.getDefault().id
             }
             getString(R.string.setting_time_zone_affect_repetition_key) -> {
-                context?.sendBroadcast(Intent(MainActivity.ACTION_UPDATE_ALL))
                 context?.sendBroadcast(Intent(MainActivity.ACTION_RESCHEDULE_ACTIVATED))
+                context?.sendBroadcast(Intent(MainActivity.ACTION_UPDATE_ALL))
             }
         }
 

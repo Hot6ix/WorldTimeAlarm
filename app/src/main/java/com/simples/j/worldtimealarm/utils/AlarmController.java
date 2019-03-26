@@ -40,21 +40,21 @@ public class AlarmController {
         return ourInstance;
     }
 
-    private Calendar calculateDate(Context context, AlarmItem item, int type, boolean applyDayRepetition) {
+    public Calendar calculateDate(AlarmItem item, int type, boolean applyDayRepetition) {
         Calendar calendar = Calendar.getInstance();
         Calendar today = Calendar.getInstance();
         Calendar start = (Calendar) today.clone();
         Calendar end = Calendar.getInstance();
 
-        if(item == null) return null;
+        if(item == null) throw new IllegalStateException("AlarmItem is null");
 
         if(type == TYPE_ALARM) {
             if(item.getEndDate() != null && item.getEndDate() > 0) {
                 end.setTimeInMillis(item.getEndDate());
 
                 if(end.before(today)) {
-                    Log.d(C.TAG, "Alarm had been expired : ID("+item.getNotiId()+1+")");
-                    return null;
+                    String msg = "Alarm had been expired : ID("+item.getNotiId()+1+")";
+                    throw new IllegalStateException(msg);
                 }
             }
             else end = null;
@@ -92,7 +92,7 @@ public class AlarmController {
             else {
                 // repeating alarm
                 // get repeat information
-                int[] repeatValues = context.getResources().getIntArray(R.array.day_of_week_values);
+                int[] repeatValues = {1,2,3,4,5,6,7};
                 ArrayList<Integer> repeat = new ArrayList<>();
 
                 long difference = TimeZone.getTimeZone(item.getTimeZone()).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis());
@@ -179,8 +179,8 @@ public class AlarmController {
 
         if(end != null && calendar.after(end)) {
             // This alarm had been expired
-            Log.d(C.TAG, "Alarm has been expired : ID("+item.getNotiId()+1+")");
-            return null;
+            String msg = "Alarm has been expired : ID("+item.getNotiId()+1+")";
+            throw new IllegalStateException(msg);
         }
 
         return calendar;
@@ -192,8 +192,14 @@ public class AlarmController {
 
         boolean applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false);
 
-        Calendar alarm = calculateDate(context, item, type, applyDayRepetition);
-        if(alarm == null) {
+        Calendar alarmCalendar = null;
+        try {
+            alarmCalendar = calculateDate(item, type, applyDayRepetition);
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+
+        if(alarmCalendar == null) {
             disableAlarm(context, item);
             return -1L;
         }
@@ -214,11 +220,11 @@ public class AlarmController {
 
         PendingIntent mainIntent = PendingIntent.getActivity(context, notiId, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, notiId+1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(alarm.getTimeInMillis(), mainIntent), alarmIntent);
-        Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.getDefault()).format(alarm.getTime()) + ", Info(" + item + "), " + type);
+        alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(alarmCalendar.getTimeInMillis(), mainIntent), alarmIntent);
+        Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.getDefault()).format(alarmCalendar.getTime()) + ", Info(" + item + "), " + type);
         Log.d(C.TAG, "Alarm scheduled : ID(" + notiId+1 + ")");
 
-        return alarm.getTimeInMillis();
+        return alarmCalendar.getTimeInMillis();
     }
 
     public void cancelAlarm(Context context, int notiId) {

@@ -1,7 +1,6 @@
 package com.simples.j.worldtimealarm.utils
 
 import android.content.Context
-import android.graphics.Color
 import android.icu.text.LocaleDisplayNames
 import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
@@ -98,21 +97,22 @@ class MediaCursor {
             val today = Calendar.getInstance()
             var difference = calendar.timeInMillis - today.timeInMillis
 
-            val daysInYear = if(calendar.get(Calendar.YEAR) != today.get(Calendar.YEAR)) {
-                val tmpCal = today.clone() as Calendar
-                var tmpMax = calendar.getActualMaximum(Calendar.DAY_OF_YEAR)
-                // this loop is for handle leap year
-                while(tmpCal.get(Calendar.YEAR) != calendar.get(Calendar.YEAR)) {
-                    if(tmpCal.getActualMaximum(Calendar.DAY_OF_YEAR) > tmpMax) {
-                        tmpMax = tmpCal.getActualMaximum(Calendar.DAY_OF_YEAR)
+            val daysInYear =
+                    if(calendar.get(Calendar.YEAR) != today.get(Calendar.YEAR)) {
+                        val tmpCal = today.clone() as Calendar
+                        var tmpMax = calendar.getActualMaximum(Calendar.DAY_OF_YEAR)
+                        // this loop is for handle leap year
+                        while(tmpCal.get(Calendar.YEAR) <= calendar.get(Calendar.YEAR)) {
+                            if(tmpCal.getActualMaximum(Calendar.DAY_OF_YEAR) > tmpMax) {
+                                tmpMax = tmpCal.getActualMaximum(Calendar.DAY_OF_YEAR)
+                            }
+                            tmpCal.add(Calendar.YEAR, 1)
+                        }
+                        tmpMax
                     }
-                    tmpCal.add(Calendar.YEAR, 1)
-                }
-                tmpMax
-            }
-            else {
-                calendar.getActualMaximum(Calendar.DAY_OF_YEAR)
-            }
+                    else {
+                        calendar.getActualMaximum(Calendar.DAY_OF_YEAR)
+                    }
 
             val years = difference / (daysInYear * 24 * 60 * 60 * 1000L)
             difference %= (daysInYear * 24 * 60 * 60 * 1000L)
@@ -163,14 +163,6 @@ class MediaCursor {
             }
 
             return dateFormat.toString()
-        }
-
-        fun makeDarker(color: Int, factor: Float): Int {
-            val c = Color.alpha(color)
-            val r = Math.round(Color.red(color) * factor)
-            val g = Math.round(Color.green(color) * factor)
-            val b = Math.round(Color.blue(color) * factor)
-            return Color.argb(c, r, g, b)
         }
 
         @RequiresApi(Build.VERSION_CODES.N)

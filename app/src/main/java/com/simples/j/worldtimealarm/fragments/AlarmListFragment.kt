@@ -187,46 +187,52 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
         when {
             requestCode == REQUEST_CODE_NEW && resultCode == Activity.RESULT_OK -> {
-                val item = data?.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
-                val scheduledTime = data?.getLongExtra(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
-                if(item != null) {
-                    alarmItems.add(item)
-                    if(::alarmListAdapter.isInitialized) {
-                        alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
-                        alarmList.scrollToPosition(alarmItems.size - 1)
-                    }
-                    else {
-                        launch(coroutineContext) {
-                            job.join()
+                val bundle = data?.getBundleExtra(AlarmReceiver.OPTIONS)
+                bundle?.let {
+                    val item = it.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+                    val scheduledTime = it.getLong(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
+                    if(item != null) {
+                        alarmItems.add(item)
+                        if(::alarmListAdapter.isInitialized) {
+                            alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
                             alarmList.scrollToPosition(alarmItems.size - 1)
                         }
+                        else {
+                            launch(coroutineContext) {
+                                job.join()
+                                alarmList.scrollToPosition(alarmItems.size - 1)
+                            }
+                        }
+                        setEmptyMessage()
+                        showSnackBar(scheduledTime)
                     }
-                    setEmptyMessage()
-                    showSnackBar(scheduledTime)
                 }
             }
             requestCode == REQUEST_CODE_MODIFY && resultCode == Activity.RESULT_OK -> {
-                val item = data?.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
-                val scheduledTime = data?.getLongExtra(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
-                if(item != null) {
-                    if(::alarmListAdapter.isInitialized) {
-                        val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
-
-                        if(index > -1) {
-                            alarmList.scrollToPosition(index)
-                            alarmItems[index] = item
-                            alarmListAdapter.notifyItemChanged(index)
-                        }
-                    }
-                    else {
-                        launch(coroutineContext) {
-                            job.join()
-
+                val bundle = data?.getBundleExtra(AlarmReceiver.OPTIONS)
+                bundle?.let {
+                    val item = it.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+                    val scheduledTime = it.getLong(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
+                    if(item != null) {
+                        if(::alarmListAdapter.isInitialized) {
                             val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
-                            if(index > -1) alarmList.scrollToPosition(index)
+
+                            if(index > -1) {
+                                alarmList.scrollToPosition(index)
+                                alarmItems[index] = item
+                                alarmListAdapter.notifyItemChanged(index)
+                            }
                         }
+                        else {
+                            launch(coroutineContext) {
+                                job.join()
+
+                                val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
+                                if(index > -1) alarmList.scrollToPosition(index)
+                            }
+                        }
+                        showSnackBar(scheduledTime)
                     }
-                    showSnackBar(scheduledTime)
                 }
             }
         }
@@ -248,15 +254,15 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
     override fun onItemStatusChanged(b: Boolean, item: AlarmItem) {
         if(b) {
+            val scheduledTime = alarmController.scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
             alarmItems.find { it.notiId == item.notiId }?.on_off = 1
             dbCursor.updateAlarmOnOffByNotiId(item.notiId, true)
-            val scheduledTime = alarmController.scheduleAlarm(context!!, item, AlarmController.TYPE_ALARM)
             showSnackBar(scheduledTime)
         }
         else {
             alarmItems.find { it.notiId == item.notiId }?.on_off = 0
             dbCursor.updateAlarmOnOffByNotiId(item.notiId, false)
-            alarmController.cancelAlarm(context!!, item.notiId)
+            alarmController.cancelAlarm(context, item.notiId)
             snackBar?.dismiss()
         }
     }
@@ -268,7 +274,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
         alarmItems[itemPosition].let {
             removedItem = it
-            if(it.on_off == 1) alarmController.cancelAlarm(context!!, it.notiId)
+            if(it.on_off == 1) alarmController.cancelAlarm(context, it.notiId)
             alarmListAdapter.removeItem(itemPosition)
             dbCursor.removeAlarm(it.notiId)
             setEmptyMessage()
@@ -306,13 +312,14 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
     }
 
-    private fun showSnackBar(scheduledTime: Long = -1) {
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = scheduledTime
+    private fun showSnackBar(scheduledTime: Long) {
+        if(scheduledTime != -1L) {
+            val calendar = Calendar.getInstance().apply {
+                timeInMillis = scheduledTime
+            }
+            snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(context!!, calendar)), Snackbar.LENGTH_LONG)
+            snackBar?.show()
         }
-        snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(context!!, calendar)), Snackbar.LENGTH_LONG)
-
-        snackBar?.show()
     }
 
     private inner class UpdateRequestReceiver: BroadcastReceiver() {
