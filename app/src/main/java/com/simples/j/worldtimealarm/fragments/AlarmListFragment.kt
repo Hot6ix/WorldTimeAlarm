@@ -210,9 +210,9 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             }
             requestCode == REQUEST_CODE_MODIFY && resultCode == Activity.RESULT_OK -> {
                 val bundle = data?.getBundleExtra(AlarmReceiver.OPTIONS)
-                bundle?.let {
-                    val item = it.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
-                    val scheduledTime = it.getLong(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
+                bundle?.let { b ->
+                    val item = b.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+                    val scheduledTime = b.getLong(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
                     if(item != null) {
                         if(::alarmListAdapter.isInitialized) {
                             val index = alarmItems.indexOfFirst { it.notiId == item.notiId }

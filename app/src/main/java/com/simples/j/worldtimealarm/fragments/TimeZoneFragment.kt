@@ -58,12 +58,10 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
             if(mAction == TimeZonePickerActivity.ACTION_ADD && id.isNullOrEmpty()) return@let
 
-            with(id) {
-                if(!this.isNullOrEmpty()) {
-                    val timeZone = TimeZone.getTimeZone(this)
-                    mTimeZone = timeZone
-                    mTimeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), mDate).format(timeZone)
-                }
+            if(!id.isNullOrEmpty()) {
+                val timeZone = TimeZone.getTimeZone(id)
+                mTimeZone = timeZone
+                mTimeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), mDate).format(timeZone)
             }
         }
 
