@@ -120,7 +120,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             val audioAttrs = AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .setUsage(AudioAttributes.USAGE_ALARM)
-            if(ringtoneUri != "null") {
+            if(ringtoneUri != null && ringtoneUri != "null") {
                 player = MediaPlayer().apply {
                     setAudioAttributes(audioAttrs.build())
                     isLooping = true

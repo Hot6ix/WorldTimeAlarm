@@ -40,7 +40,7 @@ class WakeUpActivityTest {
             endDate : null
         */
 
-        val intent = Intent(context, WakeUpActivity::class.java).apply {
+        var intent = Intent(context, WakeUpActivity::class.java).apply {
             val b = Bundle().apply {
                 putParcelable(AlarmReceiver.ITEM, createAlarm())
             }
@@ -52,6 +52,51 @@ class WakeUpActivityTest {
         ActivityScenario.launch<WakeUpActivity>(intent).use { scenario ->
             scenario.onActivity { activity ->
                 assert(activity.label.visibility == View.GONE)
+                assert(activity.time_zone_clock_layout.visibility == View.GONE)
+            }
+        }
+
+        // Test case 02 : empty bundle
+
+        intent = Intent(context, WakeUpActivity::class.java).apply {
+            val b = Bundle()
+            action = AlarmReceiver.ACTION_ALARM
+            putExtra(AlarmReceiver.OPTIONS, b)
+            putExtra(AlarmReceiver.EXPIRED, false)
+        }
+
+        ActivityScenario.launch<WakeUpActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                assert(activity.label.visibility == View.VISIBLE)
+                assert(activity.time_zone_clock_layout.visibility == View.GONE)
+            }
+        }
+
+        // Test case 03 : no bundle
+
+        intent = Intent(context, WakeUpActivity::class.java).apply {
+            action = AlarmReceiver.ACTION_ALARM
+            putExtra(AlarmReceiver.EXPIRED, false)
+        }
+
+        ActivityScenario.launch<WakeUpActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                assert(activity.label.visibility == View.VISIBLE)
+                assert(activity.time_zone_clock_layout.visibility == View.GONE)
+            }
+        }
+
+        // Test case 04 : wrong type of value
+
+        intent = Intent(context, WakeUpActivity::class.java).apply {
+            action = AlarmReceiver.ACTION_ALARM
+            putExtra(AlarmReceiver.OPTIONS, "1234") // should be bundle type
+            putExtra(AlarmReceiver.EXPIRED, "1234") // should be boolean type
+        }
+
+        ActivityScenario.launch<WakeUpActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                assert(activity.label.visibility == View.VISIBLE)
                 assert(activity.time_zone_clock_layout.visibility == View.GONE)
             }
         }
