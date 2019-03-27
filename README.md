@@ -48,6 +48,7 @@ Version 1.5
 - Change wake up ui
 - Set default value of muting alarm
 - Add privacy policy
+- Add 'Apply time difference to day repeat' option
 
 FAQ
 
