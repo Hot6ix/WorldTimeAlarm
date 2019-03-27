@@ -3,9 +3,6 @@
     <string name="app_name">World Time Alarm</string>
     <string name="main_label">报警</string>
     <string name="action_settings">设置</string>
-    <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
-    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/2970704508</string>
-    <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">当前时区</string>
     <string name="set_time_zone">选定的时区</string>
     <string name="space">&#160;</string>
@@ -160,11 +157,6 @@
         <item>区域 - 时区 (推荐的)</item>
     </string-array>
 
-    <string-array name="time_selector_values">
-        <item>0</item>
-        <item>1</item>
-    </string-array>
-
     <string-array name="alarm_mute">
         <item>禁用</item>
         <item>1分钟</item>
@@ -172,15 +164,6 @@
         <item>5分钟</item>
         <item>10分钟</item>
         <item>30分钟</item>
-    </string-array>
-
-    <string-array name="alarm_mute_values">
-        <item>0</item>
-        <item>60000</item>
-        <item>120000</item>
-        <item>300000</item>
-        <item>600000</item>
-        <item>1800000</item>
     </string-array>
 
     <!-- Alarm Options -->
@@ -233,16 +216,6 @@
         <item>星期六</item>
     </string-array>
 
-    <integer-array name="day_of_week_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-    </integer-array>
-
     <string-array name="alarm_options">
         <item>铃声</item>
         <item>振动</item>
@@ -250,64 +223,6 @@
         <item>标签</item>
         <item>颜色标签</item>
     </string-array>
-
-    <integer-array name="vibrator_simple">
-        <item>0</item>
-        <item>1500</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_short">
-        <item>0</item>
-        <item>100</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_heartbeat">
-        <item>0</item>
-        <item>150</item>
-        <item>250</item>
-        <item>150</item>
-        <item>1000</item>
-        <item>150</item>
-        <item>250</item>
-        <item>150</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_8bit">
-        <item>0</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_long">
-        <item>0</item>
-        <item>5000</item>
-        <item>1000</item>
-    </integer-array>
-
-    <array name="vibrator_array">
-        <item>@array/vibrator_simple</item>
-        <item>@array/vibrator_short</item>
-        <item>@array/vibrator_long</item>
-        <item>@array/vibrator_heartbeat</item>
-        <item>@array/vibrator_8bit</item>
-    </array>
 
     <array name="vibrator_name">
         <item>简单</item>
@@ -325,14 +240,5 @@
         <item>20分钟</item>
         <item>30分钟</item>
     </array>
-
-    <integer-array name="snooze_values">
-        <item>0</item>
-        <item>300000</item>
-        <item>600000</item>
-        <item>900000</item>
-        <item>1200000</item>
-        <item>1800000</item>
-    </integer-array>
 
 </resources>

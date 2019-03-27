@@ -3,9 +3,6 @@
     <string name="app_name">World Time Alarm</string>
     <string name="main_label">알람</string>
     <string name="action_settings">설정</string>
-    <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
-    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/2970704508</string>
-    <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">현재 시간대</string>
     <string name="set_time_zone">설정된 시간대</string>
     <string name="space">&#160;</string>
@@ -84,7 +81,7 @@
     <string name="alarm_on_repeat_every">매일 %1$s에 알람이 울립니다.</string>
     <string name="alarm_dismissed">알람이 해제되었습니다.</string>
     <string name="volume_is_muted">알람 볼륨이 음소거 상태입니다.</string>
-    <string name="exist_timezone">이미 존재하는 시간대입니다.</string>
+    <string name="exist_timezone">이미 추가된 시간대입니다.</string>
     <string name="start_date_removed">시작일이 제거되었습니다.</string>
     <string name="start_date_and_time_is_wrong">시작일만 설정한 경우, 알람 시간을 현재 시각 이후로 설정해야 합니다.</string>
     <string name="end_date_removed">종료일이 제거되었습니다.</string>
@@ -160,11 +157,6 @@
         <item>지역 - 시간대 (권장)</item>
     </string-array>
 
-    <string-array name="time_selector_values">
-        <item>0</item>
-        <item>1</item>
-    </string-array>
-
     <string-array name="alarm_mute">
         <item>사용 안 함</item>
         <item>1분</item>
@@ -172,15 +164,6 @@
         <item>5분</item>
         <item>10분</item>
         <item>30분</item>
-    </string-array>
-
-    <string-array name="alarm_mute_values">
-        <item>0</item>
-        <item>60000</item>
-        <item>120000</item>
-        <item>300000</item>
-        <item>600000</item>
-        <item>1800000</item>
     </string-array>
 
     <!-- Alarm Options -->
@@ -233,16 +216,6 @@
         <item>토요일</item>
     </string-array>
 
-    <integer-array name="day_of_week_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-    </integer-array>
-
     <string-array name="alarm_options">
         <item>벨소리</item>
         <item>진동</item>
@@ -250,64 +223,6 @@
         <item>라벨</item>
         <item>색상 태그</item>
     </string-array>
-
-    <integer-array name="vibrator_simple">
-        <item>0</item>
-        <item>1500</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_short">
-        <item>0</item>
-        <item>100</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_heartbeat">
-        <item>0</item>
-        <item>150</item>
-        <item>250</item>
-        <item>150</item>
-        <item>1000</item>
-        <item>150</item>
-        <item>250</item>
-        <item>150</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_8bit">
-        <item>0</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_long">
-        <item>0</item>
-        <item>5000</item>
-        <item>1000</item>
-    </integer-array>
-
-    <array name="vibrator_array">
-        <item>@array/vibrator_simple</item>
-        <item>@array/vibrator_short</item>
-        <item>@array/vibrator_long</item>
-        <item>@array/vibrator_heartbeat</item>
-        <item>@array/vibrator_8bit</item>
-    </array>
 
     <array name="vibrator_name">
         <item>간단한 진동</item>
@@ -325,14 +240,5 @@
         <item>20분</item>
         <item>30분</item>
     </array>
-
-    <integer-array name="snooze_values">
-        <item>0</item>
-        <item>300000</item>
-        <item>600000</item>
-        <item>900000</item>
-        <item>1200000</item>
-        <item>1800000</item>
-    </integer-array>
 
 </resources>

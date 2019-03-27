@@ -2,9 +2,6 @@
     <string name="app_name">World Time Alarm</string>
     <string name="main_label">Alarm</string>
     <string name="action_settings">Settings</string>
-    <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
-    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/2970704508</string>
-    <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">Current time zone</string>
     <string name="set_time_zone">Set time zone</string>
     <string name="space">&#160;</string>
@@ -42,7 +39,7 @@
     <string name="year">%1$d year&#160;</string>
     <string name="years">%1$d years&#160;</string>
     <string name="weekend">Weekend</string>
-    <string name="weekday">Weekday</string>
+    <string name="weekday">Weekdays</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="today">Today</string>
     <string name="everyday">Everyday</string>
@@ -158,11 +155,6 @@
         <item>Region - time zone (recommended)</item>
     </string-array>
 
-    <string-array name="time_selector_values">
-        <item>0</item>
-        <item>1</item>
-    </string-array>
-
     <string-array name="alarm_mute">
         <item>Disable</item>
         <item>1 minute</item>
@@ -170,15 +162,6 @@
         <item>5 minutes</item>
         <item>10 minutes</item>
         <item>30 minutes</item>
-    </string-array>
-
-    <string-array name="alarm_mute_values">
-        <item>0</item>
-        <item>60000</item>
-        <item>120000</item>
-        <item>300000</item>
-        <item>600000</item>
-        <item>1800000</item>
     </string-array>
 
     <!-- Alarm Options -->
@@ -231,16 +214,6 @@
         <item>Saturday</item>
     </string-array>
 
-    <integer-array name="day_of_week_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-    </integer-array>
-
     <string-array name="alarm_options">
         <item>Ringtone</item>
         <item>Vibration</item>
@@ -248,64 +221,6 @@
         <item>Label</item>
         <item>Color Tag</item>
     </string-array>
-
-    <integer-array name="vibrator_simple">
-        <item>0</item>
-        <item>1500</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_short">
-        <item>0</item>
-        <item>100</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_heartbeat">
-        <item>0</item>
-        <item>150</item>
-        <item>250</item>
-        <item>150</item>
-        <item>1000</item>
-        <item>150</item>
-        <item>250</item>
-        <item>150</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_8bit">
-        <item>0</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_long">
-        <item>0</item>
-        <item>5000</item>
-        <item>1000</item>
-    </integer-array>
-
-    <array name="vibrator_array">
-        <item>@array/vibrator_simple</item>
-        <item>@array/vibrator_short</item>
-        <item>@array/vibrator_long</item>
-        <item>@array/vibrator_heartbeat</item>
-        <item>@array/vibrator_8bit</item>
-    </array>
 
     <array name="vibrator_name">
         <item>Simple</item>
@@ -323,14 +238,5 @@
         <item>20 minutes</item>
         <item>30 minutes</item>
     </array>
-
-    <integer-array name="snooze_values">
-        <item>0</item>
-        <item>300000</item>
-        <item>600000</item>
-        <item>900000</item>
-        <item>1200000</item>
-        <item>1800000</item>
-    </integer-array>
 
 </resources>

@@ -198,21 +198,21 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                     clockItems.addAll(dbCursor.getClockList())
                     scrollToLast = true
                     setEmptyMessage()
+
+                    if(::clockListAdapter.isInitialized) {
+                        clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
+
+                        if(clockItems.isNotEmpty() && scrollToLast)
+                            clockList?.smoothScrollToPosition(clockItems.count() - 1)
+                    }
+                    else {
+                        launch(coroutineContext) {
+                            job.join()
+                            clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
+                            clockList?.smoothScrollToPosition(clockItems.count() - 1)
+                        }
+                    }
                 }
-            }
-        }
-
-        if(::clockListAdapter.isInitialized) {
-            clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
-
-            if(clockItems.isNotEmpty() && scrollToLast)
-                clockList.smoothScrollToPosition(clockItems.count() - 1)
-        }
-        else {
-            launch(coroutineContext) {
-                job.join()
-                clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
-                clockList.smoothScrollToPosition(clockItems.count() - 1)
             }
         }
     }

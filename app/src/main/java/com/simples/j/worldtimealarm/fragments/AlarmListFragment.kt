@@ -145,7 +145,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                     if(::alarmListAdapter.isInitialized) {
                         val index = alarmItems.indexOfFirst { it.notiId == id }
                         if(index > -1) {
-                            alarmList.smoothScrollToPosition(index)
+                            alarmList?.smoothScrollToPosition(index)
                             alarmListAdapter.setHighlightId(id)
                             alarmListAdapter.notifyItemChanged(index)
                         }
@@ -156,7 +156,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
                             val index = alarmItems.indexOfFirst { it.notiId == id }
                             if(index > -1) {
-                                alarmList.smoothScrollToPosition(index)
+                                alarmList?.smoothScrollToPosition(index)
                                 alarmListAdapter.setHighlightId(id)
                                 alarmListAdapter.notifyItemChanged(index)
                             }
@@ -195,12 +195,12 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         alarmItems.add(item)
                         if(::alarmListAdapter.isInitialized) {
                             alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
-                            alarmList.scrollToPosition(alarmItems.size - 1)
+                            alarmList?.scrollToPosition(alarmItems.size - 1)
                         }
                         else {
                             launch(coroutineContext) {
                                 job.join()
-                                alarmList.scrollToPosition(alarmItems.size - 1)
+                                alarmList?.scrollToPosition(alarmItems.size - 1)
                             }
                         }
                         setEmptyMessage()
@@ -218,7 +218,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                             val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
 
                             if(index > -1) {
-                                alarmList.scrollToPosition(index)
+                                alarmList?.scrollToPosition(index)
                                 alarmItems[index] = item
                                 alarmListAdapter.notifyItemChanged(index)
                             }
@@ -228,7 +228,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                                 job.join()
 
                                 val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
-                                if(index > -1) alarmList.scrollToPosition(index)
+                                if(index > -1) alarmList?.scrollToPosition(index)
                             }
                         }
                         showSnackBar(scheduledTime)

@@ -70,6 +70,14 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
             when(mAction) {
                 TimeZonePickerActivity.ACTION_ADD -> {
                     time_zone_apply.text = getString(R.string.time_zone_add)
+
+                    val clockList = DatabaseCursor(context!!).getClockList()
+                    val item = clockList.find { it.timezone == mTimeZone?.id }
+                    if(item != null) {
+                        time_zone_change_info.text = getString(R.string.exist_timezone)
+                        time_zone_change_info.visibility = View.VISIBLE
+                        time_zone_apply.visibility = View.GONE
+                    }
                 }
                 TimeZonePickerActivity.ACTION_CHANGE -> {
                     time_zone_change_info.visibility = View.VISIBLE
@@ -114,18 +122,6 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                 if(mAction == TimeZonePickerActivity.ACTION_ADD) {
                     if(mTimeZone == null) {
                         Toast.makeText(context, resources.getString(R.string.time_zone_select), Toast.LENGTH_SHORT).show()
-                        return
-                    }
-
-                    val clockList = DatabaseCursor(context!!).getClockList()
-                    var isExist = false
-                    clockList.forEach {
-                        if(it.timezone == mTimeZone?.id) {
-                            isExist = true
-                        }
-                    }
-                    if(isExist) {
-                        Toast.makeText(context, resources.getString(R.string.exist_timezone), Toast.LENGTH_SHORT).show()
                         return
                     }
                 }

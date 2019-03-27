@@ -32,7 +32,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             withContext(Dispatchers.IO) {
                 MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
             }
-            adViewMain.loadAd(AdRequest.Builder().build())
+            adViewMain.loadAd(AdRequest.Builder()
+                    .apply { addTestDevice("6EF4925B538C754B535FCB7177FCAC3D") }
+                    .build())
         }
 
         val tab01 = tab.newTab()
