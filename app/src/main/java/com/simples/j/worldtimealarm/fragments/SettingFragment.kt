@@ -163,7 +163,6 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
             }
             getString(R.string.setting_time_zone_affect_repetition_key) -> {
                 context?.sendBroadcast(Intent(MainActivity.ACTION_RESCHEDULE_ACTIVATED))
-                context?.sendBroadcast(Intent(MainActivity.ACTION_UPDATE_ALL))
             }
         }
 

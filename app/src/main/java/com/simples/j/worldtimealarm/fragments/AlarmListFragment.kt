@@ -356,10 +356,20 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                     }
                 }
                 MainActivity.ACTION_RESCHEDULE_ACTIVATED -> {
-                    launch(Dispatchers.IO) {
+                    launch(coroutineContext) {
                         dbCursor.getActivatedAlarms().forEach {
                             alarmController.cancelAlarm(context, it.notiId)
                             alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
+
+                            if(::alarmListAdapter.isInitialized) {
+                                alarmListAdapter.readPreferences()
+                                alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
+                            }
+                            else {
+                                job.join()
+                                alarmListAdapter.readPreferences()
+                                alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
+                            }
                         }
                     }
                 }

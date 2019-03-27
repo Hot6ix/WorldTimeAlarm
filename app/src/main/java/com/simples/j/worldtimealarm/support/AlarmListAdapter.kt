@@ -36,7 +36,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
     private var endDate: Calendar? = null
     private var highlightId: Int = -1
     private var prefManager = PreferenceManager.getDefaultSharedPreferences(context)
-    private val applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
+    private var applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
 
     init {
         setHasStableIds(true)
@@ -287,6 +287,10 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
     fun setHighlightId(id: Int) {
         this.highlightId = id
+    }
+
+    fun readPreferences() {
+        applyDayRepetition = prefManager.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
     }
 
     private fun updateView(holder: ViewHolder, b: Boolean) {
