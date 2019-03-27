@@ -34,7 +34,7 @@
         <ListPreference
             android:key="@string/setting_alarm_mute_key"
             android:title="@string/setting_alarm_mute_title"
-            android:defaultValue="300000"
+            android:defaultValue="600000"
             android:entries="@array/alarm_mute"
             android:entryValues="@array/alarm_mute_values"/>
 

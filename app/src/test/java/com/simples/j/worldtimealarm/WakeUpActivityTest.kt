@@ -85,21 +85,6 @@ class WakeUpActivityTest {
                 assert(activity.time_zone_clock_layout.visibility == View.GONE)
             }
         }
-
-        // Test case 04 : wrong type of value
-
-        intent = Intent(context, WakeUpActivity::class.java).apply {
-            action = AlarmReceiver.ACTION_ALARM
-            putExtra(AlarmReceiver.OPTIONS, "1234") // should be bundle type
-            putExtra(AlarmReceiver.EXPIRED, "1234") // should be boolean type
-        }
-
-        ActivityScenario.launch<WakeUpActivity>(intent).use { scenario ->
-            scenario.onActivity { activity ->
-                assert(activity.label.visibility == View.VISIBLE)
-                assert(activity.time_zone_clock_layout.visibility == View.GONE)
-            }
-        }
     }
 
     private fun createAlarm(timeZone: String = TimeZone.getDefault().id,
