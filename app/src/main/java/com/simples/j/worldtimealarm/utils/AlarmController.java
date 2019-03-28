@@ -71,6 +71,7 @@ public class AlarmController {
                 calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
                 calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
             }
+            calendar.set(Calendar.SECOND, 0);
 
             // Check if alarm repeating
             boolean isRepeating = false;
@@ -170,7 +171,6 @@ public class AlarmController {
                 }
             }
 
-            calendar.set(Calendar.SECOND, 0);
         }
         else {
             end = null;
