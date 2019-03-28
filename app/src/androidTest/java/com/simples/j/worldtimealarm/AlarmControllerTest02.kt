@@ -39,7 +39,7 @@ class AlarmControllerTest02 {
 
         val eCal = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 0) }
         val item = createAlarm(timeZone = "Asia/Seoul", repeat = intArrayOf(0,0,0,1,0,0,0), timeSet = eCal)
-        val time = AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+        val time = AlarmController.getInstance().scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
         val cal = Calendar.getInstance().apply { timeInMillis = time }
 
         // time zone doesn't affect day repeat

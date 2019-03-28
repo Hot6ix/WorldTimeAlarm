@@ -41,7 +41,7 @@ class AlarmControllerTest {
     @Test
     fun testAlarmController() {
         // timeInMillis = the current time as UTC milliseconds from the epoch.
-        val alarmCtrl = AlarmController.getInstance(context)
+        val alarmCtrl = AlarmController.getInstance()
         val scheduledCal = Calendar.getInstance()
 
         // current + 1 hour
