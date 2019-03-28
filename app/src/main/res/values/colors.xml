@@ -5,7 +5,10 @@
     <color name="colorAccent">#FF4081</color>
     <color name="whiteGray">#DDDDDD</color>
     <color name="lightGray">#AAAAAA</color>
+    <color name="mediumGray">#999999</color>
     <color name="darkerGray">#666666</color>
+    <color name="blueGrayLighter">#78909c</color>
+    <color name="blueGrayLight">#607d8b</color>
     <color name="blueGray">#546e7a</color>
     <color name="blueGrayDark">#455a64</color>
     <color name="blueGrayDarker">#37474f</color>

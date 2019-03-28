@@ -20,7 +20,7 @@ class BootCompletedReceiver : BroadcastReceiver() {
         if(intent.action == Intent.ACTION_BOOT_COMPLETED) {
             Log.d(C.TAG, Intent.ACTION_BOOT_COMPLETED)
             dbCursor = DatabaseCursor(context)
-            alarmController = AlarmController.getInstance(context)
+            alarmController = AlarmController.getInstance()
             activatedAlarms = dbCursor.getActivatedAlarms()
             activatedAlarms.forEach {
                 alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)

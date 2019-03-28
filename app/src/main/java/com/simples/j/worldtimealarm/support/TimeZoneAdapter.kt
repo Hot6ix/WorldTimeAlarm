@@ -2,7 +2,6 @@ package com.simples.j.worldtimealarm.support
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,22 +19,13 @@ class TimeZoneAdapter(private var tzs: ArrayList<String>, private val context: C
 
     private lateinit var listener: OnItemClickListener
 
-    private val calendar = Calendar.getInstance()
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(LayoutInflater.from(context).inflate(R.layout.time_zone_item, parent, false))
 
     override fun getItemCount(): Int = tzs.size
 
-    override fun getItemId(position: Int): Long = super.getItemId(position)
+    override fun getItemId(position: Int): Long = tzs[position].hashCode().toLong()
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-//        Log.d("taggg1", TimeZone.getTimeZone(tzs[position].replace(" ", "_")).rawOffset.toString())
-//        Log.d("taggg1", TimeZone.getDefault().rawOffset.toString())
-//        Log.d("taggg2", TimeZone.getTimeZone(tzs[position].replace(" ", "_")).dstSavings.toString())
-//        Log.d("taggg2", TimeZone.getDefault().dstSavings.toString())
-//        Log.d("taggg3", TimeZone.getTimeZone(tzs[position].replace(" ", "_")).getOffset(System.currentTimeMillis()).toString())
-//        Log.d("taggg3", TimeZone.getDefault().getOffset(System.currentTimeMillis()).toString())
-//        val difference = TimeZone.getTimeZone(tzs[position].replace(" ", "_")).rawOffset - TimeZone.getDefault().rawOffset + TimeZone.getTimeZone(tzs[position].replace(" ", "_")).dstSavings - TimeZone.getDefault().dstSavings
         val difference = TimeZone.getTimeZone(tzs[position].replace(" ", "_")).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
 
         val offset = if(TimeZone.getDefault() == TimeZone.getTimeZone(tzs[position].replace(" ", "_"))) context.resources.getString(R.string.current_time_zone)

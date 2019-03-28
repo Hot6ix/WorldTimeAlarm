@@ -10,8 +10,8 @@ import com.simples.j.worldtimealarm.R
 
 class SwitchPreference: SwitchPreference {
 
-    private lateinit var switch: Switch
-    private lateinit var switchListener: CompoundButton.OnCheckedChangeListener
+    private var switch: Switch? = null
+    private var switchListener: CompoundButton.OnCheckedChangeListener? = null
 
     constructor(context: Context?) : super(context)
 
@@ -24,10 +24,10 @@ class SwitchPreference: SwitchPreference {
     override fun onBindViewHolder(holder: PreferenceViewHolder?) {
         super.onBindViewHolder(holder)
 
-        val layout = holder!!.itemView
-        switch = layout.findViewById(R.id.pref_switch)
-        switch.setOnCheckedChangeListener(switchListener)
-        switch.isChecked = isChecked
+        val layout = holder?.itemView
+        switch = layout?.findViewById(R.id.pref_switch)
+        switch?.setOnCheckedChangeListener(switchListener)
+        switch?.isChecked = isChecked
     }
 
     override fun onClick() {}

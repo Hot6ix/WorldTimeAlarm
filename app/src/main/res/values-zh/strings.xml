@@ -3,9 +3,6 @@
     <string name="app_name">World Time Alarm</string>
     <string name="main_label">报警</string>
     <string name="action_settings">设置</string>
-    <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
-    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/2970704508</string>
-    <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">当前时区</string>
     <string name="set_time_zone">选定的时区</string>
     <string name="space">&#160;</string>
@@ -62,7 +59,7 @@
     <string name="clear">未选中</string>
     <string name="new_alarm_long">新警报</string>
     <string name="new_alarm_short">新警报</string>
-    <string name="expected_time">闹钟将设置为下午%1$s</string>
+    <string name="expected_time">闹钟将设置为当地时间%1$s</string>
     <string name="range_start">开始日期</string>
     <string name="range_end">结束日期</string>
     <string name="range_not_set">没有设置</string>
@@ -75,6 +72,7 @@
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>
+    <string name="clock_removed">时区(%1$s)删除。</string>
     <string name="less_than_a_minute">不到一分钟</string>
     <string name="same_as_current">与当前时区相同</string>
     <string name="same_as_set">与设置时区相同</string>
@@ -92,6 +90,31 @@
     <string name="must_check_repeat">必须至少检查一天的重复日。</string>
     <string name="invalid_repeat">如果范围小于一周，必须检查有效时间和重复日。</string>
     <string name="alarm_no_long_fires">警报(%1$s)不再触发。</string>
+    <string name="error_occurred">发生了错误。</string>
+    <string name="error_message">呼叫无效。 如果继续，请重新创建警报。 对造成的不便表示歉意。</string>
+
+    <!-- Text -->
+    <string name="timezone_fragment_title">选择时区</string>
+    <string name="timezone_fragment_country_title">区域</string>
+    <string name="timezone_fragment_time_zone_title">时区</string>
+    <string name="timezone_country">区域</string>
+    <string name="timezone_region">时区</string>
+    <string name="timezone_format">%1$s (%2$s)</string>
+    <string name="time_zone_search_hint">搜索区域</string>
+    <string name="time_zone_unknown">未知时区</string>
+    <string name="time_zone_apply">应用</string>
+    <string name="time_zone_empty">请点击这里选择。</string>
+    <string name="time_zone_add">加</string>
+    <string name="time_zone_select">请选择时区</string>
+    <string name="time_zone_wrong">错误的时区</string>
+    <string name="time_zone_change_info">从%1$s到%2$s的变化。</string>
+    <string name="time_zone_change_warning">更改时区会影响以下项目。\n- 时间\n- 日期 (包括开始/结束日期)\n- 重复的一天 (在“设置”选项卡中激活)</string>
+
+    <!-- Settings -->
+    <string name="setting_group_0_key">GENERAL</string>
+    <string name="setting_group_0">一般</string>
+    <string name="setting_time_zone_selector_key">TIME_ZONE_SELECTOR_KEY</string>
+    <string name="setting_time_zone_selector_title">如何选择您的时区</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>
@@ -104,6 +127,9 @@
     <string name="setting_alarm_volume_increase_title">逐渐增加卷</string>
     <string name="setting_time_zone_change_key">TIME_ZONE_CHANGE</string>
     <string name="setting_time_zone_change_title">当时区变化时通知</string>
+    <string name="setting_time_zone_affect_repetition_key">TIME_ZONE_AFFECT_REPETITION</string>
+    <string name="setting_time_zone_affect_repetition_title">将时间差应用于重复天数</string>
+    <string name="setting_time_zone_affect_repetition_summary">将重新安排所有已激活的警报，并可以更改重复日期。</string>
 
     <string name="setting_group_2_key">CONVERTER</string>
     <string name="setting_group_2">时间转换</string>
@@ -121,8 +147,15 @@
     <string name="setting_version_title">版</string>
     <string name="setting_license_key">LICENSE</string>
     <string name="setting_license_title">开源许可证</string>
+    <string name="setting_privacy_policy_key">PRIVACY</string>
+    <string name="setting_privacy_policy_title">隐私政策</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">访问GitHub</string>
+
+    <string-array name="time_selector">
+        <item>ID</item>
+        <item>区域 - 时区 (推荐的)</item>
+    </string-array>
 
     <string-array name="alarm_mute">
         <item>禁用</item>
@@ -131,15 +164,6 @@
         <item>5分钟</item>
         <item>10分钟</item>
         <item>30分钟</item>
-    </string-array>
-
-    <string-array name="alarm_mute_values">
-        <item>0</item>
-        <item>60000</item>
-        <item>120000</item>
-        <item>300000</item>
-        <item>600000</item>
-        <item>1800000</item>
     </string-array>
 
     <!-- Alarm Options -->
@@ -192,16 +216,6 @@
         <item>星期六</item>
     </string-array>
 
-    <integer-array name="day_of_week_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-    </integer-array>
-
     <string-array name="alarm_options">
         <item>铃声</item>
         <item>振动</item>
@@ -209,64 +223,6 @@
         <item>标签</item>
         <item>颜色标签</item>
     </string-array>
-
-    <integer-array name="vibrator_simple">
-        <item>0</item>
-        <item>1500</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_short">
-        <item>0</item>
-        <item>100</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_heartbeat">
-        <item>0</item>
-        <item>150</item>
-        <item>250</item>
-        <item>150</item>
-        <item>1000</item>
-        <item>150</item>
-        <item>250</item>
-        <item>150</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_8bit">
-        <item>0</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_long">
-        <item>0</item>
-        <item>5000</item>
-        <item>1000</item>
-    </integer-array>
-
-    <array name="vibrator_array">
-        <item>@array/vibrator_simple</item>
-        <item>@array/vibrator_short</item>
-        <item>@array/vibrator_long</item>
-        <item>@array/vibrator_heartbeat</item>
-        <item>@array/vibrator_8bit</item>
-    </array>
 
     <array name="vibrator_name">
         <item>简单</item>
@@ -284,14 +240,5 @@
         <item>20分钟</item>
         <item>30分钟</item>
     </array>
-
-    <integer-array name="snooze_values">
-        <item>0</item>
-        <item>300000</item>
-        <item>600000</item>
-        <item>900000</item>
-        <item>1200000</item>
-        <item>1800000</item>
-    </integer-array>
 
 </resources>

@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<android.support.v7.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="@string/setting_group_0_key"
+        android:title="@string/setting_group_0">
+
+        <ListPreference
+            android:key="@string/setting_time_zone_selector_key"
+            android:title="@string/setting_time_zone_selector_title"
+            android:entries="@array/time_selector"
+            android:entryValues="@array/time_selector_values"/>
+
+        <Preference
+            android:key="@string/setting_converter_goto_key"
+            android:title="@string/setting_converter_goto"/>
+
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:key="@string/setting_group_1_key"
@@ -19,9 +34,15 @@
         <ListPreference
             android:key="@string/setting_alarm_mute_key"
             android:title="@string/setting_alarm_mute_title"
-            android:defaultValue="0"
+            android:defaultValue="600000"
             android:entries="@array/alarm_mute"
             android:entryValues="@array/alarm_mute_values"/>
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/setting_time_zone_affect_repetition_key"
+            android:title="@string/setting_time_zone_affect_repetition_title"
+            android:summary="@string/setting_time_zone_affect_repetition_summary"/>
 
     </PreferenceCategory>
 
@@ -51,10 +72,6 @@
         </Preference>
 
         <Preference
-            android:key="@string/setting_converter_goto_key"
-            android:title="@string/setting_converter_goto"/>
-
-        <Preference
             android:key="@string/setting_version_key"
             android:title="@string/setting_version_title">
 
@@ -65,16 +82,26 @@
         </Preference>
 
         <Preference
-            android:key="@string/setting_license_key"
-            android:title="@string/setting_license_title"/>
-
-        <Preference
             android:key="@string/setting_source_key"
             android:title="@string/setting_source_title">
 
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="https://github.com/Hot6ix/WorldTimeAlarm"/>
+
+        </Preference>
+
+        <Preference
+            android:key="@string/setting_license_key"
+            android:title="@string/setting_license_title"/>
+
+        <Preference
+            android:key="@string/setting_privacy_policy_key"
+            android:title="@string/setting_privacy_policy_title">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://github.com/Hot6ix/WorldTimeAlarm/blob/master/privacy_policy.md"/>
 
         </Preference>
 

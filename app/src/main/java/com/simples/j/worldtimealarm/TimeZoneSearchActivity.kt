@@ -55,7 +55,7 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_timezonesearch, menu)
+        menuInflater.inflate(R.menu.menu_time_zone_search, menu)
 
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
         val searchView = menu?.findItem(R.id.search_timezone)?.actionView as SearchView
