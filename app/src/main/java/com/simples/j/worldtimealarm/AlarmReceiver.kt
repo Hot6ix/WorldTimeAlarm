@@ -31,9 +31,14 @@ class AlarmReceiver: BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
+        if(option == null) {
+            Log.d(C.TAG, "AlarmReceiver failed to get bundle.")
+            return
+        }
+
         val item = option.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
         if(item == null) {
-            Log.d(C.TAG, "AlarmReceiver failed to get AlarmItem")
+            Log.d(C.TAG, "AlarmReceiver failed to get AlarmItem.")
             return
         }
         Log.d(C.TAG, "Alarm triggered : ID(${item.notiId+1})")
@@ -94,7 +99,7 @@ class AlarmReceiver: BroadcastReceiver() {
                     context.sendBroadcast(requestIntent)
                 }
                 else
-                    AlarmController.getInstance(context).scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+                    AlarmController.getInstance().scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
             }
         }
 

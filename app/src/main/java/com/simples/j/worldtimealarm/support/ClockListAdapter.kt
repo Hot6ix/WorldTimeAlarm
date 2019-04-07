@@ -1,6 +1,7 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
+import android.os.Build
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -29,31 +30,41 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
 
     override fun getItemCount() = list.size
 
-    override fun getItemId(position: Int): Long = position.toLong()
+    override fun getItemId(position: Int): Long = list[position].hashCode().toLong()
 
     override fun getItemViewType(position: Int): Int = 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val timeZone = TimeZone.getTimeZone(list[holder.adapterPosition].timezone?.replace(" ", "_"))
-        val expectedCalendar = Calendar.getInstance(timeZone)
-        expectedCalendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
+        val item = list[holder.adapterPosition].timezone?.replace(" ", "_")
+        if(item.isNullOrEmpty()) {
+            holder.timeZoneName.text = context.getString(R.string.time_zone_wrong)
+            holder.timeZoneOffset.visibility = View.GONE
+        }
+        else {
+            val timeZone = TimeZone.getTimeZone(item)
+            val expectedCalendar = Calendar.getInstance(timeZone)
+            expectedCalendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
 
-        val differenceOriginal = calendar.timeZone.getOffset(System.currentTimeMillis()) - expectedCalendar.timeZone.getOffset(System.currentTimeMillis())
-        expectedCalendar.add(Calendar.MILLISECOND, -differenceOriginal)
+            val difference = expectedCalendar.timeZone.getOffset(System.currentTimeMillis()) - calendar.timeZone.getOffset(System.currentTimeMillis())
+            expectedCalendar.add(Calendar.MILLISECOND, difference)
 
-        val offset = if(calendar.timeZone == timeZone) context.resources.getString(R.string.same_as_set)
-        else MediaCursor.getOffsetOfDifference(context, differenceOriginal, MediaCursor.TYPE_CONVERTER)
+            val offset =
+                    if(calendar.timeZone == timeZone) context.resources.getString(R.string.same_as_set)
+                    else MediaCursor.getOffsetOfDifference(context, difference, MediaCursor.TYPE_CONVERTER)
 
-        holder.timeZoneName.text = expectedCalendar.timeZone.id.replace("_", " ")
-        holder.timeZoneOffset.text = offset
+            holder.timeZoneName.text =
+                    if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(expectedCalendar.timeZone.id))
+                    else expectedCalendar.timeZone.id
+            holder.timeZoneOffset.text = offset
 
-        val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
-        timeFormat.timeZone = timeZone
-        val dateFormat = DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault())
-        dateFormat.timeZone = timeZone
-        holder.amPm.text = if(expectedCalendar.get(Calendar.AM_PM) == 0) context.getString(R.string.am) else context.getString(R.string.pm)
-        holder.timeZoneTime.text = timeFormat.format(expectedCalendar.time)
-        holder.timeZoneDate.text = dateFormat.format(expectedCalendar.time)
+            val timeFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
+            timeFormat.timeZone = timeZone
+            val dateFormat = DateFormat.getDateInstance(DateFormat.FULL, Locale.getDefault())
+            dateFormat.timeZone = timeZone
+            holder.amPm.text = if(expectedCalendar.get(Calendar.AM_PM) == 0) context.getString(R.string.am) else context.getString(R.string.pm)
+            holder.timeZoneTime.text = timeFormat.format(expectedCalendar.time)
+            holder.timeZoneDate.text = dateFormat.format(expectedCalendar.time)
+        }
     }
 
     fun removeItem(index: Int) {
@@ -82,6 +93,5 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
 
     interface OnItemClickListener {
         fun onItemClicked(view: View, item: AlarmItem)
-        fun onItemStatusChanged(b: Boolean, item: AlarmItem)
     }
 }

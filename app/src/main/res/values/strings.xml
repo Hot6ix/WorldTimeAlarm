@@ -2,9 +2,6 @@
     <string name="app_name">World Time Alarm</string>
     <string name="main_label">Alarm</string>
     <string name="action_settings">Settings</string>
-    <string name="ad_app_id">ca-app-pub-1459869098528763~3472357649</string>
-    <string name="banner_ad_unit_id_2">ca-app-pub-1459869098528763/2970704508</string>
-    <string name="banner_ad_unit_id_3">ca-app-pub-1459869098528763/6976910817</string>
     <string name="current_time_zone">Current time zone</string>
     <string name="set_time_zone">Set time zone</string>
     <string name="space">&#160;</string>
@@ -42,7 +39,7 @@
     <string name="year">%1$d year&#160;</string>
     <string name="years">%1$d years&#160;</string>
     <string name="weekend">Weekend</string>
-    <string name="weekday">Weekday</string>
+    <string name="weekday">Weekdays</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="today">Today</string>
     <string name="everyday">Everyday</string>
@@ -61,7 +58,7 @@
     <string name="clear">Clear</string>
     <string name="new_alarm_long">New alarm</string>
     <string name="new_alarm_short">New alarm</string>
-    <string name="expected_time">Alarm will set for&#160;%1$s</string>
+    <string name="expected_time">Alarm will set for&#160;%1$s local time.</string>
     <string name="range_start">Start date</string>
     <string name="range_end">End date</string>
     <string name="range_not_set">Not set</string>
@@ -74,6 +71,7 @@
 
     <!-- Message -->
     <string name="alarm_removed">Alarm removed.</string>
+    <string name="clock_removed">Time zone (%1$s) removed.</string>
     <string name="less_than_a_minute">less than a minute</string>
     <string name="same_as_current">Same as current time zone</string>
     <string name="same_as_set">Same as set time zone</string>
@@ -88,11 +86,35 @@
     <string name="end_date_removed">End date removed.</string>
     <string name="end_date_earlier_than_today">End date cannot be earlier than today.</string>
     <string name="end_date_earlier_than_start_date">End date cannot be earlier than start date.</string>
-    <string name="must_check_repeat">Must check day repeat at least one.</string>
-    <string name="invalid_repeat">Must check valid time and repeat day if range is less than a week.</string>
+    <string name="must_check_repeat">Must check repeat day(s) at least one.</string>
+    <string name="invalid_repeat">Must check valid time and repeat day(s) if range is less than a week.</string>
     <string name="alarm_no_long_fires">Alarm (%1$s) no longer fires.</string>
+    <string name="error_occurred">Error occurred.</string>
+    <string name="error_message">Invalid call. If it continues, please re-create alarm. Sorry for inconvenience.</string>
+
+    <!-- Text -->
+    <string name="timezone_fragment_title">Select time zone</string>
+    <string name="timezone_fragment_country_title">Region</string>
+    <string name="timezone_fragment_time_zone_title">Time zone</string>
+    <string name="timezone_country">Region</string>
+    <string name="timezone_region">Time zone</string>
+    <string name="timezone_format">%1$s (%2$s)</string>
+    <string name="time_zone_search_hint">Search region</string>
+    <string name="time_zone_unknown">Unknown time zone</string>
+    <string name="time_zone_apply">Apply</string>
+    <string name="time_zone_empty">Click to select time zone</string>
+    <string name="time_zone_add">Add</string>
+    <string name="time_zone_select">Please select time zone</string>
+    <string name="time_zone_wrong">Wrong time zone</string>
+    <string name="time_zone_change_info">Changes from %1$s to %2$s.</string>
+    <string name="time_zone_change_warning">Changing the time zone affects the following items.\n- Time\n- Date (includes start/end date)\n- Repeat days (Activate in the setting tab)</string>
 
     <!-- Settings -->
+    <string name="setting_group_0_key">GENERAL</string>
+    <string name="setting_group_0">General</string>
+    <string name="setting_time_zone_selector_key">TIME_ZONE_SELECTOR_KEY</string>
+    <string name="setting_time_zone_selector_title">Select time zone by</string>
+
     <string name="setting_group_1_key">ALARM</string>
     <string name="setting_group_1">Alarm</string>
     <string name="setting_alarm_mute_key">ALARM_MUTE_KEY</string>
@@ -103,6 +125,9 @@
     <string name="setting_alarm_volume_increase_title">Gradually increase volume</string>
     <string name="setting_time_zone_change_key">TIME_ZONE_CHANGE</string>
     <string name="setting_time_zone_change_title">Notify when time zone changes</string>
+    <string name="setting_time_zone_affect_repetition_key">TIME_ZONE_AFFECT_REPETITION</string>
+    <string name="setting_time_zone_affect_repetition_title">Apply time difference to repeat day(s)</string>
+    <string name="setting_time_zone_affect_repetition_summary">All activated alarms will be rescheduled and repeat days can be changed.</string>
 
     <string name="setting_group_2_key">CONVERTER</string>
     <string name="setting_group_2">Time conversion</string>
@@ -120,8 +145,15 @@
     <string name="setting_version_title">Version</string>
     <string name="setting_license_key">LICENSE</string>
     <string name="setting_license_title">Open source license</string>
+    <string name="setting_privacy_policy_key">PRIVACY</string>
+    <string name="setting_privacy_policy_title">Privacy policy</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">Visit GitHub</string>
+
+    <string-array name="time_selector">
+        <item>ID</item>
+        <item>Region - time zone (recommended)</item>
+    </string-array>
 
     <string-array name="alarm_mute">
         <item>Disable</item>
@@ -130,15 +162,6 @@
         <item>5 minutes</item>
         <item>10 minutes</item>
         <item>30 minutes</item>
-    </string-array>
-
-    <string-array name="alarm_mute_values">
-        <item>0</item>
-        <item>60000</item>
-        <item>120000</item>
-        <item>300000</item>
-        <item>600000</item>
-        <item>1800000</item>
     </string-array>
 
     <!-- Alarm Options -->
@@ -191,16 +214,6 @@
         <item>Saturday</item>
     </string-array>
 
-    <integer-array name="day_of_week_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-    </integer-array>
-
     <string-array name="alarm_options">
         <item>Ringtone</item>
         <item>Vibration</item>
@@ -208,64 +221,6 @@
         <item>Label</item>
         <item>Color Tag</item>
     </string-array>
-
-    <integer-array name="vibrator_simple">
-        <item>0</item>
-        <item>1500</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_short">
-        <item>0</item>
-        <item>100</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_heartbeat">
-        <item>0</item>
-        <item>150</item>
-        <item>250</item>
-        <item>150</item>
-        <item>1000</item>
-        <item>150</item>
-        <item>250</item>
-        <item>150</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_8bit">
-        <item>0</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>150</item>
-        <item>100</item>
-        <item>1000</item>
-    </integer-array>
-
-    <integer-array name="vibrator_long">
-        <item>0</item>
-        <item>5000</item>
-        <item>1000</item>
-    </integer-array>
-
-    <array name="vibrator_array">
-        <item>@array/vibrator_simple</item>
-        <item>@array/vibrator_short</item>
-        <item>@array/vibrator_long</item>
-        <item>@array/vibrator_heartbeat</item>
-        <item>@array/vibrator_8bit</item>
-    </array>
 
     <array name="vibrator_name">
         <item>Simple</item>
@@ -283,14 +238,5 @@
         <item>20 minutes</item>
         <item>30 minutes</item>
     </array>
-
-    <integer-array name="snooze_values">
-        <item>0</item>
-        <item>300000</item>
-        <item>600000</item>
-        <item>900000</item>
-        <item>1200000</item>
-        <item>1800000</item>
-    </integer-array>
 
 </resources>

@@ -17,7 +17,7 @@
         <Button
             android:id="@+id/alarm_cancel"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="?android:attr/actionBarSize"
             android:layout_weight="1"
             android:text="@string/cancel"
             android:textColor="@android:color/white"
@@ -27,7 +27,7 @@
         <Button
             android:id="@+id/alarm_save"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="?android:attr/actionBarSize"
             android:layout_weight="1"
             android:text="@string/save"
             android:textColor="@android:color/white"

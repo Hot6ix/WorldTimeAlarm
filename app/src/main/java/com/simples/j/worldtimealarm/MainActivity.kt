@@ -32,7 +32,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             withContext(Dispatchers.IO) {
                 MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
             }
-            adViewMain.loadAd(AdRequest.Builder().build())
+            adViewMain.loadAd(AdRequest.Builder()
+                    .apply { addTestDevice("6EF4925B538C754B535FCB7177FCAC3D") }
+                    .build())
         }
 
         val tab01 = tab.newTab()
@@ -112,6 +114,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     companion object {
         const val ACTION_UPDATE_SINGLE = "com.simples.j.world_time_alarm.ACTION_UPDATE_SINGLE"
         const val ACTION_UPDATE_ALL = "com.simples.j.world_time_alarm.ACTION_UPDATE_ALL"
+        const val ACTION_RESCHEDULE_ACTIVATED = "com.simples.j.world_time_alarm.ACTION_RESCHEDULE_ACTIVATED"
         const val TAB_STATE = "TAB_STATE"
     }
 }

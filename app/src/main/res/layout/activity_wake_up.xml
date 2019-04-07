@@ -6,138 +6,60 @@
     android:id="@+id/wake_up_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingStart="@dimen/padding20"
+    android:paddingEnd="@dimen/padding20"
     tools:context="com.simples.j.worldtimealarm.WakeUpActivity">
 
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/clock_layout"
-        android:layout_width="match_parent"
+        android:id="@+id/current_clock_layout"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/padding20"
-        android:layout_marginEnd="@dimen/padding20"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/time_zone_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/current_clock_layout"
+        <TextClock
+            android:id="@+id/clock_am_pm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/time_zone_layout"
+            android:paddingTop="@dimen/padding20"
+            android:gravity="end"
+            android:textSize="@dimen/text_mlarge"
+            android:textColor="@android:color/white"
+            android:format12Hour="a"
+            android:layout_marginEnd="@dimen/padding5"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintBaseline_toBaselineOf="@id/clock"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toStartOf="@id/clock"/>
 
-            <TextClock
-                android:id="@+id/clock_am_pm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/padding30"
-                android:gravity="end"
-                android:textSize="@dimen/text_large"
-                android:textColor="@android:color/white"
-                android:format12Hour="a"
-                android:layout_marginEnd="@dimen/padding5"
-                app:layout_constraintHorizontal_weight="1"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintBaseline_toBaselineOf="@id/clock"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/clock"/>
-
-            <TextClock
-                android:id="@+id/clock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/padding30"
-                android:textSize="@dimen/text_clock_size"
-                android:textColor="@android:color/white"
-                android:format12Hour="hh:mm"
-                app:layout_constraintHorizontal_weight="1"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@id/clock_am_pm"
-                app:layout_constraintEnd_toEndOf="parent"/>
-
-        </android.support.constraint.ConstraintLayout>
-
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/time_zone_layout"
-            android:layout_width="match_parent"
+        <TextClock
+            android:id="@+id/clock"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:paddingTop="@dimen/padding30"
-            android:paddingStart="@dimen/padding10"
-            android:paddingEnd="@dimen/padding10"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingTop="@dimen/padding20"
+            android:textSize="@dimen/text_clock_size_big"
+            android:textColor="@android:color/white"
+            android:format12Hour="hh:mm"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/clock_am_pm"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <TextClock
+            android:id="@+id/clock_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_large"
+            android:textColor="@android:color/white"
+            android:gravity="center"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/current_clock_layout"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <TextView
-                android:id="@+id/time_zone_name_wake"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:gravity="start|bottom"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/text_middle"
-                app:layout_constraintVertical_chainStyle="packed"
-                app:layout_constraintEnd_toStartOf="@id/time_zone_time_layout"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/time_zone_offset_wake"/>
-
-            <TextView
-                android:id="@+id/time_zone_offset_wake"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:gravity="start|top"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/text_small"
-                app:layout_constraintVertical_chainStyle="packed"
-                app:layout_constraintEnd_toStartOf="@id/time_zone_time_layout"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/time_zone_name_wake"
-                app:layout_constraintBottom_toBottomOf="parent"/>
-
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/time_zone_time_layout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toEndOf="@id/time_zone_name_wake"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent">
-
-                <TextClock
-                    android:id="@+id/time_zone_time_wake_am_pm"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:textSize="@dimen/text_small"
-                    android:textColor="@android:color/white"
-                    android:format12Hour="a"
-                    android:layout_marginEnd="@dimen/padding5"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintHorizontal_chainStyle="packed"
-                    app:layout_constraintBaseline_toBaselineOf="@id/time_zone_time_wake"
-                    app:layout_constraintEnd_toStartOf="@id/time_zone_time_wake"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
-
-                <TextClock
-                    android:id="@+id/time_zone_time_wake"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/text_xxxlarge"
-                    android:textColor="@android:color/white"
-                    android:format12Hour="hh:mm"
-                    android:gravity="end"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintHorizontal_chainStyle="packed"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
-
-            </android.support.constraint.ConstraintLayout>
-
-        </android.support.constraint.ConstraintLayout>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/clock"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </android.support.constraint.ConstraintLayout>
 
@@ -148,7 +70,6 @@
         android:gravity="center"
         android:textSize="@dimen/text_middle"
         android:textColor="@android:color/white"
-        android:layout_marginTop="@dimen/padding10"
         android:layout_marginEnd="@dimen/padding20"
         android:layout_marginStart="@dimen/padding20"
         android:visibility="gone"
@@ -156,8 +77,78 @@
         android:maxLines="5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/clock_layout"
-        app:layout_constraintBottom_toTopOf="@id/selector_layout"/>
+        app:layout_constraintTop_toBottomOf="@id/current_clock_layout"
+        app:layout_constraintBottom_toTopOf="@id/time_zone_clock_layout"/>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/time_zone_clock_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding20"
+        android:paddingStart="@dimen/padding10"
+        android:paddingEnd="@dimen/padding10"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/label"
+        app:layout_constraintBottom_toTopOf="@id/selector_layout">
+
+        <TextView
+            android:id="@+id/time_zone_clock_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/text_middle"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/time_zone_clock_time"/>
+
+        <TextClock
+            android:id="@+id/time_zone_clock_am_pm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:textSize="@dimen/text_small"
+            android:textColor="@android:color/white"
+            android:format12Hour="a"
+            android:layout_marginEnd="@dimen/padding5"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintBaseline_toBaselineOf="@id/time_zone_clock_time"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/time_zone_clock_time"/>
+
+        <TextClock
+            android:id="@+id/time_zone_clock_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_xxxlarge"
+            android:textColor="@android:color/white"
+            android:format12Hour="hh:mm"
+            android:includeFontPadding="false"
+            app:layout_constraintHorizontal_weight="1"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@id/time_zone_clock_am_pm"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/time_zone_clock_title"
+            app:layout_constraintBottom_toTopOf="@id/time_zone_clock_date"/>
+
+        <TextClock
+            android:id="@+id/time_zone_clock_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/time_zone_clock_time"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </android.support.constraint.ConstraintLayout>
 
     <com.skyfishjy.library.RippleBackground
         android:id="@+id/selector_layout"
@@ -173,7 +164,7 @@
         app:rb_scale="2.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/label"
+        app:layout_constraintTop_toBottomOf="@id/time_zone_clock_layout"
         app:layout_constraintBottom_toTopOf="@id/adViewWakeUp">
 
         <android.support.constraint.ConstraintLayout
@@ -199,11 +190,11 @@
                 android:layout_height="60dp"
                 android:scaleType="center"
                 app:backgroundTint="@color/blueGrayDark"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/ic_action_alarm_off"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_action_alarm_off" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/interaction_button"
