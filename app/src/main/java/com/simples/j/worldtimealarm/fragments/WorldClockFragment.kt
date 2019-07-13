@@ -182,13 +182,15 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        var scrollToLast = false
+        val scrollToLast: Boolean
 
         when {
             requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
                     timeZone = TimeZone.getTimeZone(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID).replace(" ", "_"))
+
                     updateStandardTimeZone()
+                    updateList()
                 }
             }
             requestCode == TIME_ZONE_NEW_CODE && resultCode == Activity.RESULT_OK -> {
@@ -197,21 +199,9 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                     clockItems.clear()
                     clockItems.addAll(dbCursor.getClockList())
                     scrollToLast = true
+
                     setEmptyMessage()
-
-                    if(::clockListAdapter.isInitialized) {
-                        clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
-
-                        if(clockItems.isNotEmpty() && scrollToLast)
-                            clockList?.smoothScrollToPosition(clockItems.count() - 1)
-                    }
-                    else {
-                        launch(coroutineContext) {
-                            job.join()
-                            clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
-                            clockList?.smoothScrollToPosition(clockItems.count() - 1)
-                        }
-                    }
+                    updateList(scrollToLast)
                 }
             }
         }
@@ -304,6 +294,22 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         world_am_pm.text = if(calendar.get(Calendar.AM_PM) == 0) context!!.getString(R.string.am) else context!!.getString(R.string.pm)
         world_time.text = timeFormat.format(calendar.time)
         world_date.text = dateFormat.format(calendar.time)
+    }
+
+    private fun updateList(scrollToLast: Boolean = false) {
+        if(::clockListAdapter.isInitialized) {
+            clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
+
+            if(clockItems.isNotEmpty() && scrollToLast)
+                clockList?.smoothScrollToPosition(clockItems.count() - 1)
+        }
+        else {
+            launch(coroutineContext) {
+                job.join()
+                clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
+                clockList?.smoothScrollToPosition(clockItems.count() - 1)
+            }
+        }
     }
 
     private fun setEmptyMessage() {
