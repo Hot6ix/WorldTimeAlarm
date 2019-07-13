@@ -50,10 +50,6 @@ Version 1.5
 - Add privacy policy
 - Add 'Apply time difference to day repeat' option
 
-FAQ
-
-Q : How to change order of alarm or time?
-A : You can change order of items by long click and move up or down
-
-Q : How to remove alarm or time?
-A : Just slide right or left the item that you want to remove.
+Version 1.5.1
+- Fix bugs
+- Code optimization
