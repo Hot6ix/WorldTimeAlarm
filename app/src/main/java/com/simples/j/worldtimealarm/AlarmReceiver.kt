@@ -30,13 +30,13 @@ class AlarmReceiver: BroadcastReceiver() {
     private lateinit var dbCursor: DatabaseCursor
 
     override fun onReceive(context: Context, intent: Intent) {
-        val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
+        val option = intent.getBundleExtra(OPTIONS)
         if(option == null) {
             Log.d(C.TAG, "AlarmReceiver failed to get bundle.")
             return
         }
 
-        val item = option.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+        val item = option.getParcelable<AlarmItem>(ITEM)
         if(item == null) {
             Log.d(C.TAG, "AlarmReceiver failed to get AlarmItem.")
             return
@@ -45,14 +45,14 @@ class AlarmReceiver: BroadcastReceiver() {
 
         // If alarm type is snooze ignore, if not set alarm
         var isExpired = false
-        if(intent.action == AlarmReceiver.ACTION_ALARM) {
+        if(intent.action == ACTION_ALARM) {
             dbCursor = DatabaseCursor(context)
 
             val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE)
             val bundle = Bundle().apply {
-                putParcelable(AlarmReceiver.ITEM, item)
+                putParcelable(ITEM, item)
             }
-            requestIntent.putExtra(AlarmReceiver.OPTIONS, bundle)
+            requestIntent.putExtra(OPTIONS, bundle)
 
             if(!item.repeat.any { it > 0 }) {
                 // Disable one time alarm
@@ -103,8 +103,8 @@ class AlarmReceiver: BroadcastReceiver() {
             }
         }
 
-        // Only a single alarm are showing to user, even if several alarm triggered at same time.
-        // other alarms that lost in competition will be notified as missed.
+        // Only a single alarm will be shown to user, even if several alarm triggered at same time.
+        // others will be notified as missed.
 
         // If alarm alerted to user and until dismiss or snooze, also upcoming alarms will be notified as missed.
         if(!WakeUpActivity.isActivityRunning) {
