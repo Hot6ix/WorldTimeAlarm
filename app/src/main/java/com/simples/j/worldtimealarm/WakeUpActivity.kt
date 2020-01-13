@@ -45,7 +45,6 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import com.simples.j.worldtimealarm.utils.VolumeController
 import kotlinx.android.synthetic.main.activity_wake_up.*
-import java.text.SimpleDateFormat
 import java.util.*
 
 class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
@@ -70,6 +69,11 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_wake_up)
         isActivityRunning = true
 
+        if(!intent.hasExtra(AlarmReceiver.OPTIONS)) {
+            Log.d(C.TAG, "Received Alarm came without information, Finish activity.")
+            finish()
+        }
+
         // fix floating action button bugs on version 28
         interaction_button.scaleType = ImageView.ScaleType.CENTER
         snooze.scaleType = ImageView.ScaleType.CENTER
@@ -81,6 +85,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                 or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
                 or WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
 
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -90,8 +95,9 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         dbCursor = DatabaseCursor(applicationContext)
         sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
 
-        wakeLocker = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, C.WAKE_TAG)
-        wakeLocker.acquire(AlarmReceiver.WAKE_LONG.toLong())
+        // Wake up screen
+        wakeLocker = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE, C.WAKE_TAG)
+        wakeLocker.acquire(AlarmReceiver.WAKE_LONG)
 
         clock_date.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
 
@@ -176,9 +182,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 label.text = getString(R.string.error_message)
             }
 
-            // show notification
-            showAlarmNotification(it, TYPE_ALARM)
-
             // if snooze is not set, interaction button will work like dismiss
             // ripple background won't start animation under xhdpi layout
             selector_layout?.startRippleAnimation()
@@ -189,7 +192,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             // Mute alarm sound if set
             timerHandler = Handler()
             handlerRunnable = Runnable {
-                clear()
+                clearMedia()
                 Log.d(C.TAG, "Alarm muted : ID(${item?.notiId?.plus(1)})")
             }
 
@@ -204,16 +207,17 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     override fun onDestroy() {
+        super.onDestroy()
+
         timerHandler.removeCallbacks(handlerRunnable)
-        clear()
-        player?.release()
-        notificationManager.cancel(ALARM_NOTIFICATION_ID)
+        clearMedia()
+        notificationManager.cancel(item?.notiId ?: ALARM_NOTIFICATION_ID)
         isActivityRunning = false
+        wakeLocker.release()
 
         if(isExpired) {
-            showAlarmNotification(item, TYPE_EXPIRED)
+            showExpiredNotification(item)
         }
-        super.onDestroy()
     }
 
     override fun onBackPressed() {
@@ -267,11 +271,13 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun clear() {
+    private fun clearMedia() {
         // Clear ringtone, vibrator, notification
         if(player != null && player!!.isPlaying) {
             player!!.stop()
         }
+        player?.release()
+
         if(vibrator != null && vibrator!!.hasVibrator()) vibrator!!.cancel()
     }
 
@@ -288,77 +294,23 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    private fun showAlarmNotification(item: AlarmItem?, type: Int) {
+    private fun showExpiredNotification(item: AlarmItem?) {
+        val notificationBuilder = NotificationCompat.Builder(applicationContext, applicationContext.packageName)
 
-        val intent: Intent
-        val title: String
-        val notification = NotificationCompat.Builder(applicationContext, applicationContext.packageName)
-
-        when(type) {
-            TYPE_ALARM -> {
-                intent = Intent(this, WakeUpActivity::class.java)
-
-                title =
-                    if(item != null) {
-                        when {
-                            isExpired && !item.label.isNullOrEmpty() -> {
-                                resources.getString(R.string.last_alarm_with_time).format(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
-                            }
-                            !item.label.isNullOrEmpty() -> {
-                                SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))
-                            }
-                            isExpired -> {
-                                resources.getString(R.string.last_alarm)
-                            }
-                            else -> {
-                                resources.getString(R.string.alarm)
-                            }
-                        }
-                    }
-                    else {
-                        resources.getString(R.string.error_occurred)
-                    }
-
-
-                val contentText =
-                        if(item != null) {
-                            if(!item.label.isNullOrEmpty()) {
-                                item.label
-                            }
-                            else {
-                                SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))
-                            }
-                        }
-                        else {
-                            resources.getString(R.string.error_message)
-                        }
-
-                notification
-                        .setContentText(contentText)
-                        .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
-                        .setOngoing(true)
-            }
-            TYPE_EXPIRED -> {
-                intent = Intent(this, MainActivity::class.java)
-                if(item != null) {
-                    intent.putExtra(AlarmListFragment.HIGHLIGHT_KEY, item.notiId)
-                }
-
-                title = if(item != null) {
-                    getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(applicationContext, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME))
-                }
-                else resources.getString(R.string.error_occurred)
-
-                notification
-                        .setDefaults(Notification.DEFAULT_ALL)
-                        .setAutoCancel(true)
-                        .priority = NotificationCompat.PRIORITY_MAX
-            }
-            else -> {
-                intent = Intent(this, MainActivity::class.java)
-                title = "Wrong type of notification"
-            }
+        val intent = Intent(this, MainActivity::class.java)
+        if(item != null) {
+            intent.putExtra(AlarmListFragment.HIGHLIGHT_KEY, item.notiId)
         }
+
+        val title = if(item != null) {
+            getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(applicationContext, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME))
+        }
+        else resources.getString(R.string.error_occurred)
+
+        notificationBuilder
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setAutoCancel(true)
+                .priority = NotificationCompat.PRIORITY_MAX
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(application.packageName, application.packageName+"/channel", NotificationManager.IMPORTANCE_HIGH).apply {
@@ -368,13 +320,14 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             notificationManager.createNotificationChannel(notificationChannel)
         }
 
-        notification
+        notificationBuilder
                 .setVibrate(LongArray(0))
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
                 .setContentTitle(title)
-                .setContentIntent(PendingIntent.getActivity(this, if(item != null) item.notiId else SHARED_ALARM_NOTIFICATION_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentIntent(PendingIntent.getActivity(this, item?.notiId
+                        ?: SHARED_ALARM_NOTIFICATION_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT))
 
-        notificationManager.notify(ALARM_NOTIFICATION_ID, notification.build())
+        notificationManager.notify(ALARM_NOTIFICATION_ID, notificationBuilder.build())
     }
 
     private fun getNameForTimeZone(timeZoneId: String?): String {
@@ -423,8 +376,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     companion object {
         const val ALARM_NOTIFICATION_ID = 0
         const val SHARED_ALARM_NOTIFICATION_ID = 132562
-        const val TYPE_ALARM = 100
-        const val TYPE_EXPIRED = 101
 
         var isActivityRunning = false
     }
