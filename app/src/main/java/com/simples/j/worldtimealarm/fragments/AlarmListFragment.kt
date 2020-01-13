@@ -21,7 +21,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.simples.j.worldtimealarm.AlarmActivity
-import com.simples.j.worldtimealarm.AlarmReceiver
+import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
@@ -190,7 +190,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 val bundle = data?.getBundleExtra(AlarmReceiver.OPTIONS)
                 bundle?.let {
                     val item = it.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
-                    val scheduledTime = it.getLong(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
+                    val scheduledTime = it.getLong(AlarmActivity.SCHEDULED_TIME, -1)
                     if(item != null) {
                         alarmItems.add(item)
                         if(::alarmListAdapter.isInitialized) {
@@ -212,7 +212,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 val bundle = data?.getBundleExtra(AlarmReceiver.OPTIONS)
                 bundle?.let { b ->
                     val item = b.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
-                    val scheduledTime = b.getLong(AlarmActivity.SCHEDULED_TIME, -1) ?: -1
+                    val scheduledTime = b.getLong(AlarmActivity.SCHEDULED_TIME, -1)
                     if(item != null) {
                         if(::alarmListAdapter.isInitialized) {
                             val index = alarmItems.indexOfFirst { it.notiId == item.notiId }

@@ -7,6 +7,7 @@ import android.view.View
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import kotlinx.android.synthetic.main.activity_wake_up.*
 import org.junit.Before
 import org.junit.Test

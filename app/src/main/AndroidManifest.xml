@@ -56,7 +56,7 @@
             android:theme="@style/NoActionBar" />
 
         <receiver
-            android:name=".AlarmReceiver"
+            android:name=".receiver.AlarmReceiver"
             android:enabled="true" />
 
         <activity
@@ -81,7 +81,7 @@
             android:label="@string/action_settings" />
 
         <receiver
-            android:name=".BootCompletedReceiver"
+            android:name=".receiver.BootCompletedReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -89,7 +89,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".TimeSetChangedReceiver"
+            android:name=".receiver.TimeSetChangedReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

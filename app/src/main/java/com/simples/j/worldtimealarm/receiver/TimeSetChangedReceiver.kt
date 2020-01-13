@@ -1,8 +1,9 @@
-package com.simples.j.worldtimealarm
+package com.simples.j.worldtimealarm.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.simples.j.worldtimealarm.MainActivity
 
 class TimeSetChangedReceiver : BroadcastReceiver() {
 

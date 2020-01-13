@@ -1,4 +1,4 @@
-package com.simples.j.worldtimealarm
+package com.simples.j.worldtimealarm.receiver
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -12,6 +12,9 @@ import android.os.Bundle
 import android.support.v4.app.NotificationCompat
 import android.text.format.DateUtils
 import android.util.Log
+import com.simples.j.worldtimealarm.MainActivity
+import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.WakeUpActivity
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment

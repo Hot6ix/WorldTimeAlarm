@@ -3,20 +3,16 @@ package com.simples.j.worldtimealarm
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import kotlinx.android.synthetic.main.alarm_day_item.*
+import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
-import org.robolectric.shadows.ShadowApplicationPackageManager
-import org.robolectric.shadows.ShadowPackageManager
 import java.util.*
 
 @RunWith(RobolectricTestRunner::class)

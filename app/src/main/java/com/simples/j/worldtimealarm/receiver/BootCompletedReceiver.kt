@@ -1,4 +1,4 @@
-package com.simples.j.worldtimealarm
+package com.simples.j.worldtimealarm.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
