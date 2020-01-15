@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -19,7 +19,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".TimeZonePickerActivity"/>
+        <service
+            android:name=".utils.WakeUpService"
+            android:enabled="true"/>
+
+        <activity android:name=".TimeZonePickerActivity" />
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"

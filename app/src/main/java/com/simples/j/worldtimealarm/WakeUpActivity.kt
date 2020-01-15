@@ -11,12 +11,9 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.graphics.drawable.GradientDrawable
-import android.media.AudioAttributes
-import android.media.AudioManager
-import android.media.MediaPlayer
-import android.media.RingtoneManager
-import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Vibrator
 import android.preference.PreferenceManager
 import android.support.constraint.ConstraintSet
 import android.support.v4.app.NotificationCompat
@@ -40,27 +37,17 @@ import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.AlarmReceiver
-import com.simples.j.worldtimealarm.utils.AlarmController
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import com.simples.j.worldtimealarm.utils.MediaCursor
-import com.simples.j.worldtimealarm.utils.VolumeController
+import com.simples.j.worldtimealarm.utils.*
 import kotlinx.android.synthetic.main.activity_wake_up.*
 import java.util.*
 
 class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
-    private lateinit var powerManager: PowerManager
-    private lateinit var wakeLocker: PowerManager.WakeLock
     private lateinit var notificationManager: NotificationManager
     private lateinit var dbCursor: DatabaseCursor
-    private lateinit var audioManager: AudioManager
     private lateinit var sharedPref: SharedPreferences
-    private lateinit var timerHandler: Handler
-    private lateinit var handlerRunnable: Runnable
 
     private var item: AlarmItem? = null
-    private var player: MediaPlayer? = null
-    private var vibrator: Vibrator? = null
     private var isMenuExpanded = false
     private var isExpired = false
 
@@ -88,16 +75,9 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 or WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
                 or WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
 
-        powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         dbCursor = DatabaseCursor(applicationContext)
         sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-
-        // Wake up screen
-        wakeLocker = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE, C.WAKE_TAG)
-        wakeLocker.acquire(AlarmReceiver.WAKE_LONG)
 
         clock_date.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
 
@@ -121,42 +101,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             ViewCompat.setBackgroundTintList(interaction_button, ColorStateList.valueOf(darken))
             ViewCompat.setBackgroundTintList(dismiss, ColorStateList.valueOf(darken))
             ViewCompat.setBackgroundTintList(snooze, ColorStateList.valueOf(darken))
-
-            // Play ringtone
-            val ringtoneUri = it?.ringtone
-            val audioAttrs = AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-            if(ringtoneUri != null && ringtoneUri != "null") {
-                player = MediaPlayer().apply {
-                    setAudioAttributes(audioAttrs.build())
-                    isLooping = true
-                }
-
-                try {
-                    player?.setDataSource(applicationContext, Uri.parse(ringtoneUri))
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Toast.makeText(applicationContext, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
-
-                    // play default alarm sound if error occurred.
-                    val sound = RingtoneManager.getActualDefaultRingtoneUri(applicationContext, RingtoneManager.TYPE_ALARM)
-                    player?.setDataSource(applicationContext, sound)
-                }
-                player?.prepare()
-                player?.start()
-
-                if(sharedPref.getBoolean(resources.getString(R.string.setting_alarm_volume_increase_key), false)) {
-                    val volume = VolumeController(applicationContext, audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM))
-                    volume.start()
-                }
-            }
-
-            // Vibrate
-            val vibrationPattern = it?.vibration
-            if(vibrationPattern != null && vibrationPattern.isNotEmpty()) {
-                vibrate(vibrationPattern)
-            }
 
             // Show selected time zone's time, but not print if time zone is default
             val timeZone = it?.timeZone?.replace(" ", "_")
@@ -188,17 +132,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             if(it?.snooze == 0L || intent.action == AlarmReceiver.ACTION_SNOOZE) {
                 interaction_button.setImageDrawable(getDrawable(R.drawable.ic_action_alarm_off))
             }
-
-            // Mute alarm sound if set
-            timerHandler = Handler()
-            handlerRunnable = Runnable {
-                clearMedia()
-                Log.d(C.TAG, "Alarm muted : ID(${item?.notiId?.plus(1)})")
-            }
-
-            if(sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0")?.toInt() != 0) {
-                timerHandler.postDelayed(handlerRunnable, sharedPref.getString(resources.getString(R.string.setting_alarm_mute_key), "0")!!.toLong())
-            }
         }
 
         interaction_button.setOnClickListener(this)
@@ -209,15 +142,21 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     override fun onDestroy() {
         super.onDestroy()
 
-        timerHandler.removeCallbacks(handlerRunnable)
-        clearMedia()
         notificationManager.cancel(item?.notiId ?: ALARM_NOTIFICATION_ID)
         isActivityRunning = false
-        wakeLocker.release()
 
         if(isExpired) {
             showExpiredNotification(item)
         }
+
+        val player = AlarmMediaPlayer.player
+        if(player.isPlaying) player.stop()
+        player.release()
+
+        val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        vibrator.cancel()
+
+        stopService(Intent(applicationContext, WakeUpService::class.java))
     }
 
     override fun onBackPressed() {
@@ -267,29 +206,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 val minutes = getString(R.string.minutes, item?.snooze?.div((60 * 1000)))
                 Toast.makeText(applicationContext, getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()
                 finish()
-            }
-        }
-    }
-
-    private fun clearMedia() {
-        // Clear ringtone, vibrator, notification
-        if(player != null && player!!.isPlaying) {
-            player!!.stop()
-        }
-        player?.release()
-
-        if(vibrator != null && vibrator!!.hasVibrator()) vibrator!!.cancel()
-    }
-
-    private fun vibrate(array: LongArray?) {
-        if(array != null) {
-            if(Build.VERSION.SDK_INT < 26) {
-                if(array.size > 1) vibrator?.vibrate(array, 0)
-                else vibrator?.vibrate(array[0])
-            }
-            else {
-                if(array.size > 1) vibrator?.vibrate(VibrationEffect.createWaveform(array, 0))
-                else vibrator?.vibrate(VibrationEffect.createOneShot(array[0], VibrationEffect.DEFAULT_AMPLITUDE))
             }
         }
     }

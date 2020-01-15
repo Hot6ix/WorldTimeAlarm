@@ -21,6 +21,7 @@ import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
+import com.simples.j.worldtimealarm.utils.WakeUpService
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -33,13 +34,19 @@ class AlarmReceiver: BroadcastReceiver() {
 
     private lateinit var dbCursor: DatabaseCursor
     private lateinit var notificationManager: NotificationManager
+    private lateinit var wakeLocker: PowerManager.WakeLock
     private lateinit var powerManager: PowerManager
+
     private var option: Bundle? = null
     private var isExpired = false
 
     override fun onReceive(context: Context, intent: Intent) {
         notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+
+        // Wake up screen
+        wakeLocker = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE, C.WAKE_TAG)
+        wakeLocker.acquire(WAKE_LONG)
 
         option = intent.getBundleExtra(OPTIONS)
         if(option == null) {
@@ -117,10 +124,17 @@ class AlarmReceiver: BroadcastReceiver() {
         // others will be notified as missed.
 
         // If alarm alerted to user and until dismiss or snooze, also upcoming alarms will be notified as missed.
-        Log.d(C.TAG, powerManager.isInteractive.toString())
         if(!WakeUpActivity.isActivityRunning) {
-            showAlarmNotification(context, item, TYPE_ALARM, intent)
-            WakeUpActivity.isActivityRunning = true
+            val serviceIntent = Intent(context, WakeUpService::class.java).apply {
+                putExtra(OPTIONS, option)
+                putExtra(EXPIRED, isExpired)
+            }
+
+            if(Build.VERSION.SDK_INT >= 26)
+                context.startForegroundService(serviceIntent)
+            else
+                context.startService(serviceIntent)
+//            WakeUpActivity.isActivityRunning = true
 //            Intent(context, WakeUpActivity::class.java).apply {
 //                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 //                action = intent.action
@@ -131,103 +145,45 @@ class AlarmReceiver: BroadcastReceiver() {
         }
         else {
             Log.d(C.TAG, "Alarm missed : ID(${item.notiId+1})")
-            showAlarmNotification(context, item, TYPE_MISSED, intent)
+            showMissedNotification(context, item)
         }
     }
 
-    private fun showAlarmNotification(context: Context, item: AlarmItem, type: Int, intent: Intent) {
-        val dstIntent: Intent
-        val title: String
-        val notificationBuilder = NotificationCompat.Builder(context, context.packageName)
+    private fun showMissedNotification(context: Context, item: AlarmItem) {
+        val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
 
-        when(type) {
-            TYPE_ALARM -> {
-                dstIntent = Intent(context, WakeUpActivity::class.java).apply {
-                    action = intent.action
-                    putExtra(OPTIONS, option)
-                    putExtra(EXPIRED, isExpired)
-                }
+        val dstIntent = Intent(context, MainActivity::class.java).apply {
+            putExtra(AlarmListFragment.HIGHLIGHT_KEY, item.notiId)
+        }
 
-                title =
-                        when {
-                            isExpired && !item.label.isNullOrEmpty() -> {
-                                context.resources.getString(R.string.last_alarm_with_time).format(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
-                            }
-                            !item.label.isNullOrEmpty() -> {
-                                SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))
-                            }
-                            isExpired -> {
-                                context.resources.getString(R.string.last_alarm)
-                            }
-                            else -> {
-                                context.resources.getString(R.string.alarm)
-                            }
-                        }
+        val title = context.resources.getString(R.string.missed_alarm)
 
+        notificationBuilder
+                .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
+                .setContentIntent(PendingIntent.getActivity(context, item.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
 
-                val contentText =
-                        if(!item.label.isNullOrEmpty()) {
-                            item.label
-                        }
-                        else {
-                            SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))
-                        }
+        if(isExpired) {
+            notificationBuilder
+                    .setAutoCancel(true)
+                    .setContentTitle(context.resources.getString(R.string.missed_and_last_alarm))
+                    .setContentText(context.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(context, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME)))
+                    .setDefaults(Notification.DEFAULT_ALL)
+                    .priority = NotificationCompat.PRIORITY_MAX
+        }
 
-                notificationBuilder
-                        .setContentText(contentText)
-                        .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
-                        .setOngoing(true)
-                        .setFullScreenIntent(PendingIntent.getActivity(context, item.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT), true)
-            }
-            TYPE_EXPIRED -> {
-                dstIntent = Intent(context, MainActivity::class.java).apply {
-                    putExtra(AlarmListFragment.HIGHLIGHT_KEY, item.notiId)
-                }
-
-                title = context.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(context, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME))
-
-                notificationBuilder
-                        .setDefaults(Notification.DEFAULT_ALL)
-                        .setAutoCancel(true)
-                        .setFullScreenIntent(PendingIntent.getActivity(context, item.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT), true)
-                        .priority = NotificationCompat.PRIORITY_MAX
-            }
-            TYPE_MISSED -> {
-                dstIntent = Intent(context, MainActivity::class.java).apply {
-                    putExtra(AlarmListFragment.HIGHLIGHT_KEY, item.notiId)
-                }
-
-                title = context.resources.getString(R.string.missed_alarm)
-
-                notificationBuilder
-                        .setAutoCancel(true)
-                        .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
-                        .setContentIntent(PendingIntent.getActivity(context, item.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
-
-                if(isExpired) {
-                    notificationBuilder
-                            .setContentTitle(context.resources.getString(R.string.missed_and_last_alarm))
-                            .setContentText(context.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(context, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME)))
-                            .setDefaults(Notification.DEFAULT_ALL)
-                            .priority = NotificationCompat.PRIORITY_MAX
-                }
-
-                if(item.label != null && !item.label.isNullOrEmpty()) {
-                    notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText("${SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))} - ${item.label}"))
-                }
-            }
-            else -> {
-                title = "Wrong type of notification"
-            }
+        if(item.label != null && !item.label.isNullOrEmpty()) {
+            notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText("${SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))} - ${item.label}"))
         }
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(context.packageName, context.packageName+"/channel", NotificationManager.IMPORTANCE_HIGH).apply {
+            val notificationChannel = NotificationChannel(NOTIFICATION_CHANNEL_ID, context.getString(R.string.notification_channel_alarm), NotificationManager.IMPORTANCE_HIGH).apply {
                 enableVibration(true)
                 vibrationPattern = LongArray(0)
+
             }
             notificationManager.createNotificationChannel(notificationChannel)
         }
+
 
         notificationBuilder
                 .setVibrate(LongArray(0))
@@ -248,6 +204,8 @@ class AlarmReceiver: BroadcastReceiver() {
         const val TYPE_ALARM = 0
         const val TYPE_EXPIRED = 1
         const val TYPE_MISSED = 2
+
+        const val NOTIFICATION_CHANNEL_ID = "WorldTimeAlarmNotificationChannel"
     }
 
 }
