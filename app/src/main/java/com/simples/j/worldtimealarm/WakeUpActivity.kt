@@ -37,7 +37,10 @@ import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.AlarmReceiver
-import com.simples.j.worldtimealarm.utils.*
+import com.simples.j.worldtimealarm.utils.AlarmController
+import com.simples.j.worldtimealarm.utils.DatabaseCursor
+import com.simples.j.worldtimealarm.utils.MediaCursor
+import com.simples.j.worldtimealarm.utils.WakeUpService
 import kotlinx.android.synthetic.main.activity_wake_up.*
 import java.util.*
 
@@ -54,7 +57,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wake_up)
-        isActivityRunning = true
 
         if(!intent.hasExtra(AlarmReceiver.OPTIONS)) {
             Log.d(C.TAG, "Received Alarm came without information, Finish activity.")
@@ -143,15 +145,10 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         super.onDestroy()
 
         notificationManager.cancel(item?.notiId ?: ALARM_NOTIFICATION_ID)
-        isActivityRunning = false
 
         if(isExpired) {
             showExpiredNotification(item)
         }
-
-        val player = AlarmMediaPlayer.player
-        if(player.isPlaying) player.stop()
-        player.release()
 
         val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         vibrator.cancel()
@@ -292,8 +289,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     companion object {
         const val ALARM_NOTIFICATION_ID = 0
         const val SHARED_ALARM_NOTIFICATION_ID = 132562
-
-        var isActivityRunning = false
     }
 
 }

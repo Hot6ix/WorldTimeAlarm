@@ -15,7 +15,6 @@ import android.text.format.DateUtils
 import android.util.Log
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
-import com.simples.j.worldtimealarm.WakeUpActivity
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
@@ -124,7 +123,9 @@ class AlarmReceiver: BroadcastReceiver() {
         // others will be notified as missed.
 
         // If alarm alerted to user and until dismiss or snooze, also upcoming alarms will be notified as missed.
-        if(!WakeUpActivity.isActivityRunning) {
+        if(!WakeUpService.isWakeUpServiceRunning) {
+            WakeUpService.isWakeUpServiceRunning = true
+
             val serviceIntent = Intent(context, WakeUpService::class.java).apply {
                 putExtra(OPTIONS, option)
                 putExtra(EXPIRED, isExpired)

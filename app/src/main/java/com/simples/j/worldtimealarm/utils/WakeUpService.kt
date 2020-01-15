@@ -22,7 +22,6 @@ import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.AlarmReceiver
-import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -49,6 +48,7 @@ class WakeUpService : Service() {
         super.onCreate()
 
         Log.d(C.TAG, "WakeUpService Started")
+        isWakeUpServiceRunning = true
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
@@ -68,12 +68,7 @@ class WakeUpService : Service() {
             }
 
             item?.let { alarmItem ->
-                if(!WakeUpActivity.isActivityRunning) {
-                    startForeground(21342, getNotification(intent, AlarmReceiver.TYPE_ALARM, alarmItem))
-                }
-                else {
-                    startForeground(21342, getNotification(intent, AlarmReceiver.TYPE_MISSED, alarmItem))
-                }
+                startForeground(alarmItem.notiId, getNotification(AlarmReceiver.TYPE_ALARM, alarmItem, intent))
                 setup(alarmItem)
                 play(alarmItem.ringtone)
                 vibrate(alarmItem.vibration)
@@ -98,8 +93,13 @@ class WakeUpService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        isWakeUpServiceRunning = false
         stopAll()
         timer?.removeCallbacks(timerRunnable)
+
+        item?.let {
+            if(isExpired) notificationManager.notify(item?.notiId ?: C.SHARED_NOTIFICATION_ID, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
+        }
     }
 
     private fun setup(item: AlarmItem) {
@@ -109,7 +109,7 @@ class WakeUpService : Service() {
             vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
 
-    private fun getNotification(intent: Intent, type: Int, alarmItem: AlarmItem): Notification {
+    private fun getNotification(type: Int, alarmItem: AlarmItem, intent: Intent? = null): Notification {
         val dstIntent: Intent
         val title: String
         val notificationBuilder = NotificationCompat.Builder(applicationContext, AlarmReceiver.NOTIFICATION_CHANNEL_ID)
@@ -117,7 +117,7 @@ class WakeUpService : Service() {
         when(type) {
             AlarmReceiver.TYPE_ALARM -> {
                 dstIntent = Intent(applicationContext, WakeUpActivity::class.java).apply {
-                    action = intent.action
+                    action = intent?.action
                     putExtra(AlarmReceiver.OPTIONS, option)
                     putExtra(AlarmReceiver.EXPIRED, isExpired)
                 }
@@ -148,6 +148,8 @@ class WakeUpService : Service() {
                         }
 
                 notificationBuilder
+                        .setSound(null)
+                        .setVibrate(null)
                         .setOngoing(true)
                         .setContentText(contentText)
                         .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
@@ -166,30 +168,6 @@ class WakeUpService : Service() {
                         .setFullScreenIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT), true)
                         .priority = NotificationCompat.PRIORITY_MAX
             }
-            AlarmReceiver.TYPE_MISSED -> {
-                dstIntent = Intent(applicationContext, MainActivity::class.java).apply {
-                    putExtra(AlarmListFragment.HIGHLIGHT_KEY, alarmItem.notiId)
-                }
-
-                title = applicationContext.resources.getString(R.string.missed_alarm)
-
-                notificationBuilder
-                        .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(alarmItem.timeSet.toLong())))
-                        .setContentIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
-
-                if(isExpired) {
-                    notificationBuilder
-                            .setAutoCancel(true)
-                            .setContentTitle(applicationContext.resources.getString(R.string.missed_and_last_alarm))
-                            .setContentText(applicationContext.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(applicationContext, alarmItem.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME)))
-                            .setDefaults(Notification.DEFAULT_ALL)
-                            .priority = NotificationCompat.PRIORITY_MAX
-                }
-
-                if(alarmItem.label != null && !alarmItem.label.isNullOrEmpty()) {
-                    notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText("${SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(alarmItem.timeSet.toLong()))} - ${alarmItem.label}"))
-                }
-            }
             else -> {
                 title = "Wrong type of notification"
             }
@@ -197,9 +175,10 @@ class WakeUpService : Service() {
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(AlarmReceiver.NOTIFICATION_CHANNEL_ID, applicationContext.getString(R.string.notification_channel_alarm), NotificationManager.IMPORTANCE_HIGH).apply {
-                enableVibration(true)
-                vibrationPattern = LongArray(0)
-
+                if(type == AlarmReceiver.TYPE_ALARM) {
+                    enableVibration(false)
+                    setSound(null,  null)
+                }
             }
             notificationManager.createNotificationChannel(notificationChannel)
         }
@@ -213,17 +192,14 @@ class WakeUpService : Service() {
     }
 
     private fun play(ringtone: String?) {
-        if(ringtone.isNullOrEmpty() || ringtone == "null") {
-            Log.d(C.TAG, "Ringtone is empty.")
-            return
-        }
+        if(ringtone.isNullOrEmpty() || ringtone == "null") return
 
         val ringtoneUri = Uri.parse(ringtone)
         val audioAttrs = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_ALARM)
 
-        mediaPlayer = AlarmMediaPlayer.player.apply {
+        mediaPlayer = MediaPlayer().apply {
             setAudioAttributes(audioAttrs.build())
             isLooping = true
         }
@@ -269,5 +245,9 @@ class WakeUpService : Service() {
         vibrator?.let {
             if(it.hasVibrator()) it.cancel()
         }
+    }
+
+    companion object {
+        var isWakeUpServiceRunning = false
     }
 }
