@@ -160,12 +160,14 @@ class AlarmReceiver: BroadcastReceiver() {
         val title = context.resources.getString(R.string.missed_alarm)
 
         notificationBuilder
+                .setAutoCancel(true)
+                .setSmallIcon(R.drawable.ic_action_alarm_white)
+                .setContentTitle(title)
                 .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
                 .setContentIntent(PendingIntent.getActivity(context, item.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
 
         if(isExpired) {
             notificationBuilder
-                    .setAutoCancel(true)
                     .setContentTitle(context.resources.getString(R.string.missed_and_last_alarm))
                     .setContentText(context.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(context, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME)))
                     .setDefaults(Notification.DEFAULT_ALL)
@@ -185,12 +187,6 @@ class AlarmReceiver: BroadcastReceiver() {
             notificationManager.createNotificationChannel(notificationChannel)
         }
 
-
-        notificationBuilder
-                .setVibrate(LongArray(0))
-                .setSmallIcon(R.drawable.ic_action_alarm_white)
-                .setContentTitle(title)
-
         notificationManager.notify(item.notiId, notificationBuilder.build())
     }
 
@@ -204,7 +200,6 @@ class AlarmReceiver: BroadcastReceiver() {
 
         const val TYPE_ALARM = 0
         const val TYPE_EXPIRED = 1
-        const val TYPE_MISSED = 2
 
         const val NOTIFICATION_CHANNEL_ID = "WorldTimeAlarmNotificationChannel"
     }
