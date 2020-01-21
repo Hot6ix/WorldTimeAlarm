@@ -105,8 +105,10 @@ class WakeUpService : Service() {
 
         item?.let {
             notificationManager.cancel(it.notiId)
-            AlarmController.getInstance().disableAlarm(applicationContext, it)
-            if(isExpired) notificationManager.notify(it.notiId, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
+            if(isExpired) {
+                notificationManager.notify(it.notiId, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
+                AlarmController.getInstance().disableAlarm(applicationContext, it)
+            }
         }
 
         Log.d(C.TAG, "WakeUpService destroyed")

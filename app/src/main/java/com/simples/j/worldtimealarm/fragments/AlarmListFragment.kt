@@ -257,14 +257,13 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             showSnackBar(scheduledTime)
         }
         else {
+            alarmItems.find { it.notiId == item.notiId }?.on_off = 0
+            dbCursor.updateAlarmOnOffByNotiId(item.notiId, false)
+            alarmController.cancelAlarm(context, item.notiId)
+            snackBar?.dismiss()
+
             if(WakeUpService.isWakeUpServiceRunning) {
                 context?.stopService(Intent(context, WakeUpService::class.java))
-            }
-            else {
-                alarmItems.find { it.notiId == item.notiId }?.on_off = 0
-                dbCursor.updateAlarmOnOffByNotiId(item.notiId, false)
-                alarmController.cancelAlarm(context, item.notiId)
-                snackBar?.dismiss()
             }
         }
     }
