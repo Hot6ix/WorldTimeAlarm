@@ -4,9 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
@@ -52,11 +50,13 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
     private var item: AlarmItem? = null
     private var isMenuExpanded = false
-    private var isExpired = false
+//    private var isExpired = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wake_up)
+
+        Log.d(C.TAG, "WakeUpActivity Started")
 
         if(!intent.hasExtra(AlarmReceiver.OPTIONS)) {
             Log.d(C.TAG, "Received Alarm came without information, Finish activity.")
@@ -85,7 +85,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
         val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
         item = if(option != null && !option.isEmpty) option.getParcelable(AlarmReceiver.ITEM) else null
-        isExpired = intent.getBooleanExtra(AlarmReceiver.EXPIRED, false)
+//        isExpired = intent.getBooleanExtra(AlarmReceiver.EXPIRED, false)
 
         item.let {
             Log.d(C.TAG, "Alarm alerted : ID(${it?.notiId?.plus(1)})")
@@ -139,6 +139,18 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         interaction_button.setOnClickListener(this)
         snooze.setOnClickListener(this)
         dismiss.setOnClickListener(this)
+
+        val actionBroadcastReceiver = object: BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                // Can be extended later, for now this broadcast receiver is only for finish activity.
+                finish()
+            }
+        }
+        val actionIntentFilter = IntentFilter().apply {
+            addAction(ACTION_ACTIVITY_FINISH)
+        }
+
+        registerReceiver(actionBroadcastReceiver, actionIntentFilter)
     }
 
     override fun onDestroy() {
@@ -146,9 +158,9 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
         notificationManager.cancel(item?.notiId ?: ALARM_NOTIFICATION_ID)
 
-        if(isExpired) {
-            showExpiredNotification(item)
-        }
+//        if(isExpired) {
+//            showExpiredNotification(item)
+//        }
 
         val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         vibrator.cancel()
@@ -165,7 +177,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(view: View) {
         when(view.id) {
             R.id.interaction_button -> {
-                if(item == null || item?.snooze == 0.toLong() || intent.action == AlarmReceiver.ACTION_SNOOZE) {
+                if(item == null || item?.snooze == 0L || intent.action == AlarmReceiver.ACTION_SNOOZE) {
                     finish()
                 }
                 else {
@@ -289,6 +301,8 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     companion object {
         const val ALARM_NOTIFICATION_ID = 0
         const val SHARED_ALARM_NOTIFICATION_ID = 132562
+
+        const val ACTION_ACTIVITY_FINISH = "ACTION_ACTIVITY_FINISH"
     }
 
 }

@@ -221,7 +221,7 @@ public class AlarmController {
         PendingIntent mainIntent = PendingIntent.getActivity(context, notiId, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, notiId+1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(alarmCalendar.getTimeInMillis(), mainIntent), alarmIntent);
-        Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.getDefault()).format(alarmCalendar.getTime()) + ", Info(" + item + "), " + type);
+        Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.getDefault()).format(alarmCalendar.getTime()) + ", AlarmItem(" + item + "), " + type);
         Log.d(C.TAG, "Alarm scheduled : ID(" + notiId+1 + ")");
 
         return alarmCalendar.getTimeInMillis();

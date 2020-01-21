@@ -129,6 +129,7 @@ class AlarmReceiver: BroadcastReceiver() {
             val serviceIntent = Intent(context, WakeUpService::class.java).apply {
                 putExtra(OPTIONS, option)
                 putExtra(EXPIRED, isExpired)
+                action = intent.action
             }
 
             if(Build.VERSION.SDK_INT >= 26)

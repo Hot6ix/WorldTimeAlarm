@@ -22,6 +22,7 @@ import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.AlarmReceiver
+import com.simples.j.worldtimealarm.receiver.NotificationActionReceiver
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -98,8 +99,10 @@ class WakeUpService : Service() {
         timer?.removeCallbacks(timerRunnable)
 
         item?.let {
-            if(isExpired) notificationManager.notify(item?.notiId ?: C.SHARED_NOTIFICATION_ID, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
+            notificationManager.cancel(it.notiId)
+            if(isExpired) notificationManager.notify(it.notiId, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
         }
+
     }
 
     private fun setup(item: AlarmItem) {
@@ -147,13 +150,30 @@ class WakeUpService : Service() {
                             SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(alarmItem.timeSet.toLong()))
                         }
 
+                val dismissIntent = Intent(this, NotificationActionReceiver::class.java).apply {
+                    putExtra(NotificationActionReceiver.NOTIFICATION_ACTION, NotificationActionReceiver.ACTION_DISMISS)
+                }
+                val dismissPendingIntent = PendingIntent.getBroadcast(applicationContext, alarmItem.notiId+20, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val dismissAction = NotificationCompat.Action(0, getString(R.string.dismiss), dismissPendingIntent)
+
+                val snoozeIntent = Intent(this, NotificationActionReceiver::class.java).apply {
+                    putExtra(NotificationActionReceiver.NOTIFICATION_ACTION, NotificationActionReceiver.ACTION_SNOOZE)
+                    putExtra(AlarmReceiver.ITEM, alarmItem)
+                }
+                val snoozePendingIntent = PendingIntent.getBroadcast(applicationContext, alarmItem.notiId+30, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val snoozeAction = NotificationCompat.Action(0, getString(R.string.snooze), snoozePendingIntent)
+
+
                 notificationBuilder
+                        .addAction(dismissAction)
                         .setSound(null)
                         .setVibrate(null)
                         .setOngoing(true)
                         .setContentText(contentText)
                         .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
                         .setFullScreenIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT), true)
+
+                if(alarmItem.snooze > 0 && intent?.action == AlarmReceiver.ACTION_ALARM) notificationBuilder.addAction(snoozeAction)
             }
             AlarmReceiver.TYPE_EXPIRED -> {
                 dstIntent = Intent(applicationContext, MainActivity::class.java).apply {
@@ -165,7 +185,7 @@ class WakeUpService : Service() {
                 notificationBuilder
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL)
-                        .setFullScreenIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT), true)
+                        .setFullScreenIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId+10, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT), true)
                         .priority = NotificationCompat.PRIORITY_MAX
             }
             else -> {

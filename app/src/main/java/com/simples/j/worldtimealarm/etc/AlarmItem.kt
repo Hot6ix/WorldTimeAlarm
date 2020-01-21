@@ -2,8 +2,6 @@ package com.simples.j.worldtimealarm.etc
 
 import android.os.Parcel
 import android.os.Parcelable
-import java.io.Serializable
-import java.util.*
 
 /**
  * Created by j on 26/02/2018.
@@ -11,15 +9,15 @@ import java.util.*
  */
 data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, var repeat: IntArray, var ringtone: String?, var vibration: LongArray?, var snooze: Long, var label: String? = null, var on_off: Int, var notiId: Int, var colorTag: Int, var index: Int?, var startDate: Long? = null, var endDate: Long? = null) : Parcelable {
     override fun toString(): String {
-        return "$id, $timeZone, $timeSet, ${Arrays.toString(repeat)}, $ringtone, $vibration, $snooze, $label, $on_off, $notiId, $colorTag, $index, $startDate, $endDate"
+        return "id=$id, timeZone=$timeZone, timeSet=$timeSet, repeat=${repeat.contentToString()}, ringtone=$ringtone, vibration=$vibration, snooze=$snooze, label=$label, on_off=$on_off, notiId=$notiId, colorTag=$colorTag, index=$index, startDate=$startDate, endDate=$endDate"
     }
 
     override fun equals(other: Any?): Boolean {
         val item = other as AlarmItem
-        return Arrays.equals(item.repeat, repeat)
+        return item.repeat.contentEquals(repeat)
     }
 
-    override fun hashCode() = Arrays.hashCode(repeat)
+    override fun hashCode() = repeat.contentHashCode()
 
     constructor(source: Parcel) : this(
             source.readValue(Int::class.java.classLoader) as Int?,
