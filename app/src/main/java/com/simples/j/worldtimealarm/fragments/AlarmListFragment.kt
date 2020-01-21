@@ -27,10 +27,7 @@ import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
-import com.simples.j.worldtimealarm.utils.AlarmController
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import com.simples.j.worldtimealarm.utils.ListSwipeController
-import com.simples.j.worldtimealarm.utils.MediaCursor
+import com.simples.j.worldtimealarm.utils.*
 import kotlinx.android.synthetic.main.fragment_alarmlist.*
 import kotlinx.coroutines.*
 import java.util.*
@@ -260,10 +257,15 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             showSnackBar(scheduledTime)
         }
         else {
-            alarmItems.find { it.notiId == item.notiId }?.on_off = 0
-            dbCursor.updateAlarmOnOffByNotiId(item.notiId, false)
-            alarmController.cancelAlarm(context, item.notiId)
-            snackBar?.dismiss()
+            if(WakeUpService.isWakeUpServiceRunning) {
+                context?.stopService(Intent(context, WakeUpService::class.java))
+            }
+            else {
+                alarmItems.find { it.notiId == item.notiId }?.on_off = 0
+                dbCursor.updateAlarmOnOffByNotiId(item.notiId, false)
+                alarmController.cancelAlarm(context, item.notiId)
+                snackBar?.dismiss()
+            }
         }
     }
 

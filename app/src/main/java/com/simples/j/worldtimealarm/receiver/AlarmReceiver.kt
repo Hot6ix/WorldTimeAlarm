@@ -65,19 +65,7 @@ class AlarmReceiver: BroadcastReceiver() {
         if(intent.action == ACTION_ALARM) {
             dbCursor = DatabaseCursor(context)
 
-            val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE)
-            val bundle = Bundle().apply {
-                putParcelable(ITEM, item)
-            }
-            requestIntent.putExtra(OPTIONS, bundle)
-
-            if(!item.repeat.any { it > 0 }) {
-                // Disable one time alarm
-                item.on_off = 0
-                dbCursor.updateAlarm(item)
-                context.sendBroadcast(requestIntent)
-            }
-            else {
+            if(item.repeat.any { it > 0 }) {
                 with(item.endDate) {
                     try {
                         val endTimeInMillis = this
@@ -111,7 +99,13 @@ class AlarmReceiver: BroadcastReceiver() {
                 if(isExpired) {
                     // Alarm has been expired
                     Log.d(C.TAG, "Alarm expired : ID(${item.notiId+1})")
-                    item.on_off = 0
+
+                    val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE)
+                    val bundle = Bundle().apply {
+                        putParcelable(ITEM, item)
+                    }
+                    requestIntent.putExtra(OPTIONS, bundle)
+
                     dbCursor.updateAlarm(item)
                     context.sendBroadcast(requestIntent)
                 }

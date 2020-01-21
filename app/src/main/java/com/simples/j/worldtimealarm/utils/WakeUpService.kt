@@ -53,7 +53,7 @@ class WakeUpService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        Log.d(C.TAG, "WakeUpService Started")
+        Log.d(C.TAG, "WakeUpService started")
         isWakeUpServiceRunning = true
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -105,9 +105,11 @@ class WakeUpService : Service() {
 
         item?.let {
             notificationManager.cancel(it.notiId)
+            AlarmController.getInstance().disableAlarm(applicationContext, it)
             if(isExpired) notificationManager.notify(it.notiId, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
         }
 
+        Log.d(C.TAG, "WakeUpService destroyed")
     }
 
     private fun setup(item: AlarmItem) {

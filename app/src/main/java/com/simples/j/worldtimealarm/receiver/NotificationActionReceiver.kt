@@ -18,14 +18,15 @@ class NotificationActionReceiver : BroadcastReceiver() {
         if(intent.hasExtra(NOTIFICATION_ACTION)) {
             val action = intent.getStringExtra(NOTIFICATION_ACTION)
             Log.d(C.TAG, "Action received: $action")
+
             if(action == ACTION_SNOOZE) {
                 val alarmItem = intent.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
-
                 AlarmController.getInstance().scheduleAlarm(context, alarmItem, AlarmController.TYPE_SNOOZE)
 
                 val minutes = context.getString(R.string.minutes, alarmItem.snooze.div((60 * 1000)))
                 Toast.makeText(context, context.getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()
             }
+
             context.sendBroadcast(Intent(WakeUpActivity.ACTION_ACTIVITY_FINISH))
             context.stopService(Intent(context, WakeUpService::class.java))
         }

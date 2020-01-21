@@ -237,7 +237,7 @@ public class AlarmController {
         Log.d(C.TAG, "Alarm cancelled : ID(" + notiId+1 + ")");
     }
 
-    private void disableAlarm(Context context, AlarmItem item) {
+    public void disableAlarm(Context context, AlarmItem item) {
         item.setOn_off(0);
         new DatabaseCursor(context).updateAlarm(item);
 

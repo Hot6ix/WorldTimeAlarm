@@ -1,9 +1,6 @@
 package com.simples.j.worldtimealarm
 
-import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.*
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -14,12 +11,10 @@ import android.os.Bundle
 import android.os.Vibrator
 import android.preference.PreferenceManager
 import android.support.constraint.ConstraintSet
-import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.app.AppCompatActivity
 import android.text.format.DateFormat
-import android.text.format.DateUtils
 import android.text.method.ScrollingMovementMethod
 import android.transition.AutoTransition
 import android.transition.TransitionManager
@@ -33,7 +28,6 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
-import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
@@ -50,7 +44,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
     private var item: AlarmItem? = null
     private var isMenuExpanded = false
-//    private var isExpired = false
+    private var actionBroadcastReceiver: BroadcastReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +79,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
         val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
         item = if(option != null && !option.isEmpty) option.getParcelable(AlarmReceiver.ITEM) else null
-//        isExpired = intent.getBooleanExtra(AlarmReceiver.EXPIRED, false)
 
         item.let {
             Log.d(C.TAG, "Alarm alerted : ID(${it?.notiId?.plus(1)})")
@@ -140,7 +133,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         snooze.setOnClickListener(this)
         dismiss.setOnClickListener(this)
 
-        val actionBroadcastReceiver = object: BroadcastReceiver() {
+        actionBroadcastReceiver = object: BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 // Can be extended later, for now this broadcast receiver is only for finish activity.
                 finish()
@@ -158,14 +151,13 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
         notificationManager.cancel(item?.notiId ?: ALARM_NOTIFICATION_ID)
 
-//        if(isExpired) {
-//            showExpiredNotification(item)
-//        }
-
         val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         vibrator.cancel()
 
         stopService(Intent(applicationContext, WakeUpService::class.java))
+        unregisterReceiver(actionBroadcastReceiver)
+
+        Log.d(C.TAG, "WakeUpActivity destroyed")
     }
 
     override fun onBackPressed() {
@@ -217,42 +209,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 finish()
             }
         }
-    }
-
-    private fun showExpiredNotification(item: AlarmItem?) {
-        val notificationBuilder = NotificationCompat.Builder(applicationContext, applicationContext.packageName)
-
-        val intent = Intent(this, MainActivity::class.java)
-        if(item != null) {
-            intent.putExtra(AlarmListFragment.HIGHLIGHT_KEY, item.notiId)
-        }
-
-        val title = if(item != null) {
-            getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(applicationContext, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME))
-        }
-        else resources.getString(R.string.error_occurred)
-
-        notificationBuilder
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setAutoCancel(true)
-                .priority = NotificationCompat.PRIORITY_MAX
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(application.packageName, application.packageName+"/channel", NotificationManager.IMPORTANCE_HIGH).apply {
-                enableVibration(true)
-                vibrationPattern = LongArray(0)
-            }
-            notificationManager.createNotificationChannel(notificationChannel)
-        }
-
-        notificationBuilder
-                .setVibrate(LongArray(0))
-                .setSmallIcon(R.drawable.ic_action_alarm_white)
-                .setContentTitle(title)
-                .setContentIntent(PendingIntent.getActivity(this, item?.notiId
-                        ?: SHARED_ALARM_NOTIFICATION_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT))
-
-        notificationManager.notify(ALARM_NOTIFICATION_ID, notificationBuilder.build())
     }
 
     private fun getNameForTimeZone(timeZoneId: String?): String {
