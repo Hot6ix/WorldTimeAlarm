@@ -65,7 +65,7 @@ class AlarmReceiver: BroadcastReceiver() {
         if(intent.action == ACTION_ALARM) {
             dbCursor = DatabaseCursor(context)
 
-            if(item.repeat.any { it > 0 }) {
+            if(item.isInstantAlarm()) {
                 with(item.endDate) {
                     try {
                         val endTimeInMillis = this
