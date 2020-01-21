@@ -1,8 +1,14 @@
 package com.simples.j.worldtimealarm
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.constraint.ConstraintLayout
 import android.support.design.widget.TabLayout
 import android.support.v4.app.FragmentStatePagerAdapter
@@ -10,8 +16,13 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
+import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
+import com.simples.j.worldtimealarm.etc.C.Companion.EXPIRED_NOTIFICATION_CHANNEL
+import com.simples.j.worldtimealarm.etc.C.Companion.MISSED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
+import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import com.simples.j.worldtimealarm.support.FragmentPagerAdapter
+import com.simples.j.worldtimealarm.utils.WakeUpService
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -19,6 +30,7 @@ import kotlin.coroutines.CoroutineContext
 class MainActivity : AppCompatActivity(), CoroutineScope {
 
     private lateinit var fragmentPagerAdapter: FragmentStatePagerAdapter
+    private lateinit var preference: SharedPreferences
 
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
@@ -27,6 +39,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        createNotificationChannels()
 
         launch(coroutineContext) {
             withContext(Dispatchers.IO) {
@@ -111,10 +125,36 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         }
     }
 
+    private fun createNotificationChannels() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !preference.getBoolean(PREF_NOTIFICATION_CHANNEL, false)) {
+            val alarmChannel = NotificationChannel(ALARM_NOTIFICATION_CHANNEL, getString(R.string.alarm_notification_channel), NotificationManager.IMPORTANCE_HIGH).apply {
+                enableVibration(false)
+                setSound(null,  null)
+            }
+
+            val missedChannel = NotificationChannel(MISSED_NOTIFICATION_CHANNEL, getString(R.string.missed_notification_channel), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                enableVibration(true)
+                vibrationPattern = LongArray(0)
+            }
+
+            val expiredChannel = NotificationChannel(EXPIRED_NOTIFICATION_CHANNEL, getString(R.string.expired_notification_channel), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                enableVibration(true)
+                vibrationPattern = LongArray(0)
+
+            }
+
+            notificationManager.createNotificationChannels(listOf(alarmChannel, missedChannel, expiredChannel))
+            preference.edit().putBoolean(PREF_NOTIFICATION_CHANNEL, true).apply()
+        }
+    }
+
     companion object {
         const val ACTION_UPDATE_SINGLE = "com.simples.j.world_time_alarm.ACTION_UPDATE_SINGLE"
         const val ACTION_UPDATE_ALL = "com.simples.j.world_time_alarm.ACTION_UPDATE_ALL"
         const val ACTION_RESCHEDULE_ACTIVATED = "com.simples.j.world_time_alarm.ACTION_RESCHEDULE_ACTIVATED"
         const val TAB_STATE = "TAB_STATE"
+
+        const val PREF_NOTIFICATION_CHANNEL = "PREF_NOTIFICATION_CHANNEL"
     }
 }

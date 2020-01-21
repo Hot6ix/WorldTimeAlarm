@@ -9,7 +9,9 @@
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">Search</string>
     <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Help</string>
-    <string name="notification_channel_alarm">Alarm</string>
+    <string name="alarm_notification_channel">Alarm</string>
+    <string name="missed_notification_channel">Missed Alarm</string>
+    <string name="expired_notification_channel">Expired Alarm</string>
 
     <!-- Show info -->
     <string name="alarm_empty">No alarm set</string>

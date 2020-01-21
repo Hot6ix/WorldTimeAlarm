@@ -1,7 +1,6 @@
 package com.simples.j.worldtimealarm.receiver
 
 import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -17,6 +16,8 @@ import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_MISSED
+import com.simples.j.worldtimealarm.etc.C.Companion.MISSED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
@@ -152,7 +153,7 @@ class AlarmReceiver: BroadcastReceiver() {
     }
 
     private fun showMissedNotification(context: Context, item: AlarmItem) {
-        val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+        val notificationBuilder = NotificationCompat.Builder(context, MISSED_NOTIFICATION_CHANNEL)
 
         val dstIntent = Intent(context, MainActivity::class.java).apply {
             putExtra(AlarmListFragment.HIGHLIGHT_KEY, item.notiId)
@@ -161,31 +162,24 @@ class AlarmReceiver: BroadcastReceiver() {
         val title = context.resources.getString(R.string.missed_alarm)
 
         notificationBuilder
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
                 .setContentTitle(title)
                 .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
                 .setContentIntent(PendingIntent.getActivity(context, item.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
+                .setGroup(GROUP_MISSED)
 
         if(isExpired) {
             notificationBuilder
                     .setContentTitle(context.resources.getString(R.string.missed_and_last_alarm))
                     .setContentText(context.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(context, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME)))
                     .setDefaults(Notification.DEFAULT_ALL)
-                    .priority = NotificationCompat.PRIORITY_MAX
+                    .priority = NotificationCompat.PRIORITY_DEFAULT
         }
 
         if(item.label != null && !item.label.isNullOrEmpty()) {
             notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText("${SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))} - ${item.label}"))
-        }
-
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(NOTIFICATION_CHANNEL_ID, context.getString(R.string.notification_channel_alarm), NotificationManager.IMPORTANCE_HIGH).apply {
-                enableVibration(true)
-                vibrationPattern = LongArray(0)
-
-            }
-            notificationManager.createNotificationChannel(notificationChannel)
         }
 
         notificationManager.notify(item.notiId, notificationBuilder.build())
@@ -201,8 +195,6 @@ class AlarmReceiver: BroadcastReceiver() {
 
         const val TYPE_ALARM = 0
         const val TYPE_EXPIRED = 1
-
-        const val NOTIFICATION_CHANNEL_ID = "WorldTimeAlarmNotificationChannel"
     }
 
 }

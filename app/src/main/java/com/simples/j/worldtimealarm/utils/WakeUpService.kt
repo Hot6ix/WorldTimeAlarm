@@ -1,6 +1,9 @@
 package com.simples.j.worldtimealarm.utils
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -20,6 +23,8 @@ import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.WakeUpActivity
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
+import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_EXPIRED
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import com.simples.j.worldtimealarm.receiver.NotificationActionReceiver
@@ -115,7 +120,7 @@ class WakeUpService : Service() {
     private fun getNotification(type: Int, alarmItem: AlarmItem, intent: Intent? = null): Notification {
         val dstIntent: Intent
         val title: String
-        val notificationBuilder = NotificationCompat.Builder(applicationContext, AlarmReceiver.NOTIFICATION_CHANNEL_ID)
+        val notificationBuilder = NotificationCompat.Builder(applicationContext, ALARM_NOTIFICATION_CHANNEL)
 
         when(type) {
             AlarmReceiver.TYPE_ALARM -> {
@@ -163,7 +168,6 @@ class WakeUpService : Service() {
                 val snoozePendingIntent = PendingIntent.getBroadcast(applicationContext, alarmItem.notiId+30, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                 val snoozeAction = NotificationCompat.Action(0, getString(R.string.snooze), snoozePendingIntent)
 
-
                 notificationBuilder
                         .addAction(dismissAction)
                         .setSound(null)
@@ -183,6 +187,7 @@ class WakeUpService : Service() {
                 title = applicationContext.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(applicationContext, alarmItem.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME))
 
                 notificationBuilder
+                        .setGroup(GROUP_EXPIRED)
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL)
                         .setFullScreenIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId+10, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT), true)
@@ -193,18 +198,8 @@ class WakeUpService : Service() {
             }
         }
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(AlarmReceiver.NOTIFICATION_CHANNEL_ID, applicationContext.getString(R.string.notification_channel_alarm), NotificationManager.IMPORTANCE_HIGH).apply {
-                if(type == AlarmReceiver.TYPE_ALARM) {
-                    enableVibration(false)
-                    setSound(null,  null)
-                }
-            }
-            notificationManager.createNotificationChannel(notificationChannel)
-        }
-
-
         return notificationBuilder
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setVibrate(LongArray(0))
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
                 .setContentTitle(title)
