@@ -53,3 +53,8 @@ Version 1.5
 Version 1.5.1
 - Fix bugs
 - Code optimization
+
+Version 1.5.2
+- Support Android 10
+- Fix bugs
+- Optimize code
