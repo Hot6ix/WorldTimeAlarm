@@ -50,8 +50,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wake_up)
 
-        Log.d(C.TAG, "WakeUpActivity Started")
-
         if(!intent.hasExtra(AlarmReceiver.OPTIONS)) {
             Log.d(C.TAG, "Received Alarm came without information, Finish activity.")
             finish()
@@ -156,8 +154,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
         stopService(Intent(applicationContext, WakeUpService::class.java))
         unregisterReceiver(actionBroadcastReceiver)
-
-        Log.d(C.TAG, "WakeUpActivity destroyed")
     }
 
     override fun onBackPressed() {
