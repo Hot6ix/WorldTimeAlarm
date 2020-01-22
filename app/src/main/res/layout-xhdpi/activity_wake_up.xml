@@ -15,7 +15,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/time_zone_layout"
+        app:layout_constraintBottom_toTopOf="@id/label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -91,7 +91,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/label"
-        app:layout_constraintBottom_toTopOf="@id/selector_layout">
+        app:layout_constraintBottom_toTopOf="@id/selector">
 
         <TextView
             android:id="@+id/time_zone_clock_title"
@@ -211,7 +211,7 @@
         android:layout_marginBottom="@dimen/padding20"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/selector_layout"
+        app:layout_constraintTop_toBottomOf="@id/selector"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>
