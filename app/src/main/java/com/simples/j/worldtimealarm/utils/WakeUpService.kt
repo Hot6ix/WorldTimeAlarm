@@ -78,6 +78,7 @@ class WakeUpService : Service() {
                 setup(alarmItem)
                 play(alarmItem.ringtone)
                 vibrate(alarmItem.vibration)
+                currentAlarmItemId = alarmItem.notiId
 
                 val alarmMuteTime = preference.getString(applicationContext.resources.getString(R.string.setting_alarm_mute_key), "0")?.toLong()
 
@@ -107,7 +108,10 @@ class WakeUpService : Service() {
             notificationManager.cancel(it.notiId)
             if(it.isInstantAlarm()) {
                 AlarmController.getInstance().disableAlarm(applicationContext, it)
-                if(isExpired) notificationManager.notify(it.notiId, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
+            }
+            else if(isExpired) {
+                AlarmController.getInstance().disableAlarm(applicationContext, it)
+                notificationManager.notify(it.notiId, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
             }
         }
 
@@ -268,5 +272,6 @@ class WakeUpService : Service() {
 
     companion object {
         var isWakeUpServiceRunning = false
+        var currentAlarmItemId: Int? = -1
     }
 }

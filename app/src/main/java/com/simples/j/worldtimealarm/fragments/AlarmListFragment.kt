@@ -21,11 +21,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.simples.j.worldtimealarm.AlarmActivity
-import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.*
 import kotlinx.android.synthetic.main.fragment_alarmlist.*
@@ -262,7 +262,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             alarmController.cancelAlarm(context, item.notiId)
             snackBar?.dismiss()
 
-            if(WakeUpService.isWakeUpServiceRunning) {
+            if(WakeUpService.isWakeUpServiceRunning && WakeUpService.currentAlarmItemId == item.notiId) {
                 context?.stopService(Intent(context, WakeUpService::class.java))
             }
         }

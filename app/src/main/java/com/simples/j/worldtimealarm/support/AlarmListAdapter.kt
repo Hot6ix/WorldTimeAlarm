@@ -20,7 +20,6 @@ import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
-import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -101,10 +100,12 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         else {
             // alarm is one-time and start date is set
             // if start date passed, disable alarm
-            if(startDate != null && !item.repeat.any { it > 0 }) {
-                holder.switch.isEnabled = startDate!!.timeInMillis > System.currentTimeMillis()
+            startDate.let { date ->
+                if(date != null && !item.repeat.any { it > 0 }) {
+                    holder.switch.isEnabled = date.timeInMillis > System.currentTimeMillis()
+                }
+                else holder.switch.isEnabled = true
             }
-            else holder.switch.isEnabled = true
 
             // disable switch if alarm is expired
             with(endDate) {
