@@ -4,9 +4,7 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -28,6 +26,7 @@ import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_EXPIRED
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import com.simples.j.worldtimealarm.receiver.NotificationActionReceiver
+import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -43,11 +42,12 @@ class WakeUpService : Service() {
     private var item: AlarmItem? = null
     private var timer: Handler? = null
     private var timerRunnable: Runnable? = null
+    private var serviceAction: String? = null
 
     private var isExpired = false
 
     override fun onBind(intent: Intent): IBinder {
-        throw Exception("Not implemented.")
+        throw Exception("Not implemented")
     }
 
     override fun onCreate() {
@@ -56,19 +56,30 @@ class WakeUpService : Service() {
         isWakeUpServiceRunning = true
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val serviceActionReceiver = object: BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                serviceAction = intent?.getStringExtra(SERVICE_ACTION)
+                stopSelf()
+            }
+        }
+
+        val filter = IntentFilter(REQUEST_SERVICE_ACTION)
+        registerReceiver(serviceActionReceiver, filter)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if(intent == null) throw IllegalArgumentException("WakeUpService has empty intent.")
+        if(intent == null) throw IllegalArgumentException("WakeUpService has empty intent")
 
         option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
         isExpired = intent.getBooleanExtra(AlarmReceiver.EXPIRED, false)
+        serviceAction = intent.getStringExtra(SERVICE_ACTION)
 
         option?.let {
             item = it.getParcelable(AlarmReceiver.ITEM)
 
             if(item == null) {
-                Log.d(C.TAG, "Empty Intent arrived. Stop service.")
+                Log.d(C.TAG, "Empty Intent arrived. Stop service")
                 stopService(intent)
             }
 
@@ -105,12 +116,20 @@ class WakeUpService : Service() {
 
         item?.let {
             notificationManager.cancel(it.notiId)
-            if(it.isInstantAlarm()) {
-                AlarmController.getInstance().disableAlarm(applicationContext, it)
-            }
-            else if(isExpired) {
-                AlarmController.getInstance().disableAlarm(applicationContext, it)
-                notificationManager.notify(it.notiId, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
+            when {
+                serviceAction == AlarmReceiver.ACTION_SNOOZE -> {
+                    Log.d(C.TAG, "Destroy service without disable alarm")
+                }
+                it.isInstantAlarm() -> {
+                    AlarmController.getInstance().disableAlarm(applicationContext, it)
+                }
+                isExpired -> {
+                    AlarmController.getInstance().disableAlarm(applicationContext, it)
+                    notificationManager.notify(it.notiId, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
+                }
+                else -> {
+                    throw IllegalStateException("Unreachable action: $item")
+                }
             }
         }
     }
@@ -270,5 +289,8 @@ class WakeUpService : Service() {
     companion object {
         var isWakeUpServiceRunning = false
         var currentAlarmItemId: Int? = -1
+
+        const val REQUEST_SERVICE_ACTION = "REQUEST_SERVICE_ACTION"
+        const val SERVICE_ACTION = "SERVICE_ACTION"
     }
 }

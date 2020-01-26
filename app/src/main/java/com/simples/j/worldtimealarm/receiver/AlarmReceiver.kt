@@ -59,46 +59,44 @@ class AlarmReceiver: BroadcastReceiver() {
             Log.d(C.TAG, "AlarmReceiver failed to get AlarmItem.")
             return
         }
-        Log.d(C.TAG, "Alarm triggered : ID(${item.notiId+1})")
+        Log.d(C.TAG, "Alarm(id=${item.notiId+1}, type=${intent.action}) triggered")
 
         // If alarm type is snooze ignore, if not set alarm
-        if(intent.action == ACTION_ALARM) {
-            dbCursor = DatabaseCursor(context)
+        dbCursor = DatabaseCursor(context)
 
-            if(!item.isInstantAlarm()) {
-                with(item.endDate) {
-                    try {
-                        val endTimeInMillis = this
-                        if(endTimeInMillis != null && endTimeInMillis > 0) {
-                            val endDate = Calendar.getInstance().apply {
-                                timeInMillis = endTimeInMillis
-                            }
-
-                            val today = Calendar.getInstance()
-                            val difference = endDate.timeInMillis - today.timeInMillis
-                            if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
-                                val tmpCal = today.clone() as Calendar
-                                while(!tmpCal.after(endDate)) {
-                                    tmpCal.add(Calendar.DATE, 1)
-                                    if(item.repeat.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
-                                        isExpired = false
-                                        break
-                                    }
-                                    else isExpired = true
-                                }
-
-                                if((today.get(Calendar.YEAR) == endDate.get(Calendar.YEAR) && today.get(Calendar.MONTH) == endDate.get(Calendar.MONTH) && today.get(Calendar.DAY_OF_MONTH) == endDate.get(Calendar.DAY_OF_MONTH)) || today.after(endDate))
-                                    isExpired = true
-                            }
+        if(!item.isInstantAlarm()) {
+            with(item.endDate) {
+                try {
+                    val endTimeInMillis = this
+                    if(endTimeInMillis != null && endTimeInMillis > 0) {
+                        val endDate = Calendar.getInstance().apply {
+                            timeInMillis = endTimeInMillis
                         }
-                    } catch (e: NumberFormatException) {
-                        e.printStackTrace()
-                    }
-                }
 
-                if(!isExpired) {
-                    AlarmController.getInstance().scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+                        val today = Calendar.getInstance()
+                        val difference = endDate.timeInMillis - today.timeInMillis
+                        if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
+                            val tmpCal = today.clone() as Calendar
+                            while(!tmpCal.after(endDate)) {
+                                tmpCal.add(Calendar.DATE, 1)
+                                if(item.repeat.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
+                                    isExpired = false
+                                    break
+                                }
+                                else isExpired = true
+                            }
+
+                            if((today.get(Calendar.YEAR) == endDate.get(Calendar.YEAR) && today.get(Calendar.MONTH) == endDate.get(Calendar.MONTH) && today.get(Calendar.DAY_OF_MONTH) == endDate.get(Calendar.DAY_OF_MONTH)) || today.after(endDate))
+                                isExpired = true
+                        }
+                    }
+                } catch (e: NumberFormatException) {
+                    e.printStackTrace()
                 }
+            }
+
+            if(!isExpired) {
+                AlarmController.getInstance().scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
             }
         }
 
@@ -119,17 +117,9 @@ class AlarmReceiver: BroadcastReceiver() {
                 context.startForegroundService(serviceIntent)
             else
                 context.startService(serviceIntent)
-//            WakeUpActivity.isActivityRunning = true
-//            Intent(context, WakeUpActivity::class.java).apply {
-//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                action = intent.action
-//                putExtra(OPTIONS, option)
-//                putExtra(EXPIRED, isExpired)
-//                context.startActivity(this)
-//            }
         }
         else {
-            Log.d(C.TAG, "Alarm missed : ID(${item.notiId+1})")
+            Log.d(C.TAG, "Alarm(id=${item.notiId+1}, type=${intent.action}) missed")
             showMissedNotification(context, item)
             AlarmController.getInstance().disableAlarm(context, item)
         }
