@@ -131,6 +131,7 @@ class AlarmReceiver: BroadcastReceiver() {
         else {
             Log.d(C.TAG, "Alarm missed : ID(${item.notiId+1})")
             showMissedNotification(context, item)
+            AlarmController.getInstance().disableAlarm(context, item)
         }
     }
 
