@@ -67,9 +67,9 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         super.onActivityCreated(savedInstanceState)
 
         updateRequestReceiver = UpdateRequestReceiver()
-        dbCursor = DatabaseCursor(context!!)
+        dbCursor = DatabaseCursor(requireContext())
         alarmController = AlarmController.getInstance()
-        audioManager = context!!.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager = requireContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         job = launch(coroutineContext) {
             withContext(Dispatchers.IO) {
@@ -79,7 +79,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             if(context != null) {
                 alarmListAdapter = AlarmListAdapter(
                         alarmItems,
-                        context!!).apply {
+                        requireContext()).apply {
                     setOnItemListener(this@AlarmListFragment)
                     setHasStableIds(true)
                 }
@@ -121,7 +121,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         new_alarm.setOnClickListener {
-            startActivityForResult(Intent(context!!, AlarmActivity::class.java), REQUEST_CODE_NEW)
+            startActivityForResult(Intent(context, AlarmActivity::class.java), REQUEST_CODE_NEW)
         }
 
         val intentFilter = IntentFilter()
@@ -241,7 +241,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     }
 
     override fun onItemClicked(view: View, item: AlarmItem) {
-        val intent = Intent(context!!, AlarmActivity::class.java)
+        val intent = Intent(context, AlarmActivity::class.java)
         val bundle = Bundle().apply {
             putParcelable(AlarmReceiver.ITEM, item)
         }
@@ -318,7 +318,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             val calendar = Calendar.getInstance().apply {
                 timeInMillis = scheduledTime
             }
-            snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(context!!, calendar)), Snackbar.LENGTH_LONG)
+            snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(requireContext(), calendar)), Snackbar.LENGTH_LONG)
             snackBar?.show()
         }
     }

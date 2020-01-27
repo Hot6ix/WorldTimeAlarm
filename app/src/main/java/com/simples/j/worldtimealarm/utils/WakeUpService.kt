@@ -128,7 +128,8 @@ class WakeUpService : Service() {
                     notificationManager.notify(it.notiId, getNotification(AlarmReceiver.TYPE_EXPIRED, it))
                 }
                 else -> {
-                    throw IllegalStateException("Unreachable action: $item")
+                    // This statement is for repeating alarm that is not expired yet
+                    // Do nothing like ACTION_SNOOZE
                 }
             }
         }
