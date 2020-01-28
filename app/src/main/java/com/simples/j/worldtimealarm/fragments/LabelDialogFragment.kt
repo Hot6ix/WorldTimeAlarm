@@ -34,6 +34,9 @@ class LabelDialogFragment: DialogFragment() {
         val labelView = View.inflate(context, R.layout.label_dialog_view, null)
         labelEditor = labelView.findViewById(R.id.label)
         labelEditor.setText(lastLabel)
+        if(lastLabel.isNotEmpty()) {
+            labelEditor.selectAll()
+        }
         labelEditor.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 currentLabel = s.toString()

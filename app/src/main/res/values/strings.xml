@@ -14,18 +14,18 @@
     <string name="expired_notification_channel">Expired Alarm</string>
 
     <!-- Show info -->
-    <string name="alarm_empty">No alarm set</string>
+    <string name="alarm_empty">Empty</string>
     <string name="clock_empty">Empty</string>
-    <string name="no_result">No result</string>
+    <string name="no_result">No Result</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="ok">OK</string>
-    <string name="turn_off">Turn off</string>
+    <string name="turn_off">Turn Off</string>
     <string name="select_timezone">Time zone</string>
     <string name="select_ringtone">Ringtone</string>
     <string name="select_vibration">Vibration</string>
-    <string name="no_ringtone">No ringtone</string>
-    <string name="no_vibrator">No vibration</string>
+    <string name="no_ringtone">No Ringtone</string>
+    <string name="no_vibrator">No Vibration</string>
     <string name="not_set">Not set</string>
     <string name="timezone">Time zone</string>
     <string name="label">Label</string>
@@ -55,15 +55,15 @@
     <string name="alarm_fired_title">Alarm</string>
     <string name="unmute">Unmute</string>
     <string name="missed_alarm">Missed Alarm</string>
-    <string name="missed_and_last_alarm">Missed last Alarm</string>
-    <string name="select_color">Select a color</string>
+    <string name="missed_and_last_alarm">Missed Last Alarm</string>
+    <string name="select_color">Select Color</string>
     <string name="not_selected">Not selected</string>
     <string name="clear">Clear</string>
-    <string name="new_alarm_long">New alarm</string>
-    <string name="new_alarm_short">New alarm</string>
-    <string name="expected_time">Alarm will set for&#160;%1$s local time.</string>
-    <string name="range_start">Start date</string>
-    <string name="range_end">End date</string>
+    <string name="new_alarm_long">New Alarm</string>
+    <string name="new_alarm_short">New Alarm</string>
+    <string name="expected_time">Alarm will be fired at &#160;%1$s in local time.</string>
+    <string name="range_start">Start Date</string>
+    <string name="range_end">End Date</string>
     <string name="range_not_set">Not set</string>
     <string name="range_text">%1$s (%2$s) ~ %3$s (%4$s)</string>
     <string name="range_until">Ends on %1$s</string>
@@ -83,7 +83,7 @@
     <string name="alarm_on_repeat_every">Alarm set for everyday at %1$s.</string>
     <string name="alarm_dismissed">Alarm dismissed.</string>
     <string name="volume_is_muted">Alarm volume muted.</string>
-    <string name="exist_timezone">Selected timezone already in list.</string>
+    <string name="exist_timezone">Selected time zone is already in list.</string>
     <string name="start_date_removed">Start date removed.</string>
     <string name="start_date_and_time_is_wrong">The set time must be later than now if only set start date.</string>
     <string name="end_date_removed">End date removed.</string>
@@ -133,7 +133,7 @@
     <string name="setting_time_zone_affect_repetition_summary">All activated alarms will be rescheduled and repeat days can be changed.</string>
 
     <string name="setting_group_2_key">CONVERTER</string>
-    <string name="setting_group_2">Time conversion</string>
+    <string name="setting_group_2">Time Conversion</string>
     <string name="setting_converter_timezone_key">CONVERTER_TIME_ZONE</string>
     <string name="setting_converter_timezone">Default time zone</string>
     <string name="setting_converter_timezone_id_key">CONVERTER_TIME_ZONE_ID</string>
@@ -147,15 +147,15 @@
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">Version</string>
     <string name="setting_license_key">LICENSE</string>
-    <string name="setting_license_title">Open source license</string>
+    <string name="setting_license_title">Open Source License</string>
     <string name="setting_privacy_policy_key">PRIVACY</string>
-    <string name="setting_privacy_policy_title">Privacy policy</string>
+    <string name="setting_privacy_policy_title">Privacy Policy</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">Visit GitHub</string>
 
     <string-array name="time_selector">
         <item>ID</item>
-        <item>Region - time zone (recommended)</item>
+        <item>Region - Time zone (Recommended)</item>
     </string-array>
 
     <string-array name="alarm_mute">

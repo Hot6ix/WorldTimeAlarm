@@ -40,6 +40,7 @@ class WakeUpService : Service() {
     private var timer: Handler? = null
     private var timerRunnable: Runnable? = null
     private var serviceAction: String? = null
+    private var serviceActionReceiver: BroadcastReceiver? = null
 
     private var isExpired = false
 
@@ -54,7 +55,7 @@ class WakeUpService : Service() {
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val serviceActionReceiver = object: BroadcastReceiver() {
+        serviceActionReceiver = object: BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 serviceAction = intent?.getStringExtra(SERVICE_ACTION)
                 stopSelf()
@@ -101,6 +102,8 @@ class WakeUpService : Service() {
                 }
             }
         }
+
+        unregisterReceiver(serviceActionReceiver)
 
         return super.onStartCommand(intent, flags, startId)
     }
