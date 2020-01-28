@@ -17,7 +17,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if(intent.hasExtra(NOTIFICATION_ACTION)) {
             val action = intent.getStringExtra(NOTIFICATION_ACTION)
-            Log.d(C.TAG, "Action received: $action")
+            Log.d(C.TAG, "Notification Action received: $action")
 
             if (action == ACTION_SNOOZE) {
                 val alarmItem = intent.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)

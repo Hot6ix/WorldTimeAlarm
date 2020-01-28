@@ -23,6 +23,7 @@ import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 /**
  * Created by j on 19/02/2018.
@@ -100,11 +101,11 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         else {
             // alarm is one-time and start date is set
             // if start date passed, disable alarm
-            startDate.let { date ->
+            holder.switch.isEnabled = startDate.let { date ->
                 if(date != null && !item.repeat.any { it > 0 }) {
-                    holder.switch.isEnabled = date.timeInMillis > System.currentTimeMillis()
+                    date.timeInMillis > System.currentTimeMillis()
                 }
-                else holder.switch.isEnabled = true
+                else true
             }
 
             // disable switch if alarm is expired
@@ -173,7 +174,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                 }
                 val tmp = itemCalendar.clone() as Calendar
                 tmp.add(Calendar.MILLISECOND, difference)
-                val dayDiff = Math.abs(MediaCursor.getDayDifference(tmp, itemCalendar, true))
+                val dayDiff = abs(MediaCursor.getDayDifference(tmp, itemCalendar, true))
 
                 // for support old version of app
                 val repeat = item.repeat.mapIndexed { index, i -> if(i > 0) index + 1 else 0 }
@@ -195,7 +196,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
                         dayArray[dayOfWeek]
                     } else null
-                }.filter { it != null }
+                }.filterNotNull()
 
                 holder.repeat.text =
                         if(repeatArray.size == 7) context.resources.getString(R.string.everyday)
