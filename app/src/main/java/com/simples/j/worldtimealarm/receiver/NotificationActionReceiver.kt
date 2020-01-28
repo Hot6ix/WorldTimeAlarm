@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.WakeUpActivity
 import com.simples.j.worldtimealarm.etc.AlarmItem

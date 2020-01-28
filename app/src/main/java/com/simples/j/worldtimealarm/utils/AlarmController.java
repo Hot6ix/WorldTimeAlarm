@@ -9,7 +9,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.simples.j.worldtimealarm.receiver.AlarmReceiver;
+import com.simples.j.worldtimealarm.AlarmReceiver;
 import com.simples.j.worldtimealarm.MainActivity;
 import com.simples.j.worldtimealarm.R;
 import com.simples.j.worldtimealarm.etc.AlarmItem;

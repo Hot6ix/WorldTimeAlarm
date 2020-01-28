@@ -30,7 +30,6 @@ import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.fragments.*
 import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
-import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import com.simples.j.worldtimealarm.support.AlarmDayAdapter
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
 import com.simples.j.worldtimealarm.utils.AlarmController

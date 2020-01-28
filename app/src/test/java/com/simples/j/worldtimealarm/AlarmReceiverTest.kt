@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test

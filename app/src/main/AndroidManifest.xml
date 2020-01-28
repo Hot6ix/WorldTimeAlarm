@@ -65,7 +65,7 @@
             android:theme="@style/NoActionBar" />
 
         <receiver
-            android:name=".receiver.AlarmReceiver"
+            android:name=".AlarmReceiver"
             android:enabled="true" />
 
         <activity

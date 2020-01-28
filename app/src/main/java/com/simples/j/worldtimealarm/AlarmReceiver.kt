@@ -1,6 +1,7 @@
-package com.simples.j.worldtimealarm.receiver
+package com.simples.j.worldtimealarm
 
 import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -12,8 +13,6 @@ import android.os.PowerManager
 import android.support.v4.app.NotificationCompat
 import android.text.format.DateUtils
 import android.util.Log
-import com.simples.j.worldtimealarm.MainActivity
-import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_MISSED
@@ -143,6 +142,14 @@ class AlarmReceiver: BroadcastReceiver() {
                 .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
                 .setContentIntent(PendingIntent.getActivity(context, item.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setGroup(GROUP_MISSED)
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(MISSED_NOTIFICATION_CHANNEL, context.getString(R.string.missed_notification_channel), NotificationManager.IMPORTANCE_HIGH).apply {
+                enableVibration(true)
+                vibrationPattern = LongArray(0)
+            }
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
 
         if(isExpired) {
             notificationBuilder

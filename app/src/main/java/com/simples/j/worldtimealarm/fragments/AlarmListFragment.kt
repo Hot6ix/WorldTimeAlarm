@@ -25,7 +25,7 @@ import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
-import com.simples.j.worldtimealarm.receiver.AlarmReceiver
+import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.*
 import kotlinx.android.synthetic.main.fragment_alarmlist.*

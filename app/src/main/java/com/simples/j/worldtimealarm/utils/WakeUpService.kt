@@ -1,9 +1,6 @@
 package com.simples.j.worldtimealarm.utils
 
-import android.app.Notification
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.*
 import android.media.AudioAttributes
 import android.media.AudioManager
@@ -16,17 +13,17 @@ import android.support.v4.app.NotificationCompat
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.Toast
+import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.WakeUpActivity
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
+import com.simples.j.worldtimealarm.etc.C.Companion.EXPIRED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_EXPIRED
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
-import com.simples.j.worldtimealarm.receiver.AlarmReceiver
 import com.simples.j.worldtimealarm.receiver.NotificationActionReceiver
-import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -193,6 +190,14 @@ class WakeUpService : Service() {
                 val snoozePendingIntent = PendingIntent.getBroadcast(applicationContext, alarmItem.notiId+30, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                 val snoozeAction = NotificationCompat.Action(0, getString(R.string.snooze), snoozePendingIntent)
 
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val notificationChannel = NotificationChannel(ALARM_NOTIFICATION_CHANNEL, getString(R.string.alarm_notification_channel), NotificationManager.IMPORTANCE_HIGH).apply {
+                        enableVibration(true)
+                        vibrationPattern = LongArray(0)
+                    }
+                    notificationManager.createNotificationChannel(notificationChannel)
+                }
+
                 notificationBuilder
                         .addAction(dismissAction)
                         .setSound(null)
@@ -210,6 +215,14 @@ class WakeUpService : Service() {
                 }
 
                 title = applicationContext.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(applicationContext, alarmItem.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME))
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val notificationChannel = NotificationChannel(EXPIRED_NOTIFICATION_CHANNEL, getString(R.string.expired_notification_channel), NotificationManager.IMPORTANCE_HIGH).apply {
+                        enableVibration(true)
+                        vibrationPattern = LongArray(0)
+                    }
+                    notificationManager.createNotificationChannel(notificationChannel)
+                }
 
                 notificationBuilder
                         .setGroup(GROUP_EXPIRED)
