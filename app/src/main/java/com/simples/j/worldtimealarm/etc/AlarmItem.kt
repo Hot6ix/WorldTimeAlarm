@@ -55,9 +55,9 @@ data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, va
         writeValue(endDate)
     }
 
-    fun isInstantAlarm(): Boolean = !repeat.any { it > 0 } && endDate == null
+    fun isInstantAlarm(): Boolean = repeat.all { it == 0 } && endDate == null
 
-    fun hasRepeatDay(): Boolean = !repeat.any { it > 0 }
+    fun hasRepeatDay(): Boolean = repeat.any { it > 0 }
 
     companion object {
         @JvmField

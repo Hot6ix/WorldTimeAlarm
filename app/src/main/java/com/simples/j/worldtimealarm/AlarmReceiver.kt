@@ -74,15 +74,17 @@ class AlarmReceiver: BroadcastReceiver() {
 
                         val today = Calendar.getInstance()
                         val difference = endDate.timeInMillis - today.timeInMillis
-                        if(TimeUnit.MILLISECONDS.toDays(difference) < 7 && item.hasRepeatDay()) {
-                            val tmpCal = today.clone() as Calendar
-                            while(!tmpCal.after(endDate)) {
-                                tmpCal.add(Calendar.DATE, 1)
-                                if(item.repeat.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
-                                    isExpired = false
-                                    break
+                        if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
+                            if(item.hasRepeatDay()) {
+                                val tmpCal = today.clone() as Calendar
+                                while(!tmpCal.after(endDate)) {
+                                    tmpCal.add(Calendar.DATE, 1)
+                                    if(item.repeat.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
+                                        isExpired = false
+                                        break
+                                    }
+                                    else isExpired = true
                                 }
-                                else isExpired = true
                             }
 
                             if((today.get(Calendar.YEAR) == endDate.get(Calendar.YEAR) && today.get(Calendar.MONTH) == endDate.get(Calendar.MONTH) && today.get(Calendar.DAY_OF_MONTH) == endDate.get(Calendar.DAY_OF_MONTH)) || today.after(endDate))

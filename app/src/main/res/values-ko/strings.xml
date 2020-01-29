@@ -89,10 +89,10 @@
     <string name="start_date_removed">시작일이 제거되었습니다.</string>
     <string name="start_date_and_time_is_wrong">시작일만 설정한 경우, 알람 시간을 현재 시각 이후로 설정해야 합니다.</string>
     <string name="end_date_removed">종료일이 제거되었습니다.</string>
-    <string name="end_date_earlier_than_today">종료일은 내일부터 설정 가능 합니다.</string>
-    <string name="end_date_earlier_than_start_date">종료일은 시작일 이후부터 설정 가능 합니다.</string>
-    <string name="must_check_repeat">반드시 요일 반복을 설정해야 합니다.</string>
-    <string name="invalid_repeat">설정된 범위가 일주일 이하인 경우 범위 내 유효한 시간 또는 요일 반복을 설정해야 합니다.</string>
+    <string name="end_date_earlier_than_today">종료일은 오늘 이후로 설정해야 합니다.</string>
+    <string name="end_date_earlier_than_start_date">종료일은 시작일 이후로 설정해야 합니다.</string>
+    <string name="must_check_repeat">기간 설정 시 요일 반복을 설정해야 합니다.</string>
+    <string name="invalid_repeat">설정한 기간이 일주일 미만인 경우 유효한 시간 또는 요일 반복을 설정해야 합니다.</string>
     <string name="alarm_no_long_fires">알람(%1$s)이  더이상 울리지 않습니다.</string>
     <string name="error_occurred">오류가 발생하였습니다.</string>
     <string name="error_message">잘못된 호출입니다. 계속 발생할 경우, 알람을 재생성해 주십시오. 불편을 드려 죄송합니다.</string>

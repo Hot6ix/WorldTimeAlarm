@@ -229,13 +229,13 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                             DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) && startDate == null && endDate == null -> {
                                 context.resources.getString(R.string.tomorrow)
                             } // this can make adapter to know calendar date is tomorrow
+                            endDate != null -> {
+                                context.resources.getString(R.string.everyday)
+                            }
                             startDate != null -> {
                                 startDate?.let {
                                     DateUtils.formatDateTime(context, it.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
                                 }
-                            }
-                            endDate != null -> {
-                                context.resources.getString(R.string.everyday_within_period)
                             }
                             else -> {
                                 DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
