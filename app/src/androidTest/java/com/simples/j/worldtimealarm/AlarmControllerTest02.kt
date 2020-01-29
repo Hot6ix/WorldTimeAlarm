@@ -1,35 +1,22 @@
 package com.simples.j.worldtimealarm
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.preference.PreferenceManager
-import android.support.test.InstrumentationRegistry
-import android.util.Log
+import androidx.test.platform.app.InstrumentationRegistry
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.utils.AlarmController
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mockito
-import org.mockito.junit.MockitoJUnitRunner
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
-import java.lang.StringBuilder
 import java.util.*
 
-@RunWith(MockitoJUnitRunner::class)
 class AlarmControllerTest02 {
 
     private lateinit var context: Context
-    private lateinit var sharedPref: SharedPreferences
 
     @Before
     fun setup() {
-        this.context = InstrumentationRegistry.getTargetContext()
+        this.context = InstrumentationRegistry.getInstrumentation().context
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Taipei"))
-        this.sharedPref = Mockito.mock(SharedPreferences::class.java)
     }
 
     @Test

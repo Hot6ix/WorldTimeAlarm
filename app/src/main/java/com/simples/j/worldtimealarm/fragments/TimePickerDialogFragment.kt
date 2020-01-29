@@ -3,7 +3,7 @@ package com.simples.j.worldtimealarm.fragments
 import android.app.Dialog
 import android.app.TimePickerDialog
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import androidx.fragment.app.DialogFragment
 import java.util.*
 
 
@@ -15,7 +15,7 @@ class TimePickerDialogFragment: DialogFragment() {
     var calendar: Calendar = Calendar.getInstance()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        dialog = TimePickerDialog(context!!, listener, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false)
+        dialog = TimePickerDialog(context, listener, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false)
 
         return dialog
     }

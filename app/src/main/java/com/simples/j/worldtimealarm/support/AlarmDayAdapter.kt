@@ -1,11 +1,12 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.RecyclerView
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import com.simples.j.worldtimealarm.R
 import kotlinx.android.synthetic.main.alarm_day_item.view.*
 
@@ -46,7 +47,7 @@ class AlarmDayAdapter(private var selectedDays: IntArray, private var context: C
     }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        var day = view.day_item
+        var day: Button = view.day_item
     }
 
     interface OnItemClickListener {

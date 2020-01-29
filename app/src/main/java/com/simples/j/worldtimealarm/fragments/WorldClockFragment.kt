@@ -7,20 +7,20 @@ import android.app.TimePickerDialog
 import android.content.*
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.support.design.widget.CoordinatorLayout
-import android.support.design.widget.Snackbar
-import android.support.v4.app.Fragment
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.snackbar.Snackbar
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
+import androidx.preference.PreferenceManager
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
@@ -65,7 +65,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private lateinit var mPrefManager: SharedPreferences
     private var mTimeZoneSelectorOption: String = ""
 
-    private var job = Job()
+    private var job: Job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main
 
@@ -122,10 +122,10 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         dateDialog.setDateSetListener(this)
 
         world_time_layout.setOnClickListener {
-            if(!timeDialog.isAdded) timeDialog.show(fragmentManager, TAG_FRAGMENT_TIME_DIALOG)
+            if(!timeDialog.isAdded) timeDialog.show(requireFragmentManager(), TAG_FRAGMENT_TIME_DIALOG)
         }
         world_date.setOnClickListener {
-            if(!dateDialog.isAdded) dateDialog.show(fragmentManager, TAG_FRAGMENT_DATE_DIALOG)
+            if(!dateDialog.isAdded) dateDialog.show(requireFragmentManager(), TAG_FRAGMENT_DATE_DIALOG)
         }
 
         time_zone.text = getNameForTimeZone(timeZone.id)
@@ -187,7 +187,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         when {
             requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    timeZone = TimeZone.getTimeZone(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID).replace(" ", "_"))
+                    timeZone = TimeZone.getTimeZone(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.replace(" ", "_"))
 
                     updateStandardTimeZone()
                     updateList()
@@ -333,7 +333,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     inner class UpdateRequestReceiver: BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d(C.TAG, intent.action)
+            Log.d(C.TAG, intent.action.toString())
             when(intent.action) {
                 ACTION_TIME_ZONE_CHANGED -> {
                     timeZone = TimeZone.getTimeZone(intent.getStringExtra(TIME_ZONE_CHANGED_KEY))

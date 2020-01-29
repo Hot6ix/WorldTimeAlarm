@@ -11,18 +11,15 @@ import android.media.AudioManager
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.preference.PreferenceManager
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.LinearLayoutManager
+import android.os.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.View
 import android.widget.TimePicker
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.OptionItem
@@ -361,13 +358,15 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         when {
             requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    currentTimeZone = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID).replace(" ", "_")
+                    data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.also {
+                        currentTimeZone = it.replace(" ", "_")
 
-                    with(TimeZone.getTimeZone(currentTimeZone)) {
-                        calendar.timeZone = this
-                        dateFormat.timeZone = this
+                        with(TimeZone.getTimeZone(it)) {
+                            calendar.timeZone = this
+                            dateFormat.timeZone = this
 //                        startDate?.timeZone = this
 //                        endDate?.timeZone = this
+                        }
                     }
 
                     val difference = TimeZone.getTimeZone(currentTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
@@ -427,17 +426,17 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
-        outState?.putString(STATE_TIME_ZONE_KEY, currentTimeZone)
-        outState?.putSerializable(STATE_DATE_KEY, calendar.time)
-        outState?.putIntArray(STATE_REPEAT_KEY, selectedDays)
-        outState?.putSerializable(STATE_RINGTONE_KEY, currentRingtone)
-        outState?.putSerializable(STATE_VIBRATION_KEY, currentVibrationPattern)
-        outState?.putLong(STATE_SNOOZE_KEY, currentSnooze)
-        outState?.putString(STATE_LABEL_KEY, currentLabel)
-        outState?.putInt(STATE_COLOR_TAG_KEY, currentColorTag)
-        outState?.putLong(STATE_START_DATE_KEY, startDate?.timeInMillis ?: 0)
-        outState?.putLong(STATE_END_DATE_KEY, endDate?.timeInMillis ?: 0)
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString(STATE_TIME_ZONE_KEY, currentTimeZone)
+        outState.putSerializable(STATE_DATE_KEY, calendar.time)
+        outState.putIntArray(STATE_REPEAT_KEY, selectedDays)
+        outState.putSerializable(STATE_RINGTONE_KEY, currentRingtone)
+        outState.putSerializable(STATE_VIBRATION_KEY, currentVibrationPattern)
+        outState.putLong(STATE_SNOOZE_KEY, currentSnooze)
+        outState.putString(STATE_LABEL_KEY, currentLabel)
+        outState.putInt(STATE_COLOR_TAG_KEY, currentColorTag)
+        outState.putLong(STATE_START_DATE_KEY, startDate?.timeInMillis ?: 0)
+        outState.putLong(STATE_END_DATE_KEY, endDate?.timeInMillis ?: 0)
 
         super.onSaveInstanceState(outState)
     }
@@ -463,16 +462,12 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
                 when {
                     start != null && end != null -> {
-                        if(selectedDays.all { it == 0 }) {
-                            Toast.makeText(applicationContext, getString(R.string.must_check_repeat), Toast.LENGTH_SHORT).show()
-                            return
-                        }
                         if(start.timeInMillis >= end.timeInMillis || end.timeInMillis <= System.currentTimeMillis()) {
                             Toast.makeText(applicationContext, getString(R.string.end_date_earlier_than_start_date), Toast.LENGTH_SHORT).show()
                             return
                         }
 
-                        // need to check repeat days that alarm makes sense
+                        // alarm will be fired everyday if date range is less than a week.
                         val difference = end.timeInMillis - start.timeInMillis
                         when(TimeUnit.MILLISECONDS.toDays(difference)) {
                             in 1..5 -> {
@@ -487,6 +482,12 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                                     return
                                 }
                             }
+                            else -> {
+                                if(selectedDays.all { it == 0 }) {
+                                    Toast.makeText(applicationContext, getString(R.string.must_check_repeat), Toast.LENGTH_SHORT).show()
+                                    return
+                                }
+                            }
                         }
                     }
                     start != null -> {
@@ -496,15 +497,10 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         }
                     }
                     end != null -> {
-                        when {
-                            end.timeInMillis < System.currentTimeMillis() -> {
-                                Toast.makeText(applicationContext, getString(R.string.end_date_earlier_than_today), Toast.LENGTH_SHORT).show()
-                                return
-                            }
-                            !selectedDays.any { it > 0 } -> {
-                                Toast.makeText(applicationContext, getString(R.string.must_check_repeat), Toast.LENGTH_SHORT).show()
-                                return
-                            }
+
+                        if(end.timeInMillis < System.currentTimeMillis()) {
+                            Toast.makeText(applicationContext, getString(R.string.end_date_earlier_than_today), Toast.LENGTH_SHORT).show()
+                            return
                         }
 
                         val difference = end.timeInMillis - System.currentTimeMillis()
@@ -518,6 +514,12 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
                                 if(expect == null || expect.timeInMillis <= System.currentTimeMillis() || expect.timeInMillis > end.timeInMillis) {
                                     Toast.makeText(applicationContext, getString(R.string.invalid_repeat), Toast.LENGTH_SHORT).show()
+                                    return
+                                }
+                            }
+                            else -> {
+                                if(selectedDays.all { it == 0 }) {
+                                    Toast.makeText(applicationContext, getString(R.string.must_check_repeat), Toast.LENGTH_SHORT).show()
                                     return
                                 }
                             }
@@ -843,16 +845,20 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
     private val startDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
         if(startDate == null) startDate = calendar.clone() as Calendar
-        startDate?.set(year, month, dayOfMonth)
-        startDatePickerDialog.calendar = startDate!!
-        range_start.text = dateFormat.format(startDate?.time)
+        startDate?.let {
+            it.set(year, month, dayOfMonth)
+            startDatePickerDialog.calendar = it
+            range_start.text = dateFormat.format(it.time)
+        }
     }
 
     private val endDatePickerListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
-        if(endDate == null) endDate = calendar.clone() as Calendar
-        endDate?.set(year, month, dayOfMonth)
-        endDatePickerDialog.calendar = endDate!!
-        range_end.text = dateFormat.format(endDate?.time)
+        endDate = calendar.clone() as Calendar
+        endDate?.let {
+            it.set(year, month, dayOfMonth)
+            endDatePickerDialog.calendar = it
+            range_end.text = dateFormat.format(it.time)
+        }
     }
 
     companion object {

@@ -6,8 +6,8 @@ import android.content.Intent
 import android.icu.util.TimeZone
 import android.os.Build
 import android.os.Bundle
-import android.support.annotation.RequiresApi
-import android.support.v4.app.Fragment
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -138,7 +138,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
     private fun updateSummariesByTimeZone() {
         with(MediaCursor.getCountryNameByTimeZone(mTimeZone)) {
-            if(!this.isEmpty()) time_zone_country_summary.text = this
+            if(this.isNotEmpty()) time_zone_country_summary.text = this
         }
 
         with(mTimeZoneInfo) {

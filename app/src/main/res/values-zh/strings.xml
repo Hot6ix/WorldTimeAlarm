@@ -47,6 +47,7 @@
     <string name="tomorrow">明天</string>
     <string name="today">今天</string>
     <string name="everyday">每天</string>
+    <string name="everyday_within_period">期间每日</string>
     <string name="am">上午</string>
     <string name="pm">下午</string>
     <string name="undo">解开</string>

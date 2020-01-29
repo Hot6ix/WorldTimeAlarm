@@ -5,13 +5,12 @@ import android.database.ContentObserver
 import android.media.AudioManager
 import android.media.AudioManager.STREAM_ALARM
 import android.provider.Settings
-import android.support.constraint.ConstraintLayout
-import android.support.v7.preference.Preference
-import android.support.v7.preference.PreferenceViewHolder
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
+import androidx.preference.Preference
+import androidx.preference.PreferenceViewHolder
 import com.simples.j.worldtimealarm.R
 
 /**

@@ -21,9 +21,9 @@ data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, va
 
     constructor(source: Parcel) : this(
             source.readValue(Int::class.java.classLoader) as Int?,
-            source.readString(),
-            source.readString(),
-            source.createIntArray(),
+            source.readString().toString(),
+            source.readString().toString(),
+            source.createIntArray() ?: intArrayOf(0,0,0,0,0,0,0),
             source.readString(),
             source.createLongArray(),
             source.readLong(),
@@ -55,7 +55,9 @@ data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, va
         writeValue(endDate)
     }
 
-    fun isInstantAlarm(): Boolean = !repeat.any { it > 0 }
+    fun isInstantAlarm(): Boolean = !repeat.any { it > 0 } && endDate == null
+
+    fun hasRepeatDay(): Boolean = !repeat.any { it > 0 }
 
     companion object {
         @JvmField

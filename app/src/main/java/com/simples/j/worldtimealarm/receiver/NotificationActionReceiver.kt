@@ -21,11 +21,12 @@ class NotificationActionReceiver : BroadcastReceiver() {
             Log.d(C.TAG, "Notification Action received: $action")
 
             if (action == ACTION_SNOOZE) {
-                val alarmItem = intent.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)
-                AlarmController.getInstance().scheduleAlarm(context, alarmItem, AlarmController.TYPE_SNOOZE)
+                intent.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)?.let {
+                    AlarmController.getInstance().scheduleAlarm(context, it, AlarmController.TYPE_SNOOZE)
 
-                val minutes = context.getString(R.string.minutes, alarmItem.snooze.div((60 * 1000)))
-                Toast.makeText(context, context.getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()
+                    val minutes = context.getString(R.string.minutes, it.snooze.div((60 * 1000)))
+                    Toast.makeText(context, context.getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()
+                }
                 val serviceActionIntent = Intent(WakeUpService.REQUEST_SERVICE_ACTION).apply { putExtra(WakeUpService.SERVICE_ACTION, AlarmReceiver.ACTION_SNOOZE) }
                 context.sendBroadcast(serviceActionIntent)
             }

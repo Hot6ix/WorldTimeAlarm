@@ -9,13 +9,13 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import android.os.Bundle
 import android.os.Handler
-import android.support.design.widget.CoordinatorLayout
-import android.support.design.widget.Snackbar
-import android.support.v4.app.Fragment
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.snackbar.Snackbar
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -53,7 +53,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private var snackBar: Snackbar? = null
     private var muteStatusIsShown = false
 
-    private var job = Job()
+    private var job: Job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main
 
@@ -326,11 +326,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private inner class UpdateRequestReceiver: BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d(C.TAG, intent.action)
             when(intent.action) {
                 MainActivity.ACTION_UPDATE_SINGLE -> {
                     val bundle = intent.getBundleExtra(AlarmReceiver.OPTIONS)
-                    val item = bundle.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+                    val item = bundle?.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
                     if(item == null) {
                         Log.d(C.TAG, "AlarmItem is null")
                         return

@@ -4,10 +4,9 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.drawable.RippleDrawable
 import android.os.Handler
-import android.preference.PreferenceManager
-import android.support.constraint.ConstraintLayout
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.RecyclerView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Switch
 import android.widget.TextView
+import androidx.preference.PreferenceManager
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.utils.AlarmController
@@ -179,7 +179,6 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                 // for support old version of app
                 val repeat = item.repeat.mapIndexed { index, i -> if(i > 0) index + 1 else 0 }
 
-
                 val repeatArray = repeat.mapIndexed { index, i ->
                     if(i > 0) {
                         var dayOfWeek = index
@@ -224,10 +223,23 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             else {
                 holder.repeat.text =
                         when {
-                            DateUtils.isToday(calendar.timeInMillis) -> context.resources.getString(R.string.today)
-                            DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) && startDate == null -> context.resources.getString(R.string.tomorrow) // this can make adapter to know calendar date is tomorrow
-                            startDate != null -> DateUtils.formatDateTime(context, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
-                            else -> DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
+                            DateUtils.isToday(calendar.timeInMillis) -> {
+                                context.resources.getString(R.string.today)
+                            }
+                            DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) && startDate == null && endDate == null -> {
+                                context.resources.getString(R.string.tomorrow)
+                            } // this can make adapter to know calendar date is tomorrow
+                            startDate != null -> {
+                                startDate?.let {
+                                    DateUtils.formatDateTime(context, it.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
+                                }
+                            }
+                            endDate != null -> {
+                                context.resources.getString(R.string.everyday_within_period)
+                            }
+                            else -> {
+                                DateUtils.formatDateTime(context, calendar.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
+                            }
                         }
             }
         }

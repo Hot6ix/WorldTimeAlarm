@@ -3,8 +3,8 @@ package com.simples.j.worldtimealarm.fragments
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v7.app.AlertDialog
+import androidx.fragment.app.DialogFragment
+import androidx.appcompat.app.AlertDialog
 import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
@@ -47,7 +47,7 @@ class SnoozeDialogFragment: DialogFragment() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        val dialog = AlertDialog.Builder(context!!)
+        val dialog = AlertDialog.Builder(requireContext())
                 .setView(snoozeView)
                 .setPositiveButton(resources.getString(R.string.ok)) { dialogInterface, _ ->
                     listener?.onPositiveButtonClick(dialogInterface, currentChoice)
@@ -64,7 +64,7 @@ class SnoozeDialogFragment: DialogFragment() {
         outState.putInt(ChoiceDialogFragment.CURRENT_CHOICE, currentChoice)
     }
 
-    override fun onDismiss(dialog: DialogInterface?) {
+    override fun onDismiss(dialog: DialogInterface) {
         listener?.onDialogDismiss(dialog)
         super.onDismiss(dialog)
     }

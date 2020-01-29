@@ -22,7 +22,7 @@ class DatabaseCursor(context: Context) {
         val contentValues = ContentValues().apply {
             put(DatabaseManager.COLUMN_TIME_ZONE, item.timeZone)
             put(DatabaseManager.COLUMN_TIME_SET, item.timeSet)
-            put(DatabaseManager.COLUMN_REPEAT, Arrays.toString(item.repeat))
+            put(DatabaseManager.COLUMN_REPEAT, item.repeat.contentToString())
             put(DatabaseManager.COLUMN_RINGTONE, item.ringtone)
             put(DatabaseManager.COLUMN_VIBRATION, Arrays.toString(item.vibration))
             put(DatabaseManager.COLUMN_SNOOZE, item.snooze)
@@ -181,7 +181,7 @@ class DatabaseCursor(context: Context) {
         val contentValues = ContentValues().apply {
             put(DatabaseManager.COLUMN_TIME_ZONE, item.timeZone)
             put(DatabaseManager.COLUMN_TIME_SET, item.timeSet)
-            put(DatabaseManager.COLUMN_REPEAT, Arrays.toString(item.repeat))
+            put(DatabaseManager.COLUMN_REPEAT, item.repeat.contentToString())
             put(DatabaseManager.COLUMN_RINGTONE, item.ringtone)
             put(DatabaseManager.COLUMN_VIBRATION, Arrays.toString(item.vibration))
             put(DatabaseManager.COLUMN_SNOOZE, item.snooze)

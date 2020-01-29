@@ -2,8 +2,8 @@ package com.simples.j.worldtimealarm
 
 import android.os.Build
 import android.os.Bundle
-import android.support.annotation.RequiresApi
-import android.support.v7.app.AppCompatActivity
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import android.view.MenuItem
 import com.simples.j.worldtimealarm.fragments.TimeZoneFragment
 import com.simples.j.worldtimealarm.fragments.TimeZonePickerFragment
@@ -43,8 +43,8 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when(item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
             android.R.id.home -> {
                 if(supportFragmentManager.backStackEntryCount > 0) {
                     supportFragmentManager.popBackStack()

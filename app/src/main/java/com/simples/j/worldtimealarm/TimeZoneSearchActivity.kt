@@ -5,13 +5,13 @@ import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.SearchView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.support.TimeZoneAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
@@ -82,9 +82,9 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
-        outState?.putString(STATE_QUERY, query)
-        outState?.putStringArrayList(STATE_RESULT, resultArray)
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString(STATE_QUERY, query)
+        outState.putStringArrayList(STATE_RESULT, resultArray)
 
         super.onSaveInstanceState(outState)
     }
@@ -93,7 +93,7 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         query = text
         resultArray.clear()
         if(text != null && text.isNotEmpty()) {
-            resultArray.addAll(timeZoneArray.filter { it.toLowerCase().contains(text.toLowerCase()) })
+            resultArray.addAll(timeZoneArray.filter { it.toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)) })
         }
         if(resultArray.isEmpty()) {
             time_zone_search_list.visibility = View.GONE
@@ -112,7 +112,7 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         query = text
         resultArray.clear()
         if(text != null && text.isNotEmpty()) {
-            resultArray.addAll(timeZoneArray.filter { it.toLowerCase().contains(text.toLowerCase()) })
+            resultArray.addAll(timeZoneArray.filter { it.toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)) })
         }
         timeZoneAdapter.notifyDataSetChanged()
         return false

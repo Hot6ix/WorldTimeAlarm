@@ -46,6 +46,7 @@
     <string name="tomorrow">Tomorrow</string>
     <string name="today">Today</string>
     <string name="everyday">Everyday</string>
+    <string name="everyday_within_period">Everyday within period</string>
     <string name="am">AM</string>
     <string name="pm">PM</string>
     <string name="undo">Undo</string>
@@ -85,15 +86,15 @@
     <string name="volume_is_muted">Alarm volume muted.</string>
     <string name="exist_timezone">Selected time zone is already in list.</string>
     <string name="start_date_removed">Start date removed.</string>
-    <string name="start_date_and_time_is_wrong">The set time must be later than now if only set start date.</string>
+    <string name="start_date_and_time_is_wrong">The set time must be after now if only set start date.</string>
     <string name="end_date_removed">End date removed.</string>
-    <string name="end_date_earlier_than_today">End date cannot be earlier than today.</string>
-    <string name="end_date_earlier_than_start_date">End date cannot be earlier than start date.</string>
-    <string name="must_check_repeat">Must check repeat day(s) at least one.</string>
-    <string name="invalid_repeat">Must check valid time and repeat day(s) if range is less than a week.</string>
+    <string name="end_date_earlier_than_today">End date must be after today.</string>
+    <string name="end_date_earlier_than_start_date">End date must be after start date.</string>
+    <string name="must_check_repeat">Please check repeat day(s) at least one.</string>
+    <string name="invalid_repeat">Please check start/end date.</string>
     <string name="alarm_no_long_fires">Alarm (%1$s) no longer fires.</string>
     <string name="error_occurred">Error occurred.</string>
-    <string name="error_message">Invalid call. If it continues, please re-create alarm. Sorry for inconvenience.</string>
+    <string name="error_message">Invalid call. If you keep seeing this error, please re-create alarm. Sorry for inconvenience.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>

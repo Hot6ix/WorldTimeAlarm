@@ -3,8 +3,8 @@ package com.simples.j.worldtimealarm
 import android.content.Context
 import android.icu.text.TimeZoneNames
 import android.icu.util.ULocale
-import android.support.test.InstrumentationRegistry
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.util.Log
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.TimeZoneInfo
@@ -22,7 +22,7 @@ class MediaCursorTest {
 
     @Before
     fun setup() {
-        context = InstrumentationRegistry.getTargetContext()
+        context = InstrumentationRegistry.getInstrumentation().context
     }
 
     @Test

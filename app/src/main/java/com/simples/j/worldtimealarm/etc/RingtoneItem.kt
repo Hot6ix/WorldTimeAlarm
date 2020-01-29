@@ -1,6 +1,5 @@
 package com.simples.j.worldtimealarm.etc
 
-import android.net.Uri
 import java.io.Serializable
 
 /**

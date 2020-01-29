@@ -2,7 +2,7 @@ package com.simples.j.worldtimealarm
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import androidx.test.core.app.ApplicationProvider
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.utils.AlarmController
@@ -49,7 +49,7 @@ class AndroidScheduleTest {
         var cal = Calendar.getInstance().apply { timeInMillis = time }
 
         // time zone doesn't affect day repeat
-        System.out.println(cal.time.toString())
+        println(cal.time.toString())
         Assert.assertEquals(4, cal.get(Calendar.DAY_OF_WEEK))
         Assert.assertEquals("2019/3/27/", calendarToString(cal, false))
 
@@ -59,7 +59,7 @@ class AndroidScheduleTest {
         cal = Calendar.getInstance().apply { timeInMillis = time }
 
         // time zone affects day repeat
-        System.out.println(cal.time.toString())
+        println(cal.time.toString())
         Assert.assertEquals(5, cal.get(Calendar.DAY_OF_WEEK))
         Assert.assertEquals("2019/3/28/", calendarToString(cal, false))
 
@@ -82,7 +82,7 @@ class AndroidScheduleTest {
         cal = Calendar.getInstance().apply { timeInMillis = time }
 
         // time zone doesn't affect day repeat
-        System.out.println(cal.time.toString())
+        println(cal.time.toString())
         Assert.assertThat(cal.get(Calendar.DAY_OF_WEEK), AnyOf.anyOf(CoreMatchers.`is`(3), CoreMatchers.`is`(5)))
         Assert.assertEquals("2019/3/26/", calendarToString(cal, false))
 
@@ -92,7 +92,7 @@ class AndroidScheduleTest {
         cal = Calendar.getInstance().apply { timeInMillis = time }
 
         // time zone affects day repeat
-        System.out.println(cal.time.toString())
+        println(cal.time.toString())
         Assert.assertThat(cal.get(Calendar.DAY_OF_WEEK), AnyOf.anyOf(CoreMatchers.`is`(1), CoreMatchers.`is`(3)))
         Assert.assertEquals("2019/3/26/", calendarToString(cal, false))
 
@@ -114,7 +114,7 @@ class AndroidScheduleTest {
         cal = Calendar.getInstance().apply { timeInMillis = time }
 
         // time zone doesn't affect day repeat
-        System.out.println(cal.time.toString())
+        println(cal.time.toString())
         Assert.assertThat(cal.get(Calendar.DAY_OF_WEEK), AnyOf.anyOf(CoreMatchers.`is`(1), CoreMatchers.`is`(7)))
         Assert.assertEquals("2019/3/30/", calendarToString(cal, false))
 
@@ -124,7 +124,7 @@ class AndroidScheduleTest {
         cal = Calendar.getInstance().apply { timeInMillis = time }
 
         // time zone affects day repeat
-        System.out.println(cal.time.toString())
+        println(cal.time.toString())
         Assert.assertThat(cal.get(Calendar.DAY_OF_WEEK), AnyOf.anyOf(CoreMatchers.`is`(1), CoreMatchers.`is`(7)))
         Assert.assertEquals("2019/3/30/", calendarToString(cal, false))
 
@@ -147,7 +147,7 @@ class AndroidScheduleTest {
         cal = Calendar.getInstance().apply { timeInMillis = time }
 
         // time zone doesn't affect day repeat
-        System.out.println(cal.time.toString())
+        println(cal.time.toString())
         Assert.assertEquals(cal.get(Calendar.DAY_OF_WEEK), 2)
         Assert.assertEquals("2019/4/1/", calendarToString(cal, false))
 
@@ -157,7 +157,7 @@ class AndroidScheduleTest {
         cal = Calendar.getInstance().apply { timeInMillis = time }
 
         // time zone affects day repeat
-        System.out.println(cal.time.toString())
+        println(cal.time.toString())
         Assert.assertEquals(cal.get(Calendar.DAY_OF_WEEK), 3)
         Assert.assertEquals("2019/4/2/", calendarToString(cal, false))
     }
@@ -174,15 +174,15 @@ class AndroidScheduleTest {
         */
 
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"))
-        var eCal = Calendar.getInstance().apply { add(Calendar.MINUTE, -1) }
-        var item = createAlarm(repeat = intArrayOf(0,0,1,0,0,0,0), timeSet = eCal)
+        val eCal = Calendar.getInstance().apply { add(Calendar.MINUTE, -1) }
+        val item = createAlarm(repeat = intArrayOf(0,0,1,0,0,0,0), timeSet = eCal)
 
         sharedPref.edit().putBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false).apply()
-        var time = AlarmController.getInstance().scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
-        var cal = Calendar.getInstance().apply { timeInMillis = time }
+        val time = AlarmController.getInstance().scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+        val cal = Calendar.getInstance().apply { timeInMillis = time }
 
         // time zone doesn't affect day repeat
-        System.out.println(cal.time.toString())
+        println(cal.time.toString())
         Assert.assertEquals(4, cal.get(Calendar.DAY_OF_WEEK))
         Assert.assertEquals("2019/3/27/", calendarToString(cal, false))
     }

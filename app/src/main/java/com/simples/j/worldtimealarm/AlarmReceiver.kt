@@ -10,9 +10,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
-import android.support.v4.app.NotificationCompat
 import android.text.format.DateUtils
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_MISSED
@@ -74,7 +74,7 @@ class AlarmReceiver: BroadcastReceiver() {
 
                         val today = Calendar.getInstance()
                         val difference = endDate.timeInMillis - today.timeInMillis
-                        if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
+                        if(TimeUnit.MILLISECONDS.toDays(difference) < 7 && item.hasRepeatDay()) {
                             val tmpCal = today.clone() as Calendar
                             while(!tmpCal.after(endDate)) {
                                 tmpCal.add(Calendar.DATE, 1)

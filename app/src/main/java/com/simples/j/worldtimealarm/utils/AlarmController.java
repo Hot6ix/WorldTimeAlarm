@@ -85,7 +85,6 @@ public class AlarmController {
             if(!isRepeating) {
                 // one time alarm
                 // add a day until calendar time is after from current time
-
                 while(calendar.getTimeInMillis() < System.currentTimeMillis()) {
                     calendar.add(Calendar.DAY_OF_YEAR, 1);
                 }

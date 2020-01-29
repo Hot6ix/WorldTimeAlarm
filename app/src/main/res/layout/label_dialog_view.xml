@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -13,6 +13,7 @@
         android:inputType="textCapSentences|textAutoCorrect"
         android:focusable="true"
         android:textColor="@color/blueGrayDarker"
+        android:importantForAutofill="no"
         android:layout_marginStart="@dimen/padding20"
         android:layout_marginEnd="@dimen/padding20"
         android:layout_marginTop="@dimen/padding10"
@@ -25,4 +26,4 @@
         <requestFocus />
     </EditText>
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

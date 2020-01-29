@@ -4,7 +4,7 @@ import android.icu.text.TimeZoneNames
 import android.icu.util.TimeZone
 import android.icu.util.ULocale
 import android.os.Build
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import java.util.*
 
@@ -61,7 +61,7 @@ class TimeZoneInfo(builder: Builder) {
 
         fun format(timeZone: TimeZone): TimeZoneInfo {
             val timeZoneNames = TimeZoneNames.getInstance(ULocale.getDefault())
-            return TimeZoneInfo.Builder(timeZone)
+            return Builder(timeZone)
                     .setGenericName(timeZoneNames.getDisplayName(timeZone.id, TimeZoneNames.NameType.LONG_GENERIC, now.time))
                     .setDayLightName(timeZoneNames.getDisplayName(timeZone.id, TimeZoneNames.NameType.LONG_DAYLIGHT, now.time))
                     .setStandardName(timeZoneNames.getDisplayName(timeZone.id, TimeZoneNames.NameType.LONG_STANDARD, now.time))

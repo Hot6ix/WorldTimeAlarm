@@ -1,17 +1,12 @@
 package com.simples.j.worldtimealarm
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.app.NavUtils
-import android.util.Log
 import android.view.MenuItem
-import com.simples.j.worldtimealarm.etc.C
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NavUtils
 import kotlinx.android.synthetic.main.activity_license.*
-import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
-import java.io.InputStreamReader
-import java.lang.StringBuilder
 
 class LicenseActivity : AppCompatActivity() {
 

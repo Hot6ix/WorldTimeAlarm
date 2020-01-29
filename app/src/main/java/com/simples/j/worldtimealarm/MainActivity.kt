@@ -8,12 +8,12 @@ import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.support.constraint.ConstraintLayout
-import android.support.design.widget.TabLayout
-import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import com.google.android.material.tabs.TabLayout
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
@@ -98,8 +98,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         sendHighlightRequest(intent)
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
-        outState?.putInt(TAB_STATE, tab.selectedTabPosition)
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putInt(TAB_STATE, tab.selectedTabPosition)
 
         super.onSaveInstanceState(outState)
     }

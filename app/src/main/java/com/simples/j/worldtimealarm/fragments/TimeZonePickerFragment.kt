@@ -5,11 +5,11 @@ import android.icu.text.Collator
 import android.icu.util.ULocale
 import android.os.Build
 import android.os.Bundle
-import android.support.annotation.RequiresApi
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.SearchView
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.appcompat.widget.SearchView
 import android.view.*
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
@@ -81,7 +81,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
             if(mAdapter == null) {
                 mAdapter = when(mRequestType) {
                     TimeZonePickerActivity.REQUEST_COUNTRY -> {
-                        BaseTimeZonePickerAdapter(context, mList, false, false, null, mLocaleChangeListener)
+                        BaseTimeZonePickerAdapter(context, mList, showItemSummary = false, showItemDifference = false, headerText = null, listener = mLocaleChangeListener)
                     }
                     TimeZonePickerActivity.REQUEST_TIME_ZONE -> {
                         val showItemDifference = when(mType) {
@@ -137,8 +137,8 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
         outState.putString(TIME_ZONE_PICKER_QUERY_KEY, mQuery)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater?) {
-        inflater?.inflate(R.menu.menu_time_zone_picker_search, menu)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_time_zone_picker_search, menu)
 
         mSearchMenu = menu.findItem(R.id.search_timezone)
         mSearchView = mSearchMenu?.actionView as SearchView

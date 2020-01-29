@@ -8,11 +8,11 @@ import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.*
-import android.preference.PreferenceManager
-import android.support.v4.app.NotificationCompat
+import androidx.core.app.NotificationCompat
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
@@ -89,15 +89,17 @@ class WakeUpService : Service() {
                 currentAlarmItemId = alarmItem.notiId
 
                 val alarmMuteTime = preference.getString(applicationContext.resources.getString(R.string.setting_alarm_mute_key), "0")?.toLong()
-
-                timerRunnable = Runnable {
-                    stopAll()
-                    Log.d(C.TAG, "Alarm muted : ID(${alarmItem.notiId.plus(1)})")
-                }
-
                 if(alarmMuteTime != null && alarmMuteTime != 0L) {
-                    timer = Handler().apply {
-                        postDelayed(timerRunnable, alarmMuteTime)
+
+                    Runnable {
+                        stopAll()
+                        Log.d(C.TAG, "Alarm muted : ID(${alarmItem.notiId.plus(1)})")
+                    }.also {  runnable ->
+                        timerRunnable = runnable
+
+                        timer = Handler().apply {
+                            postDelayed(runnable, alarmMuteTime)
+                        }
                     }
                 }
             }
@@ -112,7 +114,7 @@ class WakeUpService : Service() {
         super.onDestroy()
         isWakeUpServiceRunning = false
         stopAll()
-        timer?.removeCallbacks(timerRunnable)
+        timerRunnable?.let { timer?.removeCallbacks(it) }
 
         item?.let {
             notificationManager.cancel(it.notiId)
@@ -171,7 +173,6 @@ class WakeUpService : Service() {
                             }
                         }
 
-
                 val contentText =
                         if(!alarmItem.label.isNullOrEmpty()) {
                             alarmItem.label
@@ -197,6 +198,7 @@ class WakeUpService : Service() {
                     val notificationChannel = NotificationChannel(ALARM_NOTIFICATION_CHANNEL, getString(R.string.alarm_notification_channel), NotificationManager.IMPORTANCE_HIGH).apply {
                         enableVibration(true)
                         vibrationPattern = LongArray(0)
+                        importance = NotificationManager.IMPORTANCE_HIGH
                     }
                     notificationManager.createNotificationChannel(notificationChannel)
                 }
@@ -206,6 +208,7 @@ class WakeUpService : Service() {
                         .setSound(null)
                         .setVibrate(null)
                         .setOngoing(true)
+                        .setAutoCancel(false)
                         .setContentText(contentText)
                         .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
                         .setFullScreenIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT), true)
@@ -223,6 +226,7 @@ class WakeUpService : Service() {
                     val notificationChannel = NotificationChannel(EXPIRED_NOTIFICATION_CHANNEL, getString(R.string.expired_notification_channel), NotificationManager.IMPORTANCE_HIGH).apply {
                         enableVibration(true)
                         vibrationPattern = LongArray(0)
+                        importance = NotificationManager.IMPORTANCE_HIGH
                     }
                     notificationManager.createNotificationChannel(notificationChannel)
                 }
@@ -231,8 +235,8 @@ class WakeUpService : Service() {
                         .setGroup(GROUP_EXPIRED)
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL)
-                        .setFullScreenIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId+10, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT), true)
-                        .priority = NotificationCompat.PRIORITY_MAX
+                        .setContentIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId+10, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
+                        .priority = NotificationCompat.PRIORITY_HIGH
             }
             else -> {
                 title = "Wrong type of notification"
@@ -241,9 +245,9 @@ class WakeUpService : Service() {
 
         return notificationBuilder
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setVibrate(LongArray(0))
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
                 .setContentTitle(title)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .build()
     }
 

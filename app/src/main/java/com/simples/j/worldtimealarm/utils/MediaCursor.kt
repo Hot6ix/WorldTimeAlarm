@@ -7,7 +7,7 @@ import android.icu.util.TimeZone
 import android.icu.util.ULocale
 import android.media.RingtoneManager
 import android.os.Build
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import android.text.BidiFormatter
 import android.text.TextDirectionHeuristics
 import android.text.TextUtils
@@ -184,7 +184,7 @@ class MediaCursor {
         @RequiresApi(Build.VERSION_CODES.N)
         fun getULocaleByTimeZoneId(id: String?): ULocale? {
             return ULocale.getAvailableLocales().find {
-                it.displayCountry.toLowerCase() == LocaleDisplayNames.getInstance(ULocale.getDefault()).regionDisplayName(TimeZone.getRegion(id)).toLowerCase()
+                it.displayCountry.toLowerCase(Locale.ROOT) == LocaleDisplayNames.getInstance(ULocale.getDefault()).regionDisplayName(TimeZone.getRegion(id)).toLowerCase(Locale.ROOT)
             }
         }
 

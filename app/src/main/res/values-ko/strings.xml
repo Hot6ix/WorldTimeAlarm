@@ -47,6 +47,7 @@
     <string name="tomorrow">내일</string>
     <string name="today">오늘</string>
     <string name="everyday">매일</string>
+    <string name="everyday_within_period">기간 내 매일</string>
     <string name="am">오전</string>
     <string name="pm">오후</string>
     <string name="undo">실행 취소</string>

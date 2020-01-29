@@ -1,16 +1,13 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
-import android.support.v4.content.ContextCompat
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
 import android.widget.Button
-import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.RecyclerView
 import com.simples.j.worldtimealarm.R
-import kotlinx.android.synthetic.main.alarm_day_item.view.*
 import kotlinx.android.synthetic.main.color_tag_item.view.*
 
 class ColorGridAdapter(context: Context, private var defaultColor: Int): RecyclerView.Adapter<ColorGridAdapter.ViewHolder>() {
@@ -19,7 +16,7 @@ class ColorGridAdapter(context: Context, private var defaultColor: Int): Recycle
     private var lastChecked: Button? = null
     private lateinit var colorItemClickListener: OnItemClickListener
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ColorGridAdapter.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.color_tag_item, parent, false))
     }
 
@@ -57,8 +54,8 @@ class ColorGridAdapter(context: Context, private var defaultColor: Int): Recycle
     }
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        var layout = view.color_layout
-        var color = view.color
+        var layout: ConstraintLayout = view.color_layout
+        var color: Button = view.color
     }
 
     interface OnItemClickListener {

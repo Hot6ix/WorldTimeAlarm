@@ -1,7 +1,7 @@
 package com.simples.j.worldtimealarm.utils
 
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
 
 /**
  * Created by j on 03/03/2018.
