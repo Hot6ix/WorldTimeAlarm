@@ -8,10 +8,10 @@ import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.*
-import androidx.core.app.NotificationCompat
 import android.text.format.DateUtils
 import android.util.Log
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.MainActivity
@@ -135,6 +135,11 @@ class WakeUpService : Service() {
                 }
             }
         }
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        isWakeUpServiceRunning = false
     }
 
     private fun setup(item: AlarmItem) {
