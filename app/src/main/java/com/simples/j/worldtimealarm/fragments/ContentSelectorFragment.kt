@@ -14,31 +14,35 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.OpenableColumns
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.simples.j.worldtimealarm.ContentSelectorActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
+import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
 import com.simples.j.worldtimealarm.support.ContentSelectorAdapter
-import com.simples.j.worldtimealarm.ui.models.ContentSelectorViewModel
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.content_selector_fragment.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
-class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelectedListener, CoroutineScope {
+class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelectedListener, CoroutineScope, ContentSelectorAdapter.OnItemMenuSelectedListener {
 
     private lateinit var viewModel: ContentSelectorViewModel
-    private lateinit var adapter: ContentSelectorAdapter
-    private lateinit var layoutManager: LinearLayoutManager
+    private lateinit var contentSelectorAdapter: ContentSelectorAdapter
+    private lateinit var recyclerLayoutManager: LinearLayoutManager
     private lateinit var audioManager: AudioManager
     private lateinit var vibrator: Vibrator
-
 
     private var ringtone: Ringtone? = null
 
@@ -61,6 +65,10 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         activity?.run {
             viewModel = ViewModelProviders.of(this)[ContentSelectorViewModel::class.java]
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         job = launch(coroutineContext) {
             context?.let {
@@ -73,33 +81,39 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             DatabaseCursor(requireContext()).getUserRingtoneList()
                         }
 
+                        val defaultRingtone = systemRingtone[1]
                         val ringtoneList = ArrayList<RingtoneItem>().apply {
-                            add(RingtoneItem("User Ringtone", "user:ringtone"))
+                            add(RingtoneItem(getString(R.string.my_ringtone), ContentSelectorAdapter.URI_USER_RINGTONE))
+                            add(RingtoneItem(getString(R.string.add_new), ContentSelectorAdapter.URI_ADD_RINGTONE))
                             addAll(userRingtone)
-                            add(RingtoneItem("System Ringtone", "system:ringtone"))
+                            add(RingtoneItem(getString(R.string.system_ringtone), ContentSelectorAdapter.URI_SYSTEM_RINGTONE))
                             addAll(systemRingtone)
                         }
-                        adapter = ContentSelectorAdapter(it, ringtoneList, viewModel.lastSelectedValue)
+                        contentSelectorAdapter = ContentSelectorAdapter(it, ringtoneList, viewModel.lastSelectedValue, defaultRingtone)
                     }
                     ContentSelectorActivity.ACTION_REQUEST_VIBRATION -> {
                         val vibrationList = withContext(Dispatchers.IO) {
                             MediaCursor.getVibratorPatterns(it)
                         }
-                        adapter = ContentSelectorAdapter(it, vibrationList, viewModel.lastSelectedValue)
+                        contentSelectorAdapter = ContentSelectorAdapter(it, vibrationList, viewModel.lastSelectedValue)
                     }
                     ContentSelectorActivity.ACTION_REQUEST_SNOOZE -> {
                         val snoozeList = withContext(Dispatchers.IO) {
                             MediaCursor.getSnoozeList(it)
                         }
-                        adapter = ContentSelectorAdapter(it, snoozeList, viewModel.lastSelectedValue)
+                        contentSelectorAdapter = ContentSelectorAdapter(it, snoozeList, viewModel.lastSelectedValue)
                     }
                 }
-                adapter.setOnItemSelectedListener(this@ContentSelectorFragment)
+                contentSelectorAdapter.setOnItemSelectedListener(this@ContentSelectorFragment)
+                contentSelectorAdapter.setOnItemMenuSelectedListener(this@ContentSelectorFragment)
 
-                layoutManager = LinearLayoutManager(it, LinearLayoutManager.VERTICAL, false)
+                recyclerLayoutManager = LinearLayoutManager(it, LinearLayoutManager.VERTICAL, false)
 
-                content_recyclerview.adapter = adapter
-                content_recyclerview.layoutManager = layoutManager
+                content_recyclerview.apply {
+                    adapter = contentSelectorAdapter
+                    layoutManager = recyclerLayoutManager
+                    (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+                }
             }
         }
     }
@@ -110,7 +124,13 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                 data?.data?.also {
                     val name = getNameFromUri(it)
                     val isInserted = DatabaseCursor(requireContext()).insertUserRingtone(RingtoneItem(name, it.toString()))
-                    Log.d(C.TAG, isInserted.toString())
+                    if(!isInserted) {
+                        Toast.makeText(context, getString(R.string.exist_ringtone), Toast.LENGTH_SHORT).show()
+                    }
+                    else {
+                        viewModel.lastSelectedValue = RingtoneItem(getNameFromUri(it), it.toString())
+                        play(it.toString())
+                    }
                 }
             }
         }
@@ -125,26 +145,12 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         if(vibrator.hasVibrator()) vibrator.cancel()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        if(viewModel.action == ContentSelectorActivity.ACTION_REQUEST_AUDIO) {
-            inflater.inflate(R.menu.menu_ringtone, menu)
-        }
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             android.R.id.home -> {
                 activity?.run {
                     onBackPressed()
                 }
-            }
-            R.id.action_add_ringtone -> {
-                val uriIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "audio/*"
-                }
-                startActivityForResult(uriIntent, ContentSelectorActivity.USER_AUDIO_REQUEST_CODE)
             }
         }
 
@@ -155,14 +161,25 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         when(item) {
             is RingtoneItem -> {
                 if(index > 0) {
-                    ringtone.let {
-                        if(viewModel.lastSelectedValue != item) {
-                            it?.stop()
-                            play(item.uri)
+                    if(item.uri ==ContentSelectorAdapter.URI_ADD_RINGTONE) {
+                        val uriIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "audio/*"
                         }
-                        else if(it == null || !it.isPlaying) play(item.uri)
-                        else {
-                            it.stop()
+                        startActivityForResult(uriIntent, ContentSelectorActivity.USER_AUDIO_REQUEST_CODE)
+                    }
+                    else {
+                        ringtone.let {
+                            if(item.uri.isNullOrEmpty() || item.uri != "null") {
+                                if(viewModel.lastSelectedValue != item) {
+                                    it?.stop()
+                                    play(item.uri)
+                                }
+                                else if(it == null || !it.isPlaying) play(item.uri)
+                                else {
+                                    it.stop()
+                                }
+                            }
                         }
                     }
                 }
@@ -177,6 +194,34 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         viewModel.lastSelectedValue = item
     }
 
+    override fun onItemMenuSelected(index: Int, menu: MenuItem, type: Int, item: Any) {
+        when(type) {
+            ContentSelectorAdapter.TYPE_USER_RINGTONE -> {
+                val ringtoneItem = item as RingtoneItem
+                when(menu.itemId) {
+                    R.id.action_remove -> {
+                        val tmpRingtone = try {
+                            RingtoneManager.getRingtone(context, Uri.parse(ringtoneItem.uri))
+                        } catch(e: Exception) {
+                            e.printStackTrace()
+                            null
+                        }
+
+                        ringtone?.let {
+                            if(tmpRingtone?.getTitle(context) == it.getTitle(context)) {
+                                ringtone?.stop()
+                            }
+                        }
+
+                        item.uri?.let {
+                            DatabaseCursor(requireContext()).removeUserRingtone(it)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun play(uri: String?) {
         launch(coroutineContext) {
             job.join()
@@ -187,9 +232,13 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                     .build()
 
             ringtone?.stop()
-            ringtone = RingtoneManager.getRingtone(context, Uri.parse(uri))
-            ringtone?.audioAttributes = audioAttrs
-            ringtone?.play()
+            try {
+                ringtone = RingtoneManager.getRingtone(context, Uri.parse(uri))
+                ringtone?.audioAttributes = audioAttrs
+                ringtone?.play()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -216,7 +265,12 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
             try {
                 cursor?.let {
                     it.moveToFirst()
-                    return cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                    var name = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                    val extensionIndex = name.lastIndexOf('.')
+                    if(extensionIndex > 0 && extensionIndex < (name.length - 1)) {
+                        name = name.substring(0, extensionIndex)
+                    }
+                    return name
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

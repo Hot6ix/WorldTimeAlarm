@@ -28,7 +28,7 @@
     <string name="select_snooze">贪睡</string>
     <string name="no_ringtone">没有铃声</string>
     <string name="no_vibrator">没有振动</string>
-    <string name="not_set">没有设置</string>
+    <string name="no_set">没有设置</string>
     <string name="timezone">时区</string>
     <string name="label">标签</string>
     <string name="slow">慢</string>
@@ -74,6 +74,10 @@
     <string name="one_time_alarm">%1$s (%2$s)</string>
     <string name="last_alarm">最后的警报</string>
     <string name="last_alarm_with_time">%1$s - 最后的警报</string>
+    <string name="my_ringtone">我的铃声</string>
+    <string name="system_ringtone">系统铃声</string>
+    <string name="add_new">新增</string>
+    <string name="remove">删除</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>
@@ -97,6 +101,7 @@
     <string name="alarm_no_long_fires">警报(%1$s)不再触发。</string>
     <string name="error_occurred">发生了错误。</string>
     <string name="error_message">呼叫无效。 如果继续，请重新创建警报。 对造成的不便表示歉意。</string>
+    <string name="exist_ringtone">所选铃声已在列表中。</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>

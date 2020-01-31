@@ -12,14 +12,11 @@ import android.os.Handler
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.snackbar.Snackbar
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.ItemTouchHelper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.*
 import com.simples.j.worldtimealarm.AlarmActivity
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
@@ -85,9 +82,12 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 }
                 recyclerLayoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
-                alarmList.layoutManager = recyclerLayoutManager
-                alarmList.adapter = alarmListAdapter
-                alarmList.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+                alarmList.apply {
+                    layoutManager = recyclerLayoutManager
+                    adapter = alarmListAdapter
+                    addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+                    (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+                }
 
                 swipeController = ListSwipeController()
                 swipeController.setOnSwipeListener(this@AlarmListFragment)

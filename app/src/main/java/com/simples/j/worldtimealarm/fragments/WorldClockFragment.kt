@@ -7,26 +7,21 @@ import android.app.TimePickerDialog
 import android.content.*
 import android.os.Build
 import android.os.Bundle
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import com.google.android.material.snackbar.Snackbar
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.ItemTouchHelper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.*
+import com.google.android.material.snackbar.Snackbar
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_NEW_CODE
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.support.ClockListAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
@@ -138,9 +133,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             if(context != null) {
                 clockListAdapter = ClockListAdapter(context!!, clockItems, calendar)
                 recyclerLayoutManager = LinearLayoutManager(context!!, LinearLayoutManager.VERTICAL, false)
-                clockList.layoutManager = recyclerLayoutManager
-                clockList.adapter = clockListAdapter
-                clockList.addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
+
+                clockList.apply {
+                    layoutManager = recyclerLayoutManager
+                    adapter = clockListAdapter
+                    addItemDecoration(DividerItemDecoration(context!!, DividerItemDecoration.VERTICAL))
+                    (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+                }
 
                 swipeController = ListSwipeController()
                 swipeController.setOnSwipeListener(this@WorldClockFragment)
@@ -333,7 +332,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     inner class UpdateRequestReceiver: BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d(C.TAG, intent.action.toString())
             when(intent.action) {
                 ACTION_TIME_ZONE_CHANGED -> {
                     timeZone = TimeZone.getTimeZone(intent.getStringExtra(TIME_ZONE_CHANGED_KEY))

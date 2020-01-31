@@ -27,7 +27,7 @@
     <string name="select_snooze">Snooze</string>
     <string name="no_ringtone">No Ringtone</string>
     <string name="no_vibrator">No Vibration</string>
-    <string name="not_set">Not set</string>
+    <string name="no_set">Not set</string>
     <string name="timezone">Time zone</string>
     <string name="label">Label</string>
     <string name="slow">slow</string>
@@ -73,6 +73,10 @@
     <string name="one_time_alarm">%1$s (%2$s)</string>
     <string name="last_alarm">Last alarm</string>
     <string name="last_alarm_with_time">%1$s - Last alarm</string>
+    <string name="my_ringtone">My ringtone</string>
+    <string name="system_ringtone">System ringtone</string>
+    <string name="add_new">Add new</string>
+    <string name="remove">Remove</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm removed.</string>
@@ -96,6 +100,7 @@
     <string name="alarm_no_long_fires">Alarm (%1$s) no longer fires.</string>
     <string name="error_occurred">Error occurred.</string>
     <string name="error_message">Invalid call. If you keep seeing this error, please re-create alarm. Sorry for inconvenience.</string>
+    <string name="exist_ringtone">Selected ringtone is already in list.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>

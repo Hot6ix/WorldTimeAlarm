@@ -1,4 +1,4 @@
-package com.simples.j.worldtimealarm.ui.models
+package com.simples.j.worldtimealarm.models
 
 import androidx.lifecycle.ViewModel
 

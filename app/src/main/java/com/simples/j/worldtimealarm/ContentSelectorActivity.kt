@@ -4,15 +4,12 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.MenuItem
 import androidx.lifecycle.ViewModelProviders
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.etc.SnoozeItem
 import com.simples.j.worldtimealarm.fragments.ContentSelectorFragment
-import com.simples.j.worldtimealarm.ui.models.ContentSelectorViewModel
+import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
 
 class ContentSelectorActivity : AppCompatActivity() {
 
