@@ -14,10 +14,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import com.simples.j.worldtimealarm.R
-import com.simples.j.worldtimealarm.etc.C
-import com.simples.j.worldtimealarm.etc.PatternItem
-import com.simples.j.worldtimealarm.etc.RingtoneItem
-import com.simples.j.worldtimealarm.etc.TimeZoneInfo
+import com.simples.j.worldtimealarm.etc.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -57,7 +54,7 @@ class MediaCursor {
             val array = ArrayList<PatternItem>()
             array.add(PatternItem(context.resources.getString(R.string.no_vibrator), null))
             val vibrators = context.resources.obtainTypedArray(R.array.vibrator_array)
-            val vibratorName = context.resources.getStringArray(R.array.vibrator_name)
+            val vibratorTitle = context.resources.getStringArray(R.array.vibrator_name)
 
             var index = 0
             while(index < vibrators.length()) {
@@ -66,12 +63,23 @@ class MediaCursor {
                 pattern.forEachIndexed { position, i ->
                     temp[position] = i.toLong()
                 }
-                array.add(PatternItem(vibratorName[index], temp))
+                array.add(PatternItem(vibratorTitle[index], temp))
                 index++
             }
 
             vibrators.recycle()
             return array
+        }
+
+        fun getSnoozeList(context: Context): ArrayList<SnoozeItem> {
+            val snoozeValues = context.resources.getIntArray(R.array.snooze_values)
+            val snoozeTitle = context.resources.getStringArray(R.array.snooze_array)
+
+            val array = snoozeTitle.mapIndexed { index, s ->
+                SnoozeItem(s, snoozeValues[index].toLong())
+            }
+
+            return ArrayList(array)
         }
 
         fun getOffsetOfDifference(context: Context, difference: Int, type: Int): String {

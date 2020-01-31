@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.DatabaseUtils
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.ClockItem
+import com.simples.j.worldtimealarm.etc.RingtoneItem
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -333,6 +334,57 @@ class DatabaseCursor(context: Context) {
         contentValues.put(DatabaseManager.COLUMN_TIME_ZONE, item.timezone)
 
         db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(item.id.toString()))
+        db.close()
+    }
+
+    fun getUserRingtoneList(): ArrayList<RingtoneItem> {
+        val db = dbManager.readableDatabase
+        val ringtoneList = ArrayList<RingtoneItem>()
+
+        val cursor = db.query(DatabaseManager.TABLE_USER_RINGTONE, null, null, null, null, null, DatabaseManager.COLUMN_TITLE + " ASC")
+        if(cursor.count > 0) {
+            while(cursor.moveToNext()) {
+                val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+                val title = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TITLE))
+                val uri = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_URI))
+
+                val item = RingtoneItem(
+                        title,
+                        uri)
+                ringtoneList.add(item)
+            }
+        }
+
+        cursor.close()
+        db.close()
+
+        return ringtoneList
+    }
+
+    fun insertUserRingtone(ringtone: RingtoneItem): Boolean {
+        val db = dbManager.writableDatabase
+
+        val cursor = db.query(DatabaseManager.TABLE_USER_RINGTONE, null, "${DatabaseManager.COLUMN_URI}=?", arrayOf(ringtone.uri), null, null, null, null)
+        if(cursor.count > 0) {
+            cursor.close()
+            db.close()
+            return false
+        }
+
+        val contentValues = ContentValues().apply {
+            put(DatabaseManager.COLUMN_TITLE, ringtone.title)
+            put(DatabaseManager.COLUMN_URI, ringtone.uri)
+        }
+
+        db.insert(DatabaseManager.TABLE_USER_RINGTONE, null, contentValues)
+        db.close()
+
+        return true
+    }
+
+    fun removeUserRingtone(uri: String) {
+        val db = dbManager.writableDatabase
+        db.delete(DatabaseManager.TABLE_USER_RINGTONE, DatabaseManager.COLUMN_URI + "= ?", arrayOf(uri))
         db.close()
     }
 

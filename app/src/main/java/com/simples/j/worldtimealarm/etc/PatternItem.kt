@@ -7,9 +7,9 @@ import java.util.*
  * Created by j on 20/02/2018.
  *
  */
-data class PatternItem(var name: String, var array: LongArray?): Serializable {
+data class PatternItem(var title: String, var array: LongArray?): Serializable {
     override fun toString(): String {
-        return "$name, ${Arrays.toString(array)}"
+        return "$title, ${Arrays.toString(array)}"
     }
 
     override fun equals(other: Any?): Boolean {

@@ -19,11 +19,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ContentSelectorActivity"></activity>
 
         <receiver
             android:name=".receiver.NotificationActionReceiver"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
 
         <service
             android:name=".utils.WakeUpService"
@@ -117,7 +118,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.simples.j.worldtimealarm.MainActivity" />
         </activity>
-
     </application>
 
 </manifest>

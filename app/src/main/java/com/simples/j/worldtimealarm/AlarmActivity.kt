@@ -11,20 +11,27 @@ import android.media.AudioManager
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
-import android.os.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
+import android.os.Build
+import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.View
 import android.widget.TimePicker
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.ACTION_REQUEST_AUDIO
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.ACTION_REQUEST_SNOOZE
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.ACTION_REQUEST_VIBRATION
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.AUDIO_REQUEST_CODE
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.LAST_SELECTED_KEY
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.SNOOZE_REQUEST_CODE
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.VIBRATION_REQUEST_CODE
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
-import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.OptionItem
-import com.simples.j.worldtimealarm.etc.PatternItem
-import com.simples.j.worldtimealarm.etc.RingtoneItem
+import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.fragments.*
 import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
 import com.simples.j.worldtimealarm.support.AlarmDayAdapter
@@ -44,8 +51,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private lateinit var alarmOptionAdapter: AlarmOptionAdapter
     private lateinit var ringtoneList: ArrayList<RingtoneItem>
     private lateinit var vibratorPatternList: ArrayList<PatternItem>
-    private lateinit var snoozeTimeList: Array<String>
-    private lateinit var snoozeValues: Array<Long>
+    private lateinit var snoozeList: ArrayList<SnoozeItem>
     private lateinit var optionList: ArrayList<OptionItem>
     private lateinit var selectedDays: IntArray
 
@@ -53,6 +59,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     private lateinit var currentTimeZone: String
     private lateinit var currentRingtone: RingtoneItem
     private lateinit var currentVibrationPattern: PatternItem
+    private lateinit var currentSnooze: SnoozeItem
     private lateinit var vibrator: Vibrator
     private lateinit var audioManager: AudioManager
     private lateinit var alarmController: AlarmController
@@ -67,7 +74,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
     private lateinit var existAlarmItem: AlarmItem
 
-    private var currentSnooze: Long = 0
     private var currentLabel: String? = null
     private var currentColorTag: Int = 0
     private var notiId = 0
@@ -97,8 +103,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
         ringtoneList = MediaCursor.getRingtoneList(applicationContext)
         vibratorPatternList = MediaCursor.getVibratorPatterns(applicationContext)
-        snoozeTimeList = resources.getStringArray(R.array.snooze_array)
-        snoozeValues = resources.getIntArray(R.array.snooze_values).map { it.toLong() }.toTypedArray()
+        snoozeList = MediaCursor.getSnoozeList(applicationContext)
 
         startDatePickerDialog =
                 supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_START_DATE) as? DatePickerDialogFragment ?:
@@ -210,7 +215,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
                     currentRingtone = ringtoneList.find { it.uri.toString() == alarmItem.ringtone } ?: ringtoneList[1]
                     currentVibrationPattern = vibratorPatternList.find { it.array?.contentEquals(alarmItem.vibration ?: LongArray(0)) ?: false } ?: vibratorPatternList[0]
-                    currentSnooze = snoozeValues.find { it == alarmItem.snooze } ?: snoozeValues[0]
+                    currentSnooze = snoozeList.find { it.duration == alarmItem.snooze } ?: snoozeList[0]
                     currentLabel = alarmItem.label
                     currentColorTag = alarmItem.colorTag
                     optionList = getDefaultOptionList(
@@ -296,7 +301,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
             currentRingtone = savedInstanceState.getSerializable(STATE_RINGTONE_KEY) as RingtoneItem
             currentVibrationPattern = savedInstanceState.getSerializable(STATE_VIBRATION_KEY) as PatternItem
-            currentSnooze = savedInstanceState.getLong(STATE_SNOOZE_KEY)
+            currentSnooze = savedInstanceState.getSerializable(STATE_SNOOZE_KEY) as SnoozeItem
             currentLabel = savedInstanceState.getString(STATE_LABEL_KEY)
             currentColorTag = savedInstanceState.getInt(STATE_COLOR_TAG_KEY)
 
@@ -423,6 +428,30 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
                 }
             }
+            requestCode == AUDIO_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
+                data?.getSerializableExtra(LAST_SELECTED_KEY)?.also {
+                    val ringtone = it as RingtoneItem
+                    currentRingtone = ringtone
+                    optionList[0].summary = ringtone.title
+                    alarmOptionAdapter.notifyItemChanged(0)
+                }
+            }
+            requestCode == VIBRATION_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
+                data?.getSerializableExtra(LAST_SELECTED_KEY)?.also {
+                    val vibration = it as PatternItem
+                    currentVibrationPattern = vibration
+                    optionList[1].summary = vibration.title
+                    alarmOptionAdapter.notifyItemChanged(1)
+                }
+            }
+            requestCode == SNOOZE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
+                data?.getSerializableExtra(LAST_SELECTED_KEY)?.also {
+                    val snooze = it as SnoozeItem
+                    currentSnooze = snooze
+                    optionList[2].summary = snooze.title
+                    alarmOptionAdapter.notifyItemChanged(2)
+                }
+            }
         }
     }
 
@@ -432,7 +461,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         outState.putIntArray(STATE_REPEAT_KEY, selectedDays)
         outState.putSerializable(STATE_RINGTONE_KEY, currentRingtone)
         outState.putSerializable(STATE_VIBRATION_KEY, currentVibrationPattern)
-        outState.putLong(STATE_SNOOZE_KEY, currentSnooze)
+        outState.putSerializable(STATE_SNOOZE_KEY, currentSnooze)
         outState.putString(STATE_LABEL_KEY, currentLabel)
         outState.putInt(STATE_COLOR_TAG_KEY, currentColorTag)
         outState.putLong(STATE_START_DATE_KEY, startDate?.timeInMillis ?: 0)
@@ -605,13 +634,28 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     override fun onItemClick(view: View, position: Int, item: OptionItem) {
         when(position) {
             0 -> { // Ringtone
-                if(!ringtoneDialog.isAdded) ringtoneDialog.show(supportFragmentManager, TAG_FRAGMENT_RINGTONE)
+                val contentIntent = Intent(this, ContentSelectorActivity::class.java).apply {
+                    action = ACTION_REQUEST_AUDIO
+                    putExtra(LAST_SELECTED_KEY, currentRingtone)
+                }
+                startActivityForResult(contentIntent, AUDIO_REQUEST_CODE)
+//                if(!ringtoneDialog.isAdded) ringtoneDialog.show(supportFragmentManager, TAG_FRAGMENT_RINGTONE)
             }
             1 -> { // Vibration
-                if(!vibrationDialog.isAdded) vibrationDialog.show(supportFragmentManager, TAG_FRAGMENT_VIBRATION)
+                val contentIntent = Intent(this, ContentSelectorActivity::class.java).apply {
+                    action = ACTION_REQUEST_VIBRATION
+                    putExtra(LAST_SELECTED_KEY, currentVibrationPattern)
+                }
+                startActivityForResult(contentIntent, VIBRATION_REQUEST_CODE)
+//                if(!vibrationDialog.isAdded) vibrationDialog.show(supportFragmentManager, TAG_FRAGMENT_VIBRATION)
             }
             2 -> { // Snooze
-                if(!snoozeDialog.isAdded) snoozeDialog.show(supportFragmentManager, TAG_FRAGMENT_SNOOZE)
+                val contentIntent = Intent(this, ContentSelectorActivity::class.java).apply {
+                    action = ACTION_REQUEST_SNOOZE
+                    putExtra(LAST_SELECTED_KEY, currentSnooze)
+                }
+                startActivityForResult(contentIntent, SNOOZE_REQUEST_CODE)
+//                if(!snoozeDialog.isAdded) snoozeDialog.show(supportFragmentManager, TAG_FRAGMENT_SNOOZE)
             }
             3 -> { // Label
                 if(!labelDialog.isAdded) labelDialog.show(supportFragmentManager, TAG_FRAGMENT_LABEL)
@@ -624,7 +668,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
     private fun getDefaultOptionList(defaultRingtone: RingtoneItem = ringtoneList[0],
                                      defaultVibration: PatternItem = vibratorPatternList[0],
-                                     defaultSnooze: Long = snoozeValues[0],
+                                     defaultSnooze: SnoozeItem = snoozeList[0],
                                      label: String = "",
                                      colorTag: Int = 0): ArrayList<OptionItem> {
         val array = ArrayList<OptionItem>()
@@ -633,7 +677,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         currentVibrationPattern = defaultVibration
         currentSnooze = defaultSnooze
 
-        val values = arrayOf(currentRingtone.title, currentVibrationPattern.name, snoozeTimeList[snoozeValues.indexOf(currentSnooze)], label, colorTag.toString())
+        val values = arrayOf(currentRingtone.title, currentVibrationPattern.title, currentSnooze.title, label, colorTag.toString())
         options.forEachIndexed { index, s ->
             array.add(OptionItem(s, values[index]))
         }
@@ -684,7 +728,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     }
 
     private fun getVibrationDialog(): ChoiceDialogFragment {
-        val array = vibratorPatternList.map { it.name }.toTypedArray()
+        val array = vibratorPatternList.map { it.title }.toTypedArray()
         var selected = vibratorPatternList.indexOf(currentVibrationPattern)
 
         var dialog = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_VIBRATION) as? ChoiceDialogFragment
@@ -699,7 +743,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
             override fun onPositiveButtonClick(inter: DialogInterface, index: Int) {
                 currentVibrationPattern = vibratorPatternList[index]
-                optionList[1].summary = vibratorPatternList[index].name
+                optionList[1].summary = vibratorPatternList[index].title
                 alarmOptionAdapter.notifyItemChanged(1)
                 vibrationDialog.setLastChoice(index)
             }
@@ -715,7 +759,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     }
 
     private fun getSnoozeDialog(): SnoozeDialogFragment {
-        var selected = snoozeValues.indexOf(currentSnooze)
+        var selected = snoozeList.indexOf(currentSnooze)
 
         var dialog = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_SNOOZE) as? SnoozeDialogFragment
         if(dialog == null) dialog = SnoozeDialogFragment.newInstance()
@@ -726,8 +770,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             }
 
             override fun onPositiveButtonClick(inter: DialogInterface, index: Int) {
-                currentSnooze = snoozeValues[index]
-                optionList[2].summary = snoozeTimeList[index]
+                currentSnooze = snoozeList[index]
+                optionList[2].summary = snoozeList[index].title
                 alarmOptionAdapter.notifyItemChanged(2)
                 snoozeDialog.setLastChoice(index)
             }
@@ -818,7 +862,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 selectedDays,
                 currentRingtone.uri.toString(),
                 currentVibrationPattern.array,
-                currentSnooze,
+                currentSnooze.duration,
                 optionList[3].summary,
                 1,
                 if(alarmAction == ACTION_NEW) notiId else existAlarmItem.notiId,

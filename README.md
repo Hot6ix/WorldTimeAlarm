@@ -51,10 +51,14 @@ Version 1.5
 - Add 'Apply time difference to day repeat' option
 
 Version 1.5.1
-- Fix bugs
+- Fixed bugs
 - Code optimization
 
 Version 1.5.2
 - Support Android 10
 - Fix bugs
 - Optimize code
+- Alarm that has period less than a week will be fired every day until end day
+- Notifications have actions to user can select action
+- LabelEditText in AlarmActivity will be selected if not empty
+- Alarm will be turned off when user select an action. It was turned off after alarm is fired.

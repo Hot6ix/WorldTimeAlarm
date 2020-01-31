@@ -25,6 +25,7 @@
     <string name="select_timezone">时区</string>
     <string name="select_ringtone">铃声</string>
     <string name="select_vibration">振动</string>
+    <string name="select_snooze">贪睡</string>
     <string name="no_ringtone">没有铃声</string>
     <string name="no_vibrator">没有振动</string>
     <string name="not_set">没有设置</string>

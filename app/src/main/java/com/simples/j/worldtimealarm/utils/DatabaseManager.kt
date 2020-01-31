@@ -29,6 +29,10 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
         db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_TIME_ZONE TEXT, " +
                 "$COLUMN_INDEX INTEGER);")
+
+        db.execSQL("CREATE TABLE $TABLE_USER_RINGTONE ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "$COLUMN_TITLE TEXT, " +
+                "$COLUMN_URI TEXT);")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, old: Int, new: Int) {
@@ -46,14 +50,21 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
             db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_START_DATE INTEGER")
             db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_END_DATE INTEGER")
         }
+        if(old < 5) {
+            db.execSQL("CREATE TABLE $TABLE_USER_RINGTONE ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "$COLUMN_TITLE TEXT, " +
+                    "$COLUMN_URI TEXT);")
+        }
     }
 
     companion object {
-        const val VERSION = 4
+        const val VERSION = 5
         const val DB_NAME = "alarm.db"
 
         const val TABLE_ALARM_LIST = "AlarmList"
         const val TABLE_CLOCK_LIST = "ClockList"
+        const val TABLE_USER_RINGTONE = "Ringtone"
+
         const val COLUMN_ID = "id"
         const val COLUMN_TIME_ZONE = "timezone"
         const val COLUMN_TIME_SET = "time_set"
@@ -68,6 +79,8 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
         const val COLUMN_INDEX = "dorder"
         const val COLUMN_START_DATE = "start_date"
         const val COLUMN_END_DATE = "end_date"
+        const val COLUMN_TITLE = "title"
+        const val COLUMN_URI = "uri"
     }
 
 }
