@@ -10,7 +10,6 @@ import android.net.Uri
 import android.os.*
 import android.text.format.DateUtils
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import com.simples.j.worldtimealarm.AlarmReceiver
@@ -105,8 +104,6 @@ class WakeUpService : Service() {
             }
         }
 
-        unregisterReceiver(serviceActionReceiver)
-
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -135,6 +132,8 @@ class WakeUpService : Service() {
                 }
             }
         }
+
+        unregisterReceiver(serviceActionReceiver)
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
@@ -181,6 +180,9 @@ class WakeUpService : Service() {
                 val contentText =
                         if(!alarmItem.label.isNullOrEmpty()) {
                             alarmItem.label
+                        }
+                        else if(intent?.action == AlarmReceiver.ACTION_SNOOZE) {
+                            SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date())
                         }
                         else {
                             SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(alarmItem.timeSet.toLong()))
@@ -273,10 +275,15 @@ class WakeUpService : Service() {
             mediaPlayer?.setDataSource(applicationContext, ringtoneUri)
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(applicationContext, applicationContext.getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
+//            Toast.makeText(applicationContext, applicationContext.getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
 
             // play default alarm sound if error occurred.
-            val sound = RingtoneManager.getActualDefaultRingtoneUri(applicationContext, RingtoneManager.TYPE_ALARM)
+            val sound = try {
+                Uri.parse(MediaCursor.getRingtoneList(applicationContext)[1].uri)
+            } catch (e: Exception) {
+                RingtoneManager.getActualDefaultRingtoneUri(applicationContext, RingtoneManager.TYPE_ALARM)
+            }
+
             mediaPlayer?.setDataSource(applicationContext, sound)
         }
         mediaPlayer?.prepare()

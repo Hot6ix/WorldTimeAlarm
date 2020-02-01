@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.OpenableColumns
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -25,7 +24,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.simples.j.worldtimealarm.ContentSelectorActivity
 import com.simples.j.worldtimealarm.R
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.etc.SnoozeItem
@@ -75,11 +73,11 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
             context?.let {
                 when(viewModel.action) {
                     ContentSelectorActivity.ACTION_REQUEST_AUDIO -> {
-                        val systemRingtone = withContext(Dispatchers.IO) {
-                            MediaCursor.getRingtoneList(it)
-                        }
                         val userRingtone = withContext(Dispatchers.IO) {
                             DatabaseCursor(it).getUserRingtoneList()
+                        }
+                        val systemRingtone = withContext(Dispatchers.IO) {
+                            MediaCursor.getRingtoneList(it)
                         }
 
                         val defaultRingtone = systemRingtone[1]
@@ -89,6 +87,8 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             addAll(userRingtone)
                             add(RingtoneItem(getString(R.string.system_ringtone), ContentSelectorAdapter.URI_SYSTEM_RINGTONE))
                             addAll(systemRingtone)
+
+                            if(!userRingtone.contains(viewModel.lastSelectedValue)) viewModel.lastSelectedValue = defaultRingtone
                         }
                         contentSelectorAdapter = ContentSelectorAdapter(it, ringtoneList, viewModel.lastSelectedValue, defaultRingtone)
                     }
@@ -123,6 +123,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         when {
             requestCode == ContentSelectorActivity.USER_AUDIO_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
                 data?.data?.also {
+                    context?.contentResolver?.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     val name = getNameFromUri(it)
                     val isInserted = DatabaseCursor(requireContext()).insertUserRingtone(RingtoneItem(name, it.toString()))
                     if(!isInserted) {
@@ -166,6 +167,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                         val uriIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)
                             type = "audio/*"
+                            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
                         }
                         startActivityForResult(uriIntent, ContentSelectorActivity.USER_AUDIO_REQUEST_CODE)
                     }

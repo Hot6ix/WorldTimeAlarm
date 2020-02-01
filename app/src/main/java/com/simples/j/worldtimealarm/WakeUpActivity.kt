@@ -146,8 +146,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     override fun onDestroy() {
         super.onDestroy()
 
-        notificationManager.cancel(item?.notiId ?: ALARM_NOTIFICATION_ID)
-
         val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         vibrator.cancel()
 
@@ -201,6 +199,9 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
                 val minutes = getString(R.string.minutes, item?.snooze?.div((60 * 1000)))
                 Toast.makeText(applicationContext, getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()
+
+                val serviceActionIntent = Intent(WakeUpService.REQUEST_SERVICE_ACTION).apply { putExtra(WakeUpService.SERVICE_ACTION, AlarmReceiver.ACTION_SNOOZE) }
+                sendBroadcast(serviceActionIntent)
                 finish()
             }
         }

@@ -101,7 +101,14 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        ringtoneList = MediaCursor.getRingtoneList(applicationContext)
+        val userRingtone = DatabaseCursor(applicationContext).getUserRingtoneList()
+        val systemRingtone = MediaCursor.getRingtoneList(applicationContext)
+        val defaultRingtone = systemRingtone[1]
+
+        ringtoneList = ArrayList<RingtoneItem>().apply {
+            addAll(userRingtone)
+            addAll(systemRingtone)
+        }
         vibratorPatternList = MediaCursor.getVibratorPatterns(applicationContext)
         snoozeList = MediaCursor.getSnoozeList(applicationContext)
 
@@ -213,7 +220,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         }.toIntArray()
                     }
 
-                    currentRingtone = ringtoneList.find { it.uri.toString() == alarmItem.ringtone } ?: ringtoneList[1]
+                    currentRingtone = ringtoneList.find { it.uri.toString() == alarmItem.ringtone } ?: defaultRingtone
                     currentVibrationPattern = vibratorPatternList.find { it.array?.contentEquals(alarmItem.vibration ?: LongArray(0)) ?: false } ?: vibratorPatternList[0]
                     currentSnooze = snoozeList.find { it.duration == alarmItem.snooze } ?: snoozeList[0]
                     currentLabel = alarmItem.label
@@ -237,7 +244,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             time_zone.text = getNameForTimeZone(TimeZone.getDefault().id)
             time_zone_offset.text = resources.getString(R.string.current_time_zone)
             selectedDays = IntArray(7) { 0 }
-            val defaultRingtone = if(ringtoneList.size > 1) ringtoneList[1] else ringtoneList[0]
             optionList = getDefaultOptionList(defaultRingtone)
             currentTimeZone = TimeZone.getDefault().id
             expectedTime.visibility = View.GONE

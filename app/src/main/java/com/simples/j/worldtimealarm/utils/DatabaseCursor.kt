@@ -3,17 +3,23 @@ package com.simples.j.worldtimealarm.utils
 import android.content.ContentValues
 import android.content.Context
 import android.database.DatabaseUtils
+import android.net.Uri
+import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
+import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
+
 
 /**
  * Created by j on 26/02/2018.
  *
  */
-class DatabaseCursor(context: Context) {
+class DatabaseCursor(val context: Context) {
 
     private var dbManager = DatabaseManager(context)
 
@@ -113,6 +119,7 @@ class DatabaseCursor(context: Context) {
                         index,
                         startDate,
                         endDate)
+                Log.d(C.TAG, item.toString())
                 alarmList.add(item)
             }
         }
@@ -351,7 +358,18 @@ class DatabaseCursor(context: Context) {
                 val item = RingtoneItem(
                         title,
                         uri)
-                ringtoneList.add(item)
+
+                val isAvailable = try {
+                    val itemUri = Uri.parse(uri)
+                    val docFile = DocumentFile.fromSingleUri(context, itemUri)
+                    docFile?.exists() ?: false
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    false
+                }
+
+                if(isAvailable) ringtoneList.add(item)
+                else removeUserRingtone(uri)
             }
         }
 

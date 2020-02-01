@@ -149,7 +149,7 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
         holder.itemView.setOnClickListener {
             if(holder.itemViewType != TYPE_CATEGORY && holder.itemViewType != TYPE_ADD) {
                 lastSelected = item
-                notifyItemRangeChanged(0, array.size - 1)
+                notifyItemRangeChanged(0, array.size)
             }
 
             onItemSelectedListener?.onItemSelected(holder.adapterPosition, item)
