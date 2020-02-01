@@ -89,7 +89,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             add(RingtoneItem(getString(R.string.system_ringtone), ContentSelectorAdapter.URI_SYSTEM_RINGTONE))
                             addAll(systemRingtone)
 
-                            if(!userRingtone.contains(viewModel.lastSelectedValue)) viewModel.lastSelectedValue = defaultRingtone
+                            if(!contains(viewModel.lastSelectedValue)) viewModel.lastSelectedValue = defaultRingtone
                         }
                         contentSelectorAdapter = ContentSelectorAdapter(it, ringtoneList, viewModel.lastSelectedValue, defaultRingtone)
                     }
