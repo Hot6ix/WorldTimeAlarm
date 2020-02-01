@@ -21,6 +21,7 @@ import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.EXPIRED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_EXPIRED
+import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.NotificationActionReceiver
 import java.text.SimpleDateFormat
@@ -40,6 +41,7 @@ class WakeUpService : Service() {
     private var timerRunnable: Runnable? = null
     private var serviceAction: String? = null
     private var serviceActionReceiver: BroadcastReceiver? = null
+    private lateinit var defaultRingtone: RingtoneItem
 
     private var isExpired = false
 
@@ -63,6 +65,8 @@ class WakeUpService : Service() {
 
         val filter = IntentFilter(REQUEST_SERVICE_ACTION)
         registerReceiver(serviceActionReceiver, filter)
+
+        defaultRingtone = MediaCursor.getRingtoneList(applicationContext)[1]
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -261,7 +265,6 @@ class WakeUpService : Service() {
     private fun play(ringtone: String?) {
         if(ringtone.isNullOrEmpty() || ringtone == "null") return
 
-        val ringtoneUri = Uri.parse(ringtone)
         val audioAttrs = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_ALARM)
@@ -272,14 +275,24 @@ class WakeUpService : Service() {
         }
 
         try {
-            mediaPlayer?.setDataSource(applicationContext, ringtoneUri)
+            val ringtoneUri = Uri.parse(ringtone)
+            val ringtoneItem = DatabaseCursor(applicationContext).findUserRingtone(ringtoneUri)
+            if(ringtoneItem != null)
+                mediaPlayer?.setDataSource(applicationContext, ringtoneUri)
+            else {
+                // if ringtone is not in list, set to default ringtone
+                item?.also {
+                    it.ringtone = defaultRingtone.uri
+                    DatabaseCursor(applicationContext).updateAlarm(it)
+                }
+                throw IllegalArgumentException("Ringtone(${ringtoneItem}) is not allowed to use.")
+            }
         } catch (e: Exception) {
             e.printStackTrace()
-//            Toast.makeText(applicationContext, applicationContext.getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
 
             // play default alarm sound if error occurred.
             val sound = try {
-                Uri.parse(MediaCursor.getRingtoneList(applicationContext)[1].uri)
+                Uri.parse(defaultRingtone.uri)
             } catch (e: Exception) {
                 RingtoneManager.getActualDefaultRingtoneUri(applicationContext, RingtoneManager.TYPE_ALARM)
             }

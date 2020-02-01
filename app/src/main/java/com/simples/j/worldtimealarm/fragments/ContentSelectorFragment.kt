@@ -43,6 +43,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     private lateinit var audioManager: AudioManager
     private lateinit var vibrator: Vibrator
 
+    private lateinit var defaultRingtone: RingtoneItem
     private var ringtone: Ringtone? = null
 
     private var job: Job = Job()
@@ -80,7 +81,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             MediaCursor.getRingtoneList(it)
                         }
 
-                        val defaultRingtone = systemRingtone[1]
+                        defaultRingtone = systemRingtone[1]
                         val ringtoneList = ArrayList<RingtoneItem>().apply {
                             add(RingtoneItem(getString(R.string.my_ringtone), ContentSelectorAdapter.URI_USER_RINGTONE))
                             add(RingtoneItem(getString(R.string.add_new), ContentSelectorAdapter.URI_ADD_RINGTONE))
@@ -224,8 +225,19 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             }
                         }
 
-                        item.uri?.let {
-                            DatabaseCursor(requireContext()).removeUserRingtone(it)
+                        // update all alarm items that have deleted ringtone
+                        val dbCursor = DatabaseCursor(requireContext())
+                        item.uri?.let { uri ->
+                            dbCursor.getAlarmList()
+                                    .filter { it.ringtone == uri }
+                                    .forEach {
+                                        val modified = it.apply {
+                                            this.ringtone = defaultRingtone.uri
+                                        }
+                                        dbCursor.updateAlarm(modified)
+                                    }
+
+                            dbCursor.removeUserRingtone(uri)
                         }
                     }
                 }

@@ -10,7 +10,6 @@ import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
-import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -379,6 +378,23 @@ class DatabaseCursor(val context: Context) {
         return ringtoneList
     }
 
+    fun findUserRingtone(userRingtoneUri: Uri): RingtoneItem? {
+        val db = dbManager.readableDatabase
+        var ringtoneItem: RingtoneItem? = null
+
+        val cursor = db.query(DatabaseManager.TABLE_USER_RINGTONE, null, "${DatabaseManager.COLUMN_URI}=?", arrayOf(userRingtoneUri.toString()), null, null, null)
+        if(cursor.count > 0) {
+            cursor.moveToNext()
+            val title = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TITLE))
+            val uri = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_URI))
+
+            ringtoneItem = RingtoneItem(title, uri)
+        }
+        cursor.close()
+
+        return ringtoneItem
+    }
+
     fun insertUserRingtone(ringtone: RingtoneItem): Boolean {
         val db = dbManager.writableDatabase
 
@@ -386,6 +402,7 @@ class DatabaseCursor(val context: Context) {
         if(cursor.count > 0) {
             cursor.close()
             db.close()
+
             return false
         }
 
