@@ -67,24 +67,24 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
     override fun getItemCount(): Int = array.size
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when(val item = array[holder.adapterPosition]) {
+        val item = array[holder.adapterPosition]
+        when(item) {
             is RingtoneItem -> {
                 when(holder.itemViewType) {
                     TYPE_CATEGORY -> {
                         (holder as CategoryViewHolder).title.text = item.title
                     }
-                    TYPE_ADD, TYPE_SYSTEM_RINGTONE, TYPE_USER_RINGTONE -> {
+                    TYPE_ADD -> {
+                        (holder as ItemViewHolder).title.text = item.title
+                        holder.icon.setImageResource(R.drawable.ic_action_add)
+                        holder.icon.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
+                    }
+                    TYPE_SYSTEM_RINGTONE, TYPE_USER_RINGTONE -> {
                         (holder as ItemViewHolder).title.text = item.title
 
                         holder.selector.visibility =
                                 if(array.indexOf(lastSelected) == holder.adapterPosition && holder.itemViewType != TYPE_ADD) View.VISIBLE
                                 else View.INVISIBLE
-
-                        holder.itemView.setOnClickListener {
-                            lastSelected = item
-                            notifyItemRangeChanged(0, array.size - 1)
-                            onItemSelectedListener?.onItemSelected(holder.adapterPosition, item)
-                        }
 
                         holder.icon.setImageResource(R.drawable.ic_ringtone_white)
 
@@ -97,10 +97,11 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
 
                                     onItemMenuSelectedListener?.onItemMenuSelected(position, it, TYPE_USER_RINGTONE, item)
                                     if(it.itemId == R.id.action_remove) {
+                                        // set to default ringtone if deleting item and selected item are same
                                         if(lastSelected == item) {
                                             defaultRingtoneItem?.let { default ->
                                                 lastSelected = default
-                                                onItemSelectedListener?.onItemSelected(array.indexOf(default), default)
+                                                onItemSelectedListener?.onItemSelected(array.indexOf(default), default, ACTION_NOT_PLAY)
                                             }
                                         }
                                         array.removeAt(holder.adapterPosition)
@@ -112,9 +113,6 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
                                 menu.show()
                                 true
                             }
-                        }
-                        else if(holder.itemViewType == TYPE_ADD) {
-                            holder.icon.setImageResource(R.drawable.ic_action_add)
                         }
 
                         holder.selector.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
@@ -130,6 +128,9 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
                 holder.selector.visibility =
                         if(array.indexOf(lastSelected) == position) View.VISIBLE
                         else View.INVISIBLE
+
+                holder.selector.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
+                holder.icon.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
             }
             is SnoozeItem -> {
                 (holder as ItemViewHolder).title.text = item.title
@@ -139,7 +140,19 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
                 holder.selector.visibility =
                         if(array.indexOf(lastSelected) == position) View.VISIBLE
                         else View.INVISIBLE
+
+                holder.selector.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
+                holder.icon.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
             }
+        }
+
+        holder.itemView.setOnClickListener {
+            if(holder.itemViewType != TYPE_CATEGORY && holder.itemViewType != TYPE_ADD) {
+                lastSelected = item
+                notifyItemRangeChanged(0, array.size - 1)
+            }
+
+            onItemSelectedListener?.onItemSelected(holder.adapterPosition, item)
         }
     }
 
@@ -162,7 +175,7 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
     }
 
     interface OnItemSelectedListener {
-        fun onItemSelected(index: Int, item: Any)
+        fun onItemSelected(index: Int, item: Any, action: Int? = null)
     }
 
     interface OnItemMenuSelectedListener {
@@ -179,6 +192,9 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
         const val URI_USER_RINGTONE = "user:ringtone"
         const val URI_SYSTEM_RINGTONE = "system:ringtone"
         const val URI_ADD_RINGTONE = "add:ringtone"
+
+        const val ACTION_PLAY = 100
+        const val ACTION_NOT_PLAY = 200
     }
 
 }

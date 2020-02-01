@@ -28,6 +28,7 @@ import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
+import com.simples.j.worldtimealarm.etc.SnoozeItem
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
 import com.simples.j.worldtimealarm.support.ContentSelectorAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
@@ -78,7 +79,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             MediaCursor.getRingtoneList(it)
                         }
                         val userRingtone = withContext(Dispatchers.IO) {
-                            DatabaseCursor(requireContext()).getUserRingtoneList()
+                            DatabaseCursor(it).getUserRingtoneList()
                         }
 
                         val defaultRingtone = systemRingtone[1]
@@ -157,11 +158,11 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         return true
     }
 
-    override fun onItemSelected(index: Int, item: Any) {
+    override fun onItemSelected(index: Int, item: Any, action: Int?) {
         when(item) {
             is RingtoneItem -> {
                 if(index > 0) {
-                    if(item.uri ==ContentSelectorAdapter.URI_ADD_RINGTONE) {
+                    if(item.uri == ContentSelectorAdapter.URI_ADD_RINGTONE) {
                         val uriIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)
                             type = "audio/*"
@@ -169,18 +170,24 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                         startActivityForResult(uriIntent, ContentSelectorActivity.USER_AUDIO_REQUEST_CODE)
                     }
                     else {
+                        // user selected user ringtone
                         ringtone.let {
                             if(item.uri.isNullOrEmpty() || item.uri != "null") {
-                                if(viewModel.lastSelectedValue != item) {
+                                if(viewModel.lastSelectedValue != item && action != ContentSelectorAdapter.ACTION_NOT_PLAY) {
                                     it?.stop()
                                     play(item.uri)
                                 }
-                                else if(it == null || !it.isPlaying) play(item.uri)
+                                else if(it == null || !it.isPlaying) {
+                                    if(action != ContentSelectorAdapter.ACTION_NOT_PLAY)
+                                        play(item.uri)
+                                }
                                 else {
                                     it.stop()
                                 }
                             }
                         }
+
+                        viewModel.lastSelectedValue = item
                     }
                 }
                 else
@@ -188,10 +195,12 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
             }
             is PatternItem -> {
                 vibrate(item.array)
+                viewModel.lastSelectedValue = item
+            }
+            is SnoozeItem -> {
+                viewModel.lastSelectedValue = item
             }
         }
-
-        viewModel.lastSelectedValue = item
     }
 
     override fun onItemMenuSelected(index: Int, menu: MenuItem, type: Int, item: Any) {
