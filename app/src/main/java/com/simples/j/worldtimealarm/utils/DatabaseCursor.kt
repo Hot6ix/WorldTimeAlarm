@@ -378,11 +378,11 @@ class DatabaseCursor(val context: Context) {
         return ringtoneList
     }
 
-    fun findUserRingtone(userRingtoneUri: Uri): RingtoneItem? {
+    fun findUserRingtone(userRingtoneUri: String): RingtoneItem? {
         val db = dbManager.readableDatabase
         var ringtoneItem: RingtoneItem? = null
 
-        val cursor = db.query(DatabaseManager.TABLE_USER_RINGTONE, null, "${DatabaseManager.COLUMN_URI}=?", arrayOf(userRingtoneUri.toString()), null, null, null)
+        val cursor = db.query(DatabaseManager.TABLE_USER_RINGTONE, null, "${DatabaseManager.COLUMN_URI}=?", arrayOf(userRingtoneUri), null, null, null)
         if(cursor.count > 0) {
             cursor.moveToNext()
             val title = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TITLE))

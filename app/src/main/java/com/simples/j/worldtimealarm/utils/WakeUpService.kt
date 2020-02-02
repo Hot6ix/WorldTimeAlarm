@@ -276,21 +276,24 @@ class WakeUpService : Service() {
 
         try {
             val ringtoneUri = Uri.parse(ringtone)
-            val ringtoneItem = DatabaseCursor(applicationContext).findUserRingtone(ringtoneUri)
-            if(ringtoneItem != null)
-                mediaPlayer?.setDataSource(applicationContext, ringtoneUri)
-            else {
-                // if ringtone is not in list, set to default ringtone
-                item?.also {
-                    it.ringtone = defaultRingtone.uri
-                    DatabaseCursor(applicationContext).updateAlarm(it)
-                }
-                throw IllegalArgumentException("Ringtone(${ringtoneItem}) is not allowed to use.")
-            }
+            mediaPlayer?.setDataSource(applicationContext, ringtoneUri)
         } catch (e: Exception) {
             e.printStackTrace()
 
+            // check uri that exists in system ringtone
             // play default alarm sound if error occurred.
+            if(!isSystemRingtone(ringtone)) {
+                DatabaseCursor(applicationContext).findUserRingtone(ringtone).also {
+                    if(it == null) {
+                        // if ringtone is not in list, set to default ringtone
+                        item?.also { item ->
+                            item.ringtone = defaultRingtone.uri
+                            DatabaseCursor(applicationContext).updateAlarm(item)
+                        }
+                    }
+                }
+            }
+
             val sound = try {
                 Uri.parse(defaultRingtone.uri)
             } catch (e: Exception) {
@@ -330,6 +333,11 @@ class WakeUpService : Service() {
         vibrator?.let {
             if(it.hasVibrator()) it.cancel()
         }
+    }
+
+    private fun isSystemRingtone(uri: String): Boolean {
+        val systemRingtoneList = MediaCursor.getRingtoneList(applicationContext)
+        return systemRingtoneList.find { it.uri == uri } != null
     }
 
     companion object {
