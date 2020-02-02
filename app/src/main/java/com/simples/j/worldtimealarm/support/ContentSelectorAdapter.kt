@@ -86,12 +86,13 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
                                 if(array.indexOf(lastSelected) == holder.adapterPosition && holder.itemViewType != TYPE_ADD) View.VISIBLE
                                 else View.INVISIBLE
 
-                        if(item.uri.isNullOrEmpty() || item.uri == "null") {
-                            holder.icon.setImageResource(R.drawable.ic_no_ringtone_white)
-                        }
-                        else {
-                            holder.icon.setImageResource(R.drawable.ic_ringtone_white)
-                        }
+//                        if(item.uri.isNullOrEmpty() || item.uri == "null") {
+//                            holder.icon.setImageResource(R.drawable.ic_no_ringtone_white)
+//                        }
+//                        else {
+//                            holder.icon.setImageResource(R.drawable.ic_ringtone_white)
+//                        }
+                        holder.icon.setImageResource(R.drawable.ic_ringtone_white)
 
                         if(holder.itemViewType == TYPE_USER_RINGTONE) {
                             holder.itemView.setOnLongClickListener {
@@ -151,10 +152,12 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
             }
         }
 
-        holder.itemView.setOnClickListener {
-            if(holder.itemViewType != TYPE_CATEGORY && holder.itemViewType != TYPE_ADD) {
-                lastSelected = item
-                notifyItemRangeChanged(0, array.size)
+        if(holder.itemViewType != TYPE_CATEGORY) {
+            holder.itemView.setOnClickListener {
+                if(holder.itemViewType != TYPE_ADD) {
+                    lastSelected = item
+                    notifyItemRangeChanged(0, array.size)
+                }
 
                 onItemSelectedListener?.onItemSelected(holder.adapterPosition, item)
             }
