@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioManager
-import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
@@ -44,7 +43,6 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     private lateinit var vibrator: Vibrator
 
     private lateinit var defaultRingtone: RingtoneItem
-    private var ringtone: Ringtone? = null
 
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext
@@ -142,10 +140,14 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     override fun onStop() {
         super.onStop()
 
-        ringtone?.let {
-            if(it.isPlaying) it.stop()
+        activity?.run {
+            if(!isChangingConfigurations) {
+                viewModel.ringtone?.let {
+                    if(it.isPlaying) it.stop()
+                }
+                if(vibrator.hasVibrator()) vibrator.cancel()
+            }
         }
-        if(vibrator.hasVibrator()) vibrator.cancel()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -174,7 +176,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                     }
                     else {
                         // user selected user ringtone
-                        ringtone.let {
+                        viewModel.ringtone.let {
                             if(item.uri.isNullOrEmpty() || item.uri != "null") {
                                 if(viewModel.lastSelectedValue != item && action != ContentSelectorAdapter.ACTION_NOT_PLAY) {
                                     it?.stop()
@@ -194,7 +196,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                     }
                 }
                 else
-                    ringtone?.stop()
+                    viewModel.ringtone?.stop()
             }
             is PatternItem -> {
                 vibrate(item.array)
@@ -219,9 +221,9 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             null
                         }
 
-                        ringtone?.let {
+                        viewModel.ringtone?.let {
                             if(tmpRingtone?.getTitle(context) == it.getTitle(context)) {
-                                ringtone?.stop()
+                                viewModel.ringtone?.stop()
                             }
                         }
 
@@ -254,11 +256,11 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
 
-            ringtone?.stop()
+            viewModel.ringtone?.stop()
             try {
-                ringtone = RingtoneManager.getRingtone(context, Uri.parse(uri))
-                ringtone?.audioAttributes = audioAttrs
-                ringtone?.play()
+                viewModel.ringtone = RingtoneManager.getRingtone(context, Uri.parse(uri))
+                viewModel.ringtone?.audioAttributes = audioAttrs
+                viewModel.ringtone?.play()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
