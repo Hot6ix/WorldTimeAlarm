@@ -81,7 +81,7 @@ class WakeUpService : Service() {
 
             if(item == null) {
                 Log.d(C.TAG, "Empty Intent arrived. Stop service")
-                stopService(intent)
+                stopSelf()
             }
 
             item?.let { alarmItem ->
@@ -325,13 +325,21 @@ class WakeUpService : Service() {
     }
 
     private fun stopAll() {
-        mediaPlayer?.let {
-            if(it.isPlaying) it.stop()
-            it.release()
-        }
+        // service can be stopped without playing ringtone or vibrate when item is null
+        if(item != null) {
+            mediaPlayer?.let {
+                try {
+                    if(it.isPlaying) it.stop()
+                    it.release()
+                    mediaPlayer = null
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
 
-        vibrator?.let {
-            if(it.hasVibrator()) it.cancel()
+            vibrator?.let {
+                if(it.hasVibrator()) it.cancel()
+            }
         }
     }
 
