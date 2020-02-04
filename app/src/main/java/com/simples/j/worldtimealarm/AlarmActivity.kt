@@ -505,7 +505,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                         // alarm will be fired everyday if date range is less than a week.
                         val difference = end.timeInMillis - start.timeInMillis
                         when(TimeUnit.MILLISECONDS.toDays(difference)) {
-                            in 1..5 -> {
+                            in 1..6 -> {
                                 val expect = try {
                                     alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyDayRepetition)
                                 } catch (e: IllegalStateException) {
@@ -540,7 +540,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
                         val difference = end.timeInMillis - System.currentTimeMillis()
                         when(TimeUnit.MILLISECONDS.toDays(difference)) {
-                            in 1..5 -> {
+                            in 1..6 -> {
                                 val expect = try {
                                     alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyDayRepetition)
                                 } catch (e: IllegalStateException) {
