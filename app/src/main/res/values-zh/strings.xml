@@ -102,6 +102,7 @@
     <string name="error_occurred">发生了错误。</string>
     <string name="error_message">呼叫无效。 如果继续，请重新创建警报。 对造成的不便表示歉意。</string>
     <string name="exist_ringtone">所选铃声已在列表中。</string>
+    <string name="unable_to_create_alarm">无法创建警报。 请稍后再试。</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>

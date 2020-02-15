@@ -564,7 +564,8 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
 
                 val scheduledTime = alarmController.scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
                 if(scheduledTime == -1L) {
-                    Toast.makeText(applicationContext, "Unable to create alarm", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, getString(R.string.unable_to_create_alarm), Toast.LENGTH_SHORT).show()
+                    return
                 }
 
                 item.timeSet = scheduledTime.toString()

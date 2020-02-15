@@ -101,6 +101,7 @@
     <string name="error_occurred">Error occurred.</string>
     <string name="error_message">Invalid call. If you keep seeing this error, please re-create alarm. Sorry for inconvenience.</string>
     <string name="exist_ringtone">Selected ringtone is already in list.</string>
+    <string name="unable_to_create_alarm">Unable to create alarm. Please try again later.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>
