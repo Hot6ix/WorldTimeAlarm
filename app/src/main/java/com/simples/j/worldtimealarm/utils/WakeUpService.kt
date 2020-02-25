@@ -70,45 +70,45 @@ class WakeUpService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if(intent == null) throw IllegalArgumentException("WakeUpService has empty intent")
+        intent?.let {
+            option = it.getBundleExtra(AlarmReceiver.OPTIONS)
+            isExpired = it.getBooleanExtra(AlarmReceiver.EXPIRED, false)
+            serviceAction = it.getStringExtra(SERVICE_ACTION)
 
-        option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
-        isExpired = intent.getBooleanExtra(AlarmReceiver.EXPIRED, false)
-        serviceAction = intent.getStringExtra(SERVICE_ACTION)
+            option?.let { bundle ->
+                item = bundle.getParcelable(AlarmReceiver.ITEM)
 
-        option?.let {
-            item = it.getParcelable(AlarmReceiver.ITEM)
+                if(item == null) {
+                    Log.d(C.TAG, "Empty Intent arrived. Stop service")
+                    stopSelf()
+                }
 
-            if(item == null) {
-                Log.d(C.TAG, "Empty Intent arrived. Stop service")
-                stopSelf()
-            }
+                item?.let { alarmItem ->
+                    startForeground(alarmItem.notiId, getNotification(AlarmReceiver.TYPE_ALARM, alarmItem, intent))
+                    setup(alarmItem)
+                    play(alarmItem.ringtone)
+                    vibrate(alarmItem.vibration)
+                    currentAlarmItemId = alarmItem.notiId
 
-            item?.let { alarmItem ->
-                startForeground(alarmItem.notiId, getNotification(AlarmReceiver.TYPE_ALARM, alarmItem, intent))
-                setup(alarmItem)
-                play(alarmItem.ringtone)
-                vibrate(alarmItem.vibration)
-                currentAlarmItemId = alarmItem.notiId
+                    val alarmMuteTime = preference.getString(applicationContext.resources.getString(R.string.setting_alarm_mute_key), "0")?.toLong()
+                    if(alarmMuteTime != null && alarmMuteTime != 0L) {
 
-                val alarmMuteTime = preference.getString(applicationContext.resources.getString(R.string.setting_alarm_mute_key), "0")?.toLong()
-                if(alarmMuteTime != null && alarmMuteTime != 0L) {
+                        Runnable {
+                            stopAll()
+                            Log.d(C.TAG, "Alarm muted : ID(${alarmItem.notiId.plus(1)})")
+                        }.also {  runnable ->
+                            timerRunnable = runnable
 
-                    Runnable {
-                        stopAll()
-                        Log.d(C.TAG, "Alarm muted : ID(${alarmItem.notiId.plus(1)})")
-                    }.also {  runnable ->
-                        timerRunnable = runnable
-
-                        timer = Handler().apply {
-                            postDelayed(runnable, alarmMuteTime)
+                            timer = Handler().apply {
+                                postDelayed(runnable, alarmMuteTime)
+                            }
                         }
                     }
                 }
             }
         }
 
-        return super.onStartCommand(intent, flags, startId)
+        return START_REDELIVER_INTENT
     }
 
     override fun onDestroy() {
