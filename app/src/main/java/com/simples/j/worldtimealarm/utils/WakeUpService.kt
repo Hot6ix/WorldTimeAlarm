@@ -70,6 +70,11 @@ class WakeUpService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if(intent == null) {
+            Log.d(C.TAG, "Empty Intent arrived. Stop service.")
+            stopSelf()
+        }
+        
         intent?.let {
             option = it.getBundleExtra(AlarmReceiver.OPTIONS)
             isExpired = it.getBooleanExtra(AlarmReceiver.EXPIRED, false)
@@ -79,7 +84,7 @@ class WakeUpService : Service() {
                 item = bundle.getParcelable(AlarmReceiver.ITEM)
 
                 if(item == null) {
-                    Log.d(C.TAG, "Empty Intent arrived. Stop service")
+                    Log.d(C.TAG, "Empty Intent arrived. Stop service.")
                     stopSelf()
                 }
 
