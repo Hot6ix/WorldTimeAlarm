@@ -65,3 +65,6 @@
 
 #### Version 1.5.3
 - fixed bug that WakeUpService is terminated when service destroy after muted
+
+#### Version 1.5.4
+- fixed bug that WakeUpService throws exception by null intent.
