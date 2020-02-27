@@ -19,12 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ContentSelectorActivity"/>
 
-        <receiver
-            android:name=".receiver.NotificationActionReceiver"
-            android:enabled="true"
-            android:exported="false" />
+        <activity android:name=".ContentSelectorActivity" />
 
         <service
             android:name=".utils.WakeUpService"
@@ -88,9 +84,18 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
+
         <activity
             android:name=".SettingsActivity"
             android:label="@string/action_settings" />
+
+        <activity
+            android:name=".LicenseActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.simples.j.worldtimealarm.MainActivity" />
+        </activity>
 
         <receiver
             android:name=".receiver.BootCompletedReceiver"
@@ -111,13 +116,19 @@
             </intent-filter>
         </receiver>
 
-        <activity
-            android:name=".LicenseActivity"
-            android:theme="@style/AppTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.simples.j.worldtimealarm.MainActivity" />
-        </activity>
+        <receiver
+            android:name=".receiver.NotificationActionReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver
+            android:name=".receiver.MultiBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -52,29 +52,54 @@ class DatabaseCursor(val context: Context) {
         return id
     }
 
-    fun getSingleAlarm(alarmId: Int): AlarmItem {
+    fun getSingleAlarm(alarmId: Int?): AlarmItem? {
+        if(alarmId == null) return null
+
         val db = dbManager.readableDatabase
 
         val cursor = db.query(DatabaseManager.TABLE_ALARM_LIST, null, "${DatabaseManager.COLUMN_ID} = ?", arrayOf(alarmId.toString()), null, null, null)
-        cursor.moveToFirst()
-        val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
-        val timeZone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
-        val timeSet = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
-        val repeat = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
-        val ringtone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_RINGTONE))
-        val vibration = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_VIBRATION)).replace("[", "").replace("]", "")
-        val snooze = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_SNOOZE))
-        val label = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_LABEL))
-        val switch = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ON_OFF))
-        val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
-        val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
-        val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
-        val startDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_START_DATE))
-        val endDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_END_DATE))
 
-        val repeatValues = repeat.split(",").map { it.trim().toInt() }.toIntArray()
-        val vibrationValues = if(vibration == "null") null else vibration.split(",").map { it.trim().toLong() }.toLongArray()
-        val item = AlarmItem(id, timeZone, timeSet, repeatValues, ringtone, vibrationValues, snooze.toLong(), label, switch, notiId, colorTag, index, startDate, endDate)
+        var item: AlarmItem? = null
+
+        while(cursor.moveToNext()) {
+            val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+            val timeZone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
+            val timeSet = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
+            val repeat = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
+            val ringtone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_RINGTONE))
+            val vibration = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_VIBRATION)).replace("[", "").replace("]", "")
+            val snooze = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_SNOOZE))
+            val label = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_LABEL))
+            val switch = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ON_OFF))
+            val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
+            val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
+            val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
+            val startDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_START_DATE))
+            val endDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_END_DATE))
+
+            val repeatValues = repeat.split(",").map { it.trim().toInt() }.toIntArray()
+            val vibrationValues =
+                    if(vibration == "null") null
+                    else vibration.split(",").map { it.trim().toLong() }.toLongArray()
+
+            item = AlarmItem(
+                    id,
+                    timeZone,
+                    timeSet,
+                    repeatValues,
+                    ringtone,
+                    vibrationValues,
+                    snooze.toLong(),
+                    label,
+                    switch,
+                    notiId,
+                    colorTag,
+                    index,
+                    startDate,
+                    endDate
+            )
+        }
+
         cursor.close()
         db.close()
 
@@ -196,9 +221,19 @@ class DatabaseCursor(val context: Context) {
             put(DatabaseManager.COLUMN_ON_OFF, item.on_off)
             put(DatabaseManager.COLUMN_NOTI_ID, item.notiId)
             put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
-            put(DatabaseManager.COLUMN_INDEX, item.index)
             put(DatabaseManager.COLUMN_START_DATE, item.startDate)
             put(DatabaseManager.COLUMN_END_DATE, item.endDate)
+        }
+
+        db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(item.notiId.toString()))
+        db.close()
+    }
+
+    fun updateAlarmIndex(item: AlarmItem) {
+        val db = dbManager.writableDatabase
+
+        val contentValues = ContentValues().apply {
+            put(DatabaseManager.COLUMN_INDEX, item.index)
         }
 
         db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(item.notiId.toString()))

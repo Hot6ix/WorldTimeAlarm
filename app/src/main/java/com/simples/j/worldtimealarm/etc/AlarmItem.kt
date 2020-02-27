@@ -13,8 +13,8 @@ data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, va
     }
 
     override fun equals(other: Any?): Boolean {
-        val item = other as AlarmItem
-        return item.repeat.contentEquals(repeat)
+        val item = other as AlarmItem?
+        return notiId == item?.notiId
     }
 
     override fun hashCode() = repeat.contentHashCode()
