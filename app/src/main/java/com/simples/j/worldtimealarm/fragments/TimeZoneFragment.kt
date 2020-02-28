@@ -2,6 +2,7 @@ package com.simples.j.worldtimealarm.fragments
 
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.icu.util.TimeZone
 import android.os.Build
@@ -24,12 +25,20 @@ import java.util.*
 @RequiresApi(Build.VERSION_CODES.N)
 class TimeZoneFragment : Fragment(), View.OnClickListener {
 
+    private lateinit var fragmentContext: Context
+
     private var mPreviousTimeZone: TimeZone? = null
     private var mTimeZone: TimeZone? = null
     private var mTimeZoneInfo: TimeZoneInfo? = null
     private val mDate = Date()
     private var mAction: Int = -1
     private var mType: Int = -1
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        this.fragmentContext = context
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -71,7 +80,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                 TimeZonePickerActivity.ACTION_ADD -> {
                     time_zone_apply.text = getString(R.string.time_zone_add)
 
-                    val clockList = DatabaseCursor(context!!).getClockList()
+                    val clockList = DatabaseCursor(fragmentContext).getClockList()
                     val item = clockList.find { it.timezone == mTimeZone?.id }
                     if(item != null) {
                         time_zone_change_info.text = getString(R.string.exist_timezone)
