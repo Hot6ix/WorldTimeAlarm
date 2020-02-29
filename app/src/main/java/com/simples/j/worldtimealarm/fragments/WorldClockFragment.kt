@@ -212,7 +212,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     }
 
     override fun onClick(view: View?) {
-        when(view!!.id) {
+        when(view?.id) {
             R.id.time_zone -> {
                 if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M && mTimeZoneSelectorOption == SettingFragment.SELECTOR_NEW) {
                     val i = Intent(fragmentContext, TimeZonePickerActivity::class.java).apply {
@@ -247,14 +247,19 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         removedItem = clockItems[itemPosition]
         clockListAdapter.removeItem(itemPosition)
-        dbCursor.removeClock(removedItem!!)
+
+        removedItem?.let { clockItem ->
+            dbCursor.removeClock(clockItem)
+        }
         setEmptyMessage()
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.clock_removed, getNameForTimeZone(removedItem?.timezone)), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
-            val id = dbCursor.insertClock(removedItem!!)
-            removedItem!!.id = id.toInt()
-            clockListAdapter.addItem(itemPosition, removedItem!!)
-            recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
+            removedItem?.let { clockItem ->
+                val id = dbCursor.insertClock(clockItem)
+                clockItem.id = id.toInt()
+                clockListAdapter.addItem(itemPosition, clockItem)
+                recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
+            }
             setEmptyMessage()
         }.show()
     }

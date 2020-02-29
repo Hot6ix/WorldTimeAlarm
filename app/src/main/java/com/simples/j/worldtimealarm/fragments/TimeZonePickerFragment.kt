@@ -5,12 +5,12 @@ import android.icu.text.Collator
 import android.icu.util.ULocale
 import android.os.Build
 import android.os.Bundle
+import android.view.*
 import androidx.annotation.RequiresApi
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.appcompat.widget.SearchView
-import android.view.*
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.support.BaseTimeZonePickerAdapter
@@ -81,7 +81,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
             if(mAdapter == null) {
                 mAdapter = when(mRequestType) {
                     TimeZonePickerActivity.REQUEST_COUNTRY -> {
-                        BaseTimeZonePickerAdapter(context, mList, showItemSummary = false, showItemDifference = false, headerText = null, listener = mLocaleChangeListener)
+                        BaseTimeZonePickerAdapter(context, mList, showItemSummary = false, showItemDifference = false, headerText = null, listener = mLocaleChangedListener)
                     }
                     TimeZonePickerActivity.REQUEST_TIME_ZONE -> {
                         val showItemDifference = when(mType) {
@@ -93,7 +93,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
                             }
                             else -> false
                         }
-                        BaseTimeZonePickerAdapter(context, mList, true, showItemDifference, mCountry, mTimeZoneInfoChangeListener)
+                        BaseTimeZonePickerAdapter(context, mList, true, showItemDifference, mCountry, mTimeZoneInfoChangedListener)
                     }
                     else -> {
                         throw IllegalStateException("Unexpected request type : $mRequestType")
@@ -181,7 +181,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
         }
     }
 
-    private var mLocaleChangeListener = object : BaseTimeZonePickerAdapter.OnListItemClickListener<BaseTimeZonePickerAdapter.AdapterItem> {
+    private var mLocaleChangedListener = object : BaseTimeZonePickerAdapter.OnListItemClickListener<BaseTimeZonePickerAdapter.AdapterItem> {
         override fun onListItemClick(item: BaseTimeZonePickerAdapter.AdapterItem) {
             launch(coroutineContext) {
                 val list = withContext(Dispatchers.IO) {
@@ -207,10 +207,12 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
         }
     }
 
-    private var mTimeZoneInfoChangeListener = object : BaseTimeZonePickerAdapter.OnListItemClickListener<BaseTimeZonePickerAdapter.AdapterItem> {
+    private var mTimeZoneInfoChangedListener = object : BaseTimeZonePickerAdapter.OnListItemClickListener<BaseTimeZonePickerAdapter.AdapterItem> {
         override fun onListItemClick(item: BaseTimeZonePickerAdapter.AdapterItem) {
             mListener?.onTimeZoneChanged(item.id)
-            activity?.supportFragmentManager?.popBackStack(0, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
+            val first = activity?.supportFragmentManager?.getBackStackEntryAt(0)?.id ?: 0
+            activity?.supportFragmentManager?.popBackStack(first, FragmentManager.POP_BACK_STACK_INCLUSIVE)
         }
     }
 

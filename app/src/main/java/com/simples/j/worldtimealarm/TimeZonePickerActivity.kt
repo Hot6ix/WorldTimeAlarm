@@ -2,9 +2,9 @@ package com.simples.j.worldtimealarm
 
 import android.os.Build
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import android.view.MenuItem
 import com.simples.j.worldtimealarm.fragments.TimeZoneFragment
 import com.simples.j.worldtimealarm.fragments.TimeZonePickerFragment
 
@@ -36,7 +36,10 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
                 }
                 arguments = bundle
             }
-            supportFragmentManager.beginTransaction().replace(R.id.time_zone_picker_fragment_container, mTimeZoneFragment, TIME_ZONE_FRAGMENT_TAG).commit()
+            supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.time_zone_picker_fragment_container, mTimeZoneFragment, TIME_ZONE_FRAGMENT_TAG)
+                    .commit()
         }
         else {
             mTimeZoneFragment = supportFragmentManager.findFragmentByTag(TIME_ZONE_FRAGMENT_TAG) as TimeZoneFragment
