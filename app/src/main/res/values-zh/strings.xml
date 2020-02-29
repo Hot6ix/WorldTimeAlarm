@@ -78,6 +78,7 @@
     <string name="system_ringtone">系统铃声</string>
     <string name="add_new">新增</string>
     <string name="remove">删除</string>
+    <string name="world_clock">时间转换</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>

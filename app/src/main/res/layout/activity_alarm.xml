@@ -9,28 +9,23 @@
     <LinearLayout
         android:id="@+id/decide_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/blueGray"
+        android:layout_height="?actionBarSize"
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
             android:id="@+id/alarm_cancel"
             android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/cancel"
-            android:textColor="@android:color/white"
-            android:padding="@dimen/padding20"
             android:background="?android:attr/selectableItemBackground"/>
 
         <Button
             android:id="@+id/alarm_save"
             android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/save"
-            android:textColor="@android:color/white"
-            android:padding="@dimen/padding20"
             android:background="?android:attr/selectableItemBackground"/>
 
     </LinearLayout>
@@ -88,7 +83,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:singleLine="true"
-                        android:textColor="@color/colorPrimary"
+                        android:textColor="?attr/colorAccent"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         app:layout_constraintTop_toBottomOf="@id/time_zone"/>
 
@@ -134,7 +129,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center"
                             android:text="@string/range_not_set"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorAccent"
                             app:layout_constraintTop_toBottomOf="@id/range_start_title"/>
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -166,7 +161,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center"
                             android:text="@string/range_not_set"
-                            android:textColor="@color/colorPrimary"
+                            android:textColor="?attr/colorAccent"
                             app:layout_constraintTop_toBottomOf="@id/range_end_title"/>
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -205,7 +200,7 @@
                     android:paddingStart="@dimen/padding20"
                     android:paddingEnd="@dimen/padding20"
                     android:gravity="center"
-                    android:textColor="@color/colorPrimary"
+                    android:textColor="?attr/colorAccent"
                     app:layout_constraintTop_toBottomOf="@id/divider_expected"
                     app:layout_constraintStart_toStartOf="@drawable/ic_dashboard_black_24dp"
                     app:layout_constraintEnd_toEndOf="parent"/>

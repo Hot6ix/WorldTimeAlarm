@@ -1,10 +1,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.simples.j.worldtimealarm.MainActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/view_alarm"
         android:orderInCategory="100"
+        android:title="@string/alarm"
+        android:icon="@drawable/ic_action_alarm_white"/>
+    <item
+        android:id="@+id/view_clock"
+        android:orderInCategory="102"
+        android:title="@string/world_clock"
+        android:icon="@drawable/ic_action_time_white"/>
+    <item
+        android:id="@+id/view_setting"
+        android:orderInCategory="103"
         android:title="@string/action_settings"
-        app:showAsAction="never" />
+        android:icon="@drawable/ic_action_setting_white"/>
 </menu>

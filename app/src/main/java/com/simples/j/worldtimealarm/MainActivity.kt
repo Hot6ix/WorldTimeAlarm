@@ -5,30 +5,30 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import androidx.constraintlayout.widget.ConstraintLayout
-import com.google.android.material.tabs.TabLayout
-import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.core.content.ContextCompat
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.EXPIRED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.MISSED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
-import com.simples.j.worldtimealarm.support.FragmentPagerAdapter
+import com.simples.j.worldtimealarm.fragments.SettingFragment
+import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
-class MainActivity : AppCompatActivity(), CoroutineScope {
+class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.OnNavigationItemSelectedListener {
 
-    private lateinit var fragmentPagerAdapter: FragmentStatePagerAdapter
     private lateinit var preference: SharedPreferences
+    private lateinit var alarmListFragment: AlarmListFragment
+    private lateinit var clockListFragment: WorldClockFragment
+    private lateinit var settingFragment: SettingFragment
 
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
@@ -44,52 +44,43 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             withContext(Dispatchers.IO) {
                 MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
             }
-            adViewMain.loadAd(AdRequest.Builder()
-                    .apply { addTestDevice("6EF4925B538C754B535FCB7177FCAC3D") }
-                    .build())
-        }
-
-        val tab01 = tab.newTab()
-                .setIcon(R.drawable.ic_action_alarm_white)
-        val tab02 = tab.newTab()
-                .setIcon(R.drawable.ic_action_time_white)
-        val tab03 = tab.newTab()
-                .setIcon(R.drawable.ic_action_setting_white)
-
-        tab.addTab(tab01)
-        tab.addTab(tab02)
-        tab.addTab(tab03)
-
-        tab.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                fragment_pager.currentItem = tab!!.position
+            val builder = AdRequest.Builder().apply {
+                addTestDevice("6EF4925B538C754B535FCB7177FCAC3D")
+                addTestDevice("5E85E343F2722B2AE300110EE20B92D8")
             }
-
-        })
-        tab.setSelectedTabIndicatorColor(ContextCompat.getColor(applicationContext, R.color.blueGrayDark))
-        tab.setSelectedTabIndicatorHeight((8 * resources.displayMetrics.density).toInt())
-
-        when(resources.configuration.orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> tab.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, (60 * resources.displayMetrics.density).toInt())
-            Configuration.ORIENTATION_LANDSCAPE -> tab.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, (50 * resources.displayMetrics.density).toInt())
+            adViewMain.loadAd(builder.build())
         }
 
-        fragmentPagerAdapter = FragmentPagerAdapter(supportFragmentManager)
+        alarmListFragment = AlarmListFragment.newInstance()
+        clockListFragment = WorldClockFragment.newInstance()
+        settingFragment = SettingFragment.newInstnace()
+
+        val transaction = supportFragmentManager.beginTransaction()
+        if(supportFragmentManager.findFragmentByTag(AlarmListFragment.TAG) == null) {
+            transaction.add(R.id.fragment_container, alarmListFragment, AlarmListFragment.TAG)
+        }
+        else {
+            alarmListFragment = supportFragmentManager.findFragmentByTag(AlarmListFragment.TAG) as AlarmListFragment
+        }
+        if(supportFragmentManager.findFragmentByTag(WorldClockFragment.TAG) == null) {
+            transaction.add(R.id.fragment_container, clockListFragment, WorldClockFragment.TAG)
+        }
+        else {
+            clockListFragment = supportFragmentManager.findFragmentByTag(WorldClockFragment.TAG) as WorldClockFragment
+        }
+        if(supportFragmentManager.findFragmentByTag(SettingFragment.TAG) == null) {
+            transaction.add(R.id.fragment_container, settingFragment, SettingFragment.TAG)
+        }
+        else {
+            settingFragment = supportFragmentManager.findFragmentByTag(SettingFragment.TAG) as SettingFragment
+        }
+        transaction.commitNow()
 
         sendHighlightRequest(intent)
 
-        fragment_pager.apply {
-            adapter = fragmentPagerAdapter
-            offscreenPageLimit = 3
-        }
-
-        if(savedInstanceState != null) {
-            tab.getTabAt(savedInstanceState.getInt(TAB_STATE, 0))?.select()
+        navigationView.setOnNavigationItemSelectedListener(this)
+        if(!transaction.isEmpty) {
+            navigationView.selectedItemId = R.id.view_alarm
         }
     }
 
@@ -98,27 +89,49 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         sendHighlightRequest(intent)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt(TAB_STATE, tab.selectedTabPosition)
-
-        super.onSaveInstanceState(outState)
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         adViewMain.destroy()
     }
 
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        handleNavigationClick(item.itemId)
+        return true
+    }
+
+    private fun handleNavigationClick(id: Int) {
+        val transaction = supportFragmentManager.beginTransaction()
+
+        when(id) {
+            R.id.view_alarm -> {
+                transaction.hide(clockListFragment)
+                transaction.hide(settingFragment)
+                transaction.show(alarmListFragment)
+            }
+            R.id.view_clock -> {
+                transaction.hide(alarmListFragment)
+                transaction.hide(settingFragment)
+                transaction.show(clockListFragment)
+            }
+            R.id.view_setting -> {
+                transaction.hide(alarmListFragment)
+                transaction.hide(clockListFragment)
+                transaction.show(settingFragment)
+            }
+        }
+
+        transaction.commitNow()
+    }
+
     private fun sendHighlightRequest(intent: Intent?) {
-        with(intent?.getIntExtra(AlarmListFragment.HIGHLIGHT_KEY, 0)) {
-            if(this != null && this > 0) {
-                tab.getTabAt(0)?.select()
-                val alarmListFragment = fragmentPagerAdapter.getItem(0) as AlarmListFragment
+        intent?.getIntExtra(AlarmListFragment.HIGHLIGHT_KEY, 0)?.let {
+            if(it > 0) {
+                navigationView.selectedItemId = R.id.view_alarm
                 val bundle = Bundle().apply {
-                    putInt(AlarmListFragment.HIGHLIGHT_KEY, this@with)
+                    putInt(AlarmListFragment.HIGHLIGHT_KEY, it)
                 }
                 alarmListFragment.arguments = bundle
-                intent?.removeExtra(AlarmListFragment.HIGHLIGHT_KEY)
+                intent.removeExtra(AlarmListFragment.HIGHLIGHT_KEY)
             }
         }
     }
@@ -151,7 +164,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         const val ACTION_UPDATE_SINGLE = "com.simples.j.world_time_alarm.ACTION_UPDATE_SINGLE"
         const val ACTION_UPDATE_ALL = "com.simples.j.world_time_alarm.ACTION_UPDATE_ALL"
         const val ACTION_RESCHEDULE_ACTIVATED = "com.simples.j.world_time_alarm.ACTION_RESCHEDULE_ACTIVATED"
-        const val TAB_STATE = "TAB_STATE"
 
         const val PREF_NOTIFICATION_CHANNEL = "PREF_NOTIFICATION_CHANNEL"
     }

@@ -23,7 +23,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/colorPrimary"
+        android:textColor="?attr/colorAccent"
         android:maxLines="1"
         android:ellipsize="end"
         android:gravity="end"

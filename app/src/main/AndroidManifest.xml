@@ -54,9 +54,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="noob.co.kr"
-                    android:pathPrefix="/worldtimealarm"
-                    android:scheme="http" />
+                    android:host="github.com"
+                    android:pathPrefix="/Hot6ix/WorldTimeAlarm"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity
@@ -127,6 +127,7 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <data android:scheme="package" />
             </intent-filter>
         </receiver>
     </application>

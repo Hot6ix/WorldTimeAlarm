@@ -52,7 +52,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="center|bottom"
-        app:backgroundTint="@color/blueGray"
+        android:tint="@color/blueGray"
+        app:backgroundTint="@android:color/white"
         app:srcCompat="@drawable/ic_action_add"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

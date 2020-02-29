@@ -193,15 +193,14 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
 
     companion object {
 
+        const val TAG = "SettingFragment"
         const val SELECTOR_NEW = "1"
         const val SELECTOR_OLD = "0"
-
         const val INTERNAL_MUTE_ALARM_BOOL = "INTERNAL_MUTE_ALARM_BOOL"
 
-        /**
-         * A preference value change listener that updates the preference's summary
-         * to reflect its new value.
-         */
+        @JvmStatic
+        fun newInstnace() = SettingFragment()
+
         private val sBindPreferenceSummaryToValueListener = Preference.OnPreferenceChangeListener { preference, value ->
             val stringValue = value.toString()
 

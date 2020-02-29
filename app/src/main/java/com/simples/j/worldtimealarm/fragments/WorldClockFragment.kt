@@ -352,6 +352,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     }
 
     companion object {
+        const val TAG = "WorldClockFragment"
         const val TIME_ZONE_NEW_KEY = "REQUEST_KEY"
         const val TIME_ZONE_CHANGED_KEY = "TIME_ZONE_ID"
         const val USER_SELECTED_TIMEZONE = "USER_SELECTED_TIMEZONE"
@@ -361,5 +362,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         private const val TAG_FRAGMENT_TIME_DIALOG = "TAG_FRAGMENT_TIME_DIALOG"
         private const val TAG_FRAGMENT_DATE_DIALOG = "TAG_FRAGMENT_DATE_DIALOG"
+
+        @JvmStatic
+        fun newInstance() = WorldClockFragment()
     }
 }

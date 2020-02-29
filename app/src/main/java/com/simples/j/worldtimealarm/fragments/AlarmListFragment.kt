@@ -400,9 +400,13 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     }
 
     companion object {
+        const val TAG = "AlarmListFragment"
         const val REQUEST_CODE_NEW = 10
         const val REQUEST_CODE_MODIFY = 20
         const val STATE_SNACK_BAR = "STATE_SNACK_BAR"
         const val HIGHLIGHT_KEY = "HIGHLIGHT_KEY"
+
+        @JvmStatic
+        fun newInstance() = AlarmListFragment()
     }
 }
