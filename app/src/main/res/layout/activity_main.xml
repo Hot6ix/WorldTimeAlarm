@@ -31,8 +31,10 @@
         android:id="@+id/navigationView"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@android:color/white"
+        android:background="@color/background"
         app:menu="@menu/menu_main"
+        app:itemIconTint="@color/colorAccent"
+        app:itemTextColor="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

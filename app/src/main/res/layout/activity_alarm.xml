@@ -6,11 +6,158 @@
     android:layout_height="match_parent"
     tools:context="com.simples.j.worldtimealarm.AlarmActivity">
 
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/detail_content_layout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scrollbars="none"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/decide_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/padding20"
+            android:paddingEnd="@dimen/padding20">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/time_picker_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/time_zone_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding20"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/time_zone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/text_middle"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:gravity="start"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/time_zone_offset"/>
+
+                    <TextView
+                        android:id="@+id/time_zone_offset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:textColor="?attr/colorAccent"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:layout_marginStart="@dimen/padding10"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/date_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/padding20"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"
+                    app:layout_constraintTop_toBottomOf="@id/time_zone_view">
+
+                    <TextView
+                        android:id="@+id/date_picker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/date"
+                        android:textSize="@dimen/text_middle"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:gravity="start"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/date"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="@dimen/text_small"
+                        android:textColor="?attr/colorAccent"
+                        android:gravity="end"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="2018년 1월 14일 - 2020년 2월 20일"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/date_picker"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TimePicker
+                    android:id="@+id/time_picker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:timePickerMode="spinner"
+                    app:layout_constraintTop_toBottomOf="@id/date_view"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <TextView
+                    android:id="@+id/expectedTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/padding20"
+                    android:paddingBottom="@dimen/padding20"
+                    android:gravity="center"
+                    android:textColor="?attr/colorAccent"
+                    app:layout_constraintTop_toBottomOf="@id/time_picker"
+                    app:layout_constraintStart_toStartOf="@drawable/ic_dashboard_black_24dp"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/repeat_day"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/time_picker_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/alarm_options"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/repeat_day"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
     <LinearLayout
         android:id="@+id/decide_view"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
-        app:layout_constraintTop_toTopOf="parent">
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <Button
             android:id="@+id/alarm_cancel"
@@ -29,216 +176,5 @@
             android:background="?android:attr/selectableItemBackground"/>
 
     </LinearLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/detail_content_layout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:scrollbars="none"
-        android:layout_marginStart="@dimen/padding20"
-        android:layout_marginEnd="@dimen/padding20"
-        app:layout_constraintTop_toBottomOf="@id/decide_view"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/time_picker_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/time_zone_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="@dimen/padding10"
-                    android:paddingBottom="@dimen/padding10"
-                    android:paddingStart="@dimen/padding20"
-                    android:paddingEnd="@dimen/padding20"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?attr/selectableItemBackground"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:id="@+id/time_zone"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:textSize="@dimen/text_middle"
-                        android:textColor="@android:color/black"
-                        android:ellipsize="end"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/time_zone_offset"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:singleLine="true"
-                        android:textColor="?attr/colorAccent"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        app:layout_constraintTop_toBottomOf="@id/time_zone"/>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <View
-                    android:id="@+id/divider_timezone"
-                    style="@style/Divider"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/time_zone_view" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/time_range_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/divider_timezone">
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/time_range_start"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:padding="@dimen/padding10"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/time_range_end">
-
-                        <TextView
-                            android:id="@+id/range_start_title"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/range_start"
-                            android:textColor="@android:color/black"
-                            android:gravity="center"
-                            app:layout_constraintTop_toTopOf="parent"/>
-
-                        <TextView
-                            android:id="@+id/range_start"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:text="@string/range_not_set"
-                            android:textColor="?attr/colorAccent"
-                            app:layout_constraintTop_toBottomOf="@id/range_start_title"/>
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/time_range_end"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:padding="@dimen/padding10"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:background="?attr/selectableItemBackground"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/time_range_start"
-                        app:layout_constraintEnd_toEndOf="parent">
-
-                        <TextView
-                            android:id="@+id/range_end_title"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/range_end"
-                            android:textColor="@android:color/black"
-                            android:gravity="center"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <TextView
-                            android:id="@+id/range_end"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:text="@string/range_not_set"
-                            android:textColor="?attr/colorAccent"
-                            app:layout_constraintTop_toBottomOf="@id/range_end_title"/>
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <View
-                    android:id="@+id/divider_range"
-                    style="@style/Divider"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/time_range_layout" />
-
-                <TimePicker
-                    android:id="@+id/time_picker"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:timePickerMode="spinner"
-                    app:layout_constraintTop_toBottomOf="@id/divider_range"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-
-                <View
-                    android:id="@+id/divider_expected"
-                    style="@style/Divider"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/time_picker" />
-
-                <TextView
-                    android:id="@+id/expectedTime"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="@dimen/padding10"
-                    android:paddingBottom="@dimen/padding10"
-                    android:paddingStart="@dimen/padding20"
-                    android:paddingEnd="@dimen/padding20"
-                    android:gravity="center"
-                    android:textColor="?attr/colorAccent"
-                    app:layout_constraintTop_toBottomOf="@id/divider_expected"
-                    app:layout_constraintStart_toStartOf="@drawable/ic_dashboard_black_24dp"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-
-                <View
-                    android:id="@+id/divider2"
-                    style="@style/Divider"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/expectedTime" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/repeat_day"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/time_picker_layout"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <View
-                android:id="@+id/divider_repeat"
-                style="@style/Divider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/repeat_day" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/alarm_options"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/divider_repeat"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

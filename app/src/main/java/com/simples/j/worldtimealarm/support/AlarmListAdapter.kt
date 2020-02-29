@@ -309,24 +309,24 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
     private fun updateView(holder: ViewHolder, b: Boolean) {
         if(b) {
-            holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-            holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-            holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-            holder.range.setTextColor(ContextCompat.getColor(context, R.color.darkerGray))
-            holder.timezone.setColorFilter(ContextCompat.getColor(context, R.color.darkerGray), PorterDuff.Mode.SRC_ATOP)
-            holder.ringtone.setColorFilter(ContextCompat.getColor(context, R.color.darkerGray), PorterDuff.Mode.SRC_ATOP)
-            holder.vibration.setColorFilter(ContextCompat.getColor(context, R.color.darkerGray), PorterDuff.Mode.SRC_ATOP)
-            holder.snooze.setColorFilter(ContextCompat.getColor(context, R.color.darkerGray), PorterDuff.Mode.SRC_ATOP)
+            holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.textColorEnabled))
+            holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.textColorEnabled))
+            holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.textColorEnabled))
+            holder.range.setTextColor(ContextCompat.getColor(context, R.color.textColorEnabled))
+            holder.timezone.setColorFilter(ContextCompat.getColor(context, R.color.textColorEnabled), PorterDuff.Mode.SRC_ATOP)
+            holder.ringtone.setColorFilter(ContextCompat.getColor(context, R.color.textColorEnabled), PorterDuff.Mode.SRC_ATOP)
+            holder.vibration.setColorFilter(ContextCompat.getColor(context, R.color.textColorEnabled), PorterDuff.Mode.SRC_ATOP)
+            holder.snooze.setColorFilter(ContextCompat.getColor(context, R.color.textColorEnabled), PorterDuff.Mode.SRC_ATOP)
         }
         else {
-            holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-            holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-            holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-            holder.range.setTextColor(ContextCompat.getColor(context, R.color.lightGray))
-            holder.timezone.setColorFilter(ContextCompat.getColor(context, R.color.lightGray), PorterDuff.Mode.SRC_ATOP)
-            holder.ringtone.setColorFilter(ContextCompat.getColor(context, R.color.lightGray), PorterDuff.Mode.SRC_ATOP)
-            holder.vibration.setColorFilter(ContextCompat.getColor(context, R.color.lightGray), PorterDuff.Mode.SRC_ATOP)
-            holder.snooze.setColorFilter(ContextCompat.getColor(context, R.color.lightGray), PorterDuff.Mode.SRC_ATOP)
+            holder.amPm.setTextColor(ContextCompat.getColor(context, R.color.textColorDisabled))
+            holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.textColorDisabled))
+            holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.textColorDisabled))
+            holder.range.setTextColor(ContextCompat.getColor(context, R.color.textColorDisabled))
+            holder.timezone.setColorFilter(ContextCompat.getColor(context, R.color.textColorDisabled), PorterDuff.Mode.SRC_ATOP)
+            holder.ringtone.setColorFilter(ContextCompat.getColor(context, R.color.textColorDisabled), PorterDuff.Mode.SRC_ATOP)
+            holder.vibration.setColorFilter(ContextCompat.getColor(context, R.color.textColorDisabled), PorterDuff.Mode.SRC_ATOP)
+            holder.snooze.setColorFilter(ContextCompat.getColor(context, R.color.textColorDisabled), PorterDuff.Mode.SRC_ATOP)
         }
     }
 

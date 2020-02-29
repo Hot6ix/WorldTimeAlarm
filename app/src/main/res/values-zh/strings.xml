@@ -79,6 +79,7 @@
     <string name="add_new">新增</string>
     <string name="remove">删除</string>
     <string name="world_clock">时间转换</string>
+    <string name="date">日期</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>

@@ -78,6 +78,7 @@
     <string name="add_new">Add new</string>
     <string name="remove">Remove</string>
     <string name="world_clock">Time conversion</string>
+    <string name="date">Date</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm removed.</string>

@@ -60,8 +60,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AlarmActivity"
-            android:theme="@style/NoActionBar" />
+            android:name=".AlarmActivity" />
 
         <receiver
             android:name=".AlarmReceiver"

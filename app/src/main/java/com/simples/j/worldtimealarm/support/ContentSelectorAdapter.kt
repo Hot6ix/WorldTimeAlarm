@@ -1,7 +1,6 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
-import android.graphics.PorterDuff
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -77,7 +76,6 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
                     TYPE_ADD -> {
                         (holder as ItemViewHolder).title.text = item.title
                         holder.icon.setImageResource(R.drawable.ic_action_add)
-                        holder.icon.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
                     }
                     TYPE_SYSTEM_RINGTONE, TYPE_USER_RINGTONE -> {
                         (holder as ItemViewHolder).title.text = item.title
@@ -121,34 +119,24 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
                             }
                         }
 
-                        holder.selector.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
-                        holder.icon.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
                     }
                 }
             }
             is PatternItem -> {
                 (holder as ItemViewHolder).title.text = item.title
                 holder.icon.setImageResource(R.drawable.ic_vibration_white)
-                holder.icon.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
 
                 holder.selector.visibility =
                         if(array.indexOf(lastSelected) == position) View.VISIBLE
                         else View.INVISIBLE
-
-                holder.selector.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
-                holder.icon.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
             }
             is SnoozeItem -> {
                 (holder as ItemViewHolder).title.text = item.title
                 holder.icon.setImageResource(R.drawable.ic_snooze_white)
-                holder.icon.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
 
                 holder.selector.visibility =
                         if(array.indexOf(lastSelected) == position) View.VISIBLE
                         else View.INVISIBLE
-
-                holder.selector.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
-                holder.icon.setColorFilter(R.color.colorPrimary, PorterDuff.Mode.SRC_ATOP)
             }
         }
 

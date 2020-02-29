@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:textSize="@dimen/text_middle"
-        android:textColor="@android:color/black"
+        android:textColor="?android:attr/textColorPrimary"
         android:ellipsize="end"
         android:fadingEdge="horizontal"
         app:layout_constraintTop_toTopOf="parent"

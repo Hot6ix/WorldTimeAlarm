@@ -32,8 +32,8 @@ class AlarmDayAdapter(private var selectedDays: IntArray, private var context: C
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.day.text = arrayOfDay[position]
         when(position) {
-            0 -> holder.day.setTextColor(ContextCompat.getColorStateList(context, R.color.day_text_color_selector_sun))
-            6 -> holder.day.setTextColor(ContextCompat.getColorStateList(context, R.color.day_text_color_selector_sat))
+            0 -> holder.day.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_light))
+            6 -> holder.day.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary))
         }
         holder.day.isSelected = selectedDays[position] != 0
         holder.day.setOnClickListener {

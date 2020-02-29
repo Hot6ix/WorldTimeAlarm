@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/timezone_country"
                 android:textSize="@dimen/text_large"
-                android:textColor="@android:color/black"
+                android:textColor="?android:attr/textColorPrimary"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
 
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/time_zone_empty"
                 android:textSize="@dimen/text_small"
-                android:textColor="@color/darkerGray"
+                android:textColor="?android:attr/textColorSecondary"
                 app:layout_constraintTop_toBottomOf="@id/time_zone_country_title"
                 app:layout_constraintStart_toStartOf="parent"/>
 
@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/timezone_region"
                 android:textSize="@dimen/text_large"
-                android:textColor="@color/text_color_state_title"
+                android:textColor="?android:attr/textColorPrimary"
                 android:duplicateParentState="true"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"/>
@@ -79,7 +79,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/time_zone_empty"
                 android:textSize="@dimen/text_small"
-                android:textColor="@color/text_color_state_summary"
+                android:textColor="?android:attr/textColorSecondary"
                 android:duplicateParentState="true"
                 app:layout_constraintTop_toBottomOf="@id/time_zone_region_title"
                 app:layout_constraintStart_toStartOf="parent"/>
@@ -100,7 +100,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="@dimen/text_small"
-            android:textColor="@color/darkerGray"
+            android:textColor="?android:attr/textColorPrimary"
             android:visibility="gone"
             android:layout_marginTop="@dimen/padding20"
             android:layout_marginStart="@dimen/padding20"

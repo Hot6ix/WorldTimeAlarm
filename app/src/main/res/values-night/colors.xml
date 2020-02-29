@@ -2,8 +2,8 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#546e7a</color>
-    <color name="colorAccentDark">#546e7a</color>
+    <color name="colorAccent">#DDDDDD</color>
+    <color name="colorAccentDark">#666666</color>
     <color name="whiteGray">#DDDDDD</color>
     <color name="lightGray">#AAAAAA</color>
     <color name="mediumGray">#999999</color>
@@ -13,10 +13,10 @@
     <color name="blueGray">#546e7a</color>
     <color name="blueGrayDark">#455a64</color>
     <color name="blueGrayDarker">#37474f</color>
-    <color name="background">#FFFFFF</color>
-    <color name="textColor">#000000</color>
-    <color name="textColorEnabled">#666666</color>
-    <color name="textColorDisabled">#AAAAAA</color>
+    <color name="background">#222222</color>
+    <color name="textColor">#ffffff</color>
+    <color name="textColorEnabled">#FFFFFF</color>
+    <color name="textColorDisabled">#999999</color>
 
     <color name="color1">#EF5350</color>
     <color name="color2">#ec407a</color>
