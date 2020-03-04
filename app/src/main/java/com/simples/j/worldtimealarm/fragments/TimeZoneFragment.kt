@@ -7,10 +7,14 @@ import android.content.Intent
 import android.icu.util.TimeZone
 import android.os.Build
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
-import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
@@ -21,7 +25,7 @@ import kotlinx.android.synthetic.main.fragment_time_zone.*
 import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.N)
-class TimeZoneFragment : Fragment(), View.OnClickListener {
+class TimeZoneFragment : Fragment(), View.OnClickListener, Toolbar.OnMenuItemClickListener {
 
     private lateinit var fragmentContext: Context
 
@@ -83,9 +87,12 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                     val clockList = DatabaseCursor(fragmentContext).getClockList()
                     val item = clockList.find { it.timezone == mTimeZone?.id }
                     if(item != null) {
-                        time_zone_change_info.text = getString(R.string.exist_timezone)
-                        time_zone_change_info.visibility = View.VISIBLE
+                        Snackbar.make(fragment_layout, getString(R.string.exist_timezone), Snackbar.LENGTH_LONG)
+                                .setAnchorView(bottomAppBar)
+                                .show()
                     }
+
+                    bottomAppBar.menu?.findItem(R.id.action_apply)?.isEnabled = item == null
                 }
                 TimeZonePickerActivity.ACTION_CHANGE -> {
                     time_zone_change_info.visibility = View.VISIBLE
@@ -102,26 +109,21 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
         time_zone_country_layout.setOnClickListener(this)
         time_zone_region_layout.setOnClickListener(this)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.menu_time_zone_fragment, menu)
+        bottomAppBar.setOnMenuItemClickListener(this)
 
         if(mAction == TimeZonePickerActivity.ACTION_ADD) {
-            menu.findItem(R.id.action_do)?.title = getString(R.string.time_zone_add)
+            bottomAppBar.menu?.findItem(R.id.action_apply)?.title = getString(R.string.time_zone_add)
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId) {
-            R.id.action_system_time_zone -> {
-                true
-            }
-            R.id.action_do -> {
+    override fun onMenuItemClick(item: MenuItem?): Boolean {
+        return when(item?.itemId) {
+            R.id.action_apply -> {
                 if(mAction == TimeZonePickerActivity.ACTION_ADD) {
                     if(mTimeZone == null) {
-                        Toast.makeText(context, resources.getString(R.string.time_zone_select), Toast.LENGTH_SHORT).show()
+                        Snackbar.make(fragment_layout, getString(R.string.time_zone_select), Snackbar.LENGTH_SHORT)
+                                .setAnchorView(bottomAppBar)
+                                .show()
                         return false
                     }
                 }

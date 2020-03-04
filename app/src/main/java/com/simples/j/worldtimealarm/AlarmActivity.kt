@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.text.format.DateUtils
@@ -79,10 +80,16 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alarm)
-        supportActionBar?.apply {
-            title = getString(R.string.new_alarm_short)
-            setDisplayHomeAsUpEnabled(true)
+
+        when(resources.configuration.orientation) {
+            Configuration.ORIENTATION_PORTRAIT -> {
+                setSupportActionBar(bottomAppBar)
+            }
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                setSupportActionBar(topActionBar)
+            }
         }
+        supportActionBar?.title = ""
 
         alarmController = AlarmController.getInstance()
 
@@ -278,8 +285,6 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
 
         time_picker.setOnTimeChangedListener(this)
         time_zone_view.setOnClickListener(this)
-        alarm_save.setOnClickListener(this)
-        alarm_cancel.setOnClickListener(this)
 
         // init alarm repeat
         val dayIds = arrayOf(
@@ -429,12 +434,13 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
-            android.R.id.home -> {
-                setResult(Activity.RESULT_CANCELED)
-                finish()
+            R.id.action_save -> {
+                saveAlarm()
                 true
             }
-            R.id.action_save -> {
+            R.id.action_cancel -> {
+                setResult(Activity.RESULT_CANCELED)
+                finish()
                 true
             }
             else -> false
@@ -454,109 +460,6 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
 
     override fun onClick(view: View) {
         when(view.id) {
-            R.id.alarm_save -> {
-                val item = createAlarm()
-                val start = startDate
-                val end = endDate
-
-                when {
-                    start != null && end != null -> {
-                        if(start.timeInMillis >= end.timeInMillis || end.timeInMillis <= System.currentTimeMillis()) {
-                            Toast.makeText(applicationContext, getString(R.string.end_date_earlier_than_start_date), Toast.LENGTH_SHORT).show()
-                            return
-                        }
-
-                        // alarm will be fired everyday if date range is less than a week.
-                        val difference = end.timeInMillis - start.timeInMillis
-                        when(TimeUnit.MILLISECONDS.toDays(difference)) {
-                            in 1..6 -> {
-                                val expect = try {
-                                    alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyDayRepetition)
-                                } catch (e: IllegalStateException) {
-                                    null
-                                }
-
-                                if(expect == null || expect.timeInMillis < start.timeInMillis || expect.timeInMillis > end.timeInMillis) {
-                                    Toast.makeText(applicationContext, getString(R.string.invalid_repeat), Toast.LENGTH_SHORT).show()
-                                    return
-                                }
-                            }
-                            else -> {
-                                if(selectedDays.all { it == 0 }) {
-                                    Toast.makeText(applicationContext, getString(R.string.must_check_repeat), Toast.LENGTH_SHORT).show()
-                                    return
-                                }
-                            }
-                        }
-                    }
-                    start != null -> {
-                        if(!selectedDays.any { it > 0 } && start.timeInMillis < System.currentTimeMillis()) {
-                            Toast.makeText(applicationContext, getString(R.string.start_date_and_time_is_wrong), Toast.LENGTH_SHORT).show()
-                            return
-                        }
-                    }
-                    end != null -> {
-
-                        if(end.timeInMillis < System.currentTimeMillis()) {
-                            Toast.makeText(applicationContext, getString(R.string.end_date_earlier_than_today), Toast.LENGTH_SHORT).show()
-                            return
-                        }
-
-                        val difference = end.timeInMillis - System.currentTimeMillis()
-                        when(TimeUnit.MILLISECONDS.toDays(difference)) {
-                            in 1..6 -> {
-                                val expect = try {
-                                    alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyDayRepetition)
-                                } catch (e: IllegalStateException) {
-                                    null
-                                }
-
-                                if(expect == null || expect.timeInMillis <= System.currentTimeMillis() || expect.timeInMillis > end.timeInMillis) {
-                                    Toast.makeText(applicationContext, getString(R.string.invalid_repeat), Toast.LENGTH_SHORT).show()
-                                    return
-                                }
-                            }
-                            else -> {
-                                if(selectedDays.all { it == 0 }) {
-                                    Toast.makeText(applicationContext, getString(R.string.must_check_repeat), Toast.LENGTH_SHORT).show()
-                                    return
-                                }
-                            }
-                        }
-                    }
-                }
-
-                val scheduledTime = alarmController.scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
-                if(scheduledTime == -1L) {
-                    Toast.makeText(applicationContext, getString(R.string.unable_to_create_alarm), Toast.LENGTH_SHORT).show()
-                    return
-                }
-
-                item.timeSet = scheduledTime.toString()
-
-                if(alarmAction == ACTION_NEW) {
-                    item.id = DatabaseCursor(applicationContext).insertAlarm(item).toInt()
-                    item.index = item.id
-                }
-                else {
-                    DatabaseCursor(applicationContext).updateAlarm(item)
-                }
-
-                if(isTaskRoot) showToast(scheduledTime)
-
-                val intent = Intent()
-                val bundle = Bundle().apply {
-                    putParcelable(AlarmReceiver.ITEM, item)
-                    putLong(SCHEDULED_TIME, scheduledTime)
-                }
-                intent.putExtra(AlarmReceiver.OPTIONS, bundle)
-                setResult(Activity.RESULT_OK, intent)
-                finish()
-            }
-            R.id.alarm_cancel -> {
-                setResult(Activity.RESULT_CANCELED)
-                finish()
-            }
             R.id.time_zone_view -> {
                 if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M && timeZoneSelectorOption == SettingFragment.SELECTOR_NEW) {
                     val i = Intent(this, TimeZonePickerActivity::class.java).apply {
@@ -635,6 +538,106 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
                 selectedDays[6] = if(isChecked) 7 else 0
             }
         }
+    }
+
+    private fun saveAlarm() {
+        val item = createAlarm()
+        val start = startDate
+        val end = endDate
+
+        when {
+            start != null && end != null -> {
+                if(start.timeInMillis >= end.timeInMillis || end.timeInMillis <= System.currentTimeMillis()) {
+                    Toast.makeText(applicationContext, getString(R.string.end_date_earlier_than_start_date), Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                // alarm will be fired everyday if date range is less than a week.
+                val difference = end.timeInMillis - start.timeInMillis
+                when(TimeUnit.MILLISECONDS.toDays(difference)) {
+                    in 1..6 -> {
+                        val expect = try {
+                            alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyDayRepetition)
+                        } catch (e: IllegalStateException) {
+                            null
+                        }
+
+                        if(expect == null || expect.timeInMillis < start.timeInMillis || expect.timeInMillis > end.timeInMillis) {
+                            Toast.makeText(applicationContext, getString(R.string.invalid_repeat), Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                    }
+                    else -> {
+                        if(selectedDays.all { it == 0 }) {
+                            Toast.makeText(applicationContext, getString(R.string.must_check_repeat), Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                    }
+                }
+            }
+            start != null -> {
+                if(!selectedDays.any { it > 0 } && start.timeInMillis < System.currentTimeMillis()) {
+                    Toast.makeText(applicationContext, getString(R.string.start_date_and_time_is_wrong), Toast.LENGTH_SHORT).show()
+                    return
+                }
+            }
+            end != null -> {
+
+                if(end.timeInMillis < System.currentTimeMillis()) {
+                    Toast.makeText(applicationContext, getString(R.string.end_date_earlier_than_today), Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                val difference = end.timeInMillis - System.currentTimeMillis()
+                when(TimeUnit.MILLISECONDS.toDays(difference)) {
+                    in 1..6 -> {
+                        val expect = try {
+                            alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyDayRepetition)
+                        } catch (e: IllegalStateException) {
+                            null
+                        }
+
+                        if(expect == null || expect.timeInMillis <= System.currentTimeMillis() || expect.timeInMillis > end.timeInMillis) {
+                            Toast.makeText(applicationContext, getString(R.string.invalid_repeat), Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                    }
+                    else -> {
+                        if(selectedDays.all { it == 0 }) {
+                            Toast.makeText(applicationContext, getString(R.string.must_check_repeat), Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                    }
+                }
+            }
+        }
+
+        val scheduledTime = alarmController.scheduleAlarm(this, item, AlarmController.TYPE_ALARM)
+        if(scheduledTime == -1L) {
+            Toast.makeText(applicationContext, getString(R.string.unable_to_create_alarm), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        item.timeSet = scheduledTime.toString()
+
+        if(alarmAction == ACTION_NEW) {
+            item.id = DatabaseCursor(applicationContext).insertAlarm(item).toInt()
+            item.index = item.id
+        }
+        else {
+            DatabaseCursor(applicationContext).updateAlarm(item)
+        }
+
+        if(isTaskRoot) showToast(scheduledTime)
+
+        val intent = Intent()
+        val bundle = Bundle().apply {
+            putParcelable(AlarmReceiver.ITEM, item)
+            putLong(SCHEDULED_TIME, scheduledTime)
+        }
+        intent.putExtra(AlarmReceiver.OPTIONS, bundle)
+        setResult(Activity.RESULT_OK, intent)
+        finish()
     }
 
     private fun getDefaultOptionList(defaultRingtone: RingtoneItem = ringtoneList[0],

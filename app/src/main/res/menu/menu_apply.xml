@@ -2,13 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_cancel"
+        android:id="@+id/action_apply"
         android:orderInCategory="100"
-        android:title="@string/cancel"
-        app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/action_save"
-        android:orderInCategory="101"
-        android:title="@string/save"
+        android:title="@string/apply"
         app:showAsAction="ifRoom"/>
 </menu>

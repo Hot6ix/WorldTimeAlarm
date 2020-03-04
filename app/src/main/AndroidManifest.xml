@@ -18,10 +18,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/MaterialAppTheme">
 
-        <activity android:name=".ContentSelectorActivity"
-            android:theme="@style/MaterialAppTheme" />
+        <activity android:name=".ContentSelectorActivity" />
 
         <service
             android:name=".utils.WakeUpService"
@@ -37,7 +36,7 @@
             android:name=".MainActivity"
             android:label="@string/main_label"
             android:launchMode="singleInstance"
-            android:theme="@style/NoActionBar">
+            android:theme="@style/MaterialAppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

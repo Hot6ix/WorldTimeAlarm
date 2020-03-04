@@ -51,6 +51,9 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/action_bar_height"
         android:layout_gravity="bottom"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:paddingStart="@dimen/padding10"
+        android:paddingEnd="@dimen/padding10"
+        app:menu="@menu/menu_apply"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

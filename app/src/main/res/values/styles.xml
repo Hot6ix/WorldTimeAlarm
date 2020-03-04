@@ -14,7 +14,7 @@
     </style>
 
     <style name="MaterialAppTheme" parent="@style/Theme.MaterialComponents.DayNight">
-        <item name="colorPrimary">@color/blueGray</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/blueGrayDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
