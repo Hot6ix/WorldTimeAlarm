@@ -7,7 +7,7 @@
             android:thickness="1dp"
             android:innerRadiusRatio="3"
             android:useLevel="false">
-            <solid android:color="@color/colorAccent"/>
+            <solid android:color="@color/colorPrimary"/>
         </shape>
     </item>
 </selector>

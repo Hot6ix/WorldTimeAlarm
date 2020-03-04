@@ -5,9 +5,9 @@
     <item android:state_selected="true">
         <shape android:shape="ring"
             android:thickness="1dp"
-            android:innerRadiusRatio="4"
+            android:innerRadiusRatio="5.5"
             android:useLevel="false">
-            <solid android:color="@color/colorAccent"/>
+            <solid android:color="@color/colorPrimary"/>
         </shape>
     </item>
 </selector>

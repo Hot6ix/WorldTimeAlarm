@@ -143,7 +143,6 @@ class DatabaseCursor(val context: Context) {
                         index,
                         startDate,
                         endDate)
-                Log.d(C.TAG, item.toString())
                 alarmList.add(item)
             }
         }

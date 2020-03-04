@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi
 import android.text.BidiFormatter
 import android.text.TextDirectionHeuristics
 import android.text.TextUtils
+import android.text.format.DateUtils
 import android.util.Log
 import android.view.View
 import com.simples.j.worldtimealarm.R
@@ -253,6 +254,15 @@ class MediaCursor {
 
             val diff = cal1.timeInMillis - cal2.timeInMillis
             return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)
+        }
+
+        fun formatDate(context: Context, timeInMillis: Long?): String {
+            if(timeInMillis == null) return ""
+            return DateUtils.formatDateTime(context, timeInMillis,
+                    DateUtils.FORMAT_SHOW_DATE
+                            or DateUtils.FORMAT_SHOW_WEEKDAY
+                            or DateUtils.FORMAT_SHOW_YEAR
+                            or DateUtils.FORMAT_ABBREV_ALL)
         }
     }
 

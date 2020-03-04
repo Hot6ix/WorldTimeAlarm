@@ -30,11 +30,11 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigationView"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="@dimen/action_bar_height"
         android:background="@color/background"
         app:menu="@menu/menu_main"
-        app:itemIconTint="@color/colorAccent"
-        app:itemTextColor="@color/colorAccent"
+        app:itemIconTint="@color/navigation_item_selector"
+        app:itemTextColor="@color/navigation_item_selector"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

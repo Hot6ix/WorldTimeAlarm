@@ -79,6 +79,9 @@
     <string name="remove">Remove</string>
     <string name="world_clock">Time conversion</string>
     <string name="date">Date</string>
+    <string name="reset">Revert to default</string>
+    <string name="apply">Apply</string>
+    <string name="set_to_system_time_zone">Reset</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm removed.</string>
@@ -114,7 +117,6 @@
     <string name="timezone_format">%1$s (%2$s)</string>
     <string name="time_zone_search_hint">Search region</string>
     <string name="time_zone_unknown">Unknown time zone</string>
-    <string name="time_zone_apply">Apply</string>
     <string name="time_zone_empty">Click to select time zone</string>
     <string name="time_zone_add">Add</string>
     <string name="time_zone_select">Please select time zone</string>

@@ -18,7 +18,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.simples.j.worldtimealarm.ContentSelectorActivity
@@ -55,13 +55,12 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        setHasOptionsMenu(true)
 
         audioManager = requireContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
         activity?.run {
-            viewModel = ViewModelProviders.of(this)[ContentSelectorViewModel::class.java]
+            viewModel = ViewModelProvider(this)[ContentSelectorViewModel::class.java]
         }
     }
 
@@ -148,18 +147,6 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                 if(vibrator.hasVibrator()) vibrator.cancel()
             }
         }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
-            android.R.id.home -> {
-                activity?.run {
-                    onBackPressed()
-                }
-            }
-        }
-
-        return true
     }
 
     override fun onItemSelected(index: Int, item: Any, action: Int?) {
@@ -308,6 +295,8 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     }
 
     companion object {
+        const val TAG = "ContentSelectorFragment"
+
         fun newInstance() = ContentSelectorFragment()
     }
 

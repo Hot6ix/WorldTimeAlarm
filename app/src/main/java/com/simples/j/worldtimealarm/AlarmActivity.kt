@@ -1,39 +1,40 @@
 package com.simples.j.worldtimealarm
 
 import android.app.Activity
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
-import android.media.AudioAttributes
-import android.media.AudioManager
-import android.media.Ringtone
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
+import android.text.format.DateUtils
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TimePicker
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.ACTION_REQUEST_AUDIO
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.ACTION_REQUEST_DATE
 import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.ACTION_REQUEST_SNOOZE
 import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.ACTION_REQUEST_VIBRATION
 import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.AUDIO_REQUEST_CODE
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.DATE_REQUEST_CODE
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.END_DATE_KEY
 import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.LAST_SELECTED_KEY
 import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.SNOOZE_REQUEST_CODE
+import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.START_DATE_KEY
 import com.simples.j.worldtimealarm.ContentSelectorActivity.Companion.VIBRATION_REQUEST_CODE
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
 import com.simples.j.worldtimealarm.etc.*
-import com.simples.j.worldtimealarm.fragments.*
-import com.simples.j.worldtimealarm.interfaces.OnDialogEventListener
-import com.simples.j.worldtimealarm.support.AlarmDayAdapter
+import com.simples.j.worldtimealarm.fragments.ColorTagDialogFragment
+import com.simples.j.worldtimealarm.fragments.LabelDialogFragment
+import com.simples.j.worldtimealarm.fragments.SettingFragment
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
@@ -44,43 +45,34 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
-class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, AlarmOptionAdapter.OnItemClickListener, View.OnClickListener, TimePicker.OnTimeChangedListener {
+class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListener, View.OnClickListener, TimePicker.OnTimeChangedListener, MaterialButtonToggleGroup.OnButtonCheckedListener {
 
-    private lateinit var alarmDayAdapter: AlarmDayAdapter
     private lateinit var alarmOptionAdapter: AlarmOptionAdapter
     private lateinit var ringtoneList: ArrayList<RingtoneItem>
     private lateinit var vibratorPatternList: ArrayList<PatternItem>
     private lateinit var snoozeList: ArrayList<SnoozeItem>
     private lateinit var optionList: ArrayList<OptionItem>
     private lateinit var selectedDays: IntArray
+    private lateinit var recurrenceDays: Array<String>
 
     private lateinit var calendar: Calendar
     private lateinit var currentTimeZone: String
     private lateinit var currentRingtone: RingtoneItem
     private lateinit var currentVibrationPattern: PatternItem
     private lateinit var currentSnooze: SnoozeItem
-    private lateinit var vibrator: Vibrator
-    private lateinit var audioManager: AudioManager
     private lateinit var alarmController: AlarmController
-
-    private lateinit var ringtoneDialog: ChoiceDialogFragment
-    private lateinit var vibrationDialog: ChoiceDialogFragment
-    private lateinit var snoozeDialog: SnoozeDialogFragment
     private lateinit var labelDialog: LabelDialogFragment
     private lateinit var colorTagDialog: ColorTagDialogFragment
-
     private lateinit var existAlarmItem: AlarmItem
+    private lateinit var prefManager: SharedPreferences
 
     private var currentLabel: String? = null
     private var currentColorTag: Int = 0
     private var notiId = 0
-    private var ringtone: Ringtone? = null
     private var alarmAction = -1
     private var startDate: Calendar? = null
     private var endDate: Calendar? = null
     private var dateFormat = DateFormat.getDateInstance(DateFormat.FULL)
-
-    private lateinit var prefManager: SharedPreferences
     private var timeZoneSelectorOption: String = ""
     private var applyDayRepetition = false
 
@@ -97,9 +89,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         prefManager = PreferenceManager.getDefaultSharedPreferences(this)
         timeZoneSelectorOption = prefManager.getString(resources.getString(R.string.setting_time_zone_selector_key), SettingFragment.SELECTOR_OLD) ?: SettingFragment.SELECTOR_OLD
         applyDayRepetition = prefManager.getBoolean(getString(R.string.setting_time_zone_affect_repetition_key), false)
-
-        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         val userRingtone = DatabaseCursor(applicationContext).getUserRingtoneList()
         val systemRingtone = MediaCursor.getRingtoneList(applicationContext)
@@ -149,33 +138,31 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     if(TimeZone.getDefault() == TimeZone.getTimeZone(currentTimeZone)) {
                         offset = resources.getString(R.string.current_time_zone)
                         expectedTime.visibility = View.GONE
+                        divider3.visibility = View.GONE
                     }
                     else {
                         expectedTime.visibility = View.VISIBLE
+                        divider3.visibility = View.VISIBLE
                         expectedTime.text = getString(R.string.expected_time,DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time))
                     }
                     time_zone_offset.text = offset
 
                     alarmItem.startDate?.let {
                         if(it > 0) {
-                            Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone)).apply {
+                            startDate = Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone)).apply {
                                 timeInMillis = it
                                 set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY))
                                 set(Calendar.MINUTE, calendar.get(Calendar.MINUTE))
-                            }.let { startDateCalendar ->
-                                startDate = startDateCalendar
                             }
                         }
                     }
 
                     alarmItem.endDate?.let {
                         if(it > 0) {
-                            Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone)).apply {
+                            endDate = Calendar.getInstance(TimeZone.getTimeZone(currentTimeZone)).apply {
                                 timeInMillis = it
                                 set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY))
                                 set(Calendar.MINUTE, calendar.get(Calendar.MINUTE))
-                            }.let { endDateCalendar ->
-                                endDate = endDateCalendar
                             }
                         }
                     }
@@ -217,6 +204,7 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             optionList = getDefaultOptionList(defaultRingtone)
             currentTimeZone = TimeZone.getDefault().id
             expectedTime.visibility = View.GONE
+            divider3.visibility = View.GONE
         }
 
         // Restore data
@@ -242,9 +230,11 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
             if(TimeZone.getDefault() == TimeZone.getTimeZone(currentTimeZone)) {
                 offset = resources.getString(R.string.current_time_zone)
                 expectedTime.visibility = View.GONE
+                divider3.visibility = View.GONE
             }
             else {
                 expectedTime.visibility = View.VISIBLE
+                divider3.visibility = View.VISIBLE
                 expectedTime.text = getString(R.string.expected_time,DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time))
             }
             time_zone_offset.text = offset
@@ -283,9 +273,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         }
 
         // init dialog
-        ringtoneDialog = getRingtoneDialog()
-        vibrationDialog = getVibrationDialog()
-        snoozeDialog = getSnoozeDialog()
         labelDialog = getLabelDialog()
         colorTagDialog = getColorTagChoiceDialog()
 
@@ -295,98 +282,126 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         alarm_cancel.setOnClickListener(this)
 
         // init alarm repeat
-        alarmDayAdapter = AlarmDayAdapter(selectedDays, applicationContext)
-        alarmDayAdapter.setOnItemClickListener(this)
-        repeat_day.layoutManager = GridLayoutManager(this, 7, GridLayoutManager.VERTICAL, false)
-        repeat_day.adapter = alarmDayAdapter
-        repeat_day.isNestedScrollingEnabled = false
+        val dayIds = arrayOf(
+                R.id.sunday,
+                R.id.monday,
+                R.id.tuesday,
+                R.id.wednesday,
+                R.id.thursday,
+                R.id.friday,
+                R.id.saturday
+        )
+        recurrenceDays = applicationContext.resources.getStringArray(R.array.day_of_week)
+        recurrenceDays.forEachIndexed { index, s ->
+            val button = day_recurrence.getChildAt(index) as MaterialButton
+            button.text = s
+            if(index == 0) button.setTextColor(ContextCompat.getColor(applicationContext, android.R.color.holo_red_light))
+            else if(index == 6) button.setTextColor(ContextCompat.getColor(applicationContext, android.R.color.holo_blue_light))
+
+            if(selectedDays[index] > 0) day_recurrence.check(dayIds[index])
+        }
+        day_recurrence.addOnButtonCheckedListener(this)
         detail_content_layout.isNestedScrollingEnabled = false
 
         // init alarm options
         alarmOptionAdapter = AlarmOptionAdapter(optionList, applicationContext)
         alarmOptionAdapter.setOnItemClickListener(this)
         alarm_options.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-//        alarm_options.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
+        alarm_options.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
         alarm_options.adapter = alarmOptionAdapter
         alarm_options.isNestedScrollingEnabled = false
-    }
 
-    override fun onStop() {
-        super.onStop()
-
-        ringtone?.let {
-            if(it.isPlaying) it.stop()
-        }
-        if(vibrator.hasVibrator()) vibrator.cancel()
+        date.text = formatDate()
+        date_view.setOnClickListener(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        when {
-            requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
-                if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.also {
-                        currentTimeZone = it.replace(" ", "_")
+        if(resultCode == Activity.RESULT_OK) {
+            when (requestCode) {
+                TIME_ZONE_REQUEST_CODE -> {
+                    if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
+                        data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.also {
+                            currentTimeZone = it.replace(" ", "_")
 
-                        with(TimeZone.getTimeZone(it)) {
-                            calendar.timeZone = this
-                            dateFormat.timeZone = this
-//                        startDate?.timeZone = this
-//                        endDate?.timeZone = this
+                            with(TimeZone.getTimeZone(it)) {
+                                calendar.timeZone = this
+                                dateFormat.timeZone = this
+                            }
                         }
-                    }
 
-                    val difference = TimeZone.getTimeZone(currentTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+                        val difference = TimeZone.getTimeZone(currentTimeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
 
-                    val tmpCal = Calendar.getInstance().apply {
-                        add(Calendar.MILLISECOND, difference)
-                    }
-                    if(tmpCal.after(startDate)) calendar = tmpCal
-
-                    val offset: String
-                    if(TimeZone.getDefault() == TimeZone.getTimeZone(currentTimeZone)) {
-                        offset = resources.getString(R.string.current_time_zone)
-                        expectedTime.visibility = View.GONE
-                    }
-                    else {
-                        offset = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
-                        val current = Calendar.getInstance()
-                        calendar.apply {
-                            set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH))
-                            set(Calendar.SECOND, 0)
+                        val tmpCal = Calendar.getInstance().apply {
+                            add(Calendar.MILLISECOND, difference)
                         }
-                        expectedTime.visibility = View.VISIBLE
-                        expectedTime.text = getString(R.string.expected_time, DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time))
+                        if(tmpCal.after(startDate)) calendar = tmpCal
+
+                        val offset: String
+                        if(TimeZone.getDefault() == TimeZone.getTimeZone(currentTimeZone)) {
+                            offset = resources.getString(R.string.current_time_zone)
+                            expectedTime.visibility = View.GONE
+                            divider3.visibility = View.GONE
+                        } else {
+                            offset = MediaCursor.getOffsetOfDifference(applicationContext, difference, MediaCursor.TYPE_CURRENT)
+                            val current = Calendar.getInstance()
+                            calendar.apply {
+                                set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH))
+                                set(Calendar.SECOND, 0)
+                            }
+                            expectedTime.visibility = View.VISIBLE
+                            divider3.visibility = View.VISIBLE
+                            expectedTime.text = getString(R.string.expected_time, DateFormat.getTimeInstance(DateFormat.SHORT).format(calendar.time))
+                        }
+
+                        time_zone.text = getNameForTimeZone(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID))
+                        time_zone_offset.text = offset
+
                     }
-
-                    time_zone.text = getNameForTimeZone(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID))
-                    time_zone_offset.text = offset
-
                 }
-            }
-            requestCode == AUDIO_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
-                data?.getSerializableExtra(LAST_SELECTED_KEY)?.also {
-                    val ringtone = it as RingtoneItem
-                    currentRingtone = ringtone
-                    optionList[0].summary = ringtone.title
-                    alarmOptionAdapter.notifyItemChanged(0)
+                AUDIO_REQUEST_CODE -> {
+                    data?.getSerializableExtra(LAST_SELECTED_KEY)?.also {
+                        val ringtone = it as RingtoneItem
+                        currentRingtone = ringtone
+                        optionList[0].summary = ringtone.title
+                        alarmOptionAdapter.notifyItemChanged(0)
+                    }
                 }
-            }
-            requestCode == VIBRATION_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
-                data?.getSerializableExtra(LAST_SELECTED_KEY)?.also {
-                    val vibration = it as PatternItem
-                    currentVibrationPattern = vibration
-                    optionList[1].summary = vibration.title
-                    alarmOptionAdapter.notifyItemChanged(1)
+                VIBRATION_REQUEST_CODE -> {
+                    data?.getSerializableExtra(LAST_SELECTED_KEY)?.also {
+                        val vibration = it as PatternItem
+                        currentVibrationPattern = vibration
+                        optionList[1].summary = vibration.title
+                        alarmOptionAdapter.notifyItemChanged(1)
+                    }
                 }
-            }
-            requestCode == SNOOZE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
-                data?.getSerializableExtra(LAST_SELECTED_KEY)?.also {
-                    val snooze = it as SnoozeItem
-                    currentSnooze = snooze
-                    optionList[2].summary = snooze.title
-                    alarmOptionAdapter.notifyItemChanged(2)
+                SNOOZE_REQUEST_CODE -> {
+                    data?.getSerializableExtra(LAST_SELECTED_KEY)?.also {
+                        val snooze = it as SnoozeItem
+                        currentSnooze = snooze
+                        optionList[2].summary = snooze.title
+                        alarmOptionAdapter.notifyItemChanged(2)
+                    }
+                }
+                DATE_REQUEST_CODE -> {
+                    data?.getLongExtra(START_DATE_KEY, -1)?.let {
+                        startDate = if(it > 0) {
+                            Calendar.getInstance().apply {
+                                timeInMillis = it
+                            }
+                        }
+                        else null
+                    }
+                    data?.getLongExtra(END_DATE_KEY, -1)?.let {
+                        endDate = if(it > 0) {
+                            Calendar.getInstance().apply {
+                                timeInMillis = it
+                            }
+                        }
+                        else null
+                    }
+                    date.text = formatDate()
                 }
             }
         }
@@ -407,11 +422,19 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         super.onSaveInstanceState(outState)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_alarm, menu)
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             android.R.id.home -> {
                 setResult(Activity.RESULT_CANCELED)
                 finish()
+                true
+            }
+            R.id.action_save -> {
                 true
             }
             else -> false
@@ -432,7 +455,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
     override fun onClick(view: View) {
         when(view.id) {
             R.id.alarm_save -> {
-
                 val item = createAlarm()
                 val start = startDate
                 val end = endDate
@@ -546,12 +568,15 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                 }
                 else startActivityForResult(Intent(this, TimeZoneSearchActivity::class.java), TIME_ZONE_REQUEST_CODE)
             }
+            R.id.date_view -> {
+                val contentIntent = Intent(this, ContentSelectorActivity::class.java).apply {
+                    action = ACTION_REQUEST_DATE
+                    putExtra(START_DATE_KEY, startDate?.timeInMillis)
+                    putExtra(END_DATE_KEY, endDate?.timeInMillis)
+                }
+                startActivityForResult(contentIntent, DATE_REQUEST_CODE)
+            }
         }
-    }
-
-    override fun onDayItemSelected(view: View, position: Int) {
-        if(view.isSelected) selectedDays[position] = position + 1
-        else selectedDays[position] = 0
     }
 
     override fun onItemClick(view: View, position: Int, item: OptionItem) {
@@ -562,7 +587,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     putExtra(LAST_SELECTED_KEY, currentRingtone)
                 }
                 startActivityForResult(contentIntent, AUDIO_REQUEST_CODE)
-//                if(!ringtoneDialog.isAdded) ringtoneDialog.show(supportFragmentManager, TAG_FRAGMENT_RINGTONE)
             }
             1 -> { // Vibration
                 val contentIntent = Intent(this, ContentSelectorActivity::class.java).apply {
@@ -570,7 +594,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     putExtra(LAST_SELECTED_KEY, currentVibrationPattern)
                 }
                 startActivityForResult(contentIntent, VIBRATION_REQUEST_CODE)
-//                if(!vibrationDialog.isAdded) vibrationDialog.show(supportFragmentManager, TAG_FRAGMENT_VIBRATION)
             }
             2 -> { // Snooze
                 val contentIntent = Intent(this, ContentSelectorActivity::class.java).apply {
@@ -578,13 +601,38 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
                     putExtra(LAST_SELECTED_KEY, currentSnooze)
                 }
                 startActivityForResult(contentIntent, SNOOZE_REQUEST_CODE)
-//                if(!snoozeDialog.isAdded) snoozeDialog.show(supportFragmentManager, TAG_FRAGMENT_SNOOZE)
             }
             3 -> { // Label
                 if(!labelDialog.isAdded) labelDialog.show(supportFragmentManager, TAG_FRAGMENT_LABEL)
             }
             4 -> { // Color Tag
                 if(!colorTagDialog.isAdded) colorTagDialog.show(supportFragmentManager, TAG_FRAGMENT_COLOR_TAG)
+            }
+        }
+    }
+
+    override fun onButtonChecked(group: MaterialButtonToggleGroup?, checkedId: Int, isChecked: Boolean) {
+        when(checkedId) {
+            R.id.sunday -> {
+                selectedDays[0] = if(isChecked) 1 else 0
+            }
+            R.id.monday -> {
+                selectedDays[1] = if(isChecked) 2 else 0
+            }
+            R.id.tuesday -> {
+                selectedDays[2] = if(isChecked) 3 else 0
+            }
+            R.id.wednesday -> {
+                selectedDays[3] = if(isChecked) 4 else 0
+            }
+            R.id.thursday -> {
+                selectedDays[4] = if(isChecked) 5 else 0
+            }
+            R.id.friday -> {
+                selectedDays[5] = if(isChecked) 6 else 0
+            }
+            R.id.saturday -> {
+                selectedDays[6] = if(isChecked) 7 else 0
             }
         }
     }
@@ -608,103 +656,22 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         return array
     }
 
-    private fun getRingtoneDialog(): ChoiceDialogFragment {
-        val array = ringtoneList.map { it.title }.toTypedArray()
-        var selected = ringtoneList.indexOf(currentRingtone)
+    private fun formatDate(): String {
+        val s = startDate
+        val e = endDate
 
-        var dialog = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_RINGTONE) as? ChoiceDialogFragment
-        if(dialog == null) dialog = ChoiceDialogFragment.newInstance(resources.getString(R.string.select_ringtone), array)
-        dialog.setLastChoice(selected)
-        dialog.setOnDialogEventListener(object: OnDialogEventListener {
-            override fun onItemSelect(inter: DialogInterface?, index: Int) {
-                selected = index
-                if(selected != 0) {
-                    audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
-                    val audioAttrs = AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_ALARM)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .build()
-
-                    if(ringtone != null) ringtone?.stop()
-                    ringtone = RingtoneManager.getRingtone(applicationContext, Uri.parse(ringtoneList[selected].uri))
-                    ringtone?.audioAttributes = audioAttrs
-                    ringtone?.play()
-                }
-                else ringtone?.stop()
+        return when {
+            s != null && e != null -> {
+                DateUtils.formatDateRange(applicationContext, s.timeInMillis, e.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_ALL)
             }
-
-            override fun onPositiveButtonClick(inter: DialogInterface, index: Int) {
-                currentRingtone = ringtoneList[index]
-                optionList[0].summary = ringtoneList[index].title
-                alarmOptionAdapter.notifyItemChanged(0)
-                ringtoneDialog.setLastChoice(index)
+            s != null -> {
+                DateUtils.formatDateTime(applicationContext, s.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
             }
-
-            override fun onNegativeButtonClick(inter: DialogInterface, index: Int) { inter.cancel() }
-
-            override fun onDialogDismiss(inter: DialogInterface?) {
-                if(ringtone != null && ringtone!!.isPlaying) ringtone?.stop()
+            e != null -> {
+                DateUtils.formatDateTime(applicationContext, e.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
             }
-        })
-
-        return dialog
-    }
-
-    private fun getVibrationDialog(): ChoiceDialogFragment {
-        val array = vibratorPatternList.map { it.title }.toTypedArray()
-        var selected = vibratorPatternList.indexOf(currentVibrationPattern)
-
-        var dialog = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_VIBRATION) as? ChoiceDialogFragment
-        if(dialog == null) dialog = ChoiceDialogFragment.newInstance(resources.getString(R.string.select_vibration), array)
-        dialog.setLastChoice(selected)
-        dialog.setOnDialogEventListener(object: OnDialogEventListener {
-            override fun onItemSelect(inter: DialogInterface?, index: Int) {
-                selected = index
-                vibrator.cancel()
-                if(index != 0) vibrate(vibratorPatternList[index].array)
-            }
-
-            override fun onPositiveButtonClick(inter: DialogInterface, index: Int) {
-                currentVibrationPattern = vibratorPatternList[index]
-                optionList[1].summary = vibratorPatternList[index].title
-                alarmOptionAdapter.notifyItemChanged(1)
-                vibrationDialog.setLastChoice(index)
-            }
-
-            override fun onNegativeButtonClick(inter: DialogInterface, index: Int) { inter.cancel() }
-
-            override fun onDialogDismiss(inter: DialogInterface?) {
-                if(vibrator.hasVibrator()) vibrator.cancel()
-            }
-        })
-
-        return dialog
-    }
-
-    private fun getSnoozeDialog(): SnoozeDialogFragment {
-        var selected = snoozeList.indexOf(currentSnooze)
-
-        var dialog = supportFragmentManager.findFragmentByTag(TAG_FRAGMENT_SNOOZE) as? SnoozeDialogFragment
-        if(dialog == null) dialog = SnoozeDialogFragment.newInstance()
-        dialog.setLastChoice(selected)
-        dialog.setOnDialogEventListener(object: OnDialogEventListener {
-            override fun onItemSelect(inter: DialogInterface?, index: Int) {
-                selected = index
-            }
-
-            override fun onPositiveButtonClick(inter: DialogInterface, index: Int) {
-                currentSnooze = snoozeList[index]
-                optionList[2].summary = snoozeList[index].title
-                alarmOptionAdapter.notifyItemChanged(2)
-                snoozeDialog.setLastChoice(index)
-            }
-
-            override fun onNegativeButtonClick(inter: DialogInterface, index: Int) { inter.cancel() }
-
-            override fun onDialogDismiss(inter: DialogInterface?) {}
-
-        })
-        return dialog
+            else -> getString(R.string.range_not_set)
+        }
     }
 
     private fun getLabelDialog(): LabelDialogFragment {
@@ -758,19 +725,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         return dialog
     }
 
-    private fun vibrate(array: LongArray?) {
-        if(array != null) {
-            if(Build.VERSION.SDK_INT < 26) {
-                if(array.size > 1) vibrator.vibrate(array, -1)
-                else vibrator.vibrate(array[0])
-            }
-            else {
-                if(array.size > 1) vibrator.vibrate(VibrationEffect.createWaveform(array, -1))
-                else vibrator.vibrate(VibrationEffect.createOneShot(array[0], VibrationEffect.DEFAULT_AMPLITUDE))
-            }
-        }
-    }
-
     private fun createAlarm(): AlarmItem {
         val current = Calendar.getInstance()
         calendar.set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH))
@@ -822,9 +776,6 @@ class AlarmActivity : AppCompatActivity(), AlarmDayAdapter.OnItemClickListener, 
         private const val STATE_START_DATE_KEY = "STATE_START_DATE_KEY"
         private const val STATE_END_DATE_KEY = "STATE_END_DATE_KEY"
 
-        private const val TAG_FRAGMENT_RINGTONE = "TAG_FRAGMENT_RINGTONE"
-        private const val TAG_FRAGMENT_VIBRATION = "TAG_FRAGMENT_VIBRATION"
-        private const val TAG_FRAGMENT_SNOOZE = "TAG_FRAGMENT_SNOOZE"
         private const val TAG_FRAGMENT_LABEL = "TAG_FRAGMENT_LABEL"
         private const val TAG_FRAGMENT_COLOR_TAG = "TAG_FRAGMENT_COLOR_TAG"
 

@@ -199,7 +199,7 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
         const val INTERNAL_MUTE_ALARM_BOOL = "INTERNAL_MUTE_ALARM_BOOL"
 
         @JvmStatic
-        fun newInstnace() = SettingFragment()
+        fun newInstance() = SettingFragment()
 
         private val sBindPreferenceSummaryToValueListener = Preference.OnPreferenceChangeListener { preference, value ->
             val stringValue = value.toString()

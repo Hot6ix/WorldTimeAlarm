@@ -127,16 +127,19 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                 }
             }
 
+            val s = startDate
+            val e = endDate
+
             val rangeText = when {
-                startDate != null && endDate != null -> {
-                    DateUtils.formatDateRange(context, startDate!!.timeInMillis, endDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_ALL)
+                s != null && e != null -> {
+                    DateUtils.formatDateRange(context, s.timeInMillis, e.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_ALL)
                 }
-                startDate != null -> {
-                    if(item.repeat.any { it > 0 }) context.getString(R.string.range_begin).format(DateUtils.formatDateTime(context, startDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
+                s != null -> {
+                    if(item.repeat.any { it > 0 }) context.getString(R.string.range_begin).format(DateUtils.formatDateTime(context, s.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
                     else null
                 }
-                endDate != null -> {
-                    context.getString(R.string.range_until).format(DateUtils.formatDateTime(context, endDate!!.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
+                e != null -> {
+                    context.getString(R.string.range_until).format(DateUtils.formatDateTime(context, e.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
                 }
                 else -> {
                     null

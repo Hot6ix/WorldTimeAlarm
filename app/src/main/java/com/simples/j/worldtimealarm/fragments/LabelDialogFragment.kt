@@ -1,6 +1,7 @@
 package com.simples.j.worldtimealarm.fragments
 
 import android.app.Dialog
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
@@ -10,6 +11,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.WindowManager
 import android.widget.EditText
+import androidx.core.content.ContextCompat
 import com.simples.j.worldtimealarm.R
 
 class LabelDialogFragment: DialogFragment() {
@@ -19,6 +21,13 @@ class LabelDialogFragment: DialogFragment() {
     private var currentLabel: String = ""
 
     private lateinit var labelEditor: EditText
+    private lateinit var fragmentContext: Context
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        this.fragmentContext = context
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -31,9 +40,10 @@ class LabelDialogFragment: DialogFragment() {
             currentLabel = savedInstanceState.getString(CURRENT_LABEL, "")
         }
 
-        val labelView = View.inflate(context, R.layout.label_dialog_view, null)
+        val labelView = View.inflate(fragmentContext, R.layout.label_dialog_view, null)
         labelEditor = labelView.findViewById(R.id.label)
         labelEditor.setText(lastLabel)
+        labelEditor.setTextColor(ContextCompat.getColor(fragmentContext, R.color.colorPrimary))
         if(lastLabel.isNotEmpty()) {
             labelEditor.selectAll()
         }

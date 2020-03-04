@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:gravity="start|center_vertical"
             android:textSize="@dimen/text_xsmall"
-            android:textColor="?attr/colorAccent"
+            android:textColor="?attr/colorPrimary"
             app:layout_constraintTop_toBottomOf="@id/time_zone_name_clock"
             app:layout_constraintStart_toStartOf="parent"/>
 

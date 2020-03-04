@@ -59,7 +59,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:singleLine="true"
-                        android:textColor="?attr/colorAccent"
+                        android:textColor="?attr/colorPrimary"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:layout_marginStart="@dimen/padding10"
                         app:layout_constraintTop_toTopOf="parent"
@@ -67,6 +67,13 @@
                         app:layout_constraintEnd_toEndOf="parent"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <View
+                    android:id="@+id/divider1"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/listDivider"
+                    app:layout_constraintTop_toBottomOf="@id/time_zone_view"/>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/date_view"
@@ -76,7 +83,7 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackground"
-                    app:layout_constraintTop_toBottomOf="@id/time_zone_view">
+                    app:layout_constraintTop_toBottomOf="@id/divider1">
 
                     <TextView
                         android:id="@+id/date_picker"
@@ -97,11 +104,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:textSize="@dimen/text_small"
-                        android:textColor="?attr/colorAccent"
+                        android:textColor="?attr/colorPrimary"
                         android:gravity="end"
                         android:ellipsize="end"
                         android:maxLines="1"
-                        android:text="2018년 1월 14일 - 2020년 2월 20일"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@id/date_picker"
@@ -109,42 +115,101 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <View
+                    android:id="@+id/divider2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/listDivider"
+                    app:layout_constraintTop_toBottomOf="@id/date_view"/>
+
                 <TimePicker
                     android:id="@+id/time_picker"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:timePickerMode="spinner"
-                    app:layout_constraintTop_toBottomOf="@id/date_view"
+                    app:layout_constraintTop_toBottomOf="@id/divider2"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"/>
+
+                <View
+                    android:id="@+id/divider3"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:visibility="gone"
+                    android:background="?android:attr/listDivider"
+                    app:layout_constraintTop_toBottomOf="@id/time_picker"/>
 
                 <TextView
                     android:id="@+id/expectedTime"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="@dimen/padding20"
-                    android:paddingBottom="@dimen/padding20"
+                    android:paddingTop="@dimen/padding10"
+                    android:paddingBottom="@dimen/padding10"
                     android:gravity="center"
-                    android:textColor="?attr/colorAccent"
-                    app:layout_constraintTop_toBottomOf="@id/time_picker"
-                    app:layout_constraintStart_toStartOf="@drawable/ic_dashboard_black_24dp"
+                    android:textColor="?attr/colorPrimary"
+                    app:layout_constraintTop_toBottomOf="@id/divider3"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/repeat_day"
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/day_recurrence"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:singleSelection="false"
                 app:layout_constraintTop_toBottomOf="@id/time_picker_layout"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/sunday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/monday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/tuesday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/wednesday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/thursday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/friday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/saturday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+            </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/alarm_options"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/repeat_day"
+                app:layout_constraintTop_toBottomOf="@id/day_recurrence"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
@@ -155,8 +220,9 @@
     <LinearLayout
         android:id="@+id/decide_view"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:visibility="gone"
+        android:layout_height="@dimen/action_bar_height"
+        android:background="@color/background"
+        android:elevation="72dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <Button

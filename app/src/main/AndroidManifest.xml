@@ -20,7 +20,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".ContentSelectorActivity" />
+        <activity android:name=".ContentSelectorActivity"
+            android:theme="@style/MaterialAppTheme" />
 
         <service
             android:name=".utils.WakeUpService"
@@ -60,7 +61,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AlarmActivity" />
+            android:name=".AlarmActivity"
+            android:theme="@style/MaterialAppTheme.NoActionBar"/>
 
         <receiver
             android:name=".AlarmReceiver"

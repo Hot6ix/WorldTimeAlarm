@@ -25,7 +25,7 @@ import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.*
-import kotlinx.android.synthetic.main.fragment_alarmlist.*
+import kotlinx.android.synthetic.main.fragment_alarm_list.*
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -63,7 +63,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_alarmlist, container, false)
+        val view = inflater.inflate(R.layout.fragment_alarm_list, container, false)
         fragmentLayout = view.findViewById(R.id.fragment_list)
 
         return view

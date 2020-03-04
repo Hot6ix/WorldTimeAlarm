@@ -33,7 +33,7 @@ class AlarmDayAdapter(private var selectedDays: IntArray, private var context: C
         holder.day.text = arrayOfDay[position]
         when(position) {
             0 -> holder.day.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_light))
-            6 -> holder.day.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary))
+            6 -> holder.day.setTextColor(ContextCompat.getColor(context, R.color.lightBlue))
         }
         holder.day.isSelected = selectedDays[position] != 0
         holder.day.setOnClickListener {

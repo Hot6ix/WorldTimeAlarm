@@ -7,11 +7,9 @@ import android.content.Intent
 import android.icu.util.TimeZone
 import android.os.Build
 import android.os.Bundle
+import android.view.*
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
@@ -33,6 +31,11 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
     private val mDate = Date()
     private var mAction: Int = -1
     private var mType: Int = -1
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -75,17 +78,13 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
         }
 
         if(mTimeZone != null && (mPreviousTimeZone != mTimeZone || mAction == TimeZonePickerActivity.ACTION_ADD)) {
-            time_zone_apply.visibility = View.VISIBLE
             when(mAction) {
                 TimeZonePickerActivity.ACTION_ADD -> {
-                    time_zone_apply.text = getString(R.string.time_zone_add)
-
                     val clockList = DatabaseCursor(fragmentContext).getClockList()
                     val item = clockList.find { it.timezone == mTimeZone?.id }
                     if(item != null) {
                         time_zone_change_info.text = getString(R.string.exist_timezone)
                         time_zone_change_info.visibility = View.VISIBLE
-                        time_zone_apply.visibility = View.GONE
                     }
                 }
                 TimeZonePickerActivity.ACTION_CHANGE -> {
@@ -103,7 +102,40 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
         time_zone_country_layout.setOnClickListener(this)
         time_zone_region_layout.setOnClickListener(this)
-        time_zone_apply.setOnClickListener(this)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_time_zone_fragment, menu)
+
+        if(mAction == TimeZonePickerActivity.ACTION_ADD) {
+            menu.findItem(R.id.action_do)?.title = getString(R.string.time_zone_add)
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.action_system_time_zone -> {
+                true
+            }
+            R.id.action_do -> {
+                if(mAction == TimeZonePickerActivity.ACTION_ADD) {
+                    if(mTimeZone == null) {
+                        Toast.makeText(context, resources.getString(R.string.time_zone_select), Toast.LENGTH_SHORT).show()
+                        return false
+                    }
+                }
+
+                activity?.run {
+                    val intent = Intent()
+                    intent.putExtra(TimeZoneSearchActivity.TIME_ZONE_ID, mTimeZone?.id)
+                    setResult(Activity.RESULT_OK, intent)
+                    finish()
+                }
+                return true
+            }
+            else -> false
+        }
     }
 
     override fun onClick(v: View) {
@@ -125,21 +157,6 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                         putString(TimeZonePickerActivity.GIVEN_COUNTRY, MediaCursor.getULocaleByTimeZoneId(mTimeZone?.id)?.country)
                     }
                     this?.startPickerFragment(bundle, TimeZonePickerActivity.TIME_ZONE_PICKER_FRAGMENT_TIME_ZONE_TAG)
-                }
-            }
-            R.id.time_zone_apply -> {
-                if(mAction == TimeZonePickerActivity.ACTION_ADD) {
-                    if(mTimeZone == null) {
-                        Toast.makeText(context, resources.getString(R.string.time_zone_select), Toast.LENGTH_SHORT).show()
-                        return
-                    }
-                }
-
-                activity?.run {
-                    val intent = Intent()
-                    intent.putExtra(TimeZoneSearchActivity.TIME_ZONE_ID, mTimeZone?.id)
-                    setResult(Activity.RESULT_OK, intent)
-                    finish()
                 }
             }
         }

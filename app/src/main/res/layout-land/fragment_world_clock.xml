@@ -28,7 +28,9 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
+                app:layout_constraintVertical_chainStyle="packed"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/world_date"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
@@ -70,7 +72,9 @@
                 android:paddingTop="@dimen/padding5"
                 android:paddingBottom="@dimen/padding5"
                 android:background="?attr/selectableItemBackground"
-                app:layout_constraintTop_toBottomOf="@id/world_time_layout"/>
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_constraintTop_toBottomOf="@id/world_time_layout"
+                app:layout_constraintBottom_toTopOf="@id/time_zone"/>
 
             <TextView
                 android:id="@+id/time_zone"
@@ -82,7 +86,9 @@
                 android:paddingTop="@dimen/padding5"
                 android:paddingBottom="@dimen/padding5"
                 android:background="?attr/selectableItemBackground"
-                app:layout_constraintTop_toBottomOf="@id/world_date"/>
+                app:layout_constraintVertical_chainStyle="packed"
+                app:layout_constraintTop_toBottomOf="@id/world_date"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -117,7 +123,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="center|bottom"
-        android:tint="@color/colorAccent"
+        android:tint="@color/colorPrimary"
         app:backgroundTint="@color/background"
         app:srcCompat="@drawable/ic_action_world_white"/>
 

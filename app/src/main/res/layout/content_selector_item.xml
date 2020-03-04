@@ -24,6 +24,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textSize="@dimen/text_middle"
+        android:textColor="@color/textColorEnabled"
         android:gravity="start"
         android:layout_marginStart="@dimen/padding20"
         android:layout_marginEnd="@dimen/padding20"

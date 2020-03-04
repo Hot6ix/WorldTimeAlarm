@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
 
         alarmListFragment = AlarmListFragment.newInstance()
         clockListFragment = WorldClockFragment.newInstance()
-        settingFragment = SettingFragment.newInstnace()
+        settingFragment = SettingFragment.newInstance()
 
         val transaction = supportFragmentManager.beginTransaction()
         if(supportFragmentManager.findFragmentByTag(AlarmListFragment.TAG) == null) {
