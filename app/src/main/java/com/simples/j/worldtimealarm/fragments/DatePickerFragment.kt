@@ -1,8 +1,11 @@
 package com.simples.j.worldtimealarm.fragments
 
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,14 +13,16 @@ import android.widget.CalendarView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
+import com.simples.j.worldtimealarm.ContentSelectorActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
 import com.simples.j.worldtimealarm.utils.MediaCursor.Companion.formatDate
 import kotlinx.android.synthetic.main.fragment_date_picker.*
 import java.util.*
 
-class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, CalendarView.OnDateChangeListener {
+class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, CalendarView.OnDateChangeListener, View.OnClickListener {
 
     private lateinit var fragmentContext: Context
     private lateinit var viewModel: ContentSelectorViewModel
@@ -82,6 +87,44 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
                 else setTabSummary(endDateTab, getString(R.string.range_not_set))
             }
         })
+
+        action.setOnClickListener(this)
+    }
+
+    override fun onClick(view: View?) {
+        when(view?.id) {
+            R.id.action -> {
+                val s = viewModel.startDate.value
+                val e = viewModel.endDate.value
+
+                if(s != null && e != null) {
+                    if(s > 0 && e > 0) {
+                        if(s > e || s == e) {
+                            Snackbar.make(fragment_layout, getString(R.string.end_date_earlier_than_start_date), Snackbar.LENGTH_SHORT)
+                                    .setAnchorView(action)
+                                    .show()
+                            return
+                        }
+                    }
+                }
+                if(e != null && DateUtils.isToday(e)) {
+                    Snackbar.make(fragment_layout, getString(R.string.end_date_earlier_than_today), Snackbar.LENGTH_SHORT)
+                            .setAnchorView(action)
+                            .show()
+                    return
+                }
+
+                val resultIntent = Intent().apply {
+                    putExtra(ContentSelectorActivity.START_DATE_KEY, viewModel.startDate.value)
+                    putExtra(ContentSelectorActivity.END_DATE_KEY, viewModel.endDate.value)
+                }
+
+                activity?.run {
+                    setResult(Activity.RESULT_OK, resultIntent)
+                    finish()
+                }
+            }
+        }
     }
 
     override fun onTabSelected(tab: TabLayout.Tab?) {

@@ -64,6 +64,7 @@
     <string name="clear">未选中</string>
     <string name="new_alarm_long">新警报</string>
     <string name="new_alarm_short">新警报</string>
+    <string name="modify_alarm">修改警报</string>
     <string name="expected_time">闹钟将设置为当地时间%1$s</string>
     <string name="range_start">开始日期</string>
     <string name="range_end">结束日期</string>
@@ -77,6 +78,7 @@
     <string name="my_ringtone">我的铃声</string>
     <string name="system_ringtone">系统铃声</string>
     <string name="add_new">新增</string>
+    <string name="create">生成</string>
     <string name="remove">删除</string>
     <string name="world_clock">时间转换</string>
     <string name="date">日期</string>

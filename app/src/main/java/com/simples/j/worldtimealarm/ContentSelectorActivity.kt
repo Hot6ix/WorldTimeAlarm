@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.ViewModelProvider
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
@@ -13,7 +14,7 @@ import com.simples.j.worldtimealarm.fragments.ContentSelectorFragment
 import com.simples.j.worldtimealarm.fragments.DatePickerFragment
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
 
-class ContentSelectorActivity : AppCompatActivity() {
+class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
 
     private lateinit var viewModel: ContentSelectorViewModel
     private lateinit var contentSelectorFragment: ContentSelectorFragment
@@ -25,7 +26,8 @@ class ContentSelectorActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.content_selector_activity)
+        setContentView(R.layout.activity_content_selector)
+
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
         }
@@ -104,39 +106,42 @@ class ContentSelectorActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-//        if(intent.action == ACTION_REQUEST_DATE) {
-//            val s = viewModel.startDate.value
-//            val e = viewModel.endDate.value
-//
-//            if(s != null && e != null) {
-//                if(s > 0 && e > 0) {
-//                    if(s > e || s == e) {
-//                        return
-//                    }
-//                }
-//            }
-//            if(e != null && DateUtils.isToday(e)) return
-//        }
-        setResult(Activity.RESULT_OK, getResult())
-        finish()
+        when(intent.action) {
+            ACTION_REQUEST_AUDIO, ACTION_REQUEST_VIBRATION, ACTION_REQUEST_SNOOZE -> {
+                setResult(Activity.RESULT_OK, getResult())
+                finish()
+            }
+            else -> {
+                super.onBackPressed()
+            }
+        }
+    }
+
+    override fun onMenuItemClick(item: MenuItem?): Boolean {
+        return when(item?.itemId) {
+            R.id.action_apply -> {
+                setResult(Activity.RESULT_OK, getResult())
+                finish()
+
+                true
+            }
+            else -> false
+        }
     }
 
     private fun getResult(): Intent {
         return Intent().apply {
             when(intent.action) {
                 ACTION_REQUEST_AUDIO -> {
-                    putExtra(LAST_SELECTED_KEY, viewModel.lastSelectedValue as RingtoneItem)
+                    putExtra(LAST_SELECTED_KEY, viewModel.lastSelectedValue as RingtoneItem?)
                 }
                 ACTION_REQUEST_VIBRATION -> {
-                    putExtra(LAST_SELECTED_KEY, viewModel.lastSelectedValue as PatternItem)
+                    putExtra(LAST_SELECTED_KEY, viewModel.lastSelectedValue as PatternItem?)
                 }
                 ACTION_REQUEST_SNOOZE -> {
-                    putExtra(LAST_SELECTED_KEY, viewModel.lastSelectedValue as SnoozeItem)
+                    putExtra(LAST_SELECTED_KEY, viewModel.lastSelectedValue as SnoozeItem?)
                 }
-                ACTION_REQUEST_DATE -> {
-                    putExtra(START_DATE_KEY, viewModel.startDate.value)
-                    putExtra(END_DATE_KEY, viewModel.endDate.value)
-                }
+                ACTION_REQUEST_DATE -> { }
             }
         }
     }

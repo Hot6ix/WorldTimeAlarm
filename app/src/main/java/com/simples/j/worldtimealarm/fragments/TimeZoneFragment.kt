@@ -8,11 +8,10 @@ import android.icu.util.TimeZone
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
-import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.simples.j.worldtimealarm.R
@@ -25,7 +24,7 @@ import kotlinx.android.synthetic.main.fragment_time_zone.*
 import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.N)
-class TimeZoneFragment : Fragment(), View.OnClickListener, Toolbar.OnMenuItemClickListener {
+class TimeZoneFragment : Fragment(), View.OnClickListener {
 
     private lateinit var fragmentContext: Context
 
@@ -35,6 +34,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener, Toolbar.OnMenuItemCli
     private val mDate = Date()
     private var mAction: Int = -1
     private var mType: Int = -1
+    private var isTimeZoneExist = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,12 +87,12 @@ class TimeZoneFragment : Fragment(), View.OnClickListener, Toolbar.OnMenuItemCli
                     val clockList = DatabaseCursor(fragmentContext).getClockList()
                     val item = clockList.find { it.timezone == mTimeZone?.id }
                     if(item != null) {
-                        Snackbar.make(fragment_layout, getString(R.string.exist_timezone), Snackbar.LENGTH_LONG)
-                                .setAnchorView(bottomAppBar)
+                        Snackbar.make(fragment_layout, getString(R.string.exist_timezone), Snackbar.LENGTH_SHORT)
+                                .setAnchorView(action)
                                 .show()
                     }
 
-                    bottomAppBar.menu?.findItem(R.id.action_apply)?.isEnabled = item == null
+                    isTimeZoneExist = item != null
                 }
                 TimeZonePickerActivity.ACTION_CHANGE -> {
                     time_zone_change_info.visibility = View.VISIBLE
@@ -109,34 +109,15 @@ class TimeZoneFragment : Fragment(), View.OnClickListener, Toolbar.OnMenuItemCli
 
         time_zone_country_layout.setOnClickListener(this)
         time_zone_region_layout.setOnClickListener(this)
-        bottomAppBar.setOnMenuItemClickListener(this)
+        action.setOnClickListener(this)
 
         if(mAction == TimeZonePickerActivity.ACTION_ADD) {
-            bottomAppBar.menu?.findItem(R.id.action_apply)?.title = getString(R.string.time_zone_add)
+            action.text = getString(R.string.time_zone_add)
+            action.icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
         }
-    }
-
-    override fun onMenuItemClick(item: MenuItem?): Boolean {
-        return when(item?.itemId) {
-            R.id.action_apply -> {
-                if(mAction == TimeZonePickerActivity.ACTION_ADD) {
-                    if(mTimeZone == null) {
-                        Snackbar.make(fragment_layout, getString(R.string.time_zone_select), Snackbar.LENGTH_SHORT)
-                                .setAnchorView(bottomAppBar)
-                                .show()
-                        return false
-                    }
-                }
-
-                activity?.run {
-                    val intent = Intent()
-                    intent.putExtra(TimeZoneSearchActivity.TIME_ZONE_ID, mTimeZone?.id)
-                    setResult(Activity.RESULT_OK, intent)
-                    finish()
-                }
-                return true
-            }
-            else -> false
+        else {
+            action.text = getString(R.string.apply)
+            action.icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_done_white)
         }
     }
 
@@ -159,6 +140,29 @@ class TimeZoneFragment : Fragment(), View.OnClickListener, Toolbar.OnMenuItemCli
                         putString(TimeZonePickerActivity.GIVEN_COUNTRY, MediaCursor.getULocaleByTimeZoneId(mTimeZone?.id)?.country)
                     }
                     this?.startPickerFragment(bundle, TimeZonePickerActivity.TIME_ZONE_PICKER_FRAGMENT_TIME_ZONE_TAG)
+                }
+            }
+            R.id.action -> {
+                if(mAction == TimeZonePickerActivity.ACTION_ADD) {
+                    if(mTimeZone == null) {
+                        Snackbar.make(fragment_layout, getString(R.string.time_zone_select), Snackbar.LENGTH_SHORT)
+                                .setAnchorView(action)
+                                .show()
+                        return
+                    }
+                    else if(isTimeZoneExist) {
+                        Snackbar.make(fragment_layout, getString(R.string.exist_timezone), Snackbar.LENGTH_SHORT)
+                                .setAnchorView(action)
+                                .show()
+                        return
+                    }
+                }
+
+                activity?.run {
+                    val intent = Intent()
+                    intent.putExtra(TimeZoneSearchActivity.TIME_ZONE_ID, mTimeZone?.id)
+                    setResult(Activity.RESULT_OK, intent)
+                    finish()
                 }
             }
         }

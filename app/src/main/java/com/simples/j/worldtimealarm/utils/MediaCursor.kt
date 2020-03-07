@@ -7,13 +7,13 @@ import android.icu.util.TimeZone
 import android.icu.util.ULocale
 import android.media.RingtoneManager
 import android.os.Build
-import androidx.annotation.RequiresApi
 import android.text.BidiFormatter
 import android.text.TextDirectionHeuristics
 import android.text.TextUtils
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.View
+import androidx.annotation.RequiresApi
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.*
 import java.util.*

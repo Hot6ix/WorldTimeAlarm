@@ -19,7 +19,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/MaterialAppTheme">
-
+        <activity android:name=".AlarmGeneratorActivity"></activity>
         <activity android:name=".ContentSelectorActivity" />
 
         <service
@@ -59,9 +59,7 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".AlarmActivity"
-            android:theme="@style/MaterialAppTheme.NoActionBar"/>
+        <activity android:name=".AlarmActivity" />
 
         <receiver
             android:name=".AlarmReceiver"
@@ -84,11 +82,9 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-
         <activity
             android:name=".SettingsActivity"
             android:label="@string/action_settings" />
-
         <activity
             android:name=".LicenseActivity"
             android:theme="@style/AppTheme">
@@ -115,18 +111,17 @@
                 <action android:name="android.intent.action.TIME_SET" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".receiver.NotificationActionReceiver"
             android:enabled="true"
             android:exported="false" />
-
         <receiver
             android:name=".receiver.MultiBroadcastReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>

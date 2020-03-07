@@ -4,11 +4,9 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.text.format.DateUtils
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TimePicker
@@ -81,15 +79,9 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alarm)
 
-        when(resources.configuration.orientation) {
-            Configuration.ORIENTATION_PORTRAIT -> {
-                setSupportActionBar(bottomAppBar)
-            }
-            Configuration.ORIENTATION_LANDSCAPE -> {
-                setSupportActionBar(topActionBar)
-            }
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
         }
-        supportActionBar?.title = ""
 
         alarmController = AlarmController.getInstance()
 
@@ -112,10 +104,17 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
         if(bundle != null) {
             // Modify
             alarmAction = ACTION_MODIFY
+            supportActionBar?.apply {
+                title = getString(R.string.modify_alarm)
+            }
+            action.apply {
+                text = getString(R.string.apply)
+                icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_action_done_white)
+            }
 
             bundle.getParcelable<AlarmItem>(AlarmReceiver.ITEM).let { alarmItem ->
                 if(alarmItem == null) {
-                    Toast.makeText(applicationContext, "Unable to get Alarm", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
                     finish()
                 }
                 else {
@@ -131,7 +130,9 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
                     dateFormat.timeZone = TimeZone.getTimeZone(currentTimeZone)
 
                     if(Build.VERSION.SDK_INT < 23) {
+                        @Suppress("DEPRECATION")
                         time_picker.currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+                        @Suppress("DEPRECATION")
                         time_picker.currentMinute = calendar.get(Calendar.MINUTE)
                     }
                     else {
@@ -201,6 +202,14 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
         else {
             // New
             alarmAction = ACTION_NEW
+            supportActionBar?.apply {
+                title = getString(R.string.new_alarm_long)
+            }
+            action.apply {
+                text = getString(R.string.create)
+                icon = ContextCompat.getDrawable(applicationContext, R.drawable.ic_action_add)
+            }
+
             calendar = Calendar.getInstance().apply {
                 set(Calendar.SECOND, 0)
             }
@@ -223,7 +232,9 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
             dateFormat.timeZone = TimeZone.getTimeZone(currentTimeZone)
 
             if(Build.VERSION.SDK_INT < 23) {
+                @Suppress("DEPRECATION")
                 time_picker.currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+                @Suppress("DEPRECATION")
                 time_picker.currentMinute = calendar.get(Calendar.MINUTE)
             }
             else {
@@ -311,13 +322,19 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
         // init alarm options
         alarmOptionAdapter = AlarmOptionAdapter(optionList, applicationContext)
         alarmOptionAdapter.setOnItemClickListener(this)
-        alarm_options.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        alarm_options.addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
-        alarm_options.adapter = alarmOptionAdapter
-        alarm_options.isNestedScrollingEnabled = false
+
+        alarm_options.apply {
+            adapter = alarmOptionAdapter
+            layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
+
+            addItemDecoration(DividerItemDecoration(applicationContext, DividerItemDecoration.VERTICAL))
+            isNestedScrollingEnabled = false
+        }
 
         date.text = formatDate()
         date_view.setOnClickListener(this)
+
+        action.setOnClickListener(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -427,18 +444,9 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
         super.onSaveInstanceState(outState)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_alarm, menu)
-        return true
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
-            R.id.action_save -> {
-                saveAlarm()
-                true
-            }
-            R.id.action_cancel -> {
+            android.R.id.home -> {
                 setResult(Activity.RESULT_CANCELED)
                 finish()
                 true
@@ -478,6 +486,9 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
                     putExtra(END_DATE_KEY, endDate?.timeInMillis)
                 }
                 startActivityForResult(contentIntent, DATE_REQUEST_CODE)
+            }
+            R.id.action -> {
+                saveAlarm()
             }
         }
     }

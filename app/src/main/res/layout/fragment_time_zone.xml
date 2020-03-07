@@ -10,8 +10,10 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/action_bar_height"
-        android:paddingBottom="@dimen/padding20">
+        android:paddingBottom="@dimen/alarm_item_height"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:scrollbars="none">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -122,13 +124,14 @@
 
     </ScrollView>
 
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottomAppBar"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/action_bar_height"
-        android:layout_gravity="bottom"
-        android:paddingStart="@dimen/padding10"
-        android:paddingEnd="@dimen/padding10"
-        app:menu="@menu/menu_apply"/>
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/padding20"
+        android:layout_gravity="center|bottom"
+        android:textColor="?attr/colorPrimary"
+        app:iconTint="?attr/colorPrimary"
+        app:backgroundTint="@color/background"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

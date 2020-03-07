@@ -17,12 +17,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.*
-import com.simples.j.worldtimealarm.AlarmActivity
-import com.simples.j.worldtimealarm.MainActivity
-import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
-import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.*
 import kotlinx.android.synthetic.main.fragment_alarm_list.*
@@ -113,8 +110,8 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         if(!muteStatusIsShown) {
             if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
                 Handler().postDelayed({
-                    Snackbar.make(fragmentLayout,
-                            muted, Snackbar.LENGTH_LONG)
+                    Snackbar.make(fragmentLayout, muted, Snackbar.LENGTH_LONG)
+                            .setAnchorView(new_alarm)
                             .setAction(unMute) {
                         audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
                     }.addCallback(object: Snackbar.Callback() {
@@ -128,7 +125,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         new_alarm.setOnClickListener {
-            startActivityForResult(Intent(fragmentContext, AlarmActivity::class.java), REQUEST_CODE_NEW)
+            startActivityForResult(Intent(fragmentContext, AlarmGeneratorActivity::class.java), REQUEST_CODE_NEW)
         }
 
         val intentFilter = IntentFilter()
@@ -249,11 +246,11 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     }
 
     override fun onItemClicked(view: View, item: AlarmItem) {
-        val intent = Intent(fragmentContext, AlarmActivity::class.java)
+        val intent = Intent(fragmentContext, AlarmGeneratorActivity::class.java)
         val bundle = Bundle().apply {
             putParcelable(AlarmReceiver.ITEM, item)
         }
-        intent.putExtra(AlarmActivity.BUNDLE_KEY, bundle)
+        intent.putExtra(AlarmGeneratorActivity.BUNDLE_KEY, bundle)
         startActivityForResult(intent, REQUEST_CODE_MODIFY)
     }
 
@@ -298,7 +295,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
                 setEmptyMessage()
             }
-        }.show()
+        }.setAnchorView(new_alarm).show()
     }
 
     override fun onItemMove(from: Int, to: Int) {
@@ -327,6 +324,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 timeInMillis = scheduledTime
             }
             snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(fragmentContext, calendar)), Snackbar.LENGTH_LONG)
+                    .setAnchorView(new_alarm)
             snackBar?.show()
         }
     }

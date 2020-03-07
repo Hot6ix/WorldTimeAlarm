@@ -19,7 +19,7 @@
     <color name="textColor">#000000</color>
     <color name="textColorEnabled">#666666</color>
     <color name="textColorDisabled">#AAAAAA</color>
-    <color name="textColorDisabledDark">#888888</color>
+    <color name="textColorDisabledDark">#919191</color>
     <color name="warning">@color/color1</color>
 
     <color name="color1">#EF5350</color>

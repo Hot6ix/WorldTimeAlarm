@@ -4,10 +4,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.DatabaseUtils
 import android.net.Uri
-import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import java.util.*
@@ -128,13 +126,29 @@ class DatabaseCursor(val context: Context) {
                 val startDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_START_DATE))
                 val endDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_END_DATE))
 
+                val formattedRepeat =
+                        if(repeat.isEmpty()) {
+                            IntArray(7) { 0 }
+                        }
+                        else {
+                            repeat.split(",").map { it.trim().toInt() }.toIntArray()
+                        }
+
+                val formattedVibration =
+                        if(vibration.isEmpty() || vibration == "null" ) {
+                            null
+                        }
+                        else {
+                            vibration.split(",").map { it.trim().toLong() }.toLongArray()
+                        }
+
                 val item = AlarmItem(
                         id,
                         timeZone,
                         timeSet,
-                        repeat.split(",").map { it.trim().toInt() }.toIntArray(),
+                        formattedRepeat,
                         ringtone,
-                        if(vibration == "null") null else vibration.split(",").map { it.trim().toLong() }.toLongArray(),
+                        formattedVibration,
                         snooze.toLong(),
                         label,
                         switch,
