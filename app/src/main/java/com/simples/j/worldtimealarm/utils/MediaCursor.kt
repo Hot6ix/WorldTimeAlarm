@@ -264,6 +264,30 @@ class MediaCursor {
                             or DateUtils.FORMAT_SHOW_YEAR
                             or DateUtils.FORMAT_ABBREV_ALL)
         }
+
+        fun getDstDifference(time: Date, timeZone: java.util.TimeZone): Int {
+            var diff = 0
+            val systemTimeZone = java.util.TimeZone.getDefault()
+            if(systemTimeZone.useDaylightTime() && timeZone.useDaylightTime()) {
+                if(systemTimeZone.inDaylightTime(time) && timeZone.inDaylightTime(time)) { // both system and item time zone are in dst
+                    diff = systemTimeZone.dstSavings - timeZone.dstSavings
+                }
+                else if(systemTimeZone.inDaylightTime(time) && !timeZone.inDaylightTime(time)) { // only system time zone is in dst
+                    diff = systemTimeZone.dstSavings
+                }
+                else if(!systemTimeZone.inDaylightTime(time) && timeZone.inDaylightTime(time)) { // only item time zone is in dst
+                    diff = -timeZone.dstSavings
+                }
+            }
+            else if(systemTimeZone.useDaylightTime() && !timeZone.useDaylightTime()) {
+                diff = systemTimeZone.dstSavings
+            }
+            else if(!systemTimeZone.useDaylightTime() && timeZone.useDaylightTime()) {
+                diff = -timeZone.dstSavings
+            }
+
+            return diff
+        }
     }
 
 }

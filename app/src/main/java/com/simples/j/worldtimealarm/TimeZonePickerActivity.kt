@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.simples.j.worldtimealarm.fragments.TimeZoneFragment
 import com.simples.j.worldtimealarm.fragments.TimeZonePickerFragment
+import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.N)
 class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTimeZoneChangeListener {
@@ -22,8 +23,7 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
         setContentView(R.layout.activity_time_zone_picker)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        TimeZonePickerFragment.newInstance(null)
-        mTimeZoneId = intent.getStringExtra(TIME_ZONE_ID)
+        mTimeZoneId = intent.getStringExtra(TIME_ZONE_ID) ?: TimeZone.getDefault().id
         mAction = intent.getIntExtra(ACTION, 0)
         mType = intent.getIntExtra(TYPE, -1)
 

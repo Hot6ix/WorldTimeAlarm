@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.utils.AlarmController
+import org.threeten.bp.ZonedDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -14,15 +15,13 @@ class AlarmGeneratorViewModel(app: Application): AndroidViewModel(app) {
 
     var optionList: ArrayList<OptionItem> = ArrayList()
 
-    val alarmItem: MutableLiveData<AlarmItem> by lazy {
-        MutableLiveData<AlarmItem>()
-    }
+    var alarmItem: AlarmItem? = null
 
     val timeZone: MutableLiveData<String> by lazy {
         MutableLiveData<String>()
     }
 
-    var calendar: Calendar = Calendar.getInstance()
+    var remoteZonedDateTime: ZonedDateTime = ZonedDateTime.now()
 
     val startDate: MutableLiveData<Calendar> by lazy {
         MutableLiveData<Calendar>()

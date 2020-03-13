@@ -226,7 +226,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             else {
                 holder.repeat.text =
                         when {
-                            DateUtils.isToday(calendar.timeInMillis) -> {
+                            DateUtils.isToday(calendar.timeInMillis) && endDate == null -> {
                                 context.resources.getString(R.string.today)
                             }
                             DateUtils.isToday(calendar.timeInMillis - DateUtils.DAY_IN_MILLIS) && startDate == null && endDate == null -> {

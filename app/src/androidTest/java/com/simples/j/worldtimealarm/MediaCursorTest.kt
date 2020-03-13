@@ -2,18 +2,21 @@ package com.simples.j.worldtimealarm
 
 import android.content.Context
 import android.icu.text.TimeZoneNames
+import android.icu.util.TimeZone
 import android.icu.util.ULocale
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.util.Log
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.TimeZoneInfo
 import com.simples.j.worldtimealarm.utils.MediaCursor
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.ZoneId
 import java.util.*
+import kotlin.collections.ArrayList
 
 @RunWith(AndroidJUnit4::class)
 class MediaCursorTest {
@@ -45,8 +48,8 @@ class MediaCursorTest {
         //
         val list = ArrayList<TimeZoneInfo>()
         val timeZoneNames = TimeZoneNames.getInstance(ULocale.getDefault())
-        android.icu.util.TimeZone.getAvailableIDs().forEach {
-            val timeZone = android.icu.util.TimeZone.getTimeZone(it)
+        TimeZone.getAvailableIDs().forEach {
+            val timeZone = TimeZone.getTimeZone(it)
             val timeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), Date()).format(timeZone)
             list.add(timeZoneInfo)
         }
@@ -69,6 +72,57 @@ class MediaCursorTest {
         assertEquals(a, 5)
         val b = MediaCursor.getDayDifference(cal2, cal1, true)
         assertEquals(b, 6)
+    }
+
+    @Test
+    fun testDstDiff() {
+        val list = getTimeZones()
+        list.forEach {
+            val diff = MediaCursor.getDstDifference(Date(), java.util.TimeZone.getTimeZone(it.id))
+
+            val tz = TimeZone.getDefault()
+
+            println("${tz.id}, useDST=${tz.useDaylightTime()}, inDST=${tz.inDaylightTime(Date())}")
+            println("${it.id}, useDST=${it.useDaylightTime()}, inDST=${it.inDaylightTime(Date())}")
+            println("system=${TimeZone.getDefault().id}, given=${it.id}, diffInMinutes=${diff / 1000 / 60}")
+        }
+    }
+
+    @Test
+    fun testTransitions() {
+        val i = ZoneId.of(TimeZone.getDefault().id).rules.transitions
+        println("$i")
+        ZoneId.of(TimeZone.getDefault().id).rules.transitionRules.forEach {
+            println("$it")
+            println("${it.month}")
+            println("${it.dayOfMonthIndicator}")
+            println("${it.localTime}")
+            println("${it.offsetBefore}")
+            println("${it.offsetAfter}")
+            println("${it.timeDefinition}")
+        }
+    }
+
+    private fun getTimeZones(): ArrayList<TimeZone> {
+        val list = MediaCursor.getTimeZoneLocales()
+        val tzList = ArrayList<TimeZone>()
+
+        list.forEach { uLocale ->
+            val tzs = MediaCursor.getTimeZoneListByCountry(uLocale.country)
+
+            tzs.forEach {
+                var name = it.mExemplarName
+                if(name == null) {
+                    name =
+                            if(it.mTimeZone.inDaylightTime(Date())) it.mDaylightName
+                            else it.mStandardName
+                }
+
+                tzList.add(it.mTimeZone)
+            }
+        }
+
+        return tzList
     }
 
 }

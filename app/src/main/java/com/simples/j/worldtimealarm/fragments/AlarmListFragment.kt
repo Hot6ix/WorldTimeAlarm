@@ -111,7 +111,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
                 Handler().postDelayed({
                     Snackbar.make(fragmentLayout, muted, Snackbar.LENGTH_LONG)
-                            .setAnchorView(new_alarm)
                             .setAction(unMute) {
                         audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
                     }.addCallback(object: Snackbar.Callback() {
@@ -295,7 +294,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
                 setEmptyMessage()
             }
-        }.setAnchorView(new_alarm).show()
+        }.show()
     }
 
     override fun onItemMove(from: Int, to: Int) {
@@ -324,7 +323,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 timeInMillis = scheduledTime
             }
             snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(fragmentContext, calendar)), Snackbar.LENGTH_LONG)
-                    .setAnchorView(new_alarm)
             snackBar?.show()
         }
     }

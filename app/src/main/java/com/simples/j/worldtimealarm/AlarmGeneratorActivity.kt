@@ -1,11 +1,12 @@
 package com.simples.j.worldtimealarm
 
 import android.app.Activity
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.fragments.AlarmGeneratorFragment
 import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
@@ -18,37 +19,41 @@ class AlarmGeneratorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alarm_generator)
 
+        AndroidThreeTen.init(this)
+
         viewModel = ViewModelProvider(this)[AlarmGeneratorViewModel::class.java]
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
         }
 
-        val bundle = intent.getBundleExtra(BUNDLE_KEY)
-        if(bundle == null) {
-            // New Alarm
-            supportActionBar?.title = getString(R.string.new_alarm_long)
-            viewModel.alarmItem.value = null
-        }
-        else {
-            // Modify Alarm
-            supportActionBar?.title = getString(R.string.modify_alarm)
+        if(savedInstanceState == null) {
+            val bundle = intent.getBundleExtra(BUNDLE_KEY)
+            if(bundle == null) {
+                // New Alarm
+                supportActionBar?.title = getString(R.string.new_alarm_long)
+                viewModel.alarmItem = null
+            }
+            else {
+                // Modify Alarm
+                supportActionBar?.title = getString(R.string.modify_alarm)
 
-            bundle.getParcelable<AlarmItem>(AlarmReceiver.ITEM).let { alarmItem ->
-                if(alarmItem == null) {
-                    Toast.makeText(applicationContext, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-                else {
-                    viewModel.alarmItem.value = alarmItem
+                bundle.getParcelable<AlarmItem>(AlarmReceiver.ITEM).let { alarmItem ->
+                    if(alarmItem == null) {
+                        Toast.makeText(applicationContext, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    else {
+                        viewModel.alarmItem = alarmItem
+                    }
                 }
             }
-        }
 
-        supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.container, AlarmGeneratorFragment.newInstance(), AlarmGeneratorFragment.TAG)
-                .commitNow()
+            supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.container, AlarmGeneratorFragment.newInstance(), AlarmGeneratorFragment.TAG)
+                    .commitNow()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

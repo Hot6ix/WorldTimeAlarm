@@ -4,21 +4,21 @@ import android.content.Context
 import android.icu.text.LocaleDisplayNames
 import android.icu.util.TimeZone
 import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.recyclerview.widget.RecyclerView
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.RecyclerView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import java.util.*
 import kotlin.collections.ArrayList
 
 @RequiresApi(Build.VERSION_CODES.N)
-class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(private val context: Context?,
+class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(private val context: Context,
                                                                            private var list: List<T>,
                                                                            private val showItemSummary: Boolean,
                                                                            private val showItemDifference: Boolean,
@@ -73,7 +73,7 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
                     if(showItemDifference) {
                         val difference = TimeZone.getTimeZone(item.id).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
                         holder.difference.visibility = View.VISIBLE
-                        holder.difference.text = MediaCursor.getOffsetOfDifference(context!!, difference, MediaCursor.TYPE_CONVERTER)
+                        holder.difference.text = MediaCursor.getOffsetOfDifference(context, difference, MediaCursor.TYPE_CONVERTER)
                     }
                     else {
                         holder.difference.visibility = View.GONE

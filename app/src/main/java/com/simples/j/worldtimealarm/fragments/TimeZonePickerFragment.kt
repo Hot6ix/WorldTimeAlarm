@@ -1,5 +1,6 @@
 package com.simples.j.worldtimealarm.fragments
 
+import android.app.Activity
 import android.content.Context
 import android.icu.text.Collator
 import android.icu.util.ULocale
@@ -23,6 +24,8 @@ import kotlin.coroutines.CoroutineContext
 // This fragment covers country and time zone list
 @RequiresApi(Build.VERSION_CODES.N)
 class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTextListener {
+
+    private lateinit var fragmentContext: Context
 
     private var mListener: OnTimeZoneChangeListener? = null
     private var mRequestType: Int = -1
@@ -81,7 +84,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
             if(mAdapter == null) {
                 mAdapter = when(mRequestType) {
                     TimeZonePickerActivity.REQUEST_COUNTRY -> {
-                        BaseTimeZonePickerAdapter(context, mList, showItemSummary = false, showItemDifference = false, headerText = null, listener = mLocaleChangedListener)
+                        BaseTimeZonePickerAdapter(fragmentContext, mList, showItemSummary = false, showItemDifference = false, headerText = null, listener = mLocaleChangedListener)
                     }
                     TimeZonePickerActivity.REQUEST_TIME_ZONE -> {
                         val showItemDifference = when(mType) {
@@ -93,7 +96,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
                             }
                             else -> false
                         }
-                        BaseTimeZonePickerAdapter(context, mList, true, showItemDifference, mCountry, mTimeZoneInfoChangedListener)
+                        BaseTimeZonePickerAdapter(fragmentContext, mList, true, showItemDifference, mCountry, mTimeZoneInfoChangedListener)
                     }
                     else -> {
                         throw IllegalStateException("Unexpected request type : $mRequestType")
@@ -103,7 +106,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
 
             if(view != null) {
                 time_zone_base_recycler_view.adapter = mAdapter
-                time_zone_base_recycler_view.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+                time_zone_base_recycler_view.layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
                 progressBar.visibility = View.GONE
             }
 
@@ -118,6 +121,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
     }
 
     override fun onAttach(context: Context) {
+        fragmentContext = context
         super.onAttach(context)
         if (context is OnTimeZoneChangeListener) {
             mListener = context

@@ -38,8 +38,11 @@ import kotlinx.android.synthetic.main.activity_alarm.expectedTime
 import kotlinx.android.synthetic.main.activity_alarm.time_zone
 import kotlinx.android.synthetic.main.activity_alarm.time_zone_offset
 import kotlinx.android.synthetic.main.fragment_alarm_generator.*
-import kotlinx.android.synthetic.main.fragment_alarm_generator.view.*
-import java.text.DateFormat
+import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.format.FormatStyle
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -58,7 +61,6 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
 
     private lateinit var preference: SharedPreferences
 
-    private val dateFormat = DateFormat.getDateInstance(DateFormat.FULL)
     private var timeZoneSelectorOption: String = ""
     private var applyDayRepetition = false
 
@@ -69,8 +71,11 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_alarm_generator, container, false)
+    }
 
-        val view = inflater.inflate(R.layout.fragment_alarm_generator, container, false)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
 
         preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
         timeZoneSelectorOption = preference.getString(resources.getString(R.string.setting_time_zone_selector_key), SettingFragment.SELECTOR_OLD) ?: SettingFragment.SELECTOR_OLD
@@ -102,155 +107,133 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
         vibratorPatternList = MediaCursor.getVibratorPatterns(fragmentContext)
         snoozeList = MediaCursor.getSnoozeList(fragmentContext)
 
-        viewModel.alarmItem.observe(viewLifecycleOwner, Observer {
-            if(it != null) {
-                action.apply {
-                    text = getString(R.string.apply)
-                    icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_done_white)
-                }
+        if(savedInstanceState == null) {
+            viewModel.alarmItem.let {
+                if(it != null) {
+                    viewModel.timeZone.value = it.timeZone.replace(" ", "_")
 
-                if(viewModel.ringtone.value == null)
+                    val instant = Instant.ofEpochMilli(it.timeSet.toLong())
+                    viewModel.remoteZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(it.timeZone))
+
+                    it.startDate?.let { startDateInMillis ->
+                        if(startDateInMillis > 0) {
+                            viewModel.startDate.value = Calendar.getInstance().apply {
+                                timeZone = TimeZone.getTimeZone(viewModel.timeZone.value)
+                                timeInMillis = startDateInMillis
+                                set(Calendar.HOUR_OF_DAY, viewModel.remoteZonedDateTime.hour)
+                                set(Calendar.MINUTE, viewModel.remoteZonedDateTime.minute)
+                            }
+                        }
+                    }
+
+                    it.endDate?.let { endDateInMillis ->
+                        if(endDateInMillis > 0) {
+                            viewModel.endDate.value = Calendar.getInstance().apply {
+                                timeZone = TimeZone.getTimeZone(viewModel.timeZone.value)
+                                timeInMillis = endDateInMillis
+                                set(Calendar.HOUR_OF_DAY, viewModel.remoteZonedDateTime.hour)
+                                set(Calendar.MINUTE, viewModel.remoteZonedDateTime.minute)
+                            }
+                        }
+                    }
+
+                    viewModel.recurrences.value = it.repeat
+                    viewModel.recurrences.value?.let {  recurrences ->
+                        if(recurrences.any { day -> day == 1 }) {
+                            viewModel.recurrences.value = viewModel.recurrences.value?.mapIndexed { index, i ->
+                                if(i > 0) index + 1
+                                else 0
+                            }?.toIntArray()
+                        }
+                    }
+
                     viewModel.ringtone.value = ringtoneList.find { item -> item.uri == it.ringtone } ?: defaultRingtone
-                if(viewModel.vibration.value == null)
                     viewModel.vibration.value = vibratorPatternList.find { item ->
                         if(item.array == null && it.vibration == null) true
                         else item.array?.contentEquals(it.vibration ?: longArrayOf(0)) ?: false
                     }
-                if(viewModel.snooze.value == null)
                     viewModel.snooze.value = snoozeList.find { item -> item.duration == it.snooze }
-                if(viewModel.label.value == null)
                     viewModel.label.value = it.label
-                if(viewModel.colorTag.value == null)
                     viewModel.colorTag.value = it.colorTag
-
-                viewModel.timeZone.value = it.timeZone.replace(" ", "_")
-                viewModel.calendar.apply {
-                    timeZone = TimeZone.getTimeZone(viewModel.timeZone.value)
-                    timeInMillis = it.timeSet.toLong()
-                    set(Calendar.SECOND, 0)
-                }
-                dateFormat.timeZone = TimeZone.getTimeZone(viewModel.timeZone.value)
-
-                if(Build.VERSION.SDK_INT < 23) {
-                    @Suppress("DEPRECATION")
-                    view.time_picker.currentHour = viewModel.calendar.get(Calendar.HOUR_OF_DAY)
-                    @Suppress("DEPRECATION")
-                    view.time_picker.currentMinute = viewModel.calendar.get(Calendar.MINUTE)
                 }
                 else {
-                    view.time_picker.hour = viewModel.calendar.get(Calendar.HOUR_OF_DAY)
-                    view.time_picker.minute = viewModel.calendar.get(Calendar.MINUTE)
-                }
+                    viewModel.timeZone.value = TimeZone.getDefault().id
 
-                view.time_zone.text = getFormattedTimeZoneName(it.timeZone)
-                val difference = TimeZone.getTimeZone(viewModel.timeZone.value).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-                var offset = MediaCursor.getOffsetOfDifference(fragmentContext, difference, MediaCursor.TYPE_CURRENT)
-                if(TimeZone.getDefault() == TimeZone.getTimeZone(viewModel.timeZone.value)) {
-                    offset = resources.getString(R.string.current_time_zone)
-                    view.expectedTime.visibility = View.GONE
-                    view.divider3.visibility = View.GONE
+                    viewModel.ringtone.value = defaultRingtone
+                    viewModel.vibration.value = vibratorPatternList[0]
+                    viewModel.snooze.value = snoozeList[0]
                 }
-                else {
-                    view.expectedTime.visibility = View.VISIBLE
-                    view.divider3.visibility = View.VISIBLE
-                    view.expectedTime.text = getString(R.string.expected_time,DateFormat.getTimeInstance(DateFormat.SHORT).format(viewModel.calendar.time))
-                }
-                view.time_zone_offset.text = offset
+            }
+        }
 
-                it.startDate?.let { startDateInMillis ->
-                    if(startDateInMillis > 0) {
-                        viewModel.startDate.value = Calendar.getInstance().apply {
-                            timeZone = TimeZone.getTimeZone(viewModel.timeZone.value)
-                            timeInMillis = startDateInMillis
-                            set(Calendar.HOUR_OF_DAY, viewModel.calendar.get(Calendar.HOUR_OF_DAY))
-                            set(Calendar.MINUTE, viewModel.calendar.get(Calendar.MINUTE))
-                        }
-                    }
-                }
+        time_zone.text = getFormattedTimeZoneName(viewModel.timeZone.value)
+        updateTimeZoneDifference()
 
-                it.endDate?.let { endDateInMillis ->
-                    if(endDateInMillis > 0) {
-                        viewModel.endDate.value = Calendar.getInstance().apply {
-                            timeZone = TimeZone.getTimeZone(viewModel.timeZone.value)
-                            timeInMillis = endDateInMillis
-                            set(Calendar.HOUR_OF_DAY, viewModel.calendar.get(Calendar.HOUR_OF_DAY))
-                            set(Calendar.MINUTE, viewModel.calendar.get(Calendar.MINUTE))
-                        }
-                    }
-                }
-
-                viewModel.recurrences.value = it.repeat
-                viewModel.recurrences.value?.let {  recurrences ->
-                    if(recurrences.any { day -> day == 1 }) {
-                        viewModel.recurrences.value = viewModel.recurrences.value?.mapIndexed { index, i ->
-                            if(i > 0) index + 1
-                            else 0
-                        }?.toIntArray()
-                    }
-                }
-
-                viewModel.recurrences.value?.let { recurrences ->
-                    recurrences.forEachIndexed { index, day ->
-                        if(day > 0) day_recurrence.check(dayIds[index])
-                    }
-                }
+        action.apply {
+            if(viewModel.alarmItem != null) {
+                text = getString(R.string.apply)
+                icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_done_white)
             }
             else {
-                action.apply {
-                    text = getString(R.string.create)
-                    icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
-                }
-
-                viewModel.calendar.set(Calendar.SECOND, 0)
-                view.time_zone.text = getFormattedTimeZoneName(TimeZone.getDefault().id)
-                view.time_zone_offset.text = resources.getString(R.string.current_time_zone)
-
-                view.expectedTime.visibility = View.GONE
-                view.divider3.visibility = View.GONE
-
-                if(viewModel.ringtone.value == null)
-                    viewModel.ringtone.value = defaultRingtone
-                if(viewModel.vibration.value == null)
-                    viewModel.vibration.value = vibratorPatternList[0]
-                if(viewModel.snooze.value == null)
-                    viewModel.snooze.value = snoozeList[0]
+                text = getString(R.string.create)
+                icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
             }
+        }
 
-            // init alarm options
-            viewModel.optionList = getAlarmOptions()
-            alarmOptionAdapter = AlarmOptionAdapter(viewModel.optionList, fragmentContext)
-            alarmOptionAdapter.setOnItemClickListener(this)
+        // set time
+        val hour = viewModel.remoteZonedDateTime.hour
+        val minute = viewModel.remoteZonedDateTime.minute
+        if(Build.VERSION.SDK_INT < 23) {
+            @Suppress("DEPRECATION")
+            time_picker.currentHour = hour
+            @Suppress("DEPRECATION")
+            time_picker.currentMinute = minute
+        }
+        else {
+            time_picker.hour = hour
+            time_picker.minute = minute
+        }
 
-            view.alarm_options.apply {
-                adapter = alarmOptionAdapter
-                layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
-
-                addItemDecoration(DividerItemDecoration(fragmentContext, DividerItemDecoration.VERTICAL))
-                isNestedScrollingEnabled = false
+        viewModel.recurrences.value?.let { recurrences ->
+            recurrences.forEachIndexed { index, day ->
+                if(day > 0) day_recurrence.check(dayIds[index])
             }
+        }
 
-            view.date.text = formatDate()
-        })
+        // init alarm options
+        viewModel.optionList = getAlarmOptions()
+        alarmOptionAdapter = AlarmOptionAdapter(viewModel.optionList, fragmentContext)
+        alarmOptionAdapter.setOnItemClickListener(this)
+
+        alarm_options.apply {
+            adapter = alarmOptionAdapter
+            layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
+
+            addItemDecoration(DividerItemDecoration(fragmentContext, DividerItemDecoration.VERTICAL))
+            isNestedScrollingEnabled = false
+        }
+
+        date.text = formatDate()
 
         // init dialog
         labelDialog = getLabelDialog()
         colorTagDialog = getColorTagChoiceDialog()
 
-        view.time_picker.setOnTimeChangedListener(this)
-        view.time_zone_view.setOnClickListener(this)
+        time_picker.setOnTimeChangedListener(this)
+        time_zone_view.setOnClickListener(this)
 
         // init alarm recurrences
         recurrenceDays.forEachIndexed { index, s ->
-            val button = view.day_recurrence.getChildAt(index) as MaterialButton
+            val button = day_recurrence.getChildAt(index) as MaterialButton
             button.text = s
             if(index == 0) button.setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_red_light))
             else if(index == 6) button.setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_blue_light))
         }
 
-        view.day_recurrence.addOnButtonCheckedListener(this)
-        view.date_view.setOnClickListener(this)
-        view.action.setOnClickListener(this)
-        view.detail_content_layout.isNestedScrollingEnabled = false
+        day_recurrence.addOnButtonCheckedListener(this)
+        date_view.setOnClickListener(this)
+        action.setOnClickListener(this)
+        detail_content_layout.isNestedScrollingEnabled = false
 
         // Init observers
         viewModel.ringtone.observe(viewLifecycleOwner, Observer {
@@ -268,8 +251,6 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
         viewModel.colorTag.observe(viewLifecycleOwner, Observer {
             alarmOptionAdapter.notifyItemChanged(4)
         })
-
-        return view
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -282,38 +263,22 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                         data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.also {
                             viewModel.timeZone.value = it.replace(" ", "_")
 
-                            with(TimeZone.getTimeZone(it)) {
-                                viewModel.calendar.timeZone = this
-                                dateFormat.timeZone = this
-                            }
-                        }
+                            val hour =
+                                    if(Build.VERSION.SDK_INT < 23) @Suppress("DEPRECATION") time_picker.currentHour
+                                    else time_picker.hour
+                            val minute =
+                                    if(Build.VERSION.SDK_INT < 23) @Suppress("DEPRECATION") time_picker.currentMinute
+                                    else time_picker.minute
 
-                        val difference = TimeZone.getTimeZone(viewModel.timeZone.value).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-
-                        val tmpCal = Calendar.getInstance().apply {
-                            add(Calendar.MILLISECOND, difference)
-                        }
-                        if(tmpCal.after(viewModel.startDate.value)) viewModel.calendar = tmpCal
-
-                        val offset: String
-                        if(TimeZone.getDefault() == TimeZone.getTimeZone(viewModel.timeZone.value)) {
-                            offset = resources.getString(R.string.current_time_zone)
-                            expectedTime.visibility = View.GONE
-                            divider3.visibility = View.GONE
-                        } else {
-                            offset = MediaCursor.getOffsetOfDifference(fragmentContext, difference, MediaCursor.TYPE_CURRENT)
-                            val current = Calendar.getInstance()
-                            viewModel.calendar.apply {
-                                set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH))
-                                set(Calendar.SECOND, 0)
-                            }
-                            expectedTime.visibility = View.VISIBLE
-                            divider3.visibility = View.VISIBLE
-                            expectedTime.text = getString(R.string.expected_time, DateFormat.getTimeInstance(DateFormat.SHORT).format(viewModel.calendar.time))
+                            viewModel.remoteZonedDateTime =
+                                    viewModel.remoteZonedDateTime
+                                            .withZoneSameInstant(ZoneId.of(viewModel.timeZone.value))
+                                            .withHour(hour)
+                                            .withMinute(minute)
                         }
 
                         time_zone.text = getFormattedTimeZoneName(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID))
-                        time_zone_offset.text = offset
+                        updateTimeZoneDifference()
                     }
                 }
                 ContentSelectorActivity.AUDIO_REQUEST_CODE -> {
@@ -448,14 +413,35 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
     }
 
     override fun onTimeChanged(picker: TimePicker?, hour: Int, minute: Int) {
-        viewModel.calendar.set(Calendar.HOUR_OF_DAY, hour)
-        viewModel.calendar.set(Calendar.MINUTE, minute)
-        expectedTime.text = getString(R.string.expected_time,DateFormat.getTimeInstance(DateFormat.SHORT).format(viewModel.calendar.time))
+        viewModel.remoteZonedDateTime =
+                viewModel.remoteZonedDateTime
+                        .withHour(hour)
+                        .withMinute(minute)
+        val local = viewModel.remoteZonedDateTime.withZoneSameInstant(ZoneId.systemDefault())
+        expectedTime.text = getString(R.string.expected_time, local.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
 
         viewModel.startDate.value?.set(Calendar.HOUR_OF_DAY, hour)
         viewModel.startDate.value?.set(Calendar.MINUTE, minute)
         viewModel.endDate.value?.set(Calendar.HOUR_OF_DAY, hour)
         viewModel.endDate.value?.set(Calendar.MINUTE, minute)
+    }
+
+    private fun updateTimeZoneDifference() {
+        val local = viewModel.remoteZonedDateTime.withZoneSameInstant(ZoneId.systemDefault())
+        val difference = TimeZone.getTimeZone(viewModel.timeZone.value).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+        var offset = MediaCursor.getOffsetOfDifference(fragmentContext, difference, MediaCursor.TYPE_CURRENT)
+
+        if(TimeZone.getDefault() == TimeZone.getTimeZone(viewModel.timeZone.value)) {
+            offset = resources.getString(R.string.current_time_zone)
+            expectedTime.visibility = View.GONE
+            divider3.visibility = View.GONE
+        }
+        else {
+            expectedTime.visibility = View.VISIBLE
+            divider3.visibility = View.VISIBLE
+            expectedTime.text = getString(R.string.expected_time, local.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
+        }
+        time_zone_offset.text = offset
     }
 
     private fun getAlarmOptions(): ArrayList<OptionItem> {
@@ -556,24 +542,29 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
 
     private fun createAlarm(): AlarmItem {
         val current = Calendar.getInstance()
-        viewModel.calendar.set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH))
-        viewModel.calendar.set(Calendar.SECOND, 0)
+        viewModel.remoteZonedDateTime =
+                viewModel.remoteZonedDateTime
+                        .withYear(current.get(Calendar.YEAR))
+                        .withMonth(current.get(Calendar.MONTH))
+                        .withDayOfMonth(current.get(Calendar.DAY_OF_MONTH))
+                        .withSecond(0)
+
 
         val notificationId = 100000 + Random().nextInt(899999)
 
         return AlarmItem(
-                id = viewModel.alarmItem.value?.id,
+                id = viewModel.alarmItem?.id,
                 timeZone = viewModel.timeZone.value ?: TimeZone.getDefault().id,
-                timeSet = viewModel.calendar.time.time.toString(),
+                timeSet = viewModel.remoteZonedDateTime.toInstant().toEpochMilli().toString(),
                 repeat = viewModel.recurrences.value ?: intArrayOf(0, 0, 0, 0, 0, 0, 0),
                 ringtone = viewModel.ringtone.value?.uri,
                 vibration = viewModel.vibration.value?.array,
                 snooze = viewModel.snooze.value?.duration ?: 0,
                 label = viewModel.label.value,
                 on_off = 1,
-                notiId = viewModel.alarmItem.value?.notiId ?: notificationId,
+                notiId = viewModel.alarmItem?.notiId ?: notificationId,
                 colorTag = viewModel.colorTag.value ?: 0,
-                index = viewModel.alarmItem.value?.index ?: -1,
+                index = viewModel.alarmItem?.index ?: -1,
                 startDate = viewModel.startDate.value?.timeInMillis,
                 endDate = viewModel.endDate.value?.timeInMillis
         )
@@ -595,29 +586,13 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
 
                 // alarm will be fired everyday if date range is less than a week.
                 val difference = end.timeInMillis - start.timeInMillis
-                when(TimeUnit.MILLISECONDS.toDays(difference)) {
-                    in 1..6 -> {
-                        val expect = try {
-                            viewModel.alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyDayRepetition)
-                        } catch (e: IllegalStateException) {
-                            null
-                        }
-
-                        if(expect == null || expect.timeInMillis < start.timeInMillis || expect.timeInMillis > end.timeInMillis) {
-                            Snackbar.make(fragment_container, getString(R.string.invalid_repeat), Snackbar.LENGTH_SHORT)
+                if(TimeUnit.MILLISECONDS.toDays(difference) > 6) {
+                    viewModel.recurrences.value?.let { recurrences ->
+                        if(recurrences.all { it == 0 }) {
+                            Snackbar.make(fragment_container, getString(R.string.must_check_repeat), Snackbar.LENGTH_SHORT)
                                     .setAnchorView(action)
                                     .show()
                             return
-                        }
-                    }
-                    else -> {
-                        viewModel.recurrences.value?.let { recurrences ->
-                            if(recurrences.all { it == 0 }) {
-                                Snackbar.make(fragment_container, getString(R.string.must_check_repeat), Snackbar.LENGTH_SHORT)
-                                        .setAnchorView(action)
-                                        .show()
-                                return
-                            }
                         }
                     }
                 }
@@ -680,7 +655,7 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
 
         item.timeSet = scheduledTime.toString()
 
-        if(viewModel.alarmItem.value == null) {
+        if(viewModel.alarmItem == null) {
             item.id = DatabaseCursor(fragmentContext).insertAlarm(item).toInt()
             item.index = item.id
         }
