@@ -7,7 +7,23 @@ import android.os.Parcelable
  * Created by j on 26/02/2018.
  *
  */
-data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, var repeat: IntArray, var ringtone: String?, var vibration: LongArray?, var snooze: Long, var label: String? = null, var on_off: Int, var notiId: Int, var colorTag: Int, var index: Int?, var startDate: Long? = null, var endDate: Long? = null) : Parcelable {
+data class AlarmItem(
+        var id: Int?,
+        var timeZone: String,
+        var timeSet: String,
+        var repeat: IntArray,
+        var ringtone: String?,
+        var vibration: LongArray?,
+        var snooze: Long,
+        var label: String? = null,
+        var on_off: Int,
+        var notiId: Int,
+        var colorTag: Int,
+        var index: Int?,
+        var startDate: Long? = null,
+        var endDate: Long? = null
+) : Parcelable {
+
     override fun toString(): String {
         return "id=$id, timeZone=$timeZone, timeSet=$timeSet, repeat=${repeat.contentToString()}, ringtone=$ringtone, vibration=$vibration, snooze=$snooze, label=$label, on_off=$on_off, notiId=$notiId, colorTag=$colorTag, index=$index, startDate=$startDate, endDate=$endDate"
     }
@@ -23,7 +39,7 @@ data class AlarmItem(var id: Int?, var timeZone: String, var timeSet: String, va
             source.readValue(Int::class.java.classLoader) as Int?,
             source.readString().toString(),
             source.readString().toString(),
-            source.createIntArray() ?: intArrayOf(0,0,0,0,0,0,0),
+            source.createIntArray() ?: IntArray(7) { 0 },
             source.readString(),
             source.createLongArray(),
             source.readLong(),

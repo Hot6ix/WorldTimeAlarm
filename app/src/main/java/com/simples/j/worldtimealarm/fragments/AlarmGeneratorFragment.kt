@@ -2,10 +2,7 @@ package com.simples.j.worldtimealarm.fragments
 
 
 import android.app.Activity
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.os.Build
 import android.os.Bundle
 import android.text.format.DateUtils
@@ -27,7 +24,7 @@ import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
-import com.simples.j.worldtimealarm.utils.AlarmController
+import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.action
@@ -39,6 +36,7 @@ import kotlinx.android.synthetic.main.activity_alarm.time_zone
 import kotlinx.android.synthetic.main.activity_alarm.time_zone_offset
 import kotlinx.android.synthetic.main.fragment_alarm_generator.*
 import org.threeten.bp.Instant
+import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
@@ -63,6 +61,7 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
 
     private var timeZoneSelectorOption: String = ""
     private var applyDayRepetition = false
+    private val dateTimeChangedReceiver = DateTimeChangedReceiver()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -117,23 +116,19 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
 
                     it.startDate?.let { startDateInMillis ->
                         if(startDateInMillis > 0) {
-                            viewModel.startDate.value = Calendar.getInstance().apply {
-                                timeZone = TimeZone.getTimeZone(viewModel.timeZone.value)
-                                timeInMillis = startDateInMillis
-                                set(Calendar.HOUR_OF_DAY, viewModel.remoteZonedDateTime.hour)
-                                set(Calendar.MINUTE, viewModel.remoteZonedDateTime.minute)
-                            }
+                            val startInstant = Instant.ofEpochMilli(startDateInMillis)
+                            viewModel.startDate = ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
+                                    .withHour(viewModel.remoteZonedDateTime.hour)
+                                    .withMinute(viewModel.remoteZonedDateTime.minute)
                         }
                     }
 
                     it.endDate?.let { endDateInMillis ->
                         if(endDateInMillis > 0) {
-                            viewModel.endDate.value = Calendar.getInstance().apply {
-                                timeZone = TimeZone.getTimeZone(viewModel.timeZone.value)
-                                timeInMillis = endDateInMillis
-                                set(Calendar.HOUR_OF_DAY, viewModel.remoteZonedDateTime.hour)
-                                set(Calendar.MINUTE, viewModel.remoteZonedDateTime.minute)
-                            }
+                            val endInstant = Instant.ofEpochMilli(endDateInMillis)
+                            viewModel.endDate = ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
+                                    .withHour(viewModel.remoteZonedDateTime.hour)
+                                    .withMinute(viewModel.remoteZonedDateTime.minute)
                         }
                     }
 
@@ -251,6 +246,14 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
         viewModel.colorTag.observe(viewLifecycleOwner, Observer {
             alarmOptionAdapter.notifyItemChanged(4)
         })
+
+        val intentFilter = IntentFilter(MainActivity.ACTION_UPDATE_ALL)
+        fragmentContext.registerReceiver(dateTimeChangedReceiver, intentFilter)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -304,22 +307,35 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 }
                 ContentSelectorActivity.DATE_REQUEST_CODE -> {
                     data?.getLongExtra(ContentSelectorActivity.START_DATE_KEY, -1)?.let {
-                        viewModel.startDate.value = if(it > 0) {
-                            Calendar.getInstance().apply {
-                                timeInMillis = it
-                            }
-                        }
-                        else null
+                        viewModel.startDate =
+                                if(it > 0) {
+                                    val startInstant = Instant.ofEpochMilli(it)
+                                    ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
+                                            .withHour(viewModel.remoteZonedDateTime.hour)
+                                            .withMinute(viewModel.remoteZonedDateTime.minute)
+                                }
+                                else null
                     }
+
                     data?.getLongExtra(ContentSelectorActivity.END_DATE_KEY, -1)?.let {
-                        viewModel.endDate.value = if(it > 0) {
-                            Calendar.getInstance().apply {
-                                timeInMillis = it
-                            }
-                        }
-                        else null
+                        viewModel.endDate =
+                                if(it > 0) {
+                                    val endInstant = Instant.ofEpochMilli(it)
+                                    ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
+                                            .withHour(viewModel.remoteZonedDateTime.hour)
+                                            .withMinute(viewModel.remoteZonedDateTime.minute)
+                                }
+                                else null
                     }
+
                     date.text = formatDate()
+                    viewModel.startDate?.toLocalDate()?.let {
+                        viewModel.remoteZonedDateTime =
+                                viewModel.remoteZonedDateTime
+                                        .withYear(it.year)
+                                        .withMonth(it.monthValue)
+                                        .withDayOfMonth(it.dayOfMonth)
+                    }
                 }
             }
         }
@@ -341,8 +357,8 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
             R.id.date_view -> {
                 val contentIntent = Intent(fragmentContext, ContentSelectorActivity::class.java).apply {
                     action = ContentSelectorActivity.ACTION_REQUEST_DATE
-                    putExtra(ContentSelectorActivity.START_DATE_KEY,viewModel.startDate.value?.timeInMillis)
-                    putExtra(ContentSelectorActivity.END_DATE_KEY, viewModel.endDate.value?.timeInMillis)
+                    putExtra(ContentSelectorActivity.START_DATE_KEY,viewModel.startDate?.toInstant()?.toEpochMilli())
+                    putExtra(ContentSelectorActivity.END_DATE_KEY, viewModel.endDate?.toInstant()?.toEpochMilli())
                 }
                 startActivityForResult(contentIntent, ContentSelectorActivity.DATE_REQUEST_CODE)
             }
@@ -417,18 +433,23 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 viewModel.remoteZonedDateTime
                         .withHour(hour)
                         .withMinute(minute)
-        val local = viewModel.remoteZonedDateTime.withZoneSameInstant(ZoneId.systemDefault())
-        expectedTime.text = getString(R.string.expected_time, local.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
 
-        viewModel.startDate.value?.set(Calendar.HOUR_OF_DAY, hour)
-        viewModel.startDate.value?.set(Calendar.MINUTE, minute)
-        viewModel.endDate.value?.set(Calendar.HOUR_OF_DAY, hour)
-        viewModel.endDate.value?.set(Calendar.MINUTE, minute)
+        updateTimeZoneDifference()
+
+        viewModel.startDate =
+                viewModel.startDate
+                        ?.withHour(hour)
+                        ?.withMinute(minute)
+        viewModel.endDate =
+                viewModel.endDate
+                        ?.withHour(hour)
+                        ?.withMinute(minute)
     }
 
     private fun updateTimeZoneDifference() {
         val local = viewModel.remoteZonedDateTime.withZoneSameInstant(ZoneId.systemDefault())
-        val difference = TimeZone.getTimeZone(viewModel.timeZone.value).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
+        val timeSet = viewModel.remoteZonedDateTime.toInstant().toEpochMilli()
+        val difference = TimeZone.getTimeZone(viewModel.timeZone.value).getOffset(timeSet) - TimeZone.getDefault().getOffset(timeSet)
         var offset = MediaCursor.getOffsetOfDifference(fragmentContext, difference, MediaCursor.TYPE_CURRENT)
 
         if(TimeZone.getDefault() == TimeZone.getTimeZone(viewModel.timeZone.value)) {
@@ -470,23 +491,23 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
     }
 
     private fun formatDate(): String {
-        val s = viewModel.startDate.value
-        val e = viewModel.endDate.value
+        val s = viewModel.startDate?.toInstant()
+        val e = viewModel.endDate?.toInstant()
 
         return when {
             s != null && e != null -> {
-                DateUtils.formatDateRange(fragmentContext, s.timeInMillis, e.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_ALL)
+                DateUtils.formatDateRange(fragmentContext, s.toEpochMilli(), e.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_ALL)
             }
             s != null -> {
                 viewModel.recurrences.value.let { array ->
                     if(array != null && array.any { it > 0 }) {
-                        fragmentContext.getString(R.string.range_begin).format(DateUtils.formatDateTime(context, s.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
+                        fragmentContext.getString(R.string.range_begin).format(DateUtils.formatDateTime(context, s.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
                     }
                     else null
-                } ?: DateUtils.formatDateTime(fragmentContext, s.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
+                } ?: DateUtils.formatDateTime(fragmentContext, s.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
             }
             e != null -> {
-                fragmentContext.getString(R.string.range_until).format(DateUtils.formatDateTime(fragmentContext, e.timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
+                fragmentContext.getString(R.string.range_until).format(DateUtils.formatDateTime(fragmentContext, e.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
             }
             else -> {
                 getString(R.string.range_not_set)
@@ -541,21 +562,20 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
     }
 
     private fun createAlarm(): AlarmItem {
-        val current = Calendar.getInstance()
-        viewModel.remoteZonedDateTime =
-                viewModel.remoteZonedDateTime
-                        .withYear(current.get(Calendar.YEAR))
-                        .withMonth(current.get(Calendar.MONTH))
-                        .withDayOfMonth(current.get(Calendar.DAY_OF_MONTH))
-                        .withSecond(0)
+        val local = viewModel.remoteZonedDateTime
+                .withZoneSameInstant(ZoneId.systemDefault())
+                .withSecond(0)
 
+        val startLocal = viewModel.startDate?.withZoneSameInstant(ZoneId.systemDefault())
+
+        val endLocal = viewModel.endDate?.withZoneSameInstant(ZoneId.systemDefault())
 
         val notificationId = 100000 + Random().nextInt(899999)
 
         return AlarmItem(
                 id = viewModel.alarmItem?.id,
                 timeZone = viewModel.timeZone.value ?: TimeZone.getDefault().id,
-                timeSet = viewModel.remoteZonedDateTime.toInstant().toEpochMilli().toString(),
+                timeSet = local.toInstant().toEpochMilli().toString(),
                 repeat = viewModel.recurrences.value ?: intArrayOf(0, 0, 0, 0, 0, 0, 0),
                 ringtone = viewModel.ringtone.value?.uri,
                 vibration = viewModel.vibration.value?.array,
@@ -565,19 +585,19 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 notiId = viewModel.alarmItem?.notiId ?: notificationId,
                 colorTag = viewModel.colorTag.value ?: 0,
                 index = viewModel.alarmItem?.index ?: -1,
-                startDate = viewModel.startDate.value?.timeInMillis,
-                endDate = viewModel.endDate.value?.timeInMillis
+                startDate = startLocal?.toInstant()?.toEpochMilli(),
+                endDate = endLocal?.toInstant()?.toEpochMilli()
         )
     }
 
     private fun saveAlarm() {
         val item = createAlarm()
-        val start = viewModel.startDate.value
-        val end = viewModel.endDate.value
+        val start = viewModel.startDate?.toInstant()
+        val end = viewModel.endDate?.toInstant()
 
         when {
             start != null && end != null -> {
-                if(start.timeInMillis >= end.timeInMillis || end.timeInMillis <= System.currentTimeMillis()) {
+                if(start.toEpochMilli() >= end.toEpochMilli() || end.toEpochMilli() <= System.currentTimeMillis()) {
                     Snackbar.make(fragment_container, getString(R.string.end_date_earlier_than_start_date), Snackbar.LENGTH_SHORT)
                             .setAnchorView(action)
                             .show()
@@ -585,10 +605,10 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 }
 
                 // alarm will be fired everyday if date range is less than a week.
-                val difference = end.timeInMillis - start.timeInMillis
+                val difference = end.toEpochMilli() - start.toEpochMilli()
                 if(TimeUnit.MILLISECONDS.toDays(difference) > 6) {
-                    viewModel.recurrences.value?.let { recurrences ->
-                        if(recurrences.all { it == 0 }) {
+                    viewModel.recurrences.value.let { recurrences ->
+                        if(recurrences == null || recurrences.all { it == 0 }) {
                             Snackbar.make(fragment_container, getString(R.string.must_check_repeat), Snackbar.LENGTH_SHORT)
                                     .setAnchorView(action)
                                     .show()
@@ -599,7 +619,7 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
             }
             start != null -> {
                 viewModel.recurrences.value?.let { recurrences ->
-                    if(!recurrences.any { it > 0 } && start.timeInMillis < System.currentTimeMillis()) {
+                    if(!recurrences.any { it > 0 } && start.toEpochMilli() < System.currentTimeMillis()) {
                         Snackbar.make(fragment_container, getString(R.string.start_date_and_time_is_wrong), Snackbar.LENGTH_SHORT)
                                 .setAnchorView(action)
                                 .show()
@@ -608,23 +628,23 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 }
             }
             end != null -> {
-                if(end.timeInMillis < System.currentTimeMillis()) {
+                if(end.toEpochMilli() < System.currentTimeMillis()) {
                     Snackbar.make(fragment_container, getString(R.string.end_date_earlier_than_today), Snackbar.LENGTH_SHORT)
                             .setAnchorView(action)
                             .show()
                     return
                 }
 
-                val difference = end.timeInMillis - System.currentTimeMillis()
+                val difference = end.toEpochMilli() - System.currentTimeMillis()
                 when(TimeUnit.MILLISECONDS.toDays(difference)) {
                     in 1..6 -> {
                         val expect = try {
-                            viewModel.alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyDayRepetition)
+                            viewModel.alarmController.calculateDate(item, TYPE_ALARM, applyDayRepetition)
                         } catch (e: IllegalStateException) {
                             null
                         }
 
-                        if(expect == null || expect.timeInMillis <= System.currentTimeMillis() || expect.timeInMillis > end.timeInMillis) {
+                        if(expect == null || expect.timeInMillis <= System.currentTimeMillis() || expect.timeInMillis > end.toEpochMilli()) {
                             Snackbar.make(fragment_container, getString(R.string.invalid_repeat), Snackbar.LENGTH_SHORT)
                                     .setAnchorView(action)
                                     .show()
@@ -645,7 +665,7 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
             }
         }
 
-        val scheduledTime = viewModel.alarmController.scheduleAlarm(fragmentContext, item, AlarmController.TYPE_ALARM)
+        val scheduledTime = viewModel.alarmController.scheduleAlarm(fragmentContext, item, TYPE_ALARM)
         if(scheduledTime == -1L) {
             Snackbar.make(fragment_container, getString(R.string.unable_to_create_alarm), Snackbar.LENGTH_SHORT)
                     .setAnchorView(action)
@@ -683,6 +703,24 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
             intent.putExtra(AlarmReceiver.OPTIONS, bundle)
             setResult(Activity.RESULT_OK, intent)
             finish()
+        }
+    }
+
+    private inner class DateTimeChangedReceiver: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when(intent?.action) {
+                MainActivity.ACTION_UPDATE_ALL -> {
+                    if(viewModel.startDate == null) {
+                        val dateTime = LocalDateTime.now()
+                        viewModel.remoteZonedDateTime =
+                                viewModel.remoteZonedDateTime
+                                        .withYear(dateTime.year)
+                                        .withMonth(dateTime.monthValue)
+                                        .withDayOfMonth(dateTime.dayOfMonth)
+                        updateTimeZoneDifference()
+                    }
+                }
+            }
         }
     }
 
