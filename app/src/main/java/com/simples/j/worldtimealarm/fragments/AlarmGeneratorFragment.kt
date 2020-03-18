@@ -30,7 +30,6 @@ import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.action
 import kotlinx.android.synthetic.main.activity_alarm.date
 import kotlinx.android.synthetic.main.activity_alarm.day_recurrence
-import kotlinx.android.synthetic.main.activity_alarm.divider3
 import kotlinx.android.synthetic.main.activity_alarm.expectedTime
 import kotlinx.android.synthetic.main.activity_alarm.time_zone
 import kotlinx.android.synthetic.main.activity_alarm.time_zone_offset
@@ -56,6 +55,7 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
     private lateinit var ringtoneList: ArrayList<RingtoneItem>
     private lateinit var vibratorPatternList: ArrayList<PatternItem>
     private lateinit var snoozeList: ArrayList<SnoozeItem>
+    private lateinit var now: ZonedDateTime
 
     private lateinit var preference: SharedPreferences
 
@@ -110,9 +110,11 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
             viewModel.alarmItem.let {
                 if(it != null) {
                     viewModel.timeZone.value = it.timeZone.replace(" ", "_")
+                    now = ZonedDateTime.now(ZoneId.of(viewModel.timeZone.value))
 
-                    val instant = Instant.ofEpochMilli(it.timeSet.toLong())
-                    viewModel.remoteZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(it.timeZone))
+                    val instant = Instant.ofEpochMilli(it.pickerTime)
+                    val local = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
+                    viewModel.remoteZonedDateTime = local.withZoneSameInstant(ZoneId.of(it.timeZone))
 
                     it.startDate?.let { startDateInMillis ->
                         if(startDateInMillis > 0) {
@@ -129,6 +131,23 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                             viewModel.endDate = ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
                                     .withHour(viewModel.remoteZonedDateTime.hour)
                                     .withMinute(viewModel.remoteZonedDateTime.minute)
+                        }
+                    }
+
+                    viewModel.startDate.let { start ->
+                        if(start == null) {
+                            viewModel.remoteZonedDateTime =
+                                    viewModel.remoteZonedDateTime
+                                            .withYear(now.year)
+                                            .withMonth(now.monthValue)
+                                            .withDayOfMonth(now.dayOfMonth)
+                        }
+                        else {
+                            viewModel.remoteZonedDateTime =
+                                    viewModel.remoteZonedDateTime
+                                            .withYear(start.year)
+                                            .withMonth(start.monthValue)
+                                            .withDayOfMonth(start.dayOfMonth)
                         }
                     }
 
@@ -153,12 +172,26 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 }
                 else {
                     viewModel.timeZone.value = TimeZone.getDefault().id
+                    now = ZonedDateTime.now(ZoneId.systemDefault())
 
                     viewModel.ringtone.value = defaultRingtone
                     viewModel.vibration.value = vibratorPatternList[0]
                     viewModel.snooze.value = snoozeList[0]
                 }
             }
+        }
+
+        val hour = viewModel.remoteZonedDateTime.hour
+        val minute = viewModel.remoteZonedDateTime.minute
+        if(Build.VERSION.SDK_INT < 23) {
+            @Suppress("DEPRECATION")
+            time_picker.currentHour = hour
+            @Suppress("DEPRECATION")
+            time_picker.currentMinute = minute
+        }
+        else {
+            time_picker.hour = hour
+            time_picker.minute = minute
         }
 
         time_zone.text = getFormattedTimeZoneName(viewModel.timeZone.value)
@@ -173,20 +206,6 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 text = getString(R.string.create)
                 icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
             }
-        }
-
-        // set time
-        val hour = viewModel.remoteZonedDateTime.hour
-        val minute = viewModel.remoteZonedDateTime.minute
-        if(Build.VERSION.SDK_INT < 23) {
-            @Suppress("DEPRECATION")
-            time_picker.currentHour = hour
-            @Suppress("DEPRECATION")
-            time_picker.currentMinute = minute
-        }
-        else {
-            time_picker.hour = hour
-            time_picker.minute = minute
         }
 
         viewModel.recurrences.value?.let { recurrences ->
@@ -266,18 +285,12 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                         data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.also {
                             viewModel.timeZone.value = it.replace(" ", "_")
 
-                            val hour =
-                                    if(Build.VERSION.SDK_INT < 23) @Suppress("DEPRECATION") time_picker.currentHour
-                                    else time_picker.hour
-                            val minute =
-                                    if(Build.VERSION.SDK_INT < 23) @Suppress("DEPRECATION") time_picker.currentMinute
-                                    else time_picker.minute
-
                             viewModel.remoteZonedDateTime =
                                     viewModel.remoteZonedDateTime
-                                            .withZoneSameInstant(ZoneId.of(viewModel.timeZone.value))
-                                            .withHour(hour)
-                                            .withMinute(minute)
+                                            .withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
+
+                            viewModel.startDate = viewModel.startDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
+                            viewModel.endDate = viewModel.endDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
                         }
 
                         time_zone.text = getFormattedTimeZoneName(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID))
@@ -329,12 +342,20 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                     }
 
                     date.text = formatDate()
-                    viewModel.startDate?.toLocalDate()?.let {
+                    viewModel.startDate.let {
                         viewModel.remoteZonedDateTime =
-                                viewModel.remoteZonedDateTime
-                                        .withYear(it.year)
-                                        .withMonth(it.monthValue)
-                                        .withDayOfMonth(it.dayOfMonth)
+                        if(it == null) {
+                            viewModel.remoteZonedDateTime
+                                    .withYear(now.year)
+                                    .withMonth(now.monthValue)
+                                    .withDayOfMonth(now.dayOfMonth)
+                        }
+                        else {
+                            viewModel.remoteZonedDateTime
+                                    .withYear(it.year)
+                                    .withMonth(it.monthValue)
+                                    .withDayOfMonth(it.dayOfMonth)
+                        }
                     }
                 }
             }
@@ -359,6 +380,7 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                     action = ContentSelectorActivity.ACTION_REQUEST_DATE
                     putExtra(ContentSelectorActivity.START_DATE_KEY,viewModel.startDate?.toInstant()?.toEpochMilli())
                     putExtra(ContentSelectorActivity.END_DATE_KEY, viewModel.endDate?.toInstant()?.toEpochMilli())
+                    putExtra(ContentSelectorActivity.TIME_ZONE_KEY, viewModel.timeZone.value)
                 }
                 startActivityForResult(contentIntent, ContentSelectorActivity.DATE_REQUEST_CODE)
             }
@@ -447,21 +469,14 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
     }
 
     private fun updateTimeZoneDifference() {
-        val local = viewModel.remoteZonedDateTime.withZoneSameInstant(ZoneId.systemDefault())
         val timeSet = viewModel.remoteZonedDateTime.toInstant().toEpochMilli()
         val difference = TimeZone.getTimeZone(viewModel.timeZone.value).getOffset(timeSet) - TimeZone.getDefault().getOffset(timeSet)
-        var offset = MediaCursor.getOffsetOfDifference(fragmentContext, difference, MediaCursor.TYPE_CURRENT)
+        val offset =
+                if(difference == 0) resources.getString(R.string.current_time_zone)
+                else MediaCursor.getOffsetOfDifference(fragmentContext, difference, MediaCursor.TYPE_CURRENT)
 
-        if(TimeZone.getDefault() == TimeZone.getTimeZone(viewModel.timeZone.value)) {
-            offset = resources.getString(R.string.current_time_zone)
-            expectedTime.visibility = View.GONE
-            divider3.visibility = View.GONE
-        }
-        else {
-            expectedTime.visibility = View.VISIBLE
-            divider3.visibility = View.VISIBLE
-            expectedTime.text = getString(R.string.expected_time, local.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
-        }
+        val resultInLocal = viewModel.alarmController.calculateDateTime(createAlarm(), TYPE_ALARM).withZoneSameInstant(ZoneId.systemDefault())
+        expectedTime.text = resultInLocal.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.LONG))
         time_zone_offset.text = offset
     }
 
@@ -562,20 +577,12 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
     }
 
     private fun createAlarm(): AlarmItem {
-        val local = viewModel.remoteZonedDateTime
-                .withZoneSameInstant(ZoneId.systemDefault())
-                .withSecond(0)
-
-        val startLocal = viewModel.startDate?.withZoneSameInstant(ZoneId.systemDefault())
-
-        val endLocal = viewModel.endDate?.withZoneSameInstant(ZoneId.systemDefault())
-
         val notificationId = 100000 + Random().nextInt(899999)
 
         return AlarmItem(
                 id = viewModel.alarmItem?.id,
                 timeZone = viewModel.timeZone.value ?: TimeZone.getDefault().id,
-                timeSet = local.toInstant().toEpochMilli().toString(),
+                timeSet = viewModel.remoteZonedDateTime.toInstant().toEpochMilli().toString(),
                 repeat = viewModel.recurrences.value ?: intArrayOf(0, 0, 0, 0, 0, 0, 0),
                 ringtone = viewModel.ringtone.value?.uri,
                 vibration = viewModel.vibration.value?.array,
@@ -585,8 +592,9 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 notiId = viewModel.alarmItem?.notiId ?: notificationId,
                 colorTag = viewModel.colorTag.value ?: 0,
                 index = viewModel.alarmItem?.index ?: -1,
-                startDate = startLocal?.toInstant()?.toEpochMilli(),
-                endDate = endLocal?.toInstant()?.toEpochMilli()
+                startDate = viewModel.startDate?.toInstant()?.toEpochMilli(),
+                endDate = viewModel.endDate?.toInstant()?.toEpochMilli(),
+                pickerTime = viewModel.remoteZonedDateTime.toInstant().toEpochMilli()
         )
     }
 

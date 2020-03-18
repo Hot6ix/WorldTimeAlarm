@@ -21,11 +21,12 @@ data class AlarmItem(
         var colorTag: Int,
         var index: Int?,
         var startDate: Long? = null,
-        var endDate: Long? = null
+        var endDate: Long? = null,
+        var pickerTime: Long
 ) : Parcelable {
 
     override fun toString(): String {
-        return "id=$id, timeZone=$timeZone, timeSet=$timeSet, repeat=${repeat.contentToString()}, ringtone=$ringtone, vibration=$vibration, snooze=$snooze, label=$label, on_off=$on_off, notiId=$notiId, colorTag=$colorTag, index=$index, startDate=$startDate, endDate=$endDate"
+        return "id=$id, timeZone=$timeZone, timeSet=$timeSet, repeat=${repeat.contentToString()}, ringtone=$ringtone, vibration=$vibration, snooze=$snooze, label=$label, on_off=$on_off, notiId=$notiId, colorTag=$colorTag, index=$index, startDate=$startDate, endDate=$endDate, picker_time=$pickerTime"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -49,7 +50,8 @@ data class AlarmItem(
             source.readInt(),
             source.readValue(Int::class.java.classLoader) as Int?,
             source.readValue(Long::class.java.classLoader) as Long?,
-            source.readValue(Long::class.java.classLoader) as Long?
+            source.readValue(Long::class.java.classLoader) as Long?,
+            source.readLong()
     )
 
     override fun describeContents() = 0
@@ -69,6 +71,7 @@ data class AlarmItem(
         writeValue(index)
         writeValue(startDate)
         writeValue(endDate)
+        writeLong(pickerTime)
     }
 
     fun isInstantAlarm(): Boolean = repeat.all { it == 0 } && endDate == null

@@ -37,6 +37,7 @@ class DatabaseCursor(val context: Context) {
             put(DatabaseManager.COLUMN_INDEX, item.index)
             put(DatabaseManager.COLUMN_START_DATE, item.startDate)
             put(DatabaseManager.COLUMN_END_DATE, item.endDate)
+            put(DatabaseManager.COLUMN_PICKER_TIME, item.pickerTime)
         }
 
         val id = db.insert(DatabaseManager.TABLE_ALARM_LIST, null, contentValues)
@@ -74,6 +75,7 @@ class DatabaseCursor(val context: Context) {
             val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
             val startDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_START_DATE))
             val endDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_END_DATE))
+            val pickerTime = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_PICKER_TIME))
 
             val repeatValues = repeat.split(",").map { it.trim().toInt() }.toIntArray()
             val vibrationValues =
@@ -94,7 +96,8 @@ class DatabaseCursor(val context: Context) {
                     colorTag,
                     index,
                     startDate,
-                    endDate
+                    endDate,
+                    pickerTime
             )
         }
 
@@ -125,6 +128,7 @@ class DatabaseCursor(val context: Context) {
                 val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
                 val startDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_START_DATE))
                 val endDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_END_DATE))
+                val pickerTime = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_PICKER_TIME))
 
                 val formattedRepeat =
                         if(repeat.isEmpty()) {
@@ -156,7 +160,9 @@ class DatabaseCursor(val context: Context) {
                         colorTag,
                         index,
                         startDate,
-                        endDate)
+                        endDate,
+                        pickerTime
+                )
                 alarmList.add(item)
             }
         }
@@ -188,6 +194,7 @@ class DatabaseCursor(val context: Context) {
                 val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
                 val startDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_START_DATE))
                 val endDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_END_DATE))
+                val pickerTime = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_PICKER_TIME))
 
                 val item = AlarmItem(
                         id,
@@ -203,7 +210,9 @@ class DatabaseCursor(val context: Context) {
                         colorTag,
                         index,
                         startDate,
-                        endDate)
+                        endDate,
+                        pickerTime
+                )
                 alarmList.add(item)
             }
         }
@@ -236,6 +245,7 @@ class DatabaseCursor(val context: Context) {
             put(DatabaseManager.COLUMN_COLOR_TAG, item.colorTag)
             put(DatabaseManager.COLUMN_START_DATE, item.startDate)
             put(DatabaseManager.COLUMN_END_DATE, item.endDate)
+            put(DatabaseManager.COLUMN_PICKER_TIME, item.pickerTime)
         }
 
         db.update(DatabaseManager.TABLE_ALARM_LIST, contentValues, DatabaseManager.COLUMN_NOTI_ID + "= ?", arrayOf(item.notiId.toString()))

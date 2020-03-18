@@ -18,9 +18,12 @@ import com.google.android.material.tabs.TabLayout
 import com.simples.j.worldtimealarm.ContentSelectorActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
-import com.simples.j.worldtimealarm.utils.MediaCursor.Companion.formatDate
 import kotlinx.android.synthetic.main.fragment_date_picker.*
-import java.util.*
+import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.format.FormatStyle
 
 class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, CalendarView.OnDateChangeListener, View.OnClickListener {
 
@@ -30,7 +33,7 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
     private var startDateTab: TabLayout.Tab? = null
     private var endDateTab: TabLayout.Tab? = null
 
-    private val sharedCalendar = Calendar.getInstance()
+    private var dateSet = ZonedDateTime.now()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -50,17 +53,22 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
             viewModel = ViewModelProvider(this)[ContentSelectorViewModel::class.java]
         }
 
-        calendar.minDate = System.currentTimeMillis()
+        dateSet = dateSet.withZoneSameInstant(ZoneId.of(viewModel.timeZone))
+
+        calendar.minDate = dateSet.toInstant().toEpochMilli()
         calendar.setOnDateChangeListener(this)
 
+        val instant: Instant
         when(viewModel.currentTab) {
             0 -> {
-                sharedCalendar.timeInMillis = viewModel.startDate.value ?: System.currentTimeMillis()
-                calendar.date = sharedCalendar.timeInMillis
+                instant = Instant.ofEpochMilli(viewModel.startDate.value ?: System.currentTimeMillis())
+                dateSet = ZonedDateTime.ofInstant(instant, ZoneId.of(viewModel.timeZone))
+                calendar.date = dateSet.toInstant().toEpochMilli()
             }
             1 -> {
-                sharedCalendar.timeInMillis = viewModel.endDate.value ?: System.currentTimeMillis()
-                calendar.date = sharedCalendar.timeInMillis
+                instant = Instant.ofEpochMilli(viewModel.endDate.value ?: System.currentTimeMillis())
+                dateSet = ZonedDateTime.ofInstant(instant, ZoneId.of(viewModel.timeZone))
+                calendar.date = dateSet.toInstant().toEpochMilli()
             }
         }
 
@@ -77,13 +85,13 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
         // Observe
         viewModel.startDate.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
             it?.let {
-                if(it > 0) setTabSummary(startDateTab, formatDate(fragmentContext, it))
+                if(it > 0) setTabSummary(startDateTab, formatDate(it))
                 else setTabSummary(startDateTab, getString(R.string.range_not_set))
             }
         })
         viewModel.endDate.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
             it?.let {
-                if(it > 0) setTabSummary(endDateTab, formatDate(fragmentContext, it))
+                if(it > 0) setTabSummary(endDateTab, formatDate(it))
                 else setTabSummary(endDateTab, getString(R.string.range_not_set))
             }
         })
@@ -107,11 +115,23 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
                         }
                     }
                 }
+
+                if(s != null && s < System.currentTimeMillis()) {
+                    if(s > 0) {
+                        Snackbar.make(fragment_layout, getString(R.string.start_date_and_time_is_wrong), Snackbar.LENGTH_SHORT)
+                                .setAnchorView(action)
+                                .show()
+                        return
+                    }
+                }
+
                 if(e != null && DateUtils.isToday(e)) {
-                    Snackbar.make(fragment_layout, getString(R.string.end_date_earlier_than_today), Snackbar.LENGTH_SHORT)
-                            .setAnchorView(action)
-                            .show()
-                    return
+                    if(e > 0) {
+                        Snackbar.make(fragment_layout, getString(R.string.end_date_earlier_than_today), Snackbar.LENGTH_SHORT)
+                                .setAnchorView(action)
+                                .show()
+                        return
+                    }
                 }
 
                 val resultIntent = Intent().apply {
@@ -156,20 +176,27 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
     }
 
     override fun onSelectedDayChange(view: CalendarView, year: Int, month: Int, dayOfMonth: Int) {
-        sharedCalendar.set(year, month, dayOfMonth)
+        dateSet = dateSet.withYear(year).withMonth(month+1).withDayOfMonth(dayOfMonth)
 
         when(viewModel.currentTab) {
             0 -> {
-                viewModel.startDate.value = sharedCalendar.timeInMillis
+                viewModel.startDate.value = dateSet.toInstant().toEpochMilli()
             }
             1 -> {
-                viewModel.endDate.value = sharedCalendar.timeInMillis
+                viewModel.endDate.value = dateSet.toInstant().toEpochMilli()
             }
         }
     }
 
     private fun setTabSummary(tab: TabLayout.Tab?, content: String?) {
         tab?.view?.findViewById<TextView>(R.id.summary)?.text = content
+    }
+
+    private fun formatDate(epochMillis: Long): String {
+        val instant = Instant.ofEpochMilli(epochMillis)
+        val timeZoneDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(viewModel.timeZone))
+
+        return timeZoneDateTime.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
     }
 
     companion object {

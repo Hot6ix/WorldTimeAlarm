@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.models
 import android.media.Ringtone
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import java.util.*
 
 class ContentSelectorViewModel : ViewModel() {
 
@@ -19,6 +20,7 @@ class ContentSelectorViewModel : ViewModel() {
         MutableLiveData<Long>()
     }
 
+    var timeZone: String = TimeZone.getDefault().id
     var defaultStart: Long? = null
     var defaultEnd: Long? = null
 

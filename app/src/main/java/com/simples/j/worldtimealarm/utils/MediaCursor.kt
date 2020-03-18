@@ -16,6 +16,9 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.*
+import org.threeten.bp.LocalDate
+import org.threeten.bp.LocalDateTime
+import org.threeten.bp.ZonedDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -240,8 +243,17 @@ class MediaCursor {
             return name ?: timeZone.id
         }
 
+        fun isSameDay(from: ZonedDateTime, to: ZonedDateTime): Boolean {
+            return from.year == to.year && from.monthValue == to.monthValue && from.dayOfMonth == to.dayOfMonth
+        }
+
         fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {
             return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) && cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH)
+        }
+
+        fun getDayDifference(from: ZonedDateTime, to: ZonedDateTime): Long {
+            val diff = from.toInstant().toEpochMilli() - to.toInstant().toEpochMilli()
+            return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)
         }
 
         fun getDayDifference(cal1: Calendar, cal2: Calendar, ignoreTime: Boolean): Long {
@@ -254,15 +266,6 @@ class MediaCursor {
 
             val diff = cal1.timeInMillis - cal2.timeInMillis
             return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)
-        }
-
-        fun formatDate(context: Context, timeInMillis: Long?): String {
-            if(timeInMillis == null) return ""
-            return DateUtils.formatDateTime(context, timeInMillis,
-                    DateUtils.FORMAT_SHOW_DATE
-                            or DateUtils.FORMAT_SHOW_WEEKDAY
-                            or DateUtils.FORMAT_SHOW_YEAR
-                            or DateUtils.FORMAT_ABBREV_ALL)
         }
 
         fun getDstDifference(time: Date, timeZone: java.util.TimeZone): Int {

@@ -13,16 +13,13 @@ import com.simples.j.worldtimealarm.etc.SnoozeItem
 import com.simples.j.worldtimealarm.fragments.ContentSelectorFragment
 import com.simples.j.worldtimealarm.fragments.DatePickerFragment
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
+import java.util.*
 
 class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
 
     private lateinit var viewModel: ContentSelectorViewModel
     private lateinit var contentSelectorFragment: ContentSelectorFragment
     private lateinit var datePickerFragment: DatePickerFragment
-
-    private var lastValue: Any? = null
-    private var startDate: Long = -1
-    private var endDate: Long? = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,10 +28,6 @@ class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickList
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
         }
-
-        lastValue = intent.getSerializableExtra(LAST_SELECTED_KEY)
-        startDate = intent.getLongExtra(START_DATE_KEY, -1)
-        endDate = intent.getLongExtra(END_DATE_KEY, -1)
 
         supportActionBar?.title = when(intent.action) {
             ACTION_REQUEST_AUDIO -> {
@@ -54,16 +47,19 @@ class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickList
             }
         }
 
-        viewModel = ViewModelProvider(this).get(ContentSelectorViewModel::class.java).also {
-            it.action = intent.action
-            if(it.lastSelectedValue == null) it.lastSelectedValue = lastValue
-            if(it.startDate.value == null) it.startDate.value = startDate
-            if(it.endDate.value == null) it.endDate.value = endDate
-            if(it.defaultStart == null) it.defaultStart = startDate
-            if(it.defaultEnd == null) it.defaultEnd = endDate
-        }
+        viewModel = ViewModelProvider(this).get(ContentSelectorViewModel::class.java)
 
         if(savedInstanceState == null) {
+            viewModel.action = intent.action
+
+            viewModel.lastSelectedValue = intent.getSerializableExtra(LAST_SELECTED_KEY)
+            viewModel.startDate.value = intent.getLongExtra(START_DATE_KEY, -1)
+            viewModel.endDate.value = intent.getLongExtra(END_DATE_KEY, -1)
+            viewModel.timeZone = intent.getStringExtra(TIME_ZONE_KEY) ?: TimeZone.getDefault().id
+
+            viewModel.defaultStart = intent.getLongExtra(START_DATE_KEY, -1)
+            viewModel.defaultEnd = intent.getLongExtra(END_DATE_KEY, -1)
+
             when (intent.action) {
                 ACTION_REQUEST_AUDIO, ACTION_REQUEST_VIBRATION, ACTION_REQUEST_SNOOZE -> {
                     with(supportFragmentManager.findFragmentByTag(ContentSelectorFragment.TAG)) {
@@ -150,6 +146,7 @@ class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickList
         const val LAST_SELECTED_KEY = "LAST_SELECTED_KEY"
         const val START_DATE_KEY = "START_DATE_KEY"
         const val END_DATE_KEY = "END_DATE_KEY"
+        const val TIME_ZONE_KEY = "TIME_ZONE_KEY"
 
         const val AUDIO_REQUEST_CODE = 2
         const val VIBRATION_REQUEST_CODE = 3

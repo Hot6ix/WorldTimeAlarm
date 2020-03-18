@@ -56,7 +56,8 @@ class AlarmControllerTest02 {
                 0,
                 0,
                 startDate,
-                endDate
+                endDate,
+                timeSet.timeInMillis
         )
     }
 

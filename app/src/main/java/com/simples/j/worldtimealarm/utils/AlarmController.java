@@ -15,6 +15,14 @@ import com.simples.j.worldtimealarm.R;
 import com.simples.j.worldtimealarm.etc.AlarmItem;
 import com.simples.j.worldtimealarm.etc.C;
 
+import org.threeten.bp.DayOfWeek;
+import org.threeten.bp.Instant;
+import org.threeten.bp.ZoneId;
+import org.threeten.bp.ZonedDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
+import org.threeten.bp.format.FormatStyle;
+import org.threeten.bp.temporal.TemporalAdjusters;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,6 +46,118 @@ public class AlarmController {
     public static AlarmController getInstance() {
         if(ourInstance == null) ourInstance = new AlarmController();
         return ourInstance;
+    }
+
+    public ZonedDateTime calculateDateTime(AlarmItem item, int type) {
+
+        if(item == null) return null;
+
+        Instant timeSet = Instant.ofEpochMilli(Long.valueOf(item.getTimeSet()));
+        ZoneId targetZoneId = ZoneId.of(item.getTimeZone());
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime target = ZonedDateTime.ofInstant(timeSet, targetZoneId).withSecond(0).withNano(0);
+        ZonedDateTime start = now;
+        ZonedDateTime end = null;
+
+        if(type == TYPE_ALARM) {
+            if(item.getEndDate() != null && item.getEndDate() > 0) {
+                Instant endInstant = Instant.ofEpochMilli(item.getEndDate());
+                end = ZonedDateTime.ofInstant(endInstant, targetZoneId);
+
+                if(end.withZoneSameInstant(ZoneId.systemDefault()).isBefore(now)) {
+                    return null;
+                }
+            }
+
+            if(item.getStartDate() != null && item.getStartDate() > 0) {
+                Instant startInstant = Instant.ofEpochMilli(item.getStartDate());
+                start = ZonedDateTime.ofInstant(startInstant, targetZoneId);
+
+                if(start.isBefore(now)) {
+                    target = start
+                            .withYear(now.getYear())
+                            .withMonth(now.getMonthValue())
+                            .withDayOfMonth(now.getDayOfMonth());
+                }
+                else {
+                    target = start;
+                }
+            }
+
+            boolean isRepeating = false;
+            for(int i : item.getRepeat()) {
+                if(i > 0) {
+                    isRepeating = true;
+                    break;
+                }
+            }
+
+            if(isRepeating) {
+                int[] repeatValues = {7,1,2,3,4,5,6};
+                ArrayList<DayOfWeek> repeat = new ArrayList<>();
+
+                for(int i=0; i<item.getRepeat().length; i++) {
+                    if(item.getRepeat()[i] > 0) {
+                        repeat.add(DayOfWeek.of(repeatValues[i]));
+                    }
+                }
+                Collections.sort(repeat);
+
+                DayOfWeek nextDayOfWeek;
+
+                if(start.isAfter(now)) {
+                    nextDayOfWeek = start.getDayOfWeek();
+                }
+                else {
+                    nextDayOfWeek = now.getDayOfWeek();
+                }
+
+                boolean isContained = repeat.contains(nextDayOfWeek);
+
+                if(isContained) {
+                    // currentDay is contained in repeat
+                    if(now.isAfter(target) || now.isEqual(target)) {
+                        if(nextDayOfWeek == repeat.get(repeat.size() - 1))
+                            nextDayOfWeek = repeat.get(0);
+                        else
+                            nextDayOfWeek = repeat.get(repeat.indexOf(nextDayOfWeek) + 1);
+
+                        target = target.with(TemporalAdjusters.next(nextDayOfWeek));
+                    }
+                    else {
+                        target = target.with(TemporalAdjusters.nextOrSame(nextDayOfWeek));
+                    }
+                }
+                else {
+                    // currentDay is not contained in repeat
+                    // If today is not after from repeated day back to current week
+                    int nextIndex = nextDayOfWeek.getValue();
+                    while(!repeat.contains(nextDayOfWeek)) {
+                        nextIndex++;
+                        if(nextIndex > 7) nextIndex = 1;
+
+                        nextDayOfWeek = DayOfWeek.of(nextIndex);
+                    }
+
+                    target = target.with(TemporalAdjusters.next(nextDayOfWeek));
+                }
+            }
+            else {
+                while(target.isBefore(ZonedDateTime.now())) {
+                    target = target.plusDays(1);
+                }
+            }
+        }
+        else {
+            long seconds = item.getSnooze() / 1000;
+            target = ZonedDateTime.now().plusSeconds(seconds);
+        }
+
+        if(end != null && target.isAfter(end)) {
+            return null;
+        }
+
+        return target;
     }
 
     public Calendar calculateDate(AlarmItem item, int type, boolean applyDayRepetition) {
@@ -183,6 +303,46 @@ public class AlarmController {
         }
 
         return calendar;
+    }
+
+    public Long scheduleLocalAlarm(Context context, AlarmItem item, int type) {
+        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        SharedPreferences prefManager = PreferenceManager.getDefaultSharedPreferences(context);
+
+        ZonedDateTime alarmDateTime = null;
+        try {
+            alarmDateTime = calculateDateTime(item, type);
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        }
+
+        if(alarmDateTime == null) {
+            disableAlarm(context, item);
+            return -1L;
+        }
+
+        int notiId = item.getNotiId();
+
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(AlarmReceiver.ITEM, item);
+        intent.putExtra(AlarmReceiver.OPTIONS, bundle);
+        if(type == TYPE_ALARM) {
+            intent.setAction(AlarmReceiver.ACTION_ALARM);
+        }
+        else {
+            intent.setAction(AlarmReceiver.ACTION_SNOOZE);
+        }
+
+        long resultDateTime = alarmDateTime.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        int alarmNotificationId = notiId + 1;
+        PendingIntent mainIntent = PendingIntent.getActivity(context, notiId, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(resultDateTime, mainIntent), alarmIntent);
+        Log.d(C.TAG, "Alarm will fire on " + alarmDateTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.FULL)) + ", AlarmItem(" + item + "), " + type);
+        Log.d(C.TAG, "Alarm(notiId=" + alarmNotificationId + ", type=" + type + ") scheduled");
+
+        return resultDateTime;
     }
 
     public Long scheduleAlarm(Context context, AlarmItem item, int type) {

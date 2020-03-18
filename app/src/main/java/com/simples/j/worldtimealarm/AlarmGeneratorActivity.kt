@@ -27,17 +27,18 @@ class AlarmGeneratorActivity : AppCompatActivity() {
             setDisplayHomeAsUpEnabled(true)
         }
 
-        if(savedInstanceState == null) {
-            val bundle = intent.getBundleExtra(BUNDLE_KEY)
-            if(bundle == null) {
-                // New Alarm
-                supportActionBar?.title = getString(R.string.new_alarm_long)
-                viewModel.alarmItem = null
-            }
-            else {
-                // Modify Alarm
-                supportActionBar?.title = getString(R.string.modify_alarm)
+        val bundle = intent.getBundleExtra(BUNDLE_KEY)
+        supportActionBar?.title =
+                if(bundle == null) {
+                    getString(R.string.new_alarm_long)
+                }
+                else {
+                    getString(R.string.modify_alarm)
+                }
 
+        if(savedInstanceState == null) {
+            if(bundle == null) viewModel.alarmItem = null
+            else {
                 bundle.getParcelable<AlarmItem>(AlarmReceiver.ITEM).let { alarmItem ->
                     if(alarmItem == null) {
                         Toast.makeText(applicationContext, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()

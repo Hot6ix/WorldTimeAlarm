@@ -1,17 +1,21 @@
 package com.simples.j.worldtimealarm
 
 import android.content.Context
+import android.util.Log
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
+import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
 import com.simples.j.worldtimealarm.utils.MediaCursor
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.threeten.bp.*
+import org.threeten.bp.temporal.TemporalAdjusters
 import java.util.*
 
 /**
@@ -27,10 +31,11 @@ class AlarmControllerTest {
 
     @Before
     fun setup() {
-        this.context = InstrumentationRegistry.getInstrumentation().context
+        this.context = ApplicationProvider.getApplicationContext<Context>()
+        AndroidThreeTen.init(context)
     }
 
-    @Test
+//    @Test
     fun printTimeZone() {
         val list = MediaCursor.getTimeZoneLocales()
 
@@ -56,38 +61,121 @@ class AlarmControllerTest {
     }
 
     @Test
-    fun testCalculateDate() {
+    fun testAnHourAfterFromNow() {
         // current + 1 hour
-        val cal1 = Calendar.getInstance().apply {
-            add(Calendar.HOUR_OF_DAY, +1)
-            set(Calendar.SECOND, 0)
+        val now = ZonedDateTime.now().plusHours(1).withSecond(0).withNano(0).toInstant()
+        val item = createAlarm(timeSet = now)
+        val resultOld = alarmCtrl.calculateDate(item, TYPE_ALARM, false).apply {
+            set(Calendar.MILLISECOND, 0)
         }
-        val item = createAlarm(timeSet = cal1)
-        val schedule1 = alarmCtrl.calculateDate(item, TYPE_ALARM, false)
+        val resultNew = alarmCtrl.calculateDateTime(item, TYPE_ALARM)
 
-        assertEquals(cal1.timeInMillis, schedule1.timeInMillis)
+        Log.d(C.TAG, "TestResult(testAnHourAfterFromNow)=resultOld(${resultOld.time}), resultNew(${resultNew})")
+        assertEquals(now.toEpochMilli(), resultOld.timeInMillis)
+        assertEquals(now.toEpochMilli(), resultNew.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
     }
 
     @Test
-    fun testCalculateDateWithDST() {
-        // current + 1 hour
-        val cal1 = Calendar.getInstance().apply {
-            add(Calendar.HOUR_OF_DAY, +1)
-            set(Calendar.SECOND, 0)
+    fun testDifferentTimeZone() {
+        val now = ZonedDateTime.now().withSecond(0).withNano(0).toInstant()
+        val item = createAlarm(timeSet = now, timeZone = "Asia/Seoul")
+        val resultOld = alarmCtrl.calculateDate(item, TYPE_ALARM, false).apply {
+            set(Calendar.MILLISECOND, 0)
         }
-        val item = createAlarm(timeSet = cal1, timeZone = "Asia/Seoul")
+        val resultNew = alarmCtrl.calculateDateTime(item, TYPE_ALARM)
 
-        val schedule2 = alarmCtrl.calculateDate(item, TYPE_ALARM, false)
-
-        assertNotEquals(cal1.timeInMillis, schedule2.timeInMillis)
+        Log.d(C.TAG, "TestResult(testDifferentTimeZone)=resultOld(${resultOld.time}), resultNew(${resultNew.withZoneSameInstant(ZoneId.systemDefault())})")
+        assertNotEquals(now.toEpochMilli(), resultOld.timeInMillis)
+        assertNotEquals(now.toEpochMilli(), resultNew.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        assertEquals(resultOld.timeInMillis, resultNew.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
     }
 
-    private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean {
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) && cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH)
+    @Test
+    fun testSingleRepeating() {
+        val now = ZonedDateTime.now().withSecond(0).withNano(0).toInstant()
+        val item = createAlarm(timeSet = now, repeat = intArrayOf(0,0,0,1,0,0,0))
+        val resultOld = alarmCtrl.calculateDate(item, TYPE_ALARM, false).apply {
+            set(Calendar.MILLISECOND, 0)
+        }
+        val resultNew = alarmCtrl.calculateDateTime(item, TYPE_ALARM)
+
+        val answer = ZonedDateTime.ofInstant(now, ZoneId.systemDefault())
+                .withSecond(0)
+                .withNano(0)
+                .with(TemporalAdjusters.next(DayOfWeek.WEDNESDAY))
+
+        Log.d(C.TAG, "TestResult(testSingleRepeating)=resultOld(${resultOld.time}), resultNew(${resultNew})")
+        assertEquals(answer.toInstant().toEpochMilli(), resultOld.timeInMillis)
+        assertEquals(answer.toInstant().toEpochMilli(), resultNew.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        assertNotEquals(now.toEpochMilli(), resultOld.timeInMillis)
+        assertNotEquals(now.toEpochMilli(), resultNew.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        assertEquals(resultOld.timeInMillis, resultNew.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+    }
+
+    @Test
+    fun testAnHourAfterFromNowAndSingleRepeating() {
+        val now = ZonedDateTime.now().plusHours(1).withSecond(0).withNano(0).toInstant()
+        val item = createAlarm(timeSet = now, repeat = intArrayOf(0,0,0,1,0,0,0))
+        val resultOld = alarmCtrl.calculateDate(item, TYPE_ALARM, false).apply {
+            set(Calendar.MILLISECOND, 0)
+        }
+        val resultNew = alarmCtrl.calculateDateTime(item, TYPE_ALARM)
+
+        val answer = ZonedDateTime.ofInstant(now, ZoneId.systemDefault())
+                .withSecond(0)
+                .withNano(0)
+                .with(TemporalAdjusters.nextOrSame(DayOfWeek.WEDNESDAY))
+
+        Log.d(C.TAG, "TestResult(testAnHourAfterFromNowAndSingleRepeating)=resultOld(${resultOld.time}), resultNew(${resultNew})")
+        assertEquals(answer.toInstant().toEpochMilli(), resultOld.timeInMillis)
+        assertEquals(answer.toInstant().toEpochMilli(), resultNew.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        assertEquals(resultOld.timeInMillis, resultNew.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+    }
+
+    @Test
+    fun testMultipleRepeating() {
+        val now = ZonedDateTime.now().withSecond(0).withNano(0).toInstant()
+        val item = createAlarm(timeSet = now, repeat = intArrayOf(0,0,0,1,1,1,0))
+        val resultOld = alarmCtrl.calculateDate(item, TYPE_ALARM, false).apply {
+            set(Calendar.MILLISECOND, 0)
+        }
+        val resultNew = alarmCtrl.calculateDateTime(item, TYPE_ALARM)
+
+        Log.d(C.TAG, "TestResult(testMultipleRepeating)=resultOld(${resultOld.time}), resultNew(${resultNew})")
+        assertNotEquals(now.toEpochMilli(), resultOld.timeInMillis)
+        assertNotEquals(now.toEpochMilli(), resultNew.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+        assertEquals(resultOld.timeInMillis, resultNew.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+    }
+
+    @Test
+    fun testSingleRepeatingWithDifferentTimeZone() {
+        // Local Timezone: America/New_York in DST (-04:00)
+        // Given: 12:00:00 Asia/Seoul (+09:00), Every Wednesday
+        // Should be: Wednesday 12:00:00 Asia/Seoul
+        // Should be(local): Tuesday 23:00:00 America/New_York
+        val id = "Asia/Seoul"
+        val local = LocalDateTime.now(ZoneId.of(id))
+                .withHour(12)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0)
+        val given = local.atZone(ZoneId.of(id))
+
+        val item = createAlarm(timeSet = given.toInstant(), timeZone = id, repeat = intArrayOf(0,0,0,1,0,0,0))
+
+        val result = alarmCtrl.calculateDateTime(item, TYPE_ALARM)
+
+        val answer = local.with(TemporalAdjusters.next(DayOfWeek.WEDNESDAY)).atZone(ZoneId.of(id))
+
+        Log.d(C.TAG, "TestResult(testSingleRepeatingWithDifferentTimeZone)=given(${given}), result(${result})")
+        assertEquals(result.toInstant().toEpochMilli(), answer.toInstant().toEpochMilli())
+        assertNotEquals(given.toInstant().toEpochMilli(), result.toInstant().toEpochMilli())
+        assertNotEquals(given.toInstant().toEpochMilli(), answer.toInstant().toEpochMilli())
+        assertTrue(answer.withZoneSameInstant(ZoneId.systemDefault()).isEqual(result.withZoneSameInstant(ZoneId.systemDefault())))
     }
 
     private fun createAlarm(timeZone: String = TimeZone.getDefault().id,
-                    timeSet: Calendar = Calendar.getInstance().apply { add(Calendar.HOUR_OF_DAY, 1) },
+                    timeSet: Instant = Instant.now(),
                     repeat: IntArray = IntArray(7) {0},
                     startDate: Long? = null,
                     endDate: Long? = null): AlarmItem {
@@ -95,7 +183,7 @@ class AlarmControllerTest {
         return AlarmItem(
                 null,
                 timeZone,
-                timeSet.timeInMillis.toString(),
+                timeSet.toEpochMilli().toString(),
                 repeat,
                 null,
                 null,
@@ -106,7 +194,8 @@ class AlarmControllerTest {
                 0,
                 0,
                 startDate,
-                endDate
+                endDate,
+                timeSet.toEpochMilli()
         )
     }
 }

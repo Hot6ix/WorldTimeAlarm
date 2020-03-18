@@ -760,7 +760,8 @@ class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListene
                 currentColorTag,
                 if(alarmAction == ACTION_NEW) -1 else existAlarmItem.index,
                 startDate?.timeInMillis,
-                endDate?.timeInMillis
+                endDate?.timeInMillis,
+                calendar.time.time
         )
     }
 

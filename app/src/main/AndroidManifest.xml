@@ -35,7 +35,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/main_label"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTop"
             android:theme="@style/MaterialAppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

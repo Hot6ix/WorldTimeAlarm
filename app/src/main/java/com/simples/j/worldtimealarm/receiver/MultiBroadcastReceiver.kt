@@ -23,6 +23,8 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
 
                         list.forEach {
                             it.index = list.indexOf(it)
+                            it.pickerTime = it.timeSet.toLong()
+
                             db.updateAlarmIndex(it)
                         }
                     }

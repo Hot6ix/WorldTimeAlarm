@@ -24,7 +24,8 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
                 "$COLUMN_COLOR_TAG INTEGER," +
                 "$COLUMN_INDEX INTEGER," +
                 "$COLUMN_START_DATE INTEGER," +
-                "$COLUMN_END_DATE INTEGER);")
+                "$COLUMN_END_DATE INTEGER," +
+                "$COLUMN_PICKER_TIME TEXT);")
 
         db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_TIME_ZONE TEXT, " +
@@ -55,10 +56,13 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
                     "$COLUMN_TITLE TEXT, " +
                     "$COLUMN_URI TEXT);")
         }
+        if(old < 6) {
+            db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_PICKER_TIME TEXT")
+        }
     }
 
     companion object {
-        const val VERSION = 5
+        const val VERSION = 6
         const val DB_NAME = "alarm.db"
 
         const val TABLE_ALARM_LIST = "AlarmList"
@@ -81,6 +85,7 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
         const val COLUMN_END_DATE = "end_date"
         const val COLUMN_TITLE = "title"
         const val COLUMN_URI = "uri"
+        const val COLUMN_PICKER_TIME = "picker_time"
     }
 
 }
