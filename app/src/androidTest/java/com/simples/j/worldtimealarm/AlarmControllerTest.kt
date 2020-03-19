@@ -15,6 +15,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.threeten.bp.*
+import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.format.FormatStyle
 import org.threeten.bp.temporal.TemporalAdjusters
 import java.util.*
 
@@ -33,6 +35,31 @@ class AlarmControllerTest {
     fun setup() {
         this.context = ApplicationProvider.getApplicationContext<Context>()
         AndroidThreeTen.init(context)
+    }
+
+    @Test
+    fun printDateTimeFormatter() {
+        val current = ZonedDateTime.now()
+        println("========================")
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL)))
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG)))
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)))
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)))
+        println("========================")
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.FULL)))
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.LONG)))
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.MEDIUM)))
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.SHORT)))
+        println("========================")
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.FULL)))
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.LONG)))
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM)))
+        println(current.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.SHORT)))
+        println("========================")
+        println(current.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+        println(current.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+        println(current.format(DateTimeFormatter.ISO_DATE_TIME))
+        println("========================")
     }
 
 //    @Test

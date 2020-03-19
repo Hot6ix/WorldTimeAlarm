@@ -1,7 +1,9 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
+import android.graphics.PorterDuff
 import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -11,6 +13,7 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.etc.SnoozeItem
@@ -84,13 +87,10 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
                                 if(array.indexOf(lastSelected) == holder.adapterPosition && holder.itemViewType != TYPE_ADD) View.VISIBLE
                                 else View.INVISIBLE
 
-//                        if(item.uri.isNullOrEmpty() || item.uri == "null") {
-//                            holder.icon.setImageResource(R.drawable.ic_no_ringtone_white)
-//                        }
-//                        else {
-//                            holder.icon.setImageResource(R.drawable.ic_ringtone_white)
-//                        }
                         holder.icon.setImageResource(R.drawable.ic_ringtone_white)
+
+                        if(item.uri.isNullOrEmpty() || item.uri == "null") holder.icon.imageTintMode = PorterDuff.Mode.CLEAR
+                        else holder.icon.imageTintMode = PorterDuff.Mode.SRC_ATOP
 
                         if(holder.itemViewType == TYPE_USER_RINGTONE) {
                             holder.itemView.setOnLongClickListener {
@@ -124,7 +124,11 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
             }
             is PatternItem -> {
                 (holder as ItemViewHolder).title.text = item.title
+
                 holder.icon.setImageResource(R.drawable.ic_vibration_white)
+
+                if(item.array == null) holder.icon.imageTintMode = PorterDuff.Mode.CLEAR
+                else holder.icon.imageTintMode = PorterDuff.Mode.SRC_ATOP
 
                 holder.selector.visibility =
                         if(array.indexOf(lastSelected) == position) View.VISIBLE
@@ -132,7 +136,11 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
             }
             is SnoozeItem -> {
                 (holder as ItemViewHolder).title.text = item.title
+
                 holder.icon.setImageResource(R.drawable.ic_snooze_white)
+
+                if(item.duration == 0L) holder.icon.imageTintMode = PorterDuff.Mode.CLEAR
+                else holder.icon.imageTintMode = PorterDuff.Mode.SRC_ATOP
 
                 holder.selector.visibility =
                         if(array.indexOf(lastSelected) == position) View.VISIBLE

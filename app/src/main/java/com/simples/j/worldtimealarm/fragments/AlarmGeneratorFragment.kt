@@ -34,10 +34,7 @@ import kotlinx.android.synthetic.main.activity_alarm.expectedTime
 import kotlinx.android.synthetic.main.activity_alarm.time_zone
 import kotlinx.android.synthetic.main.activity_alarm.time_zone_offset
 import kotlinx.android.synthetic.main.fragment_alarm_generator.*
-import org.threeten.bp.Instant
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.ZoneId
-import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.*
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
 import java.util.*
@@ -476,7 +473,7 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 else MediaCursor.getOffsetOfDifference(fragmentContext, difference, MediaCursor.TYPE_CURRENT)
 
         val resultInLocal = viewModel.alarmController.calculateDateTime(createAlarm(), TYPE_ALARM).withZoneSameInstant(ZoneId.systemDefault())
-        expectedTime.text = resultInLocal.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.LONG))
+        expected_time.text = resultInLocal.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.SHORT))
         time_zone_offset.text = offset
     }
 
