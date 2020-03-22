@@ -307,7 +307,6 @@ public class AlarmController {
 
     public Long scheduleLocalAlarm(Context context, AlarmItem item, int type) {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        SharedPreferences prefManager = PreferenceManager.getDefaultSharedPreferences(context);
 
         ZonedDateTime alarmDateTime = null;
         try {
@@ -334,15 +333,15 @@ public class AlarmController {
             intent.setAction(AlarmReceiver.ACTION_SNOOZE);
         }
 
-        long resultDateTime = alarmDateTime.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        ZonedDateTime resultDateTime = alarmDateTime.withZoneSameInstant(ZoneId.systemDefault());
         int alarmNotificationId = notiId + 1;
         PendingIntent mainIntent = PendingIntent.getActivity(context, notiId, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(resultDateTime, mainIntent), alarmIntent);
-        Log.d(C.TAG, "Alarm will fire on " + alarmDateTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.FULL)) + ", AlarmItem(" + item + "), " + type);
+        alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(resultDateTime.toInstant().toEpochMilli(), mainIntent), alarmIntent);
+        Log.d(C.TAG, "Alarm will fire on " + resultDateTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.FULL)) + ", AlarmItem(" + item + "), " + type);
         Log.d(C.TAG, "Alarm(notiId=" + alarmNotificationId + ", type=" + type + ") scheduled");
 
-        return resultDateTime;
+        return resultDateTime.toInstant().toEpochMilli();
     }
 
     public Long scheduleAlarm(Context context, AlarmItem item, int type) {

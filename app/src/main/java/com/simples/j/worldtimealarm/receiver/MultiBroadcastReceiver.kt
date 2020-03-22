@@ -6,6 +6,7 @@ import android.content.Intent
 import android.util.Log
 import com.simples.j.worldtimealarm.BuildConfig
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 
 class MultiBroadcastReceiver : BroadcastReceiver() {
@@ -20,12 +21,18 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                     22 -> {
                         val db = DatabaseCursor(context)
                         val list = db.getAlarmList()
+                        val alarmController = AlarmController.getInstance()
 
                         list.forEach {
                             it.index = list.indexOf(it)
                             it.pickerTime = it.timeSet.toLong()
 
                             db.updateAlarmIndex(it)
+
+                            if(it.on_off == 1) {
+                                alarmController.cancelAlarm(context, it.notiId)
+                                alarmController.scheduleLocalAlarm(context, it, AlarmController.TYPE_ALARM)
+                            }
                         }
                     }
                 }

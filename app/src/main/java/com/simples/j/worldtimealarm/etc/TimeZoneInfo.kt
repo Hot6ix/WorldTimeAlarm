@@ -31,6 +31,10 @@ class TimeZoneInfo(builder: Builder) {
         return "timeZone : ${mTimeZone.id}, genericName : $mGenericName, daylightName : $mDaylightName, standardName : $mStandardName, exemplarName : $mExemplarName, gmtOffset : $mGmtOffset"
     }
 
+    fun hasExtraNames(): Boolean {
+        return mGenericName != null && mDaylightName != null && mStandardName != null
+    }
+
     class Builder(val timeZone: TimeZone) {
 
         var mGenericName: String? = null

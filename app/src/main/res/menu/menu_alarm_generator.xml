@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/show_dst"
+        android:orderInCategory="101"
+        android:title="DST"
+        android:icon="@drawable/ic_daylight_saving_time"
+        app:showAsAction="ifRoom"/>
+</menu>

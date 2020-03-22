@@ -1,7 +1,9 @@
 package com.simples.j.worldtimealarm.fragments
 
-import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.icu.text.Collator
 import android.icu.util.ULocale
 import android.os.Build
@@ -12,6 +14,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.support.BaseTimeZonePickerAdapter
@@ -37,6 +40,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
 
     private var mSearchMenu: MenuItem? = null
     private var mSearchView: SearchView? = null
+    private val dateTimeChangedReceiver = DateTimeChangedReceiver()
 
     private var mJob = Job()
     override val coroutineContext: CoroutineContext
@@ -118,6 +122,14 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
                 setQuery(query, false)
             }
         }
+
+        val intentFilter = IntentFilter(MainActivity.ACTION_UPDATE_ALL)
+        fragmentContext.registerReceiver(dateTimeChangedReceiver, intentFilter)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
     }
 
     override fun onAttach(context: Context) {
@@ -278,6 +290,18 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
     private class PickerItemComparator internal constructor(private val mCollator: Collator) : Comparator<PickerItem> {
         override fun compare(o1: PickerItem, o2: PickerItem): Int {
             return mCollator.compare(o1.title, o2.title)
+        }
+    }
+
+    private inner class DateTimeChangedReceiver: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when(intent?.action) {
+                MainActivity.ACTION_UPDATE_ALL -> {
+                    if(mRequestType == TimeZonePickerActivity.REQUEST_TIME_ZONE) {
+                        mAdapter?.notifyItemRangeChanged(0, mList.count())
+                    }
+                }
+            }
         }
     }
 

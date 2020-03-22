@@ -41,17 +41,30 @@
 
                     <TextView
                         android:id="@+id/time_zone"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="@dimen/text_middle"
                         android:textColor="?android:attr/textColorPrimary"
                         android:gravity="start"
                         android:ellipsize="end"
                         android:maxLines="1"
+                        app:layout_constraintHorizontal_chainStyle="spread_inside"
+                        app:layout_constraintHorizontal_bias="1"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/time_zone_offset"/>
+                        app:layout_constraintEnd_toStartOf="@id/time_zone_dst"/>
+
+                    <ImageView
+                        android:id="@+id/time_zone_dst"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:src="@drawable/ic_daylight_saving_time"
+                        android:tint="@color/color14"
+                        android:contentDescription="@null"
+                        android:layout_marginStart="@dimen/padding5"
+                        app:layout_constraintTop_toTopOf="@id/time_zone"
+                        app:layout_constraintStart_toEndOf="@id/time_zone"/>
 
                     <TextView
                         android:id="@+id/time_zone_offset"
@@ -61,8 +74,11 @@
                         android:textColor="?attr/colorPrimary"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:layout_marginStart="@dimen/padding10"
+                        app:layout_constraintHorizontal_chainStyle="spread_inside"
+                        app:layout_constraintHorizontal_bias="1"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/time_zone_dst"
                         app:layout_constraintEnd_toEndOf="parent"/>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

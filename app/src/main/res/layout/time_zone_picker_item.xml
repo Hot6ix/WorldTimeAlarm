@@ -18,6 +18,18 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <ImageView
+        android:id="@+id/time_zone_dst"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:src="@drawable/ic_daylight_saving_time"
+        android:tint="@color/color14"
+        android:visibility="gone"
+        android:contentDescription="@null"
+        android:layout_marginStart="@dimen/padding5"
+        app:layout_constraintTop_toTopOf="@id/time_zone_picker_title"
+        app:layout_constraintStart_toEndOf="@id/time_zone_picker_title"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/time_zone_picker_summary_layout"
         android:layout_width="match_parent"

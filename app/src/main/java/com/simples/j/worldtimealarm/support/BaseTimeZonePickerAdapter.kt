@@ -8,6 +8,7 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -65,7 +66,21 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
             }
             is ItemViewHolder -> {
                 val item = getData(position)
+
                 holder.title.text = item.title
+
+                try {
+                    val timeZone = TimeZone.getTimeZone(item.id)
+                    if(timeZone.useDaylightTime() && timeZone.inDaylightTime(Date())) {
+                        holder.dst.visibility = View.VISIBLE
+                    }
+                    else {
+                        holder.dst.visibility = View.GONE
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
                 if(showItemSummary) {
                     holder.summaryLayout.visibility = View.VISIBLE
                     holder.summary.text = item.summary
@@ -94,6 +109,7 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
 
     private class ItemViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.time_zone_picker_title)
+        val dst: ImageView = view.findViewById(R.id.time_zone_dst)
         val summaryLayout: ConstraintLayout = view.findViewById(R.id.time_zone_picker_summary_layout)
         val summary: TextView = view.findViewById(R.id.time_zone_picker_summary)
         val difference: TextView = view.findViewById(R.id.time_zone_picker_difference)

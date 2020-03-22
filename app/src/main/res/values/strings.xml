@@ -125,6 +125,8 @@
     <string name="time_zone_wrong">Wrong time zone</string>
     <string name="time_zone_change_info">Changes from %1$s to %2$s.</string>
     <string name="time_zone_change_warning">Changing the time zone affects the following items.\n- Time\n- Date (includes start/end date)\n- Repeat days (Activate in the setting tab)</string>
+    <string name="time_zone_dst_end_msg">%1$s is in Daylight Saving Time. It ends on %2$s.</string>
+    <string name="time_zone_dst_start_msg">%1$s observes Daylight Saving Time. It starts on %2$s.</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>

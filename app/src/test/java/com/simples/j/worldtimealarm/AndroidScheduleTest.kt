@@ -207,7 +207,8 @@ class AndroidScheduleTest {
                 0,
                 0,
                 startDate,
-                endDate
+                endDate,
+                timeSet.timeInMillis
         )
     }
 

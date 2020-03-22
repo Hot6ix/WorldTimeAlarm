@@ -57,7 +57,7 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
         val version = findPreference<Preference>(resources.getString(R.string.setting_version_key))
         version?.summary = pName
 
-        findPreference<androidx.preference.SwitchPreference>(getString(R.string.setting_time_zone_affect_repetition_key))?.onPreferenceChangeListener = this
+//        findPreference<androidx.preference.SwitchPreference>(getString(R.string.setting_time_zone_affect_repetition_key))?.onPreferenceChangeListener = this
 
         converterTimezone = findPreference(resources.getString(R.string.setting_converter_timezone_key))
         converterTimezone?.let { switchPref ->
@@ -162,9 +162,9 @@ class SettingFragment : PreferenceFragmentCompat(), CompoundButton.OnCheckedChan
             getString(R.string.setting_converter_timezone_key) -> {
                 if(newValue == false) converterTimezone?.summary = TimeZone.getDefault().id
             }
-            getString(R.string.setting_time_zone_affect_repetition_key) -> {
-                context?.sendBroadcast(Intent(MainActivity.ACTION_RESCHEDULE_ACTIVATED))
-            }
+//            getString(R.string.setting_time_zone_affect_repetition_key) -> {
+//                context?.sendBroadcast(Intent(MainActivity.ACTION_RESCHEDULE_ACTIVATED))
+//            }
         }
 
         return true

@@ -45,6 +45,29 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     private lateinit var defaultRingtone: RingtoneItem
 
     private var job: Job = Job()
+
+    private fun ArrayList<out Any>.contentEquals(list: ArrayList<out Any>?): Boolean {
+        if(list == null) return false
+
+        var isSame = this == list
+
+        if(!isSame) {
+            if(this.size != list.size) {
+                isSame = false
+            }
+            else {
+                isSame = true
+                this.forEachIndexed { index, item ->
+                    if(list[index] != item) {
+                        return false
+                    }
+                }
+            }
+        }
+
+        return isSame
+    }
+
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main
 
@@ -62,6 +85,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         activity?.run {
             viewModel = ViewModelProvider(this)[ContentSelectorViewModel::class.java]
         }
+
     }
 
     override fun onResume() {
@@ -69,6 +93,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
 
         job = launch(coroutineContext) {
             context?.let {
+                var isSameContent = false
                 when(viewModel.action) {
                     ContentSelectorActivity.ACTION_REQUEST_AUDIO -> {
                         val userRingtone = withContext(Dispatchers.IO) {
@@ -88,30 +113,48 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
 
                             if(!contains(viewModel.lastSelectedValue)) viewModel.lastSelectedValue = defaultRingtone
                         }
-                        contentSelectorAdapter = ContentSelectorAdapter(it, ringtoneList, viewModel.lastSelectedValue, defaultRingtone)
+
+                        if(::contentSelectorAdapter.isInitialized)
+                            isSameContent = ringtoneList.contentEquals(contentSelectorAdapter.array)
+
+                        if(!isSameContent)
+                            contentSelectorAdapter = ContentSelectorAdapter(it, ringtoneList, viewModel.lastSelectedValue, defaultRingtone)
                     }
                     ContentSelectorActivity.ACTION_REQUEST_VIBRATION -> {
                         val vibrationList = withContext(Dispatchers.IO) {
                             MediaCursor.getVibratorPatterns(it)
                         }
-                        contentSelectorAdapter = ContentSelectorAdapter(it, vibrationList, viewModel.lastSelectedValue)
+
+                        if(::contentSelectorAdapter.isInitialized)
+                            isSameContent = vibrationList.contentEquals(contentSelectorAdapter.array)
+
+                        if(!isSameContent)
+                            contentSelectorAdapter = ContentSelectorAdapter(it, vibrationList, viewModel.lastSelectedValue)
                     }
                     ContentSelectorActivity.ACTION_REQUEST_SNOOZE -> {
                         val snoozeList = withContext(Dispatchers.IO) {
                             MediaCursor.getSnoozeList(it)
                         }
-                        contentSelectorAdapter = ContentSelectorAdapter(it, snoozeList, viewModel.lastSelectedValue)
+
+                        if(::contentSelectorAdapter.isInitialized)
+                            isSameContent = snoozeList.contentEquals(contentSelectorAdapter.array)
+
+                        if(!isSameContent)
+                            contentSelectorAdapter = ContentSelectorAdapter(it, snoozeList, viewModel.lastSelectedValue)
                     }
                 }
-                contentSelectorAdapter.setOnItemSelectedListener(this@ContentSelectorFragment)
-                contentSelectorAdapter.setOnItemMenuSelectedListener(this@ContentSelectorFragment)
 
-                recyclerLayoutManager = LinearLayoutManager(it, LinearLayoutManager.VERTICAL, false)
+                if(!isSameContent) {
+                    contentSelectorAdapter.setOnItemSelectedListener(this@ContentSelectorFragment)
+                    contentSelectorAdapter.setOnItemMenuSelectedListener(this@ContentSelectorFragment)
 
-                content_recyclerview.apply {
-                    adapter = contentSelectorAdapter
-                    layoutManager = recyclerLayoutManager
-                    (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+                    recyclerLayoutManager = LinearLayoutManager(it, LinearLayoutManager.VERTICAL, false)
+
+                    content_recyclerview.apply {
+                        adapter = contentSelectorAdapter
+                        layoutManager = recyclerLayoutManager
+                        (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+                    }
                 }
             }
         }

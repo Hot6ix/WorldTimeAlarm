@@ -21,6 +21,11 @@ import com.simples.j.worldtimealarm.etc.TimeZoneInfo
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.fragment_time_zone.*
+import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.format.FormatStyle
 import java.util.*
 
 @RequiresApi(Build.VERSION_CODES.N)
@@ -67,11 +72,6 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
             mAction = it.getInt(TimeZonePickerActivity.ACTION)
             mType = it.getInt(TimeZonePickerActivity.TYPE)
 
-            if(mType == TimeZonePickerActivity.TYPE_ALARM_CLOCK) {
-                time_zone_change_info.visibility = View.VISIBLE
-                time_zone_change_info.text = getString(R.string.time_zone_change_warning)
-            }
-
             if(mAction == TimeZonePickerActivity.ACTION_ADD && id.isNullOrEmpty()) return@let
 
             if(!id.isNullOrEmpty()) {
@@ -86,21 +86,11 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                 TimeZonePickerActivity.ACTION_ADD -> {
                     val clockList = DatabaseCursor(fragmentContext).getClockList()
                     val item = clockList.find { it.timezone == mTimeZone?.id }
-                    if(item != null) {
-                        Snackbar.make(fragment_layout, getString(R.string.exist_timezone), Snackbar.LENGTH_SHORT)
-                                .setAnchorView(action)
-                                .show()
-                    }
 
                     isTimeZoneExist = item != null
                 }
                 TimeZonePickerActivity.ACTION_CHANGE -> {
-                    time_zone_change_info.visibility = View.VISIBLE
-
-                    val locale = Locale.getDefault()
-                    val previous = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mPreviousTimeZone), MediaCursor.getGmtOffsetString(locale, mPreviousTimeZone, mDate))
-                    val current = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), MediaCursor.getGmtOffsetString(locale, mTimeZone, mDate))
-                    time_zone_change_info.text = getString(R.string.time_zone_change_info, previous, current)
+//                    val previous = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mPreviousTimeZone), MediaCursor.getGmtOffsetString(locale, mPreviousTimeZone, mDate))
                 }
             }
         }
@@ -176,10 +166,27 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
         with(mTimeZoneInfo) {
             if(this == null) {
                 time_zone_region_layout.isEnabled = false
+                time_zone_dst.visibility = View.GONE
             }
             else {
                 time_zone_region_layout.isEnabled = true
                 time_zone_region_summary.text = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), this.mGmtOffset)
+
+                if(mTimeZone.useDaylightTime()) {
+                    val nextTransition = ZoneId.of(mTimeZone.id).rules.nextTransition(Instant.now())
+                    val nextTransitionLocal = ZonedDateTime.of(nextTransition.dateTimeBefore, ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.SHORT))
+
+                    val timeZoneName = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), MediaCursor.getGmtOffsetString(Locale.getDefault(), mTimeZone, mDate))
+
+                    if(mTimeZone.inDaylightTime(Date())) {
+                        time_zone_change_info.text = getString(R.string.time_zone_dst_end_msg, timeZoneName, nextTransitionLocal)
+                        time_zone_dst.visibility = View.VISIBLE
+                    }
+                    else {
+                        time_zone_change_info.text = getString(R.string.time_zone_dst_start_msg, timeZoneName, nextTransitionLocal)
+                        time_zone_dst.visibility = View.GONE
+                    }
+                }
 
                 val found = MediaCursor.getULocaleByTimeZoneId(mTimeZone.id)
                 val isSingleTimeZone = found != null && (MediaCursor.getTimeZoneListByCountry(found.country).size == 1)

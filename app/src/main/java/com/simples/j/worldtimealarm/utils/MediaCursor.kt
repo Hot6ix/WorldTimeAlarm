@@ -10,14 +10,11 @@ import android.os.Build
 import android.text.BidiFormatter
 import android.text.TextDirectionHeuristics
 import android.text.TextUtils
-import android.text.format.DateUtils
 import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.*
-import org.threeten.bp.LocalDate
-import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZonedDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -207,7 +204,10 @@ class MediaCursor {
             TimeZone.getAvailableIDs(country).forEach {
                 if(javaTimeZone.contains(it)) {
                     val timeZone = TimeZone.getTimeZone(it)
-                    list.add(TimeZoneInfo.Formatter(uLocale.toLocale(), Date()).format(timeZone))
+                    val timeZoneInfo = TimeZoneInfo.Formatter(uLocale.toLocale(), Date()).format(timeZone)
+
+//                    if(timeZoneInfo.hasExtraNames())
+                    list.add(timeZoneInfo)
                 }
             }
             return list
