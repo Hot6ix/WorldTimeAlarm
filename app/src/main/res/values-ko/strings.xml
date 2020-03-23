@@ -156,6 +156,8 @@
     <string name="setting_converter_timezone_id_key">CONVERTER_TIME_ZONE_ID</string>
     <string name="setting_converter_goto_key">CONVERTER_GOTO</string>
     <string name="setting_converter_goto">날짜 및 시간 변경</string>
+    <string name="setting_converter_remember_last_key">REMEMBER</string>
+    <string name="setting_converter_remember_last">최근 설정 기억하기</string>
 
     <string name="setting_group_3_key">Others</string>
     <string name="setting_group_3">기타</string>

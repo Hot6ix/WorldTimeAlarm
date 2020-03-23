@@ -155,6 +155,8 @@
     <string name="setting_converter_timezone_id_key">CONVERTER_TIME_ZONE_ID</string>
     <string name="setting_converter_goto_key">CONVERTER_GOTO</string>
     <string name="setting_converter_goto">Change date and time</string>
+    <string name="setting_converter_remember_last_key">REMEMBER</string>
+    <string name="setting_converter_remember_last">Remember last setting</string>
 
     <string name="setting_group_3_key">Others</string>
     <string name="setting_group_3">Others</string>

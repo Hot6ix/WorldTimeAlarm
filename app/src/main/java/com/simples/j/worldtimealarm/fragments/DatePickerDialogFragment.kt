@@ -2,20 +2,45 @@ package com.simples.j.worldtimealarm.fragments
 
 import android.app.DatePickerDialog
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import java.util.*
+import androidx.lifecycle.ViewModelProvider
+import com.simples.j.worldtimealarm.models.WorldClockViewModel
+import org.threeten.bp.ZonedDateTime
 
 class DatePickerDialogFragment: DialogFragment() {
 
     private lateinit var dialog: DatePickerDialog
+    private lateinit var fragmentContext: Context
+    private lateinit var viewModel: WorldClockViewModel
     private var listener: DatePickerDialog.OnDateSetListener? = null
+    private val now = ZonedDateTime.now()
 
-    var calendar: Calendar = Calendar.getInstance()
-    var minDate: Long = calendar.timeInMillis
+    var minDate: Long = 0
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        fragmentContext = context
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        activity?.run {
+            viewModel = ViewModelProvider(this)[WorldClockViewModel::class.java]
+        }
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        dialog = DatePickerDialog(context!!, listener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
+        dialog = DatePickerDialog(
+                fragmentContext,
+                listener,
+                viewModel.mainZonedDateTime.value?.year ?: now.year,
+                viewModel.mainZonedDateTime.value?.monthValue?.minus(1) ?: now.monthValue,
+                viewModel.mainZonedDateTime.value?.dayOfMonth ?: now.dayOfMonth
+        )
 
         if(savedInstanceState != null) {
             minDate = savedInstanceState.getLong(CURRENT_MIN_DATE)
@@ -33,10 +58,6 @@ class DatePickerDialogFragment: DialogFragment() {
 
     fun setDateSetListener(listener: DatePickerDialog.OnDateSetListener) {
         this.listener = listener
-    }
-
-    fun setDate(calendar: Calendar) {
-        this.calendar = calendar
     }
 
     companion object {

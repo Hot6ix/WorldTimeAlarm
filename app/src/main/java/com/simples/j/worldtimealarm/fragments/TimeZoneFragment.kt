@@ -2,8 +2,10 @@ package com.simples.j.worldtimealarm.fragments
 
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.icu.util.TimeZone
 import android.os.Build
 import android.os.Bundle
@@ -14,6 +16,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
+import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
@@ -40,6 +43,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
     private var mAction: Int = -1
     private var mType: Int = -1
     private var isTimeZoneExist = false
+    private val dateTimeChangedReceiver = DateTimeChangedReceiver()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,6 +113,14 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
             action.text = getString(R.string.apply)
             action.icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_done_white)
         }
+
+        val intentFilter = IntentFilter(MainActivity.ACTION_UPDATE_ALL)
+        fragmentContext.registerReceiver(dateTimeChangedReceiver, intentFilter)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
     }
 
     override fun onClick(v: View) {
@@ -192,6 +204,16 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                 val isSingleTimeZone = found != null && (MediaCursor.getTimeZoneListByCountry(found.country).size == 1)
                 time_zone_region_layout.apply {
                     isEnabled = !isSingleTimeZone
+                }
+            }
+        }
+    }
+
+    private inner class DateTimeChangedReceiver: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when(intent?.action) {
+                MainActivity.ACTION_UPDATE_ALL -> {
+                    updateSummariesByTimeZone()
                 }
             }
         }

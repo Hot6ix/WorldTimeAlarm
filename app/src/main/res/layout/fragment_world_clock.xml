@@ -12,53 +12,28 @@
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/standardTimeLayout"
+            android:id="@+id/main_date_time_selector_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/padding10"
             android:paddingBottom="@dimen/padding10"
+            android:background="@color/background"
+            android:elevation="2dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/world_time_layout"
+            <TextView
+                android:id="@+id/world_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true"
+                android:gravity="center"
+                android:textSize="@dimen/text_clock_size_small"
+                android:includeFontPadding="false"
                 android:background="?attr/selectableItemBackground"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent">
-
-                <TextView
-                    android:id="@+id/world_am_pm"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:textSize="@dimen/text_large"
-                    android:layout_marginEnd="@dimen/padding5"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintHorizontal_chainStyle="packed"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/world_time"
-                    app:layout_constraintBaseline_toBaselineOf="@id/world_time"/>
-
-                <TextView
-                    android:id="@+id/world_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textSize="@dimen/text_clock_size"
-                    android:includeFontPadding="false"
-                    app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintHorizontal_chainStyle="packed"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/world_am_pm"
-                    app:layout_constraintEnd_toEndOf="parent"/>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                app:layout_constraintEnd_toEndOf="parent"/>
 
             <TextView
                 android:id="@+id/world_date"
@@ -69,28 +44,48 @@
                 android:paddingTop="@dimen/padding5"
                 android:paddingBottom="@dimen/padding5"
                 android:background="?attr/selectableItemBackground"
-                app:layout_constraintTop_toBottomOf="@id/world_time_layout" />
+                app:layout_constraintTop_toBottomOf="@id/world_time" />
 
-            <TextView
-                android:id="@+id/time_zone"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/time_zone_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:textSize="@dimen/text_middle"
                 android:paddingTop="@dimen/padding5"
                 android:paddingBottom="@dimen/padding5"
+                android:clickable="true"
+                android:focusable="true"
                 android:background="?attr/selectableItemBackground"
-                app:layout_constraintTop_toBottomOf="@id/world_date" />
+                app:layout_constraintTop_toBottomOf="@id/world_date"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:id="@+id/time_zone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:textSize="@dimen/text_middle"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <ImageView
+                    android:id="@+id/time_zone_dst"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:src="@drawable/ic_daylight_saving_time"
+                    android:tint="@color/color14"
+                    android:visibility="gone"
+                    android:contentDescription="@null"
+                    android:layout_marginStart="@dimen/padding5"
+                    app:layout_constraintTop_toTopOf="@id/time_zone"
+                    app:layout_constraintStart_toEndOf="@id/time_zone"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <View
-            android:id="@+id/divider1"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            app:layout_constraintTop_toBottomOf="@id/standardTimeLayout"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/clockList"
@@ -98,10 +93,11 @@
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:paddingBottom="@dimen/alarm_item_height"
+            android:scrollbars="none"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/divider1" />
+            app:layout_constraintTop_toBottomOf="@id/main_date_time_selector_layout" />
 
         <TextView
             android:id="@+id/list_empty"
@@ -113,7 +109,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/standardTimeLayout" />
+            app:layout_constraintTop_toBottomOf="@id/main_date_time_selector_layout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

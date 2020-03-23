@@ -26,37 +26,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/time_view"
+        <TextView
+            android:id="@+id/local_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/test"
+            android:textSize="@dimen/text_mxlarge"
+            android:gravity="center"
+            android:includeFontPadding="false"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/range"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <TextView
-                android:id="@+id/am_pm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/test"
-                android:textSize="@dimen/text_middle"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBaseline_toBaselineOf="@id/local_time"/>
-
-            <TextView
-                android:id="@+id/local_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/padding5"
-                android:text="@string/test"
-                android:textSize="@dimen/text_xxlarge"
-                android:gravity="center"
-                android:includeFontPadding="false"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/am_pm"/>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
             android:id="@+id/range"
@@ -64,7 +44,7 @@
             android:layout_height="wrap_content"
             android:textSize="@dimen/text_xsmall"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/time_view"
+            app:layout_constraintTop_toBottomOf="@id/local_time"
             app:layout_constraintBottom_toTopOf="@id/repeat"/>
 
         <TextView
@@ -81,8 +61,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/time_view"
-            app:layout_constraintBottom_toTopOf="@id/time_view"/>
+            app:layout_constraintTop_toBottomOf="@id/local_time"
+            app:layout_constraintBottom_toTopOf="@id/local_time"/>
 
         <ImageView
             android:id="@+id/timezone"

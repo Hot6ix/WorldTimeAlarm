@@ -28,6 +28,18 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
 
+        <ImageView
+            android:id="@+id/time_zone_dst"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:src="@drawable/ic_daylight_saving_time"
+            android:tint="@color/color14"
+            android:visibility="gone"
+            android:contentDescription="@null"
+            android:layout_marginStart="@dimen/padding5"
+            app:layout_constraintTop_toTopOf="@id/time_zone_name_clock"
+            app:layout_constraintStart_toEndOf="@id/time_zone_name_clock"/>
+
         <TextView
             android:id="@+id/time_zone_offset"
             android:layout_width="wrap_content"
@@ -50,21 +62,11 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
-            android:id="@+id/time_zone_am_pm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="end"
-            android:textSize="@dimen/text_middle"
-            android:layout_marginEnd="@dimen/padding5"
-            app:layout_constraintEnd_toStartOf="@id/time_zone_time"
-            app:layout_constraintBaseline_toBaselineOf="@id/time_zone_time"/>
-
-        <TextView
             android:id="@+id/time_zone_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end|bottom"
-            android:textSize="@dimen/text_mxlarge"
+            android:textSize="@dimen/text_xlarge"
             android:includeFontPadding="false"
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintTop_toTopOf="parent"

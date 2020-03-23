@@ -44,11 +44,10 @@
         android:key="@string/setting_group_2_key"
         android:title="@string/setting_group_2">
 
-        <com.simples.j.worldtimealarm.support.SwitchPreference
-            android:key="@string/setting_converter_timezone_key"
-            android:title="@string/setting_converter_timezone"
-            android:defaultValue="false"
-            android:layout="@layout/preference_timezone"/>
+        <SwitchPreference
+            android:key="@string/setting_converter_remember_last_key"
+            android:title="@string/setting_converter_remember_last"
+            android:defaultValue="true"/>
 
     </PreferenceCategory>
 

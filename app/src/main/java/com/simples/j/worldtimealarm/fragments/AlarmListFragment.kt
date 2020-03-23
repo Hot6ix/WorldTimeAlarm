@@ -366,12 +366,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                             alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
 
                             if(::alarmListAdapter.isInitialized) {
-                                alarmListAdapter.readPreferences()
                                 alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
                             }
                             else {
                                 job.join()
-                                alarmListAdapter.readPreferences()
                                 alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
                             }
                         }

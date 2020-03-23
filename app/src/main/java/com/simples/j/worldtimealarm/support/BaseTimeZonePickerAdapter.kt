@@ -69,16 +69,18 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
 
                 holder.title.text = item.title
 
-                try {
-                    val timeZone = TimeZone.getTimeZone(item.id)
-                    if(timeZone.useDaylightTime() && timeZone.inDaylightTime(Date())) {
-                        holder.dst.visibility = View.VISIBLE
+                if(item.summary != null) {
+                    try {
+                        val timeZone = TimeZone.getTimeZone(item.id)
+                        if(timeZone.useDaylightTime() && timeZone.inDaylightTime(Date())) {
+                            holder.dst.visibility = View.VISIBLE
+                        }
+                        else {
+                            holder.dst.visibility = View.GONE
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
-                    else {
-                        holder.dst.visibility = View.GONE
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
 
                 if(showItemSummary) {

@@ -157,6 +157,8 @@
     <string name="setting_converter_timezone_id_key">CONVERTER_TIME_ZONE_ID</string>
     <string name="setting_converter_goto_key">CONVERTER_GOTO</string>
     <string name="setting_converter_goto">更改日期和时间</string>
+    <string name="setting_converter_remember_last_key">REMEMBER</string>
+    <string name="setting_converter_remember_last">记住最后的设置</string>
 
     <string name="setting_group_3_key">Others</string>
     <string name="setting_group_3">其他</string>
