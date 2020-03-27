@@ -67,15 +67,8 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             highlightId = -1
         }
 
-        val instant = Instant.ofEpochMilli(item.pickerTime)
-        val now = ZonedDateTime.now()
-
         val expect = try {
-            AlarmController.getInstance().calculateDateTime(item, AlarmController.TYPE_ALARM) ?:
-                ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
-                        .withYear(now.year)
-                        .withMonth(now.monthValue)
-                        .withDayOfMonth(now.dayOfMonth)
+            AlarmController.getInstance().calculateDateTime(item, AlarmController.TYPE_ALARM)
         } catch (e: Exception) {
             e.printStackTrace()
             null
@@ -117,9 +110,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
             // disable switch if alarm is expired
             endDate?.let {
-                holder.switch.isEnabled =
-                        if(expect == null) false
-                        else expect.isBefore(it) || expect.isEqual(it)
+                holder.switch.isEnabled = expect?.isAfter(it) ?: false
             }
 
             val rangeText = when {

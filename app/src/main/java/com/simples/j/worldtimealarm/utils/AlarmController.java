@@ -65,7 +65,8 @@ public class AlarmController {
                 end = ZonedDateTime.ofInstant(endInstant, targetZoneId).withSecond(0).withNano(0);
 
                 if(end.isBefore(now)) {
-                    return null;
+                    target = end;
+                    return target.withSecond(0).withNano(0);
                 }
             }
 
@@ -154,7 +155,8 @@ public class AlarmController {
         }
 
         if(end != null && target.isAfter(end)) {
-            return null;
+            target = end;
+            return target.withSecond(0).withNano(0);
         }
 
         return target.withSecond(0).withNano(0);
@@ -316,7 +318,7 @@ public class AlarmController {
             e.printStackTrace();
         }
 
-        if(alarmDateTime == null) {
+        if(alarmDateTime == null || alarmDateTime.isBefore(ZonedDateTime.now())) {
             disableAlarm(context, item);
             return -1L;
         }
