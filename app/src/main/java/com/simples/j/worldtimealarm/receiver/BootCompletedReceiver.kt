@@ -23,7 +23,7 @@ class BootCompletedReceiver : BroadcastReceiver() {
             alarmController = AlarmController.getInstance()
             activatedAlarms = dbCursor.getActivatedAlarms()
             activatedAlarms.forEach {
-                alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
+                alarmController.scheduleLocalAlarm(context, it, AlarmController.TYPE_ALARM)
             }
         }
     }

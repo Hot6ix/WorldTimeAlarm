@@ -20,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.etc.DstItem
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.*
 import kotlinx.android.synthetic.main.fragment_alarm_list.*
@@ -42,6 +43,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private lateinit var dbCursor: DatabaseCursor
     private lateinit var recyclerLayoutManager: LinearLayoutManager
     private lateinit var alarmController: AlarmController
+    private lateinit var dstController: DstController
     private lateinit var audioManager: AudioManager
     private lateinit var fragmentLayout: CoordinatorLayout
 
@@ -72,6 +74,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         updateRequestReceiver = UpdateRequestReceiver()
         dbCursor = DatabaseCursor(fragmentContext)
         alarmController = AlarmController.getInstance()
+        dstController = DstController(fragmentContext)
         audioManager = fragmentContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         job = launch(coroutineContext) {
@@ -255,8 +258,8 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
     override fun onItemStatusChanged(b: Boolean, item: AlarmItem) {
         if(b) {
-            val scheduledTime = alarmController.scheduleAlarm(fragmentContext, item, AlarmController.TYPE_ALARM)
             alarmItems.find { it.notiId == item.notiId }?.on_off = 1
+            val scheduledTime = alarmController.scheduleLocalAlarm(fragmentContext, item, AlarmController.TYPE_ALARM)
             dbCursor.updateAlarmOnOffByNotiId(item.notiId, true)
             showSnackBar(scheduledTime)
         }
@@ -276,10 +279,15 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         val itemPosition = viewHolder.adapterPosition
         val previousPosition = recyclerLayoutManager.findFirstCompletelyVisibleItemPosition()
         val removedItem: AlarmItem
+        var removedDst: DstItem? = null
 
         alarmItems[itemPosition].let {
             removedItem = it
             if(it.on_off == 1) alarmController.cancelAlarm(fragmentContext, it.notiId)
+            dbCursor.findDstItemByAlarmId(it.id)?.let { dstItem ->
+                dstController.requestDstCancellation(dstItem)
+                removedDst = dstItem
+            }
             alarmListAdapter.removeItem(itemPosition)
             dbCursor.removeAlarm(it.notiId)
             setEmptyMessage()
@@ -289,8 +297,9 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             removedItem.let {
                 val id = dbCursor.insertAlarm(it)
                 it.id = id.toInt()
-                if(removedItem.on_off == 1) alarmController.scheduleAlarm(fragmentContext, it, AlarmController.TYPE_ALARM)
+                if(removedItem.on_off == 1) alarmController.scheduleLocalAlarm(fragmentContext, it, AlarmController.TYPE_ALARM)
                 alarmListAdapter.addItem(itemPosition, it)
+                dstController.checkAndScheduleDst(removedDst)
                 recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
                 setEmptyMessage()
             }
@@ -363,7 +372,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                     launch(coroutineContext) {
                         dbCursor.getActivatedAlarms().forEach {
                             alarmController.cancelAlarm(context, it.notiId)
-                            alarmController.scheduleAlarm(context, it, AlarmController.TYPE_ALARM)
+                            alarmController.scheduleLocalAlarm(context, it, AlarmController.TYPE_ALARM)
 
                             if(::alarmListAdapter.isInitialized) {
                                 alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
@@ -382,7 +391,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
             if(index > -1) {
                 if(item.repeat.any { it > 0 }) {
-                    if(item.on_off == 0) alarmItems[index].on_off= 0
+                    alarmItems[index].on_off = item.on_off
                 }
                 else {
                     // One time alarm

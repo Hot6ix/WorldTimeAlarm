@@ -67,8 +67,21 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             highlightId = -1
         }
 
-        val instant = Instant.ofEpochMilli(item.timeSet.toLong())
-        val mainZonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
+        val instant = Instant.ofEpochMilli(item.pickerTime)
+        val now = ZonedDateTime.now()
+
+        val expect = try {
+            AlarmController.getInstance().calculateDateTime(item, AlarmController.TYPE_ALARM) ?:
+                ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
+                        .withYear(now.year)
+                        .withMonth(now.monthValue)
+                        .withDayOfMonth(now.dayOfMonth)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+
+        val mainZonedDateTime = expect?.withZoneSameInstant(ZoneId.systemDefault())
 
         val startDate =
                 item.startDate.let {
@@ -104,12 +117,6 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
             // disable switch if alarm is expired
             endDate?.let {
-                val expect = try {
-                    AlarmController.getInstance().calculateDateTime(item, AlarmController.TYPE_ALARM)
-                } catch (e: IllegalStateException) {
-                    null
-                }
-
                 holder.switch.isEnabled =
                         if(expect == null) false
                         else expect.isBefore(it) || expect.isEqual(it)
@@ -148,7 +155,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             holder.colorTag.visibility = View.GONE
         }
 
-        holder.localTime.text = mainZonedDateTime.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+        holder.localTime.text = mainZonedDateTime?.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
 
         with(item.repeat) {
             if(this.any { it > 0 }) {
@@ -169,12 +176,12 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                     DayOfWeek.of(converted)
                 }
 
-                val repeatLocal = repeat.map {
-                    val targetZonedDateTime = mainZonedDateTime
-                            .withZoneSameInstant(ZoneId.of(item.timeZone))
-                            .with(TemporalAdjusters.nextOrSame(it))
+                val repeatLocal = repeat.mapNotNull {
+                    val nextRepeatDateTime = mainZonedDateTime
+                            ?.withZoneSameInstant(ZoneId.of(item.timeZone))
+                            ?.with(TemporalAdjusters.nextOrSame(it))
 
-                    targetZonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).dayOfWeek
+                    nextRepeatDateTime?.withZoneSameInstant(ZoneId.systemDefault())?.dayOfWeek
                 }
 
                 holder.repeat.text =
@@ -196,31 +203,50 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                         }
             }
             else {
-                val mainInstant = mainZonedDateTime.toInstant()
-                holder.repeat.text =
-                        when {
-                            DateUtils.isToday(mainInstant.toEpochMilli()) && mainInstant.isAfter(Instant.now()) && endDate == null -> {
-                                context.resources.getString(R.string.today)
+                mainZonedDateTime?.toInstant()?.let {
+                    holder.repeat.text =
+                            when {
+                                DateUtils.isToday(it.toEpochMilli()) && it.isAfter(Instant.now()) && endDate == null -> {
+                                    context.resources.getString(R.string.today)
+                                }
+                                (it.isBefore(Instant.now()) || DateUtils.isToday(it.toEpochMilli() - DateUtils.DAY_IN_MILLIS)) && startDate == null && endDate == null -> {
+                                    context.resources.getString(R.string.tomorrow)
+                                } // this can make adapter to know calendar date is tomorrow
+                                endDate != null -> {
+                                    context.resources.getString(R.string.everyday)
+                                }
+                                startDate != null -> {
+                                    DateUtils.formatDateTime(context, it.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
+                                }
+                                else -> {
+                                    DateUtils.formatDateTime(context, it.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
+                                }
                             }
-                            (mainInstant.isBefore(Instant.now()) || DateUtils.isToday(mainInstant.toEpochMilli() - DateUtils.DAY_IN_MILLIS)) && startDate == null && endDate == null -> {
-                                context.resources.getString(R.string.tomorrow)
-                            } // this can make adapter to know calendar date is tomorrow
-                            endDate != null -> {
-                                context.resources.getString(R.string.everyday)
-                            }
-                            startDate != null -> {
-                                DateUtils.formatDateTime(context, mainInstant.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
-                            }
-                            else -> {
-                                DateUtils.formatDateTime(context, mainInstant.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_WEEKDAY)
-                            }
-                        }
+                }
             }
         }
 
         holder.itemView.setOnClickListener { listener.onItemClicked(it, item) }
         holder.switch.setOnCheckedChangeListener(null)
         holder.switch.isChecked = item.on_off != 0
+
+        try {
+            val targetTimeZone = TimeZone.getTimeZone(item.timeZone)
+            val systemTimeZone = TimeZone.getDefault()
+
+            val targetUseDst = targetTimeZone.useDaylightTime() && targetTimeZone.inDaylightTime(Date(expect?.toInstant()?.toEpochMilli() ?: Instant.now().toEpochMilli()))
+            val systemUseDst = systemTimeZone.useDaylightTime() && systemTimeZone.inDaylightTime(Date(expect?.toInstant()?.toEpochMilli() ?: Instant.now().toEpochMilli()))
+
+            if(targetUseDst || systemUseDst) {
+                holder.dst.visibility = View.VISIBLE
+            }
+            else {
+                holder.dst.visibility = View.GONE
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            holder.dst.visibility = View.GONE
+        }
 
         if(item.timeZone != TimeZone.getDefault().id)
             holder.timezone.visibility = View.VISIBLE
@@ -305,6 +331,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         var switch: Switch = view.on_off
         var colorTag: View = view.colorTag
         var range: TextView = view.range
+        var dst: ImageView = view.dst
         var timezone: ImageView = view.timezone
         var ringtone: ImageView = view.ringtone
         var vibration: ImageView = view.vibration

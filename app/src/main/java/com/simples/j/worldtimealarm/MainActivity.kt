@@ -13,12 +13,14 @@ import androidx.preference.PreferenceManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.EXPIRED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.MISSED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.fragments.SettingFragment
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
+import com.simples.j.worldtimealarm.utils.DstController
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -39,6 +41,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
         setContentView(R.layout.activity_main)
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         createNotificationChannels()
+        AndroidThreeTen.init(application)
 
         launch(coroutineContext) {
             withContext(Dispatchers.IO) {
@@ -50,6 +53,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
             }
             adViewMain.loadAd(builder.build())
         }
+
+        DstController(applicationContext).handleSystemDst()
 
         alarmListFragment = AlarmListFragment.newInstance()
         clockListFragment = WorldClockFragment.newInstance()

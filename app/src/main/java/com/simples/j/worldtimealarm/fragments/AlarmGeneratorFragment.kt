@@ -24,6 +24,7 @@ import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
 import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
+import com.simples.j.worldtimealarm.utils.DstController
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.action
 import kotlinx.android.synthetic.main.activity_alarm.date
@@ -38,6 +39,7 @@ import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.apply
 import kotlin.collections.ArrayList
 
 class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListener, View.OnClickListener, MaterialButtonToggleGroup.OnButtonCheckedListener, TimePicker.OnTimeChangedListener {
@@ -56,7 +58,6 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
     private lateinit var preference: SharedPreferences
 
     private var timeZoneSelectorOption: String = ""
-    private var applyDayRepetition = false
     private val dateTimeChangedReceiver = DateTimeChangedReceiver()
 
     override fun onAttach(context: Context) {
@@ -75,7 +76,6 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
 
         preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
         timeZoneSelectorOption = preference.getString(resources.getString(R.string.setting_time_zone_selector_key), SettingFragment.SELECTOR_OLD) ?: SettingFragment.SELECTOR_OLD
-        applyDayRepetition = preference.getBoolean(getString(R.string.setting_time_zone_affect_repetition_key), false)
 
         activity?.run {
             viewModel = ViewModelProvider(this)[AlarmGeneratorViewModel::class.java]
@@ -489,13 +489,17 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 if(difference == 0) resources.getString(R.string.current_time_zone)
                 else MediaCursor.getOffsetOfDifference(fragmentContext, difference, MediaCursor.TYPE_CURRENT)
 
-        val resultInLocal = viewModel.alarmController.calculateDateTime(createAlarm(), TYPE_ALARM).withZoneSameInstant(ZoneId.systemDefault())
-        expected_time.text = resultInLocal.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.SHORT))
+        var resultInLocal = viewModel.alarmController.calculateDateTime(createAlarm(), TYPE_ALARM)
+        if(resultInLocal != null) {
+            resultInLocal = resultInLocal.withZoneSameInstant(ZoneId.systemDefault())
+            expected_time.text = resultInLocal.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.SHORT))
+        }
+
         time_zone_offset.text = offset
 
         val setTimeZone = TimeZone.getTimeZone(viewModel.timeZone.value)
         time_zone_dst.visibility =
-                if(setTimeZone.useDaylightTime() && setTimeZone.inDaylightTime(Date(timeSet))) View.VISIBLE
+                if(setTimeZone.useDaylightTime() && setTimeZone.inDaylightTime(Date(viewModel.remoteZonedDateTime.toInstant().toEpochMilli()))) View.VISIBLE
                 else View.GONE
     }
 
@@ -666,12 +670,13 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
                 when(TimeUnit.MILLISECONDS.toDays(difference)) {
                     in 1..6 -> {
                         val expect = try {
-                            viewModel.alarmController.calculateDate(item, TYPE_ALARM, applyDayRepetition)
+                            viewModel.alarmController.calculateDateTime(item, TYPE_ALARM)
                         } catch (e: IllegalStateException) {
                             null
                         }
 
-                        if(expect == null || expect.timeInMillis <= System.currentTimeMillis() || expect.timeInMillis > end.toEpochMilli()) {
+                        val now = ZonedDateTime.now()
+                        if(expect == null || expect.isBefore(now) || expect.isEqual(now) || expect.isAfter(viewModel.endDate)) {
                             Snackbar.make(fragment_container, getString(R.string.invalid_repeat), Snackbar.LENGTH_SHORT)
                                     .setAnchorView(action)
                                     .show()
@@ -702,12 +707,22 @@ class AlarmGeneratorFragment : Fragment(), AlarmOptionAdapter.OnItemClickListene
 
         item.timeSet = scheduledTime.toString()
 
+        val dbCursor = DatabaseCursor(fragmentContext)
         if(viewModel.alarmItem == null) {
-            item.id = DatabaseCursor(fragmentContext).insertAlarm(item).toInt()
+            item.id = dbCursor.insertAlarm(item).toInt()
             item.index = item.id
         }
         else {
-            DatabaseCursor(fragmentContext).updateAlarm(item)
+            dbCursor.updateAlarm(item)
+        }
+
+        val zoneId = viewModel.remoteZonedDateTime.zone
+        val timeZone = TimeZone.getTimeZone(zoneId.id)
+
+        if(timeZone.useDaylightTime()) {
+            val nextDateTimeAfter = zoneId.rules.nextTransition(Instant.now()).dateTimeAfter.atZone(zoneId).toInstant().toEpochMilli()
+            val dstId = dbCursor.insertDst(nextDateTimeAfter, zoneId.id, item.id)
+            DstController(fragmentContext).checkAndScheduleDst(DstItem(dstId, nextDateTimeAfter, zoneId.id, item.id))
         }
 
         activity?.run {

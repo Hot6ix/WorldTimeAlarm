@@ -97,7 +97,7 @@ class AlarmReceiver: BroadcastReceiver() {
             }
 
             if(!isExpired) {
-                AlarmController.getInstance().scheduleAlarm(context, item, AlarmController.TYPE_ALARM)
+                AlarmController.getInstance().scheduleLocalAlarm(context, item, AlarmController.TYPE_ALARM)
             }
         }
 

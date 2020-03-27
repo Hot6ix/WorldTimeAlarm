@@ -12,13 +12,11 @@
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/main_date_time_selector_layout"
+            android:id="@+id/main_date_time_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/padding10"
             android:paddingBottom="@dimen/padding10"
-            android:background="@color/background"
-            android:elevation="2dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -87,6 +85,14 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <View
+            android:id="@+id/divider1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider"
+            android:elevation="100dp"
+            app:layout_constraintTop_toBottomOf="@id/main_date_time_layout"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/clockList"
             android:layout_width="match_parent"
@@ -94,10 +100,11 @@
             android:clipToPadding="false"
             android:paddingBottom="@dimen/alarm_item_height"
             android:scrollbars="none"
+            android:overScrollMode="never"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/main_date_time_selector_layout" />
+            app:layout_constraintTop_toBottomOf="@id/divider1" />
 
         <TextView
             android:id="@+id/list_empty"
@@ -109,7 +116,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/main_date_time_selector_layout" />
+            app:layout_constraintTop_toBottomOf="@id/divider1" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

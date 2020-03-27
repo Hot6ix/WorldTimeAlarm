@@ -21,7 +21,7 @@
     <color name="textColorDisabled">#AAAAAA</color>
     <color name="textColorDisabledDark">#919191</color>
     <color name="warning">@color/color1</color>
-    <color name="daylight_saving_time">@color/color14</color>
+    <color name="material_background">@android:color/white</color>
 
     <color name="color1">#EF5350</color>
     <color name="color2">#ec407a</color>

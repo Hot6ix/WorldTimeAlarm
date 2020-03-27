@@ -62,7 +62,7 @@ class AlarmControllerAndroidTest {
         println("========================")
     }
 
-    @Test
+//    @Test
     fun printTimeZone() {
         val list = MediaCursor.getTimeZoneLocales()
 
@@ -192,6 +192,10 @@ class AlarmControllerAndroidTest {
         assertNotEquals(given.toInstant().toEpochMilli(), result.toInstant().toEpochMilli())
         assertNotEquals(given.toInstant().toEpochMilli(), answer.toInstant().toEpochMilli())
         assertTrue(answer.withZoneSameInstant(ZoneId.systemDefault()).isEqual(result.withZoneSameInstant(ZoneId.systemDefault())))
+    }
+
+    @Test
+    fun testDSTScheduling() {
     }
 
     private fun createAlarm(timeZone: String = TimeZone.getDefault().id,

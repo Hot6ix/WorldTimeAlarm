@@ -137,7 +137,12 @@ class WakeUpService : Service() {
                 }
                 else -> {
                     // This statement is for repeating alarm that is not expired yet
-                    // Do nothing like ACTION_SNOOZE
+                    val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
+                        val bundle = Bundle()
+                        bundle.putParcelable(AlarmReceiver.ITEM, it)
+                        putExtra(AlarmReceiver.OPTIONS, bundle)
+                    }
+                    sendBroadcast(requestIntent)
                 }
             }
         }
@@ -319,6 +324,7 @@ class WakeUpService : Service() {
     private fun vibrate(array: LongArray?) {
         if(array != null) {
             if(Build.VERSION.SDK_INT < 26) {
+                @Suppress("DEPRECATION")
                 if(array.size > 1) vibrator?.vibrate(array, 0)
                 else vibrator?.vibrate(array[0])
             }

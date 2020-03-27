@@ -52,9 +52,9 @@ public class AlarmController {
 
         if(item == null) return null;
 
-        Instant timeSet = Instant.ofEpochMilli(Long.valueOf(item.getTimeSet()));
+        Instant timeSet = Instant.ofEpochMilli(item.getPickerTime());
         ZoneId targetZoneId = ZoneId.of(item.getTimeZone());
-        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now().withZoneSameInstant(targetZoneId);
         ZonedDateTime target = ZonedDateTime.ofInstant(timeSet, targetZoneId).withSecond(0).withNano(0);
         ZonedDateTime start = now;
         ZonedDateTime end = null;
@@ -62,19 +62,19 @@ public class AlarmController {
         if(type == TYPE_ALARM) {
             if(item.getEndDate() != null && item.getEndDate() > 0) {
                 Instant endInstant = Instant.ofEpochMilli(item.getEndDate());
-                end = ZonedDateTime.ofInstant(endInstant, targetZoneId);
+                end = ZonedDateTime.ofInstant(endInstant, targetZoneId).withSecond(0).withNano(0);
 
-                if(end.withZoneSameInstant(ZoneId.systemDefault()).isBefore(now)) {
+                if(end.isBefore(now)) {
                     return null;
                 }
             }
 
             if(item.getStartDate() != null && item.getStartDate() > 0) {
                 Instant startInstant = Instant.ofEpochMilli(item.getStartDate());
-                start = ZonedDateTime.ofInstant(startInstant, targetZoneId);
+                start = ZonedDateTime.ofInstant(startInstant, targetZoneId).withSecond(0).withNano(0);
 
                 if(start.isBefore(now)) {
-                    target = start
+                    target = target
                             .withYear(now.getYear())
                             .withMonth(now.getMonthValue())
                             .withDayOfMonth(now.getDayOfMonth());
@@ -157,7 +157,7 @@ public class AlarmController {
             return null;
         }
 
-        return target;
+        return target.withSecond(0).withNano(0);
     }
 
     public Calendar calculateDate(AlarmItem item, int type, boolean applyDayRepetition) {
@@ -311,7 +311,8 @@ public class AlarmController {
         ZonedDateTime alarmDateTime = null;
         try {
             alarmDateTime = calculateDateTime(item, type);
-        } catch (IllegalStateException e) {
+            item.setTimeSet(String.valueOf(alarmDateTime.toInstant().toEpochMilli()));
+        } catch (IllegalStateException | NullPointerException e) {
             e.printStackTrace();
         }
 
@@ -411,5 +412,7 @@ public class AlarmController {
         requestIntent.putExtra(AlarmReceiver.OPTIONS, bundle);
         context.sendBroadcast(requestIntent);
     }
+
+    public static final String EXTRA_TIME_IN_MILLIS = "EXTRA_TIME_IN_MILLIS";
 
 }

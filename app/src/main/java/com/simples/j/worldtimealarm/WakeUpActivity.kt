@@ -62,6 +62,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
         adViewWakeUp.loadAd(AdRequest.Builder().addTestDevice("6EF4925B538C754B535FCB7177FCAC3D").build())
 
+        @Suppress("DEPRECATION")
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                 or WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
@@ -195,7 +196,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 finish()
             }
             R.id.snooze -> {
-                AlarmController.getInstance().scheduleAlarm(applicationContext, item, AlarmController.TYPE_SNOOZE)
+                AlarmController.getInstance().scheduleLocalAlarm(applicationContext, item, AlarmController.TYPE_SNOOZE)
 
                 val minutes = getString(R.string.minutes, item?.snooze?.div((60 * 1000)))
                 Toast.makeText(applicationContext, getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()
@@ -251,8 +252,8 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     companion object {
-        const val ALARM_NOTIFICATION_ID = 0
-        const val SHARED_ALARM_NOTIFICATION_ID = 132562
+//        const val ALARM_NOTIFICATION_ID = 0
+//        const val SHARED_ALARM_NOTIFICATION_ID = 132562
 
         const val ACTION_ACTIVITY_FINISH = "ACTION_ACTIVITY_FINISH"
     }

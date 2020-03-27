@@ -58,17 +58,12 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
         calendar.minDate = dateSet.toInstant().toEpochMilli()
         calendar.setOnDateChangeListener(this)
 
-        val instant: Instant
         when(viewModel.currentTab) {
             0 -> {
-                instant = Instant.ofEpochMilli(viewModel.startDate.value ?: System.currentTimeMillis())
-                dateSet = ZonedDateTime.ofInstant(instant, ZoneId.of(viewModel.timeZone))
-                calendar.date = dateSet.toInstant().toEpochMilli()
+                setLocalizedDate(viewModel.startDate.value ?: System.currentTimeMillis())
             }
             1 -> {
-                instant = Instant.ofEpochMilli(viewModel.endDate.value ?: System.currentTimeMillis())
-                dateSet = ZonedDateTime.ofInstant(instant, ZoneId.of(viewModel.timeZone))
-                calendar.date = dateSet.toInstant().toEpochMilli()
+                setLocalizedDate(viewModel.endDate.value ?: System.currentTimeMillis())
             }
         }
 
@@ -116,15 +111,6 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
                     }
                 }
 
-                if(s != null && s < System.currentTimeMillis()) {
-                    if(s > 0) {
-                        Snackbar.make(fragment_layout, getString(R.string.start_date_and_time_is_wrong), Snackbar.LENGTH_SHORT)
-                                .setAnchorView(action)
-                                .show()
-                        return
-                    }
-                }
-
                 if(e != null && DateUtils.isToday(e)) {
                     if(e > 0) {
                         Snackbar.make(fragment_layout, getString(R.string.end_date_earlier_than_today), Snackbar.LENGTH_SHORT)
@@ -152,10 +138,10 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
 
         when(tab?.position) {
             0 -> {
-                calendar.date = viewModel.startDate.value ?: System.currentTimeMillis()
+                setLocalizedDate(viewModel.startDate.value ?: System.currentTimeMillis())
             }
             1 -> {
-                calendar.date = viewModel.endDate.value ?: System.currentTimeMillis()
+                setLocalizedDate(viewModel.endDate.value ?: System.currentTimeMillis())
             }
         }
     }
@@ -192,11 +178,19 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
         tab?.view?.findViewById<TextView>(R.id.summary)?.text = content
     }
 
+    private fun setLocalizedDate(millis: Long) {
+        val instant = Instant.ofEpochMilli(millis)
+        val target = ZonedDateTime.ofInstant(instant, ZoneId.of(viewModel.timeZone))
+
+        val calendarLocal = target.withZoneSameLocal(ZoneId.systemDefault())
+        calendar.date = calendarLocal.toInstant().toEpochMilli()
+    }
+
     private fun formatDate(epochMillis: Long): String {
         val instant = Instant.ofEpochMilli(epochMillis)
-        val timeZoneDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(viewModel.timeZone))
 
-        return timeZoneDateTime.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+        return ZonedDateTime.ofInstant(instant, ZoneId.of(viewModel.timeZone)).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
+//        return DateUtils.formatDateTime(fragmentContext, instant.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
     }
 
     companion object {

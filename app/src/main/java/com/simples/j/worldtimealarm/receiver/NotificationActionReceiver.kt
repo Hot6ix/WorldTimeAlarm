@@ -22,7 +22,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
             if (action == ACTION_SNOOZE) {
                 intent.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)?.let {
-                    AlarmController.getInstance().scheduleAlarm(context, it, AlarmController.TYPE_SNOOZE)
+                    AlarmController.getInstance().scheduleLocalAlarm(context, it, AlarmController.TYPE_SNOOZE)
 
                     val minutes = context.getString(R.string.minutes, it.snooze.div((60 * 1000)))
                     Toast.makeText(context, context.getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()

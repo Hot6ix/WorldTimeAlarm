@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.ClockItem
+import com.simples.j.worldtimealarm.etc.DstItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import java.util.*
 import kotlin.collections.ArrayList
@@ -478,6 +479,106 @@ class DatabaseCursor(val context: Context) {
     fun removeUserRingtone(uri: String) {
         val db = dbManager.writableDatabase
         db.delete(DatabaseManager.TABLE_USER_RINGTONE, DatabaseManager.COLUMN_URI + "= ?", arrayOf(uri))
+        db.close()
+    }
+
+    fun getSystemDst(): DstItem? {
+        val db = dbManager.readableDatabase
+
+        var systemDst: DstItem? = null
+
+        val cursor = db.query(DatabaseManager.TABLE_DST_LIST, null, "${DatabaseManager.COLUMN_ALARM_ID}=?", arrayOf((-1).toString()), null, null, null)
+        if(cursor.count > 0) {
+            cursor.moveToNext()
+            val id = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+            val timeSet = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
+            val timeZone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
+            val alarmId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ALARM_ID))
+
+            systemDst = DstItem(id, timeSet, timeZone, alarmId)
+        }
+
+        cursor.close()
+
+        return systemDst
+    }
+
+    fun removeSystemDst() {
+        val db = dbManager.writableDatabase
+        db.delete(DatabaseManager.TABLE_DST_LIST, DatabaseManager.COLUMN_ALARM_ID + "= ?", arrayOf((-1).toString()))
+        db.close()
+    }
+
+    fun getDstList(): ArrayList<DstItem> {
+        val db = dbManager.readableDatabase
+        val list = ArrayList<DstItem>()
+
+        val cursor = db.query(DatabaseManager.TABLE_DST_LIST, null, null, null, null, null, null)
+        if(cursor.count > 0) {
+            cursor.moveToNext()
+            val id = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+            val timeSet = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
+            val timeZone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
+            val alarmId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ALARM_ID))
+
+            list.add(DstItem(id, timeSet, timeZone, alarmId))
+        }
+        cursor.close()
+
+        return list
+    }
+
+    fun findDstItemByAlarmId(alarmId: Int?): DstItem? {
+        val db = dbManager.readableDatabase
+        var dstItem: DstItem? = null
+
+        val cursor = db.query(DatabaseManager.TABLE_DST_LIST, null, "${DatabaseManager.COLUMN_ALARM_ID}=?", arrayOf(alarmId.toString()), null, null, null)
+        if(cursor.count > 0) {
+            cursor.moveToNext()
+            val id = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+            val millis = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
+            val timeZone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
+            val aId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ALARM_ID))
+
+            dstItem = DstItem(id, millis, timeZone, aId)
+        }
+        cursor.close()
+
+        return dstItem
+    }
+
+    fun insertDst(timeInMillis: Long, timeZone: String, alarmId: Int?): Long {
+        val db = dbManager.writableDatabase
+
+        if(alarmId == null) return -1
+
+        val contentValues = ContentValues().apply {
+            put(DatabaseManager.COLUMN_TIME_SET, timeInMillis)
+            put(DatabaseManager.COLUMN_TIME_ZONE, timeZone)
+            put(DatabaseManager.COLUMN_ALARM_ID, alarmId)
+        }
+
+        val id = db.insert(DatabaseManager.TABLE_DST_LIST, null, contentValues)
+        db.close()
+
+        return id
+    }
+
+    fun removeDst(dstItem: DstItem) {
+        val db = dbManager.writableDatabase
+        db.delete(DatabaseManager.TABLE_DST_LIST, DatabaseManager.COLUMN_ID + "= ?", arrayOf(dstItem.id.toString()))
+        db.close()
+    }
+
+    fun updateDst(item: DstItem) {
+        val db = dbManager.writableDatabase
+
+        val contentValues = ContentValues()
+        contentValues.put(DatabaseManager.COLUMN_TIME_SET, item.millis)
+        contentValues.put(DatabaseManager.COLUMN_TIME_ZONE, item.timeZone)
+        contentValues.put(DatabaseManager.COLUMN_ALARM_ID, item.alarmId)
+
+        db.update(DatabaseManager.TABLE_DST_LIST, contentValues, DatabaseManager.COLUMN_ID + "= ?", arrayOf(item.id.toString()))
         db.close()
     }
 

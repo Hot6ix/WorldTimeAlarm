@@ -10,6 +10,12 @@ import android.database.sqlite.SQLiteOpenHelper
  */
 class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, null, VERSION) {
 
+    override fun onConfigure(db: SQLiteDatabase?) {
+        super.onConfigure(db)
+
+        db?.setForeignKeyConstraintsEnabled(true)
+    }
+
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("CREATE TABLE $TABLE_ALARM_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "$COLUMN_TIME_ZONE TEXT," +
@@ -34,6 +40,11 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
         db.execSQL("CREATE TABLE $TABLE_USER_RINGTONE ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "$COLUMN_TITLE TEXT, " +
                 "$COLUMN_URI TEXT);")
+
+        db.execSQL("CREATE TABLE $TABLE_DST_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "$COLUMN_TIME_SET INTEGER, " +
+                "$COLUMN_TIME_ZONE TEXT, " +
+                "$COLUMN_ALARM_ID INTEGER);")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, old: Int, new: Int) {
@@ -59,15 +70,22 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
         if(old < 6) {
             db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_PICKER_TIME TEXT")
         }
+        if(old < 7) {
+            db.execSQL("CREATE TABLE $TABLE_DST_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "$COLUMN_TIME_SET INTEGER, " +
+                    "$COLUMN_TIME_ZONE TEXT, " +
+                    "$COLUMN_ALARM_ID INTEGER);")
+        }
     }
 
     companion object {
-        const val VERSION = 6
+        const val VERSION = 7
         const val DB_NAME = "alarm.db"
 
         const val TABLE_ALARM_LIST = "AlarmList"
         const val TABLE_CLOCK_LIST = "ClockList"
         const val TABLE_USER_RINGTONE = "Ringtone"
+        const val TABLE_DST_LIST = "DaylightSavingTime"
 
         const val COLUMN_ID = "id"
         const val COLUMN_TIME_ZONE = "timezone"
@@ -86,6 +104,7 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
         const val COLUMN_TITLE = "title"
         const val COLUMN_URI = "uri"
         const val COLUMN_PICKER_TIME = "picker_time"
+        const val COLUMN_ALARM_ID = "alarm_id"
     }
 
 }
