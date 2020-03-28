@@ -127,6 +127,7 @@
     <string name="time_zone_change_warning">Changing the time zone affects the following items.\n- Time\n- Date (includes start/end date)\n- Repeat days (Activate in the setting tab)</string>
     <string name="time_zone_dst_end_msg">%1$s is in Daylight Saving Time. It ends on %2$s.</string>
     <string name="time_zone_dst_start_msg">%1$s observes Daylight Saving Time. It starts on %2$s.</string>
+    <string name="time_zone_no_dst_msg">%1$s doesn\'t use Daylight Saving Time.</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>

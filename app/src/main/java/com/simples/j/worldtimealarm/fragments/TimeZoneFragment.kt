@@ -184,11 +184,11 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                 time_zone_region_layout.isEnabled = true
                 time_zone_region_summary.text = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), this.mGmtOffset)
 
+                val timeZoneName = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), MediaCursor.getGmtOffsetString(Locale.getDefault(), mTimeZone, mDate))
+
                 if(mTimeZone.useDaylightTime()) {
                     val nextTransition = ZoneId.of(mTimeZone.id).rules.nextTransition(Instant.now())
                     val nextTransitionLocal = ZonedDateTime.of(nextTransition.dateTimeBefore, ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.SHORT))
-
-                    val timeZoneName = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), MediaCursor.getGmtOffsetString(Locale.getDefault(), mTimeZone, mDate))
 
                     if(mTimeZone.inDaylightTime(Date())) {
                         time_zone_change_info.text = getString(R.string.time_zone_dst_end_msg, timeZoneName, nextTransitionLocal)
@@ -198,6 +198,10 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                         time_zone_change_info.text = getString(R.string.time_zone_dst_start_msg, timeZoneName, nextTransitionLocal)
                         time_zone_dst.visibility = View.GONE
                     }
+                }
+                else {
+                    time_zone_change_info.text = getString(R.string.time_zone_no_dst_msg, timeZoneName)
+                    time_zone_dst.visibility = View.GONE
                 }
 
                 val found = MediaCursor.getULocaleByTimeZoneId(mTimeZone.id)

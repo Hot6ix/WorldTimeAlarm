@@ -128,6 +128,7 @@
     <string name="time_zone_change_warning">更改时区会影响以下项目。\n- 时间\n- 日期 (包括开始/结束日期)\n- 重复的一天 (在“设置”选项卡中激活)</string>
     <string name="time_zone_dst_end_msg">%1$s处于夏令时。 结束于%2$s。</string>
     <string name="time_zone_dst_start_msg">%1$s遵守夏令时。 它开始于%2$s.</string>
+    <string name="time_zone_no_dst_msg">%1$s使用夏令时。</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>

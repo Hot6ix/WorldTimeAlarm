@@ -110,7 +110,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
             // disable switch if alarm is expired
             endDate?.let {
-                holder.switch.isEnabled = expect?.isAfter(it) ?: false
+                holder.switch.isEnabled = expect?.isBefore(it) ?: false
             }
 
             val rangeText = when {

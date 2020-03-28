@@ -55,7 +55,12 @@ public class AlarmController {
         Instant timeSet = Instant.ofEpochMilli(item.getPickerTime());
         ZoneId targetZoneId = ZoneId.of(item.getTimeZone());
         ZonedDateTime now = ZonedDateTime.now().withZoneSameInstant(targetZoneId);
-        ZonedDateTime target = ZonedDateTime.ofInstant(timeSet, targetZoneId).withSecond(0).withNano(0);
+        ZonedDateTime target = ZonedDateTime.ofInstant(timeSet, targetZoneId)
+                .withYear(now.getYear())
+                .withMonth(now.getMonthValue())
+                .withDayOfMonth(now.getDayOfMonth())
+                .withSecond(0)
+                .withNano(0);
         ZonedDateTime start = now;
         ZonedDateTime end = null;
 
@@ -75,12 +80,6 @@ public class AlarmController {
                 start = ZonedDateTime.ofInstant(startInstant, targetZoneId).withSecond(0).withNano(0);
 
                 if(start.isBefore(now)) {
-                    target = target
-                            .withYear(now.getYear())
-                            .withMonth(now.getMonthValue())
-                            .withDayOfMonth(now.getDayOfMonth());
-                }
-                else {
                     target = start;
                 }
             }
@@ -313,6 +312,7 @@ public class AlarmController {
         ZonedDateTime alarmDateTime = null;
         try {
             alarmDateTime = calculateDateTime(item, type);
+            Log.d(C.TAG, alarmDateTime.toString());
             item.setTimeSet(String.valueOf(alarmDateTime.toInstant().toEpochMilli()));
         } catch (IllegalStateException | NullPointerException e) {
             e.printStackTrace();
