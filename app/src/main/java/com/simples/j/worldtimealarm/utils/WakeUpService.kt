@@ -24,8 +24,11 @@ import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_EXPIRED
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.NotificationActionReceiver
-import java.text.SimpleDateFormat
-import java.util.*
+import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.format.FormatStyle
 
 class WakeUpService : Service() {
 
@@ -167,6 +170,9 @@ class WakeUpService : Service() {
         val title: String
         val notificationBuilder = NotificationCompat.Builder(applicationContext, ALARM_NOTIFICATION_CHANNEL)
 
+        val instant = Instant.ofEpochMilli(alarmItem.timeSet.toLong())
+        val zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(alarmItem.timeZone))
+
         when(type) {
             AlarmReceiver.TYPE_ALARM -> {
                 dstIntent = Intent(applicationContext, WakeUpActivity::class.java).apply {
@@ -178,10 +184,10 @@ class WakeUpService : Service() {
                 title =
                         when {
                             isExpired && !alarmItem.label.isNullOrEmpty() -> {
-                                applicationContext.resources.getString(R.string.last_alarm_with_time).format(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(alarmItem.timeSet.toLong())))
+                                applicationContext.resources.getString(R.string.last_alarm_with_time).format(zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
                             }
                             !alarmItem.label.isNullOrEmpty() -> {
-                                SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(alarmItem.timeSet.toLong()))
+                                zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
                             }
                             isExpired -> {
                                 applicationContext.resources.getString(R.string.last_alarm)
@@ -196,10 +202,10 @@ class WakeUpService : Service() {
                             alarmItem.label
                         }
                         else if(intent?.action == AlarmReceiver.ACTION_SNOOZE) {
-                            SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date())
+                            ZonedDateTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
                         }
                         else {
-                            SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(alarmItem.timeSet.toLong()))
+                            zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
                         }
 
                 val dismissIntent = Intent(this, NotificationActionReceiver::class.java).apply {

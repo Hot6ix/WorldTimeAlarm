@@ -79,7 +79,7 @@ public class AlarmController {
                 Instant startInstant = Instant.ofEpochMilli(item.getStartDate());
                 start = ZonedDateTime.ofInstant(startInstant, targetZoneId).withSecond(0).withNano(0);
 
-                if(start.isBefore(now)) {
+                if(start.isAfter(now)) {
                     target = start;
                 }
             }
@@ -312,7 +312,6 @@ public class AlarmController {
         ZonedDateTime alarmDateTime = null;
         try {
             alarmDateTime = calculateDateTime(item, type);
-            Log.d(C.TAG, alarmDateTime.toString());
             item.setTimeSet(String.valueOf(alarmDateTime.toInstant().toEpochMilli()));
         } catch (IllegalStateException | NullPointerException e) {
             e.printStackTrace();

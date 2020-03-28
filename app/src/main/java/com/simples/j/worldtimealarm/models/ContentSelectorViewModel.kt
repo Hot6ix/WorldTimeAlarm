@@ -21,7 +21,4 @@ class ContentSelectorViewModel : ViewModel() {
     }
 
     var timeZone: String = TimeZone.getDefault().id
-    var defaultStart: Long? = null
-    var defaultEnd: Long? = null
-
 }

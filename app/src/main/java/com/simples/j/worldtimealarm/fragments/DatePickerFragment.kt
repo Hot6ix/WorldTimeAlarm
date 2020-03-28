@@ -79,15 +79,19 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
 
         // Observe
         viewModel.startDate.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            it?.let {
-                if(it > 0) setTabSummary(startDateTab, formatDate(it))
-                else setTabSummary(startDateTab, getString(R.string.range_not_set))
+            if(it == null || it < 0) {
+                setTabSummary(startDateTab, getString(R.string.range_not_set))
+            }
+            else {
+                setTabSummary(startDateTab, formatDate(it))
             }
         })
         viewModel.endDate.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            it?.let {
-                if(it > 0) setTabSummary(endDateTab, formatDate(it))
-                else setTabSummary(endDateTab, getString(R.string.range_not_set))
+            if(it == null || it < 0) {
+                setTabSummary(endDateTab, getString(R.string.range_not_set))
+            }
+            else {
+                setTabSummary(endDateTab, formatDate(it))
             }
         })
 
@@ -141,7 +145,14 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
                 setLocalizedDate(viewModel.startDate.value ?: System.currentTimeMillis())
             }
             1 -> {
-                setLocalizedDate(viewModel.endDate.value ?: System.currentTimeMillis())
+                viewModel.startDate.value.let {
+                    if(it != null && viewModel.endDate.value == null) {
+                        setLocalizedDate(it)
+                    }
+                    else {
+                        setLocalizedDate(viewModel.endDate.value ?: System.currentTimeMillis())
+                    }
+                }
             }
         }
     }

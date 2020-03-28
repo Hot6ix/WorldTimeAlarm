@@ -53,12 +53,17 @@ class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickList
             viewModel.action = intent.action
 
             viewModel.lastSelectedValue = intent.getSerializableExtra(LAST_SELECTED_KEY)
-            viewModel.startDate.value = intent.getLongExtra(START_DATE_KEY, -1)
-            viewModel.endDate.value = intent.getLongExtra(END_DATE_KEY, -1)
+            intent.getLongExtra(START_DATE_KEY, -1).let {
+                viewModel.startDate.value =
+                        if(it > 0) it
+                        else null
+            }
+            intent.getLongExtra(END_DATE_KEY, -1).let {
+                viewModel.endDate.value =
+                        if(it > 0) it
+                        else null
+            }
             viewModel.timeZone = intent.getStringExtra(TIME_ZONE_KEY) ?: TimeZone.getDefault().id
-
-            viewModel.defaultStart = intent.getLongExtra(START_DATE_KEY, -1)
-            viewModel.defaultEnd = intent.getLongExtra(END_DATE_KEY, -1)
 
             when (intent.action) {
                 ACTION_REQUEST_AUDIO, ACTION_REQUEST_VIBRATION, ACTION_REQUEST_SNOOZE -> {
