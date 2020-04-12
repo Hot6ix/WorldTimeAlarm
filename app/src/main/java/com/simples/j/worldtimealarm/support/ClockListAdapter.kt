@@ -3,10 +3,10 @@ package com.simples.j.worldtimealarm.support
 import android.content.Context
 import android.icu.util.TimeZone
 import android.os.Build
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.simples.j.worldtimealarm.R
@@ -19,7 +19,6 @@ import org.threeten.bp.ZoneId
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * Created by j on 19/02/2018.
@@ -61,16 +60,14 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
                 holder.timeZoneName.text =
                         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) MediaCursor.getBestNameForTimeZone(TimeZone.getTimeZone(target.zone.id))
                         else target.zone.id
-                val targetTimeZone = java.util.TimeZone.getTimeZone(target.zone.id)
-                if(targetTimeZone.useDaylightTime() && targetTimeZone.inDaylightTime(Date(target.toInstant().toEpochMilli()))) {
-                    holder.timeZoneDst.visibility = View.VISIBLE
-                }
-                else {
-                    holder.timeZoneDst.visibility = View.GONE
-                }
                 holder.timeZoneOffset.text = offset
 
-                holder.timeZoneTime.text = target.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+                val calendar = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, target.hour)
+                    set(Calendar.MINUTE, target.minute)
+                }
+
+                holder.timeZoneTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
                 holder.timeZoneDate.text = target.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
             }
         }
@@ -94,7 +91,6 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         var timeZoneName: TextView = view.time_zone_name_clock
-        var timeZoneDst: ImageView = view.time_zone_dst
         var timeZoneOffset: TextView = view.time_zone_offset
         var timeZoneTime: TextView = view.time_zone_time
         var timeZoneDate: TextView = view.time_zone_date

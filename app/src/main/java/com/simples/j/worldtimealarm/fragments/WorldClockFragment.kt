@@ -7,6 +7,7 @@ import android.app.TimePickerDialog
 import android.content.*
 import android.os.Build
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -163,15 +164,12 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         }
 
         viewModel.mainZonedDateTime.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            val tz = TimeZone.getTimeZone(it.zone.id)
-            if(tz.useDaylightTime() && tz.inDaylightTime(Date(it.toInstant().toEpochMilli()))) {
-                time_zone_dst.visibility = View.VISIBLE
-            }
-            else {
-                time_zone_dst.visibility = View.GONE
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, it.hour)
+                set(Calendar.MINUTE, it.minute)
             }
 
-            world_time.text = it.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+            world_time.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
             world_date.text = it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
 
             time_zone.text = getNameForTimeZone(it.zone.id)

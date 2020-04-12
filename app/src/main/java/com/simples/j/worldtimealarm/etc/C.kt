@@ -1,5 +1,11 @@
 package com.simples.j.worldtimealarm.etc
 
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import com.simples.j.worldtimealarm.AlarmReceiver
+import com.simples.j.worldtimealarm.WakeUpActivity
+import org.threeten.bp.Instant
 import java.util.*
 
 /**
@@ -18,5 +24,44 @@ class C {
 
         const val GROUP_MISSED = "com.simples.j.worldtimealarm.GROUP_MISSED"
         const val GROUP_EXPIRED = "com.simples.j.worldtimealarm.GROUP_EXPIRED"
+
+        fun createAlarm(timeZone: String,
+                                timeSet: Instant = Instant.now(),
+                                repeat: IntArray = IntArray(7) {0},
+                                snooze: Long = 0L,
+                                label: String? = null,
+                                startDate: Long? = null,
+                                endDate: Long? = null): AlarmItem {
+            val notiId = 100000 + Random().nextInt(899999)
+            return AlarmItem(
+                    null,
+                    timeZone,
+                    timeSet.toEpochMilli().toString(),
+                    repeat,
+                    null,
+                    null,
+                    snooze,
+                    label,
+                    1,
+                    notiId,
+                    0,
+                    0,
+                    startDate,
+                    endDate,
+                    timeSet.toEpochMilli()
+            )
+        }
+
+        fun createWakeUpIntent(context: Context, item: AlarmItem): Intent {
+            val bundle = Bundle().apply {
+                putParcelable(AlarmReceiver.ITEM, item)
+            }
+
+            return Intent(context, WakeUpActivity::class.java).apply {
+                putExtra(AlarmReceiver.OPTIONS, bundle)
+                putExtra(AlarmReceiver.EXPIRED, false)
+                action = AlarmReceiver.ACTION_ALARM
+            }
+        }
     }
 }

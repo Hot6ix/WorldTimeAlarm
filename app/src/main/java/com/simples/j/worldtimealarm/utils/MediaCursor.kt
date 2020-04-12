@@ -7,9 +7,9 @@ import android.icu.util.TimeZone
 import android.icu.util.ULocale
 import android.media.RingtoneManager
 import android.os.Build
-import android.text.BidiFormatter
-import android.text.TextDirectionHeuristics
-import android.text.TextUtils
+import android.text.*
+import android.text.format.DateFormat
+import android.text.style.RelativeSizeSpan
 import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
@@ -290,6 +290,16 @@ class MediaCursor {
             }
 
             return diff
+        }
+
+        fun getLocalizedTimeFormat(): SpannableString {
+            val pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "hma").replace(" ", "\u200A")
+            val amPmPos = pattern.indexOf("a")
+
+            val spannable = SpannableString(pattern)
+            spannable.setSpan(RelativeSizeSpan(0.5f), amPmPos, amPmPos + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            return spannable
         }
     }
 

@@ -94,18 +94,6 @@
                     app:layout_constraintTop_toBottomOf="@id/time_zone_region_title"
                     app:layout_constraintStart_toStartOf="parent"/>
 
-                <ImageView
-                    android:id="@+id/time_zone_dst"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:src="@drawable/ic_daylight_saving_time"
-                    android:tint="@color/color14"
-                    android:visibility="gone"
-                    android:contentDescription="@null"
-                    android:layout_marginStart="@dimen/padding5"
-                    app:layout_constraintTop_toTopOf="@id/time_zone_region_summary"
-                    app:layout_constraintStart_toEndOf="@id/time_zone_region_summary"/>
-
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View

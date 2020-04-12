@@ -66,7 +66,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end|bottom"
-            android:textSize="@dimen/text_xlarge"
+            android:textSize="@dimen/text_xxlarge"
             android:includeFontPadding="false"
             app:layout_constraintVertical_chainStyle="packed"
             app:layout_constraintTop_toTopOf="parent"

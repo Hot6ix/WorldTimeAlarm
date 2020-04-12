@@ -19,7 +19,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/MaterialAppTheme">
-        <activity android:name=".AlarmGeneratorActivity"></activity>
+        <activity android:name=".AlarmGeneratorActivity"/>
         <activity android:name=".ContentSelectorActivity" />
 
         <service
@@ -73,7 +73,7 @@
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
             android:taskAffinity=".WakeUpActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/MaterialAppTheme.NoActionBar" />
         <activity
             android:name=".TimeZoneSearchActivity"
             android:label=""

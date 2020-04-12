@@ -61,25 +61,15 @@
                             android:textSize="@dimen/text_middle"
                             android:textColor="?android:attr/textColorPrimary"
                             android:ellipsize="end"
+                            android:text="@string/timezone"
                             app:layout_constraintVertical_chainStyle="packed"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toTopOf="@id/time_zone_offset"
+                            app:layout_constraintBottom_toTopOf="@id/time_zone_name"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"/>
 
-                        <ImageView
-                            android:id="@+id/time_zone_dst"
-                            android:layout_width="10dp"
-                            android:layout_height="10dp"
-                            android:src="@drawable/ic_daylight_saving_time"
-                            android:tint="@color/color14"
-                            android:contentDescription="@null"
-                            android:layout_marginStart="@dimen/padding5"
-                            app:layout_constraintTop_toTopOf="@id/time_zone"
-                            app:layout_constraintStart_toEndOf="@id/time_zone"/>
-
                         <TextView
-                            android:id="@+id/time_zone_offset"
+                            android:id="@+id/time_zone_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
@@ -96,34 +86,37 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="?android:attr/listDivider"
+                        app:layout_constraintTop_toBottomOf="@id/time_zone_view"
                         app:layout_constraintBottom_toTopOf="@id/date_view"/>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/date_view"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="0dp"
                         android:padding="@dimen/padding20"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground"
+                        app:layout_constraintTop_toBottomOf="@id/divider2"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintEnd_toEndOf="parent">
 
                         <TextView
                             android:id="@+id/date_picker"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:text="@string/date"
                             android:textSize="@dimen/text_middle"
                             android:textColor="?android:attr/textColorPrimary"
-                            android:gravity="start"
+                            android:gravity="center"
                             android:ellipsize="end"
                             android:maxLines="1"
+                            app:layout_constraintVertical_chainStyle="packed"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintBottom_toTopOf="@id/date"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/date"/>
+                            app:layout_constraintEnd_toEndOf="parent"/>
 
                         <TextView
                             android:id="@+id/date"
@@ -131,12 +124,12 @@
                             android:layout_height="wrap_content"
                             android:textSize="@dimen/text_small"
                             android:textColor="?attr/colorPrimary"
-                            android:gravity="end"
+                            android:gravity="center"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/date_picker"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toEndOf="@id/date_picker"
+                            app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"/>
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -151,6 +144,7 @@
                     android:focusable="false"
                     android:paddingStart="@dimen/padding25"
                     android:paddingEnd="@dimen/padding25"
+                    android:theme="@style/TimePicker"
                     app:layout_constraintHorizontal_bias="0.7"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -233,26 +227,68 @@
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
-                <TextView
-                    android:id="@+id/expected_time"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/est_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingTop="@dimen/padding10"
-                    android:paddingBottom="@dimen/padding10"
-                    android:paddingStart="@dimen/padding20"
-                    android:paddingEnd="@dimen/padding20"
-                    android:gravity="center"
-                    android:textColor="?attr/colorPrimary"
+                    android:padding="@dimen/padding20"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"
                     app:layout_constraintTop_toBottomOf="@id/day_recurrence"
-                    app:layout_constraintStart_toStartOf="@drawable/ic_dashboard_black_24dp"
-                    app:layout_constraintEnd_toEndOf="parent"/>
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <TextView
+                        android:id="@+id/est_date_time"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/padding20"
+                        android:textSize="@dimen/text_middle"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:maxLines="1"
+                        android:gravity="start"
+                        android:ellipsize="end"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/est_time_zone"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/est_detail"/>
+
+                    <TextView
+                        android:id="@+id/est_time_zone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/padding20"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="?attr/colorPrimary"
+                        android:maxLines="1"
+                        android:gravity="start"
+                        android:ellipsize="end"
+                        app:layout_constraintTop_toBottomOf="@id/est_date_time"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/est_detail"/>
+
+                    <ImageView
+                        android:id="@+id/est_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_arrow_right"
+                        android:tint="?attr/colorPrimary"
+                        android:contentDescription="@null"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/est_date_time"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <View
                     android:id="@+id/divider3"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="?android:attr/listDivider"
-                    app:layout_constraintTop_toBottomOf="@id/expected_time"/>
+                    app:layout_constraintTop_toBottomOf="@id/est_layout"/>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/alarm_options"
@@ -261,7 +297,7 @@
                     android:focusable="false"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/day_recurrence" />
+                    app:layout_constraintTop_toBottomOf="@id/divider3" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

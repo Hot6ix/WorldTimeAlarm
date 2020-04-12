@@ -31,24 +31,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/test"
-            android:textSize="@dimen/text_mxlarge"
+            android:textSize="@dimen/text_xxxlarge"
             android:gravity="center"
             android:includeFontPadding="false"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/range"
             app:layout_constraintStart_toStartOf="parent"/>
-
-        <ImageView
-            android:id="@+id/dst"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:src="@drawable/ic_daylight_saving_time"
-            android:tint="@color/color14"
-            android:visibility="gone"
-            android:contentDescription="@null"
-            android:layout_marginStart="@dimen/padding5"
-            app:layout_constraintTop_toTopOf="@id/local_time"
-            app:layout_constraintStart_toEndOf="@id/local_time"/>
 
         <TextView
             android:id="@+id/range"

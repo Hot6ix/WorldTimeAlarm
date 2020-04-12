@@ -63,7 +63,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
         <item name="android:background">?android:attr/listDivider</item>
-    </style>
+    </style>®
 
     <style name="Divider_white">
         <item name="android:layout_width">match_parent</item>
@@ -73,6 +73,10 @@
 
     <style name="SeekBarNoTickMark" parent="Base.Widget.AppCompat.SeekBar.Discrete">
         <item name="tickMark">@null</item>
+    </style>
+
+    <style name="TimePicker">
+        <item name="android:textSize">@dimen/text_large</item>
     </style>
 
 </resources>
