@@ -19,7 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/MaterialAppTheme">
-        <activity android:name=".AlarmGeneratorActivity"/>
+
+        <activity android:name=".AlarmGeneratorActivity" />
         <activity android:name=".ContentSelectorActivity" />
 
         <service

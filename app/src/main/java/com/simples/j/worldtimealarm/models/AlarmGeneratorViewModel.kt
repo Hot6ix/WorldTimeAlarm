@@ -48,4 +48,6 @@ class AlarmGeneratorViewModel(app: Application): AndroidViewModel(app) {
         MutableLiveData<Int>()
     }
 
+    var estimated: ZonedDateTime = ZonedDateTime.now()
+
 }

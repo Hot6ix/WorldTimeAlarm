@@ -6,14 +6,14 @@
     android:id="@+id/wake_up_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="@dimen/padding20"
-    android:paddingEnd="@dimen/padding20"
     tools:context="com.simples.j.worldtimealarm.WakeUpActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/current_clock_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/padding20"
+        android:layout_marginEnd="@dimen/padding20"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -23,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/padding20"
-            android:textSize="@dimen/text_clock_size_big"
+            android:textSize="@dimen/text_clock_size"
             android:textColor="@color/textColorEnabled"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -48,6 +48,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding30"
+        android:layout_marginStart="@dimen/padding20"
+        android:layout_marginEnd="@dimen/padding20"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -103,7 +105,9 @@
         android:textColor="@color/textColorEnabled"
         android:gravity="center"
         android:layout_marginTop="@dimen/padding30"
-        android:maxLines="1"
+        android:layout_marginStart="@dimen/padding20"
+        android:layout_marginEnd="@dimen/padding20"
+        android:maxLines="2"
         android:ellipsize="end"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
@@ -114,42 +118,36 @@
         android:id="@+id/selector"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/label"
-        app:layout_constraintBottom_toTopOf="@id/adViewWakeUp">
+        app:layout_constraintBottom_toTopOf="@id/adViewWakeUp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/snooze"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/snooze"
-            android:textColor="?attr/colorPrimary"
             app:icon="@drawable/ic_action_alarm_snooze"
+            app:iconSize="50dp"
             app:iconTint="?attr/colorPrimary"
             app:backgroundTint="@color/background"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/dismiss"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            style="@style/Widget.MaterialComponents.FloatingActionButton"/>
+            app:layout_constraintEnd_toStartOf="@id/dismiss"/>
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/dismiss"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/dismiss"
-            android:textSize="22sp"
-            android:textColor="?attr/colorPrimary"
             app:icon="@drawable/ic_action_alarm_off"
-            app:iconSize="35dp"
+            app:iconSize="50dp"
             app:iconTint="?attr/colorPrimary"
             app:backgroundTint="@color/background"
-            app:layout_constraintTop_toBottomOf="@id/snooze"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            style="@style/Widget.MaterialComponents.FloatingActionButton"/>
+            app:layout_constraintStart_toEndOf="@id/snooze"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -157,6 +155,7 @@
         android:id="@+id/adViewWakeUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minHeight="100dp"
         ads:adSize="LARGE_BANNER"
         ads:adUnitId="@string/banner_ad_unit_id_3"
         android:layout_marginTop="@dimen/padding20"

@@ -16,9 +16,10 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/blueGrayDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:statusBarColor" tools:targetApi="m">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
         <item name="actionBarStyle">@style/TransparentActionBar</item>
+        <item name="android:navigationBarColor">@color/material_background</item>
     </style>
 
     <style name="MaterialAppTheme.NoActionBar" parent="@style/MaterialAppTheme">
@@ -70,6 +71,10 @@
 
     <style name="SeekBarNoTickMark" parent="Base.Widget.AppCompat.SeekBar.Discrete">
         <item name="tickMark">@null</item>
+    </style>
+
+    <style name="TimePicker">
+        <item name="android:textSize">@dimen/text_large</item>
     </style>
 
 </resources>

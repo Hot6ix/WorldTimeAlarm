@@ -42,9 +42,9 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             finish()
         }
 
-
+        MobileAds.setRequestConfiguration(C.getAdsTestConfig())
         MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
-        adViewWakeUp.loadAd(AdRequest.Builder().addTestDevice("6EF4925B538C754B535FCB7177FCAC3D").build())
+        adViewWakeUp.loadAd(AdRequest.Builder().build())
 
         @Suppress("DEPRECATION")
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
@@ -89,8 +89,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 label.visibility = View.VISIBLE
                 label.text = getString(R.string.error_message)
             }
-
-            if(it?.snooze == null || it.snooze == 0L) snooze.visibility = View.GONE
         }
 
         snooze.setOnClickListener(this)

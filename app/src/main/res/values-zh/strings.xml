@@ -85,6 +85,7 @@
     <string name="reset">还原为默认值</string>
     <string name="apply">应用</string>
     <string name="set_to_system_time_zone">Reset</string>
+    <string name="time_zone_with_diff">%1$s (%2$s)</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>

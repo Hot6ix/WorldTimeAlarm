@@ -5,8 +5,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NavUtils
 import kotlinx.android.synthetic.main.activity_license.*
-import java.io.IOException
-import java.io.InputStream
+import java.io.*
 
 class LicenseActivity : AppCompatActivity() {
 
@@ -16,19 +15,7 @@ class LicenseActivity : AppCompatActivity() {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         try {
-            var inputStream: InputStream = assets.open("apache_license")
-            val byteArray = ByteArray(1024)
-            val text = StringBuilder()
-            while(inputStream.read(byteArray) > 0) {
-                text.append(String(byteArray))
-            }
-            text.append("\n\n\n\n\n\n")
-            inputStream = assets.open("mit_license")
-            while(inputStream.read(byteArray) > 0) {
-                text.append(String(byteArray))
-            }
-
-            license_text.text = text
+            license_text.text = assets.open("apache_license").bufferedReader().use { it.readText() }
         } catch (e: IOException) {
             e.printStackTrace()
         }

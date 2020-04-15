@@ -14,6 +14,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.jakewharton.threetenabp.AndroidThreeTen
+import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.EXPIRED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.MISSED_NOTIFICATION_CHANNEL
@@ -45,12 +46,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
 
         launch(coroutineContext) {
             withContext(Dispatchers.IO) {
+                MobileAds.setRequestConfiguration(C.getAdsTestConfig())
                 MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
             }
-            val builder = AdRequest.Builder().apply {
-                addTestDevice("6EF4925B538C754B535FCB7177FCAC3D")
-                addTestDevice("5E85E343F2722B2AE300110EE20B92D8")
-            }
+            val builder = AdRequest.Builder()
             adViewMain.loadAd(builder.build())
         }
 

@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.etc
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import com.google.android.gms.ads.RequestConfiguration
 import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.WakeUpActivity
 import org.threeten.bp.Instant
@@ -62,6 +63,14 @@ class C {
                 putExtra(AlarmReceiver.EXPIRED, false)
                 action = AlarmReceiver.ACTION_ALARM
             }
+        }
+
+        fun getAdsTestConfig(): RequestConfiguration {
+            val testDevices = arrayListOf("5E85E343F2722B2AE300110EE20B92D8")
+            val reqConfig = RequestConfiguration.Builder()
+                    .setTestDeviceIds(testDevices)
+
+            return reqConfig.build()
         }
     }
 }
