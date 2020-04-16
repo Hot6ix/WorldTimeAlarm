@@ -254,7 +254,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
         date_view.setOnClickListener(this)
         day_recurrence.addOnButtonCheckedListener(this)
-        est_layout.setOnClickListener(this)
         action.setOnClickListener(this)
         detail_content_layout.isNestedScrollingEnabled = false
 
@@ -404,8 +403,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 }
                 startActivityForResult(contentIntent, ContentSelectorActivity.DATE_REQUEST_CODE)
             }
-            R.id.est_layout -> {
-            }
             R.id.action -> {
                 saveAlarm()
             }
@@ -503,12 +500,19 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 viewModel.estimated = resultInLocal
 
                 val diff = ZoneId.systemDefault().rules.getOffset(resultInLocal.toInstant()).totalSeconds - viewModel.remoteZonedDateTime.zone.rules.getOffset(resultInLocal.toInstant()).totalSeconds
-                val hourFormat = DecimalFormat("+00;-00")
-                val minFormat = DecimalFormat("00")
 
-                val diffHour = hourFormat.format(diff.div(60 * 60))
-                val diffMin = minFormat.format(diff.rem(60 * 60).div(60).absoluteValue)
-                val diffText = if(diff == 0) "-" else "$diffHour:$diffMin"
+                val diffHour = diff.div(60 * 60)
+                val diffMin = diff.rem(60 * 60).div(60)
+
+                val hourFormat =
+                    if(diffHour < 0 || diffMin < 0)
+                        DecimalFormat("-00")
+                    else
+                        DecimalFormat("+00")
+
+
+                val minFormat = DecimalFormat("00")
+                val diffText = "${hourFormat.format(diffHour.absoluteValue)}:${minFormat.format(diffMin.absoluteValue)}"
 
                 est_time_zone.text = getString(R.string.time_zone_with_diff, getFormattedTimeZoneName(resultInLocal.zone.id), diffText)
                 est_date_time.text = DateUtils.formatDateTime(fragmentContext, resultInLocal.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)

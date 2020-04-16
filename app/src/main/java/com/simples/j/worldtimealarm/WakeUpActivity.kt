@@ -66,28 +66,37 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         item.let {
             Log.d(C.TAG, "Alarm alerted : ID(${it?.notiId?.plus(1)})")
 
-            // Show selected time zone's time, but not print if time zone is default
-            val timeZone = it?.timeZone?.replace(" ", "_")
-            if(TimeZone.getDefault().id != TimeZone.getTimeZone(timeZone).id) {
-                time_zone_clock_layout.visibility = View.VISIBLE
-                val name = getNameForTimeZone(it?.timeZone)
-                time_zone_clock_title.text = name
-
-                time_zone_clock_time.timeZone = timeZone
-                time_zone_clock_time.format12Hour = MediaCursor.getLocalizedTimeFormat()
-                time_zone_clock_date.timeZone = timeZone
-                time_zone_clock_date.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
-            }
-
-            // Show label
-            if(!it?.label.isNullOrEmpty()) {
-                label.visibility = View.VISIBLE
-                label.text = it?.label
-                label.movementMethod = ScrollingMovementMethod()
-            }
             if(it == null) {
                 label.visibility = View.VISIBLE
                 label.text = getString(R.string.error_message)
+            }
+            else {
+                // Show selected time zone's time, but not print if time zone is default
+                val timeZone = it.timeZone.replace(" ", "_")
+                if(TimeZone.getDefault().id != TimeZone.getTimeZone(timeZone).id) {
+                    time_zone_clock_layout.visibility = View.VISIBLE
+                    val name = getNameForTimeZone(it.timeZone)
+                    time_zone_clock_title.text = name
+
+                    time_zone_clock_time.timeZone = timeZone
+                    time_zone_clock_time.format12Hour = MediaCursor.getLocalizedTimeFormat()
+                    time_zone_clock_date.timeZone = timeZone
+                    time_zone_clock_date.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
+                }
+
+                // Show label
+                if(!it.label.isNullOrEmpty()) {
+                    label.visibility = View.VISIBLE
+                    label.text = it.label
+                    label.movementMethod = ScrollingMovementMethod()
+                }
+
+                if(it.snooze > 0) {
+                    snooze.visibility = View.VISIBLE
+                }
+                else {
+                    snooze.visibility = View.GONE
+                }
             }
         }
 

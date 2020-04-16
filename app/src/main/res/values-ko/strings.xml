@@ -91,7 +91,7 @@
     <string name="alarm_removed">알람이 삭제되었습니다.</string>
     <string name="clock_removed">시간대 %1$s(이)가 삭제되었습니다.</string>
     <string name="less_than_a_minute">1분&#160;</string>
-    <string name="same_as_current">현재 시간대와 동일</string>
+    <string name="same_as_current">디바이스 시간대와 동일</string>
     <string name="same_as_set">설정된 시간대와 동일</string>
     <string name="alarm_on">알람이 %1$s후 울립니다.</string>
     <string name="alarm_on_repeat">매주 %1$s %2$s에 알람이 울립니다.</string>
