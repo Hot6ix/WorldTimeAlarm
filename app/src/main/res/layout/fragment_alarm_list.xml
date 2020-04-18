@@ -28,6 +28,7 @@
             android:paddingBottom="@dimen/alarm_item_height"
             android:clipToPadding="false"
             android:overScrollMode="never"
+            android:scrollbars="none"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

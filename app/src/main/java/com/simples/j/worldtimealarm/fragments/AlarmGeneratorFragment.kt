@@ -738,8 +738,11 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
         if(timeZone.useDaylightTime()) {
             val nextDateTimeAfter = zoneId.rules.nextTransition(Instant.now()).dateTimeAfter.atZone(zoneId).toInstant().toEpochMilli()
-            val dstId = dbCursor.insertDst(nextDateTimeAfter, zoneId.id, item.id)
-            DstController(fragmentContext).checkAndScheduleDst(DstItem(dstId, nextDateTimeAfter, zoneId.id, item.id))
+
+            dbCursor.findDstItemByAlarmId(item.id).let {
+                val dstId = it?.id ?: dbCursor.insertDst(nextDateTimeAfter, zoneId.id, item.id)
+                DstController(fragmentContext).checkAndScheduleDst(DstItem(dstId, nextDateTimeAfter, zoneId.id, item.id))
+            }
         }
 
         activity?.run {

@@ -63,13 +63,6 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
             }
             DstController.ACTION_DST_CHANGED -> {
                 // Re-schedule all alarms
-//                alarmList.forEach {
-//                    alarmController.cancelAlarm(context, it.notiId)
-//                    val timeSet = alarmController.scheduleLocalAlarm(context, it, AlarmController.TYPE_ALARM)
-//
-//                    db.updateAlarm(it.apply { this.timeSet = timeSet.toString() })
-//                }
-
                 val targetMillis = intent.getLongExtra(AlarmController.EXTRA_TIME_IN_MILLIS, -1)
                 val dstList = db.getDstList()
                 val millisGroup = dstList.groupBy {

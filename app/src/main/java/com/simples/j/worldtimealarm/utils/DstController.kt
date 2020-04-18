@@ -44,7 +44,7 @@ class DstController(private val context: Context) {
                     }
                     dbCursor.updateDst(updated)
                     scheduleNextDaylightSavingTimeAlarm(systemDst.millis)
-                    Log.d(C.TAG, "Re-schedule dst alarm due to time zone changed or dst is already passed")
+                    Log.d(C.TAG, "Re-schedule system dst alarm due to time zone changed or dst is already passed")
                 }
             }
         }
@@ -62,32 +62,28 @@ class DstController(private val context: Context) {
 
         val list = dbCursor.getDstList()
 
-        val isAllOff = list.filter { it.alarmId != item.alarmId }.filter { it.millis == item.millis }.all {
-            dbCursor.getSingleAlarm(it.alarmId)?.on_off == 0
-        }
-
-        if(isAllOff) {
-            scheduleNextDaylightSavingTimeAlarm(item.millis)
-            Log.d(C.TAG, "Schedule dst Alarm for ${item.millis}.")
-        }
-        else {
-            Log.d(C.TAG, "Same dst alarm already scheduled.")
+        with(list.filter { it.millis == item.millis && it.alarmId != item.alarmId }) {
+            if(size == 0 || this.all { dbCursor.getSingleAlarm(it.alarmId)?.on_off == 0 }) {
+                scheduleNextDaylightSavingTimeAlarm(item.millis)
+                Log.d(C.TAG, "Schedule dstItem($item) alarm for ${ZonedDateTime.ofInstant(Instant.ofEpochMilli(item.millis), ZoneId.systemDefault())}.")
+            }
+            else {
+                Log.d(C.TAG, "Same dst alarm already scheduled.")
+            }
         }
     }
 
     fun requestDstCancellation(item: DstItem) {
         val list = dbCursor.getDstList()
 
-        val isOff = list.filter { it.millis == item.millis }.all {
-            dbCursor.getSingleAlarm(it.alarmId)?.on_off == 0
-        }
-
-        if(isOff) {
-            cancelDaylightSavingTimeAlarm(item.millis)
-            Log.d(C.TAG, "cancellation succeed.")
-        }
-        else {
-            Log.d(C.TAG, "cancellation failed due to other alarm.")
+        with(list.filter { it.millis == item.millis && it.alarmId != item.alarmId }) {
+            if(size == 0 || this.all { dbCursor.getSingleAlarm(it.alarmId)?.on_off == 0 }) {
+                cancelDaylightSavingTimeAlarm(item.millis)
+                Log.d(C.TAG, "dstItem($item) alarm cancelled.")
+            }
+            else {
+                Log.d(C.TAG, "dstItem($item) alarm failed to cancel due to other alarm.")
+            }
         }
     }
 

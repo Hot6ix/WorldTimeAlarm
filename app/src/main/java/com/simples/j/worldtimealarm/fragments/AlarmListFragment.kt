@@ -257,11 +257,15 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     }
 
     override fun onItemStatusChanged(b: Boolean, item: AlarmItem) {
+        val dstItem = dbCursor.findDstItemByAlarmId(item.id)
+
         if(b) {
             alarmItems.find { it.notiId == item.notiId }?.on_off = 1
             val scheduledTime = alarmController.scheduleLocalAlarm(fragmentContext, item, AlarmController.TYPE_ALARM)
             dbCursor.updateAlarmOnOffByNotiId(item.notiId, true)
             showSnackBar(scheduledTime)
+
+            dstItem?.let { dstController.checkAndScheduleDst(dstItem) }
         }
         else {
             alarmItems.find { it.notiId == item.notiId }?.on_off = 0
@@ -272,6 +276,9 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             if(WakeUpService.isWakeUpServiceRunning && WakeUpService.currentAlarmItemId == item.notiId) {
                 fragmentContext.stopService(Intent(fragmentContext, WakeUpService::class.java))
             }
+
+            dstItem?.let { dstController.requestDstCancellation(dstItem) }
+
         }
     }
 
@@ -290,6 +297,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             }
             alarmListAdapter.removeItem(itemPosition)
             dbCursor.removeAlarm(it.notiId)
+            dbCursor.removeDst(removedDst)
             setEmptyMessage()
         }
 
@@ -299,7 +307,10 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 it.id = id.toInt()
                 if(removedItem.on_off == 1) alarmController.scheduleLocalAlarm(fragmentContext, it, AlarmController.TYPE_ALARM)
                 alarmListAdapter.addItem(itemPosition, it)
-                dstController.checkAndScheduleDst(removedDst)
+                removedDst?.let { dst ->
+                    dbCursor.insertDst(dst.millis, dst.timeZone, it.id)
+                    dstController.checkAndScheduleDst(dst.apply { alarmId = it.id })
+                }
                 recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
                 setEmptyMessage()
             }

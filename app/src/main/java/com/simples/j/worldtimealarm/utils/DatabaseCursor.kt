@@ -515,13 +515,14 @@ class DatabaseCursor(val context: Context) {
 
         val cursor = db.query(DatabaseManager.TABLE_DST_LIST, null, null, null, null, null, null)
         if(cursor.count > 0) {
-            cursor.moveToNext()
-            val id = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
-            val timeSet = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
-            val timeZone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
-            val alarmId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ALARM_ID))
+            while(cursor.moveToNext()) {
+                val id = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+                val timeSet = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
+                val timeZone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
+                val alarmId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ALARM_ID))
 
-            list.add(DstItem(id, timeSet, timeZone, alarmId))
+                list.add(DstItem(id, timeSet, timeZone, alarmId))
+            }
         }
         cursor.close()
 
@@ -564,7 +565,9 @@ class DatabaseCursor(val context: Context) {
         return id
     }
 
-    fun removeDst(dstItem: DstItem) {
+    fun removeDst(dstItem: DstItem?) {
+        if(dstItem == null) return
+
         val db = dbManager.writableDatabase
         db.delete(DatabaseManager.TABLE_DST_LIST, DatabaseManager.COLUMN_ID + "= ?", arrayOf(dstItem.id.toString()))
         db.close()
