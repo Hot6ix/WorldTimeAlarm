@@ -38,26 +38,33 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                                 alarmController.cancelAlarm(context, alarmItem.notiId)
                                 alarmController.scheduleLocalAlarm(context, alarmItem, AlarmController.TYPE_ALARM)
                             }
-
-                            val zoneId = ZoneId.of(alarmItem.timeZone)
-                            db.insertDst(
-                                    zoneId.rules.nextTransition(Instant.now()).dateTimeAfter.atZone(zoneId).toInstant().toEpochMilli(),
-                                    alarmItem.timeZone,
-                                    alarmItem.id)
-                        }
-
-                        alarmList.groupBy {
-                            val zoneId = ZoneId.of(it.timeZone)
-                            zoneId.rules.nextTransition(Instant.now()).dateTimeAfter.atZone(zoneId).toInstant().toEpochMilli()
-                        }.forEach {
-                            if(it.value.any { alarmItem -> alarmItem.on_off == 1 })
-                                dstController.scheduleNextDaylightSavingTimeAlarm(it.key)
                         }
 
                         val preference = PreferenceManager.getDefaultSharedPreferences(context)
                         preference.edit()
                                 .putBoolean(context.getString(R.string.setting_converter_timezone_key), true)
                                 .apply()
+
+                        // insert into dst db and schedule
+//                        with(alarmList.filter { TimeZone.getTimeZone(it.timeZone).useDaylightTime() }) {
+//                            // insert into db
+//                            forEach {
+//                                val zoneId = ZoneId.of(it.timeZone)
+//                                db.insertDst(
+//                                        zoneId.rules.nextTransition(Instant.now()).dateTimeAfter.atZone(zoneId).toInstant().toEpochMilli(),
+//                                        it.timeZone,
+//                                        it.id)
+//                            }
+//
+//                            // schedule
+//                            groupBy {
+//                                val zoneId = ZoneId.of(it.timeZone)
+//                                zoneId.rules.nextTransition(Instant.now()).dateTimeAfter.atZone(zoneId).toInstant().toEpochMilli()
+//                            }.forEach {
+//                                if(it.value.any { alarmItem -> alarmItem.on_off == 1 })
+//                                    dstController.scheduleNextDaylightSavingTimeAlarm(it.key)
+//                            }
+//                        }
                     }
                 }
             }

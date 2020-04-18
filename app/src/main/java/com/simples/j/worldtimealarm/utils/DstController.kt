@@ -31,20 +31,8 @@ class DstController(private val context: Context) {
                 val id = dbCursor.insertDst(nextDateTimeAfter.toEpochMilli(), timeZone.id, -1)
 
                 if(id > 0) {
-                    scheduleNextDaylightSavingTimeAlarm(nextDateTimeAfter.toEpochMilli())
+                    checkAndScheduleDst(DstItem(id, nextDateTimeAfter.toEpochMilli(), zoneId.id, -1))
                     Log.d(C.TAG, "Schedule system dst alarm")
-                }
-            }
-            else {
-                if(timeZone.id != systemDst.timeZone || Instant.ofEpochMilli(systemDst.millis).isBefore(Instant.now()) || nextDateTimeAfter.toEpochMilli() != systemDst.millis) {
-                    cancelDaylightSavingTimeAlarm(systemDst.millis)
-                    val updated = systemDst.apply {
-                        this.timeZone = timeZone.id
-                        this.millis = nextDateTimeAfter.toEpochMilli()
-                    }
-                    dbCursor.updateDst(updated)
-                    scheduleNextDaylightSavingTimeAlarm(systemDst.millis)
-                    Log.d(C.TAG, "Re-schedule system dst alarm due to time zone changed or dst is already passed")
                 }
             }
         }

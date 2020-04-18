@@ -21,7 +21,6 @@ import com.simples.j.worldtimealarm.etc.C.Companion.MISSED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.fragments.SettingFragment
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
-import com.simples.j.worldtimealarm.utils.DstController
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -52,8 +51,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
             val builder = AdRequest.Builder()
             adViewMain.loadAd(builder.build())
         }
-
-        DstController(applicationContext).handleSystemDst()
 
         alarmListFragment = AlarmListFragment.newInstance()
         clockListFragment = WorldClockFragment.newInstance()

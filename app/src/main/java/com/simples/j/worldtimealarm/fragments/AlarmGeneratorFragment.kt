@@ -26,7 +26,6 @@ import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
 import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import com.simples.j.worldtimealarm.utils.DstController
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.action
 import kotlinx.android.synthetic.main.activity_alarm.date
@@ -731,18 +730,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         }
         else {
             dbCursor.updateAlarm(item)
-        }
-
-        val zoneId = viewModel.remoteZonedDateTime.zone
-        val timeZone = TimeZone.getTimeZone(zoneId.id)
-
-        if(timeZone.useDaylightTime()) {
-            val nextDateTimeAfter = zoneId.rules.nextTransition(Instant.now()).dateTimeAfter.atZone(zoneId).toInstant().toEpochMilli()
-
-            dbCursor.findDstItemByAlarmId(item.id).let {
-                val dstId = it?.id ?: dbCursor.insertDst(nextDateTimeAfter, zoneId.id, item.id)
-                DstController(fragmentContext).checkAndScheduleDst(DstItem(dstId, nextDateTimeAfter, zoneId.id, item.id))
-            }
         }
 
         activity?.run {
