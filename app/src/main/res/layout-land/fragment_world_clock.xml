@@ -86,7 +86,6 @@
             android:clipToPadding="false"
             android:paddingBottom="@dimen/alarm_item_height"
             android:scrollbars="none"
-            android:overScrollMode="never"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/standardTimeLayout"

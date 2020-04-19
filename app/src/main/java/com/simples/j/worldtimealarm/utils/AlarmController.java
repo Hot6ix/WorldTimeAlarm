@@ -161,6 +161,7 @@ public class AlarmController {
         return target.withSecond(0).withNano(0);
     }
 
+    @Deprecated
     public Calendar calculateDate(AlarmItem item, int type, boolean applyDayRepetition) {
         Calendar calendar = Calendar.getInstance();
         Calendar today = Calendar.getInstance();
@@ -346,6 +347,7 @@ public class AlarmController {
         return resultDateTime.toInstant().toEpochMilli();
     }
 
+    @Deprecated
     public Long scheduleAlarm(Context context, AlarmItem item, int type) {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         SharedPreferences prefManager = PreferenceManager.getDefaultSharedPreferences(context);

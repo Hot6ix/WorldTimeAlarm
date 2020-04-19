@@ -914,7 +914,7 @@ class AlarmControllerSingleRepeatingAndroidTest {
             Log.d(C.TAG, "Round: $i")
 
             if(i == 0) every { ZonedDateTime.now() } returns system
-            else every { ZonedDateTime.now() } returns time
+            else every { ZonedDateTime.now() } returns time.withZoneSameInstant(ZoneId.systemDefault())
 
             Log.d(C.TAG, "now=${ZonedDateTime.now()}, ${ZonedDateTime.now().dayOfWeek}")
             Log.d(C.TAG, "given=${time}, ${time.dayOfWeek}")
@@ -983,7 +983,7 @@ class AlarmControllerSingleRepeatingAndroidTest {
             Log.d(C.TAG, "Round: $i")
 
             if(i == 0) every { ZonedDateTime.now() } returns system
-            else every { ZonedDateTime.now() } returns time
+            else every { ZonedDateTime.now() } returns time.withZoneSameInstant(ZoneId.systemDefault())
 
             Log.d(C.TAG, "now=${ZonedDateTime.now()}, ${ZonedDateTime.now().dayOfWeek}")
             Log.d(C.TAG, "given=${time}, ${time.dayOfWeek}")

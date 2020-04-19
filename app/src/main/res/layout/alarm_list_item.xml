@@ -42,7 +42,7 @@
             android:id="@+id/range"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/text_xsmall"
+            android:textSize="@dimen/text_small"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/local_time"
             app:layout_constraintBottom_toTopOf="@id/repeat"/>
@@ -51,7 +51,7 @@
             android:id="@+id/repeat"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/text_xsmall"
+            android:textSize="@dimen/text_small"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/range"
             app:layout_constraintBottom_toBottomOf="parent"/>
