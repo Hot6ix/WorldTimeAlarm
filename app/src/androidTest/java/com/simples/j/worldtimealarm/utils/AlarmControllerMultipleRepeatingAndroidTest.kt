@@ -236,7 +236,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
                 .withSecond(0)
                 .withNano(0)
                 .withMonth(Month.MAY.value)
-                .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+                .with(TemporalAdjusters.firstInMonth(DayOfWeek.MONDAY))
 
         var time = system.withZoneSameLocal(ZoneId.of(tz)).withHour(21).withMinute(0)
         for(i in 0..round) {
@@ -246,18 +246,23 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             else every { ZonedDateTime.now() } returns time
 
             Log.d(C.TAG, "now=${ZonedDateTime.now().toInstant()}, ${ZonedDateTime.now().dayOfWeek}")
+            Log.d(C.TAG, "nowInTargetTz=${ZonedDateTime.now().withZoneSameInstant(ZoneId.of(tz))}, ${ZonedDateTime.now().withZoneSameInstant(ZoneId.of(tz)).dayOfWeek}")
             Log.d(C.TAG, "given=${time.toInstant()}, ${time.dayOfWeek}")
 
             val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(1,0,1,0,0,0,1), timeZone = tz)
             val r = alarmCtrl.calculateDateTime(a, AlarmController.TYPE_ALARM)
 
             val answer =
-                    if(i == 0 || time.dayOfWeek == DayOfWeek.SUNDAY)
-                        ZonedDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault()).with(TemporalAdjusters.next(DayOfWeek.WEDNESDAY))
-                    else if(time.dayOfWeek == DayOfWeek.TUESDAY)
-                        ZonedDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault()).with(TemporalAdjusters.next(DayOfWeek.SUNDAY))
-                    else
-                        ZonedDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault()).with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+                    when {
+                        i == 0 ->
+                            if(system.isAfter(ZonedDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault()).with(TemporalAdjusters.next(DayOfWeek.MONDAY))))
+                                ZonedDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault()).with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+                            else
+                                ZonedDateTime.ofInstant(system.withHour(1).withMinute(0).toInstant(), ZoneId.systemDefault()).with(TemporalAdjusters.nextOrSame(DayOfWeek.WEDNESDAY))
+                        time.dayOfWeek == DayOfWeek.TUESDAY -> ZonedDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault()).with(TemporalAdjusters.next(DayOfWeek.SUNDAY))
+                        time.dayOfWeek == DayOfWeek.SUNDAY -> ZonedDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault()).with(TemporalAdjusters.next(DayOfWeek.WEDNESDAY))
+                        else -> ZonedDateTime.ofInstant(time.toInstant(), ZoneId.systemDefault()).with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+                    }
 
             Log.d(C.TAG, "answerTz=${answer.zone.id}, resultTz=${r.zone.id}")
             Log.d(C.TAG, "answer=${answer.withZoneSameInstant(ZoneId.of(tz))}, ${answer.withZoneSameInstant(ZoneId.of(tz)).dayOfWeek}, inSystemTz=${answer}, ${answer.dayOfWeek}")

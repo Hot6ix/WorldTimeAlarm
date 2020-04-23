@@ -44,6 +44,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
+@Deprecated(message = "Use AlarmGeneratorActivity instead")
 class AlarmActivity : AppCompatActivity(), AlarmOptionAdapter.OnItemClickListener, View.OnClickListener, TimePicker.OnTimeChangedListener, MaterialButtonToggleGroup.OnButtonCheckedListener {
 
     private lateinit var alarmOptionAdapter: AlarmOptionAdapter

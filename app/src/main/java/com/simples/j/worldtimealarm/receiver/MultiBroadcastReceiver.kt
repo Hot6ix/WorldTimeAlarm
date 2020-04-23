@@ -1,9 +1,15 @@
 package com.simples.j.worldtimealarm.receiver
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import com.simples.j.worldtimealarm.BuildConfig
 import com.simples.j.worldtimealarm.MainActivity
@@ -28,15 +34,28 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
             Intent.ACTION_MY_PACKAGE_REPLACED -> {
                 when(BuildConfig.VERSION_CODE) {
                     22 -> {
+                        // reset order of list
                         alarmList.forEachIndexed { index, alarmItem ->
                             alarmItem.index = index
                             alarmItem.pickerTime = alarmItem.timeSet.toLong()
 
                             db.updateAlarmIndex(alarmItem)
+                        }
 
-                            if(alarmItem.on_off == 1) {
-                                alarmController.cancelAlarm(context, alarmItem.notiId)
-                                alarmController.scheduleLocalAlarm(context, alarmItem, AlarmController.TYPE_ALARM)
+                        alarmList.filter {
+                            val applyTimeDiffToRepeat = PreferenceManager.getDefaultSharedPreferences(context)
+                                    .getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
+                            val oldResult = alarmController.calculateDate(it, AlarmController.TYPE_ALARM, applyTimeDiffToRepeat)
+                            val newResult = alarmController.calculateDateTime(it, AlarmController.TYPE_ALARM)
+
+                            oldResult.timeInMillis != newResult.toInstant().toEpochMilli()
+                        }.let { list ->
+                            if(list.isNotEmpty()) {
+                                showNotification(
+                                        context,
+                                        context.getString(R.string.version_code_22_update_title),
+                                        context.getString(R.string.version_code_22_update_message),
+                                        true)
                             }
                         }
 
@@ -44,27 +63,6 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                         preference.edit()
                                 .putBoolean(context.getString(R.string.setting_converter_timezone_key), true)
                                 .apply()
-
-                        // insert into dst db and schedule
-//                        with(alarmList.filter { TimeZone.getTimeZone(it.timeZone).useDaylightTime() }) {
-//                            // insert into db
-//                            forEach {
-//                                val zoneId = ZoneId.of(it.timeZone)
-//                                db.insertDst(
-//                                        zoneId.rules.nextTransition(Instant.now()).dateTimeAfter.atZone(zoneId).toInstant().toEpochMilli(),
-//                                        it.timeZone,
-//                                        it.id)
-//                            }
-//
-//                            // schedule
-//                            groupBy {
-//                                val zoneId = ZoneId.of(it.timeZone)
-//                                zoneId.rules.nextTransition(Instant.now()).dateTimeAfter.atZone(zoneId).toInstant().toEpochMilli()
-//                            }.forEach {
-//                                if(it.value.any { alarmItem -> alarmItem.on_off == 1 })
-//                                    dstController.scheduleNextDaylightSavingTimeAlarm(it.key)
-//                            }
-//                        }
                     }
                 }
             }
@@ -104,5 +102,37 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
 
             }
         }
+    }
+
+    private fun showNotification(context: Context, title: String, msg: String, isLongMsg: Boolean) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationBuilder = NotificationCompat.Builder(context, C.DEFAULT_NOTIFICATION_CHANNEL)
+
+        val dstIntent = Intent(context, MainActivity::class.java)
+
+        notificationBuilder
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setAutoCancel(true)
+                .setSmallIcon(R.drawable.ic_action_alarm_white)
+                .setContentTitle(title)
+                .setContentText(msg)
+                .setContentIntent(PendingIntent.getActivity(context, BuildConfig.VERSION_CODE, dstIntent, PendingIntent.FLAG_ONE_SHOT))
+                .setGroup(C.GROUP_DEFAULT)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .priority = NotificationCompat.PRIORITY_DEFAULT
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(C.DEFAULT_NOTIFICATION_CHANNEL, context.getString(R.string.default_notification_channel), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                enableVibration(true)
+                vibrationPattern = LongArray(0)
+            }
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+
+        if(isLongMsg) {
+            notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText(msg))
+        }
+
+        notificationManager.notify(BuildConfig.VERSION_CODE, notificationBuilder.build())
     }
 }

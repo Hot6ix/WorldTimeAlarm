@@ -16,6 +16,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
+import com.simples.j.worldtimealarm.etc.C.Companion.DEFAULT_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.EXPIRED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.MISSED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
@@ -140,6 +141,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
     private fun createNotificationChannels() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !preference.getBoolean(PREF_NOTIFICATION_CHANNEL, false)) {
+
+            val defaultChannel = NotificationChannel(DEFAULT_NOTIFICATION_CHANNEL, getString(R.string.default_notification_channel), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                enableVibration(true)
+                vibrationPattern = LongArray(0)
+            }
+
             val alarmChannel = NotificationChannel(ALARM_NOTIFICATION_CHANNEL, getString(R.string.alarm_notification_channel), NotificationManager.IMPORTANCE_HIGH).apply {
                 enableVibration(false)
                 setSound(null,  null)
@@ -153,10 +160,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
             val expiredChannel = NotificationChannel(EXPIRED_NOTIFICATION_CHANNEL, getString(R.string.expired_notification_channel), NotificationManager.IMPORTANCE_DEFAULT).apply {
                 enableVibration(true)
                 vibrationPattern = LongArray(0)
-
             }
 
-            notificationManager.createNotificationChannels(listOf(alarmChannel, missedChannel, expiredChannel))
+            notificationManager.createNotificationChannels(listOf(defaultChannel, alarmChannel, missedChannel, expiredChannel))
             preference.edit().putBoolean(PREF_NOTIFICATION_CHANNEL, true).apply()
         }
     }

@@ -22,9 +22,11 @@ class C {
         const val ALARM_NOTIFICATION_CHANNEL = "ALARM_NOTIFICATION_CHANNEL"
         const val MISSED_NOTIFICATION_CHANNEL = "MISSED_NOTIFICATION_CHANNEL"
         const val EXPIRED_NOTIFICATION_CHANNEL = "EXPIRED_NOTIFICATION_CHANNEL"
+        const val DEFAULT_NOTIFICATION_CHANNEL = "DEFAULT_NOTIFICATION_CHANNEL"
 
         const val GROUP_MISSED = "com.simples.j.worldtimealarm.GROUP_MISSED"
         const val GROUP_EXPIRED = "com.simples.j.worldtimealarm.GROUP_EXPIRED"
+        const val GROUP_DEFAULT = "com.simples.j.worldtimealarm.GROUP_DEFAULT"
 
         fun createAlarm(timeZone: String,
                                 timeSet: Instant = Instant.now(),

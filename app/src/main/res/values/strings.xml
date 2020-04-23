@@ -9,6 +9,7 @@
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">Search</string>
     <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Help</string>
+    <string name="default_notification_channel">Notice</string>
     <string name="alarm_notification_channel">Alarm</string>
     <string name="missed_notification_channel">Missed Alarm</string>
     <string name="expired_notification_channel">Expired Alarm</string>
@@ -110,6 +111,8 @@
     <string name="error_message">Invalid call. If you keep seeing this error, please re-create alarm. Sorry for inconvenience.</string>
     <string name="exist_ringtone">Selected ringtone is already in list.</string>
     <string name="unable_to_create_alarm">Unable to create alarm. Please try again later.</string>
+    <string name="version_code_22_update_title">Check for update changes</string>
+    <string name="version_code_22_update_message">Due to Summer Time feature support, notice that time of some alarms will be changed. Click here to see more details.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>
