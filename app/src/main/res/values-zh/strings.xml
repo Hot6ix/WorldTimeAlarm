@@ -9,7 +9,7 @@
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">搜索</string>
-    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/帮助</string>
+    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Wiki%EF%BC%88%E4%B8%AD%E6%96%87%EF%BC%89</string>
     <string name="default_notification_channel">注意</string>
     <string name="alarm_notification_channel">报警</string>
     <string name="missed_notification_channel">错过警报</string>
@@ -166,7 +166,7 @@
     <string name="setting_group_3_key">Others</string>
     <string name="setting_group_3">其他</string>
     <string name="setting_help_key">HELP</string>
-    <string name="setting_help_title">帮助</string>
+    <string name="setting_help_title">访问维基</string>
     <string name="setting_version_key">VERSION</string>
     <string name="setting_version_title">版</string>
     <string name="setting_license_key">LICENSE</string>

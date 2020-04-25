@@ -55,22 +55,22 @@
         android:title="@string/setting_group_3" >
 
         <Preference
-            android:key="@string/setting_help_key"
-            android:title="@string/setting_help_title">
-
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:data="@string/help_link"/>
-
-        </Preference>
-
-        <Preference
             android:key="@string/setting_version_key"
             android:title="@string/setting_version_title">
 
             <intent
                 android:action="android.intent.action.VIEW"
                 android:data="https://play.google.com/store/apps/details?id=com.simples.j.worldtimealarm"/>
+
+        </Preference>
+
+        <Preference
+            android:key="@string/setting_help_key"
+            android:title="@string/setting_help_title">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="@string/help_link"/>
 
         </Preference>
 
