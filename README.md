@@ -1,5 +1,7 @@
 # WorldTimeAlarm
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/bed3155059c348c3ad390147db599eca)](https://app.codacy.com/manual/jamesy5017/WorldTimeAlarm?utm_source=github.com&utm_medium=referral&utm_content=Hot6ix/WorldTimeAlarm&utm_campaign=Badge_Grade_Dashboard)
+
 #### Version 1.0
 - App launched
 
