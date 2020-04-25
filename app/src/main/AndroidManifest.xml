@@ -55,8 +55,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="github.com"
-                    android:pathPrefix="/Hot6ix/WorldTimeAlarm"
+                    android:host="hot6ix.github.com"
+                    android:pathPrefix="/WorldTimeAlarm"
                     android:scheme="https" />
             </intent-filter>
         </activity>
@@ -119,11 +119,9 @@
         <receiver
             android:name=".receiver.MultiBroadcastReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-
-                <data android:scheme="package" />
             </intent-filter>
         </receiver>
     </application>

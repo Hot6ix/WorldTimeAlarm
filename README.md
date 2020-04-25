@@ -1,70 +1,10 @@
-# WorldTimeAlarm
+# World Time Alarm
 
-#### Version 1.0
-- App launched
+[![Version](https://img.shields.io/badge/version-1.6.0-blue)](https://play.google.com/store/apps/details?id=com.simples.j.worldtimealarm)
+[![GitHub license](https://img.shields.io/github/license/Hot6ix/WorldTimeAlarm)](https://github.com/Hot6ix/WorldTimeAlarm/blob/master/LICENSE)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/bed3155059c348c3ad390147db599eca)](https://app.codacy.com/manual/jamesy5017/WorldTimeAlarm?utm_source=github.com&utm_medium=referral&utm_content=Hot6ix/WorldTimeAlarm&utm_campaign=Badge_Grade_Dashboard)
 
-#### Version 1.1
-- Add color tag feature
-- Show expected time if set different timezone
-- Move label's location start to center
-- Fix some bugs
-- Support app shortcut (Available for Android 7.1 or higher)
+World Time Alarm provides a way to make an alarm with different time zone.
+Just set time zone, date and time you want app will do everything. You don't need to calculate time difference.
 
-#### Version 1.1 (Version code until 9)
-- Fix repeat days bug
-
-#### ersion 1.2
-- Add time converter feature
-- Add empty button in label dialog view
-- Add setting options for time converter
-- Optimized landscape view
-- Support changing order of alarm or time items
-- New design of main view
-- New design of wake up view
-
-#### Version 1.3
-- Remove unnecessary function
-- Fix alarm scheduling bugs
-- Optimize alarm scheduling
-- Add app license
-
-#### Version 1.4
-- Fix alarm scheduling bug
-- Add start/end date features
-- Show day of week
-- Improve app speed
-- Add help page
-
-#### Version 1.4.1
-- Fix dialog crash
-
-#### Version 1.4.2
-- Fix showing wrong date in time conversion
-
-#### Version 1.5
-- Support localized time zone name
-- Add new way to select time zone
-- Fix wrong prints, error, bugs
-- Change wake up ui
-- Set default value of muting alarm
-- Add privacy policy
-- Add 'Apply time difference to day repeat' option
-
-#### Version 1.5.1
-- Fixed bugs
-- Code optimization
-
-#### Version 1.5.2
-- Support Android 10
-- Fix bugs
-- Optimize code
-- Alarm that has period less than a week will be fired every day until end day
-- Notifications have actions to user can select action
-- LabelEditText in AlarmActivity will be selected if not empty
-- Alarm will be turned off when user select an action. It was turned off after alarm is fired.
-
-#### Version 1.5.3
-- fixed bug that WakeUpService is terminated when service destroy after muted
-
-#### Version 1.5.4
-- fixed bug that WakeUpService throws exception by null intent.
+<a href='https://play.google.com/store/apps/details?id=com.simples.j.worldtimealarm&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img height='100' alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>

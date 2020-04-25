@@ -27,8 +27,8 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
         Log.d(C.TAG, "${intent.action}")
         val db = DatabaseCursor(context)
         val alarmList = db.getActivatedAlarms()
-        val alarmController = AlarmController.getInstance()
         val dstController = DstController(context)
+        val preference = PreferenceManager.getDefaultSharedPreferences(context)
 
         when(intent.action) {
             Intent.ACTION_MY_PACKAGE_REPLACED -> {
@@ -36,30 +36,15 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                     22 -> {
                         // reset order of list
                         alarmList.forEachIndexed { index, alarmItem ->
-                            alarmItem.index = index
-                            alarmItem.pickerTime = alarmItem.timeSet.toLong()
-
-                            db.updateAlarmIndex(alarmItem)
-                        }
-
-                        alarmList.filter {
-                            val applyTimeDiffToRepeat = PreferenceManager.getDefaultSharedPreferences(context)
-                                    .getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
-                            val oldResult = alarmController.calculateDate(it, AlarmController.TYPE_ALARM, applyTimeDiffToRepeat)
-                            val newResult = alarmController.calculateDateTime(it, AlarmController.TYPE_ALARM)
-
-                            oldResult.timeInMillis != newResult.toInstant().toEpochMilli()
-                        }.let { list ->
-                            if(list.isNotEmpty()) {
-                                showNotification(
-                                        context,
-                                        context.getString(R.string.version_code_22_update_title),
-                                        context.getString(R.string.version_code_22_update_message),
-                                        true)
+                            val updated = alarmItem.apply {
+                                this.index = index
+                                this.pickerTime = alarmItem.timeSet.toLong()
                             }
+
+                            db.updateAlarm(updated)
+                            db.updateAlarmIndex(updated)
                         }
 
-                        val preference = PreferenceManager.getDefaultSharedPreferences(context)
                         preference.edit()
                                 .putBoolean(context.getString(R.string.setting_converter_timezone_key), true)
                                 .apply()

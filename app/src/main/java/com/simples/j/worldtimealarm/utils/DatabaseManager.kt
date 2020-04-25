@@ -17,7 +17,7 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL("CREATE TABLE $TABLE_ALARM_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+        db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_ALARM_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "$COLUMN_TIME_ZONE TEXT," +
                 "$COLUMN_TIME_SET TEXT," +
                 "$COLUMN_REPEAT TEXT," +
@@ -33,15 +33,15 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
                 "$COLUMN_END_DATE INTEGER," +
                 "$COLUMN_PICKER_TIME TEXT);")
 
-        db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+        db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$COLUMN_TIME_ZONE TEXT, " +
                 "$COLUMN_INDEX INTEGER);")
 
-        db.execSQL("CREATE TABLE $TABLE_USER_RINGTONE ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+        db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_USER_RINGTONE ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "$COLUMN_TITLE TEXT, " +
                 "$COLUMN_URI TEXT);")
 
-        db.execSQL("CREATE TABLE $TABLE_DST_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+        db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_DST_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "$COLUMN_TIME_SET INTEGER, " +
                 "$COLUMN_TIME_ZONE TEXT, " +
                 "$COLUMN_ALARM_ID INTEGER);")
@@ -52,7 +52,7 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
             db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_COLOR_TAG INTEGER DEFAULT 0")
         }
         if(old < 3) {
-            db.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "$COLUMN_TIME_ZONE TEXT," +
                     "$COLUMN_INDEX INTEGER);")
             db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_INDEX INTEGER")
@@ -63,15 +63,13 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
             db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_END_DATE INTEGER")
         }
         if(old < 5) {
-            db.execSQL("CREATE TABLE $TABLE_USER_RINGTONE ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+            db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_USER_RINGTONE ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "$COLUMN_TITLE TEXT, " +
                     "$COLUMN_URI TEXT);")
         }
-        if(old < 6) {
-            db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_PICKER_TIME TEXT")
-        }
         if(old < 7) {
-            db.execSQL("CREATE TABLE $TABLE_DST_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+            db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_PICKER_TIME TEXT")
+            db.execSQL("CREATE TABLE IF NOT EXISTS $TABLE_DST_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "$COLUMN_TIME_SET INTEGER, " +
                     "$COLUMN_TIME_ZONE TEXT, " +
                     "$COLUMN_ALARM_ID INTEGER);")

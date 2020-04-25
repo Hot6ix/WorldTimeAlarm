@@ -112,8 +112,6 @@
     <string name="error_message">呼叫无效。 如果继续，请重新创建警报。 对造成的不便表示歉意。</string>
     <string name="exist_ringtone">所选铃声已在列表中。</string>
     <string name="unable_to_create_alarm">无法创建警报。 请稍后再试。</string>
-    <string name="version_code_22_update_title">检查更新更改</string>
-    <string name="version_code_22_update_message">由于支持夏令时功能，请注意某些警报的时间将被更改。 单击此处查看更多详细信息。</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>

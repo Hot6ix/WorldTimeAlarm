@@ -112,8 +112,6 @@
     <string name="error_message">잘못된 호출입니다. 계속 발생할 경우, 알람을 재생성해 주십시오. 불편을 드려 죄송합니다.</string>
     <string name="exist_ringtone">이미 추가된 벨소리입니다.</string>
     <string name="unable_to_create_alarm">알람을 생성할 수 없습니다. 잠시 후에 다시 시도해주세요.</string>
-    <string name="version_code_22_update_title">업데이트 변경 사항 확인</string>
-    <string name="version_code_22_update_message">서머타임 지원으로 알람들 중 일부가 시간이 변경될 예정입니다. 자세한 사항은 여기를 눌러 확인해주세요.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">시간대 선택</string>

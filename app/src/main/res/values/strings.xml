@@ -88,31 +88,29 @@
     <string name="time_zone_with_diff">%1$s (%2$s)</string>
 
     <!-- Message -->
-    <string name="alarm_removed">Alarm removed.</string>
-    <string name="clock_removed">Time zone (%1$s) removed.</string>
+    <string name="alarm_removed">Alarm has been removed.</string>
+    <string name="clock_removed">Time zone (%1$s) has been removed.</string>
     <string name="less_than_a_minute">less than a minute</string>
     <string name="same_as_current">Same as device time zone</string>
     <string name="same_as_set">Same as set time zone</string>
-    <string name="alarm_on">Alarm set for %1$s from now.</string>
-    <string name="alarm_on_repeat">Alarm set for every %1$s at %2$s.</string>
-    <string name="alarm_on_repeat_every">Alarm set for everyday at %1$s.</string>
-    <string name="alarm_dismissed">Alarm dismissed.</string>
-    <string name="volume_is_muted">Alarm volume muted.</string>
-    <string name="exist_timezone">Selected time zone is already in list.</string>
-    <string name="start_date_removed">Start date removed.</string>
-    <string name="start_date_and_time_is_wrong">The set time must be after now if only set start date.</string>
-    <string name="end_date_removed">End date removed.</string>
-    <string name="end_date_earlier_than_today">End date must be after today.</string>
-    <string name="end_date_earlier_than_start_date">End date must be after start date.</string>
-    <string name="must_check_repeat">Please check repeat day(s) at least one.</string>
-    <string name="invalid_repeat">Please check start/end date.</string>
-    <string name="alarm_no_long_fires">Alarm (%1$s) no longer fires.</string>
+    <string name="alarm_on">Alarm will be fired after %1$s from now.</string>
+    <string name="alarm_on_repeat">Alarm will be fired every %1$s at %2$s.</string>
+    <string name="alarm_on_repeat_every">Alarm will be fired everyday at %1$s.</string>
+    <string name="alarm_dismissed">Alarm has been dismissed.</string>
+    <string name="volume_is_muted">Alarm volume is muted.</string>
+    <string name="exist_timezone">Selected time zone is already added in the list.</string>
+    <string name="start_date_removed">Start date has been removed.</string>
+    <string name="start_date_and_time_is_wrong">Start date should not be earlier than now.</string>
+    <string name="end_date_removed">End date has been removed.</string>
+    <string name="end_date_earlier_than_today">End date should be later than now.</string>
+    <string name="end_date_earlier_than_start_date">End date should be later than start date.</string>
+    <string name="must_check_repeat">Repeats should be selected at least one when start date and end date are set.</string>
+    <string name="invalid_repeat">Please check start date and end date.</string>
+    <string name="alarm_no_long_fires">Alarm (%1$s) won\'t be fired anymore.</string>
     <string name="error_occurred">Error occurred.</string>
     <string name="error_message">Invalid call. If you keep seeing this error, please re-create alarm. Sorry for inconvenience.</string>
-    <string name="exist_ringtone">Selected ringtone is already in list.</string>
+    <string name="exist_ringtone">Selected ringtone is already added in the list.</string>
     <string name="unable_to_create_alarm">Unable to create alarm. Please try again later.</string>
-    <string name="version_code_22_update_title">Check for update changes</string>
-    <string name="version_code_22_update_message">Due to Summer Time feature support, notice that time of some alarms will be changed. Click here to see more details.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>
@@ -129,8 +127,8 @@
     <string name="time_zone_wrong">Wrong time zone</string>
     <string name="time_zone_change_info">Changes from %1$s to %2$s.</string>
     <string name="time_zone_change_warning">Changing the time zone affects the following items.\n- Time\n- Date (includes start/end date)\n- Repeat days (Activate in the setting tab)</string>
-    <string name="time_zone_dst_end_msg">%1$s is in Daylight Saving Time. It ends on %2$s.</string>
-    <string name="time_zone_dst_start_msg">%1$s observes Daylight Saving Time. It starts on %2$s.</string>
+    <string name="time_zone_dst_end_msg">%1$s is in Summer Time. It ends on %2$s.</string>
+    <string name="time_zone_dst_start_msg">%1$s uses Summer Time, but not in it now. It starts on %2$s.</string>
     <string name="time_zone_no_dst_msg">%1$s doesn\'t use Daylight Saving Time.</string>
 
     <!-- Settings -->
@@ -174,7 +172,7 @@
     <string name="setting_privacy_policy_key">PRIVACY</string>
     <string name="setting_privacy_policy_title">Privacy Policy</string>
     <string name="setting_source_key">GITHUB</string>
-    <string name="setting_source_title">Visit GitHub</string>
+`    <string name="setting_source_title">Visit GitHub</string>
 
     <string-array name="time_selector">
         <item>ID</item>
