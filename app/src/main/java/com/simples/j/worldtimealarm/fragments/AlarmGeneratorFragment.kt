@@ -171,6 +171,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                         }
                     }
 
+                    // options
                     viewModel.ringtone.value = ringtoneList.find { item -> item.uri == it.ringtone }
                             ?: defaultRingtone
                     viewModel.vibration.value = vibratorPatternList.find { item ->
@@ -180,7 +181,8 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                     viewModel.snooze.value = snoozeList.find { item -> item.duration == it.snooze }
                     viewModel.label.value = it.label
                     viewModel.colorTag.value = it.colorTag
-                } else {
+                }
+                else {
                     viewModel.timeZone.value = TimeZone.getDefault().id
                     now = ZonedDateTime.now(ZoneId.systemDefault())
 

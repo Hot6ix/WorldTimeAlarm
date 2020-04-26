@@ -14,6 +14,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.jakewharton.threetenabp.AndroidThreeTen
+import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.etc.C.Companion.DEFAULT_NOTIFICATION_CHANNEL
@@ -22,6 +23,7 @@ import com.simples.j.worldtimealarm.etc.C.Companion.MISSED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.fragments.SettingFragment
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
+import com.simples.j.worldtimealarm.receiver.MultiBroadcastReceiver
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -134,6 +136,12 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
                 }
                 alarmListFragment.arguments = bundle
                 intent.removeExtra(AlarmListFragment.HIGHLIGHT_KEY)
+            }
+        }
+        intent?.getBundleExtra(MultiBroadcastReceiver.BUNDLE)?.let { bundle ->
+            navigationView.selectedItemId = R.id.view_alarm
+            bundle.getString(AlarmItem.WARNING, null)?.let {
+                alarmListFragment.arguments = bundle
             }
         }
     }

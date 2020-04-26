@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.AlarmStatus
 import com.simples.j.worldtimealarm.fragments.AlarmGeneratorFragment
 import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
 
@@ -47,6 +48,9 @@ class AlarmGeneratorActivity : AppCompatActivity() {
                     else {
                         viewModel.alarmItem = alarmItem
                     }
+                }
+                bundle.getSerializable(AlarmItem.ALARM_ITEM_STATUS).let {
+                    if(it != null) viewModel.status = it as AlarmStatus
                 }
             }
 

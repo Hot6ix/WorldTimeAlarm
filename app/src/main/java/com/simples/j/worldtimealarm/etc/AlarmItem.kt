@@ -2,6 +2,11 @@ package com.simples.j.worldtimealarm.etc
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.simples.j.worldtimealarm.utils.AlarmController
+import org.threeten.bp.DayOfWeek
+import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
+import org.threeten.bp.ZonedDateTime
 
 /**
  * Created by j on 26/02/2018.
@@ -78,11 +83,60 @@ data class AlarmItem(
 
     fun hasRepeatDay(): Boolean = repeat.any { it > 0 }
 
+    fun isExpired(): Boolean {
+        if(startDate == null && endDate == null) return false
+
+        val s =
+                startDate.let {
+                    if(it != null && it > 0) {
+                        val startInstant = Instant.ofEpochMilli(it)
+                        ZonedDateTime.ofInstant(startInstant, ZoneId.systemDefault())
+                    }
+                    else null
+                }
+        val e =
+                endDate.let {
+                    if(it != null && it > 0) {
+                        val endInstant = Instant.ofEpochMilli(it)
+                        ZonedDateTime.ofInstant(endInstant, ZoneId.systemDefault())
+                    }
+                    else null
+                }
+
+        var isExpired: Boolean
+
+        isExpired = s.let { date ->
+            if(date != null && !repeat.any { it > 0 }) {
+                !date.isAfter(ZonedDateTime.now())
+            }
+            else false
+        }
+
+        e?.let {
+            val next = AlarmController().calculateDateTime(this, AlarmController.TYPE_ALARM)
+
+            val repeatValues = intArrayOf(7, 1, 2, 3, 4, 5, 6)
+
+            val isLastAlarmEndDate = repeat.mapIndexed { index, i ->
+                if (i > 0) DayOfWeek.of(repeatValues[index])
+                else null
+            }.filterNotNull().contains(next.dayOfWeek)
+
+            isExpired = next.isAfter(it) || !isLastAlarmEndDate || next.isBefore(ZonedDateTime.now()) || next.isEqual(ZonedDateTime.now().withSecond(0).withNano(0))
+        }
+
+        return isExpired
+    }
+
     companion object {
         @JvmField
         val CREATOR: Parcelable.Creator<AlarmItem> = object : Parcelable.Creator<AlarmItem> {
             override fun createFromParcel(source: Parcel): AlarmItem = AlarmItem(source)
             override fun newArray(size: Int): Array<AlarmItem?> = arrayOfNulls(size)
         }
+
+        const val ALARM_ITEM_STATUS = "ALARM_ITEM_STATUS"
+        const val WARNING = "WARNING"
+        const val REASON = "REASON"
     }
 }

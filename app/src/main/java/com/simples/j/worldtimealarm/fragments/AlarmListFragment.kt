@@ -2,28 +2,32 @@ package com.simples.j.worldtimealarm.fragments
 
 
 import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.media.AudioManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.*
 import com.google.android.material.snackbar.Snackbar
 import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.AlarmStatus
+import com.simples.j.worldtimealarm.etc.AlarmWarningReason
 import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.receiver.MultiBroadcastReceiver
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.*
 import kotlinx.android.synthetic.main.fragment_alarm_list.*
 import kotlinx.coroutines.*
+import org.threeten.bp.ZoneId
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
@@ -44,6 +48,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private lateinit var alarmController: AlarmController
     private lateinit var audioManager: AudioManager
     private lateinit var fragmentLayout: CoordinatorLayout
+    private lateinit var preference: SharedPreferences
 
     private var alarmItems = ArrayList<AlarmItem>()
     private var snackBar: Snackbar? = null
@@ -73,6 +78,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         dbCursor = DatabaseCursor(fragmentContext)
         alarmController = AlarmController.getInstance()
         audioManager = fragmentContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
 
         job = launch(coroutineContext) {
             withContext(Dispatchers.IO) {
@@ -140,7 +146,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
         with(arguments) {
             if(this != null) {
-                val id = this.getInt(HIGHLIGHT_KEY)
+                val id = this.getInt(HIGHLIGHT_KEY, -1)
                 if(id > 0) {
                     // highlight item
                     if(::alarmListAdapter.isInitialized) {
@@ -164,6 +170,29 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         }
                     }
                     arguments?.remove(HIGHLIGHT_KEY) // remove id from bundle to prevent to be called again.
+                }
+
+                this.getString(AlarmItem.WARNING, null)?.let {
+                    val warning = it.split(",")
+                    val reason = this.getString(AlarmItem.REASON, null)
+                            .split(",")
+                            .map { r -> AlarmWarningReason.valueOf(r.toIntOrNull()) }
+
+                    val warnings = warning.mapIndexed { index, s ->
+                        Pair(s, reason[index])
+                    }
+
+                    if(::alarmListAdapter.isInitialized) {
+                        alarmListAdapter.setWarningMark(warnings)
+                    }
+                    else {
+                        launch(coroutineContext) {
+                            job.join()
+                            alarmListAdapter.setWarningMark(warnings)
+                        }
+                    }
+
+                    arguments?.remove(AlarmItem.WARNING)
                 }
             }
         }
@@ -244,13 +273,29 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         outState.putBoolean(STATE_SNACK_BAR, muteStatusIsShown)
     }
 
-    override fun onItemClicked(view: View, item: AlarmItem) {
-        val intent = Intent(fragmentContext, AlarmGeneratorActivity::class.java)
-        val bundle = Bundle().apply {
-            putParcelable(AlarmReceiver.ITEM, item)
+    override fun onItemClicked(view: View, item: AlarmItem, status: AlarmStatus) {
+        when(status) {
+            AlarmStatus.STATUS_V22_UPDATE_ERROR -> {
+                val title = getString(R.string.v22_change_dialog_title)
+                val msg = getString(
+                        R.string.v22_change_dialog_message,
+                        DateUtils.formatDateTime(fragmentContext, alarmController.calculateDate(item, AlarmController.TYPE_ALARM, preference.getBoolean(getString(R.string.setting_time_zone_affect_repetition_key), false)).timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL),
+                        getFormattedTimeZoneName(ZoneId.systemDefault().id),
+                        DateUtils.formatDateTime(fragmentContext, alarmController.calculateDateTime(item, AlarmController.TYPE_ALARM).toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL),
+                        getFormattedTimeZoneName(ZoneId.systemDefault().id)
+                )
+                SimpleDialogFragment.newInstance(title, msg, SimpleDialogFragment.CANCELABLE_NO_BUTTON).show(parentFragmentManager, SimpleDialogFragment.TAG)
+            }
+            else -> {
+                val intent = Intent(fragmentContext, AlarmGeneratorActivity::class.java)
+                val bundle = Bundle().apply {
+                    putParcelable(AlarmReceiver.ITEM, item)
+                    putSerializable(AlarmItem.ALARM_ITEM_STATUS, status)
+                }
+                intent.putExtra(AlarmGeneratorActivity.BUNDLE_KEY, bundle)
+                startActivityForResult(intent, REQUEST_CODE_MODIFY)
+            }
         }
-        intent.putExtra(AlarmGeneratorActivity.BUNDLE_KEY, bundle)
-        startActivityForResult(intent, REQUEST_CODE_MODIFY)
     }
 
     override fun onItemStatusChanged(b: Boolean, item: AlarmItem) {
@@ -327,6 +372,13 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
     }
 
+    private fun getFormattedTimeZoneName(timeZoneId: String?): String {
+        return if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(timeZoneId))
+        }
+        else timeZoneId ?: getString(R.string.time_zone_unknown)
+    }
+
     private inner class UpdateRequestReceiver: BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
@@ -349,12 +401,35 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                     }
                 }
                 MainActivity.ACTION_UPDATE_ALL -> {
+                    val bundle = intent.getBundleExtra(MultiBroadcastReceiver.BUNDLE)
                     if(::alarmListAdapter.isInitialized) {
+                        bundle?.getString(AlarmItem.WARNING, null)?.let {
+                            val warning = it.split(",")
+                            val reason = bundle.getString(AlarmItem.REASON, null)
+                                    .split(",")
+                                    .map { r -> AlarmWarningReason.valueOf(r.toIntOrNull()) }
+
+                            val warnings = warning.mapIndexed { index, s ->
+                                Pair(s, reason[index])
+                            }
+                            alarmListAdapter.setWarningMark(warnings)
+                        }
                         alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
                     }
                     else {
                         launch(coroutineContext) {
                             job.join()
+                            bundle?.getString(AlarmItem.WARNING, null)?.let {
+                                val warning = it.split(",")
+                                val reason = bundle.getString(AlarmItem.REASON, null)
+                                        .split(",")
+                                        .map { r -> AlarmWarningReason.valueOf(r.toIntOrNull()) }
+
+                                val warnings = warning.mapIndexed { index, s ->
+                                    Pair(s, reason[index])
+                                }
+                                alarmListAdapter.setWarningMark(warnings)
+                            }
                             alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
                         }
                     }

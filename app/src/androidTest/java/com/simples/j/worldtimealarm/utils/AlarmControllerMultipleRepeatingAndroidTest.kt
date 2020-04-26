@@ -383,7 +383,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
                     else
                         time.with(TemporalAdjusters.next(DayOfWeek.SATURDAY))
 
-            if(answer.month != Month.MARCH) {
+            if(a.apply { timeSet = r.toInstant().toEpochMilli().toString() }.isExpired()) {
                 Log.d(C.TAG, "expired")
                 break
             }
@@ -465,7 +465,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
                         }
                     }
 
-            if(answer.month != Month.MARCH) {
+            if(a.apply { timeSet = r.toInstant().toEpochMilli().toString() }.isExpired()) {
                 Log.d(C.TAG, "expired")
                 break
             }
@@ -479,7 +479,11 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             else
                 Assert.assertEquals(13, r.withZoneSameInstant(ZoneId.systemDefault()).hour)
             Assert.assertEquals(answer.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            Assert.assertNotEquals(time.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+
+            if(ZonedDateTime.now().year == endDate.year && ZonedDateTime.now().monthValue == endDate.monthValue && ZonedDateTime.now().dayOfMonth == endDate.dayOfMonth)
+                Assert.assertEquals(time.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+            else
+                Assert.assertNotEquals(time.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
 
             time = r
         }
@@ -540,7 +544,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
                     else
                         time.with(TemporalAdjusters.next(DayOfWeek.SATURDAY))
 
-            if(answer.isAfter(endDate)) {
+            if(a.apply { timeSet = r.toInstant().toEpochMilli().toString() }.isExpired()) {
                 Log.d(C.TAG, "expired")
                 break
             }
@@ -554,7 +558,11 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             else
                 Assert.assertEquals(13, r.withZoneSameInstant(ZoneId.systemDefault()).hour)
             Assert.assertEquals(answer.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            Assert.assertNotEquals(time.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+
+            if(ZonedDateTime.now().year == endDate.year && ZonedDateTime.now().monthValue == endDate.monthValue && ZonedDateTime.now().dayOfMonth == endDate.dayOfMonth)
+                Assert.assertEquals(time.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+            else
+                Assert.assertNotEquals(time.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
 
             time = r
         }

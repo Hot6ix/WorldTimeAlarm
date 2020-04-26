@@ -9,7 +9,9 @@
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">검색</string>
-    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Wiki-(%ED%95%9C%EA%B5%AD%EC%96%B4)</string>
+    <string name="wiki_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Wiki-(%ED%95%9C%EA%B5%AD%EC%96%B4)</string>
+    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/도움말</string>
+    <string name="change_log_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/업데이트-내역</string>
     <string name="default_notification_channel">공지사항</string>
     <string name="alarm_notification_channel">알람</string>
     <string name="missed_notification_channel">놓친 알람</string>
@@ -87,6 +89,7 @@
     <string name="apply">적용</string>
     <string name="set_to_system_time_zone">초기화</string>
     <string name="time_zone_with_diff">%1$s (%2$s)</string>
+    <string name="change_log">업데이트 내역</string>
 
     <!-- Message -->
     <string name="alarm_removed">알람이 삭제되었습니다.</string>
@@ -112,6 +115,8 @@
     <string name="error_message">잘못된 호출입니다. 계속 발생할 경우, 알람을 재생성해 주십시오. 불편을 드려 죄송합니다.</string>
     <string name="exist_ringtone">이미 추가된 벨소리입니다.</string>
     <string name="unable_to_create_alarm">알람을 생성할 수 없습니다. 잠시 후에 다시 시도해주세요.</string>
+    <string name="confirm_before_change">변경 전 확인</string>
+    <string name="v22_time_set_message">서머 타임 기능 지원으로 인해 %1$d개 알람의 날짜와 시간이 변경될 예정입니다. 영향을 받는 알람들의 울리는 날짜와 시간은 바로 변경되지 않고 다음부터 적용됩니다. 여기를 눌러 변경되는 알람들을 확인하세요. 즉시 변경하고자 하는 경우 변경 사항 적용하기 버튼을 누르시면 됩니다.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">시간대 선택</string>

@@ -50,4 +50,6 @@ class AlarmGeneratorViewModel(app: Application): AndroidViewModel(app) {
 
     var estimated: ZonedDateTime = ZonedDateTime.now()
 
+    var status: AlarmStatus = AlarmStatus.STATUS_NORMAL
+
 }

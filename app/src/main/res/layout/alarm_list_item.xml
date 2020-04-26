@@ -65,6 +65,19 @@
             app:layout_constraintBottom_toTopOf="@id/local_time"/>
 
         <ImageView
+            android:id="@+id/warning"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_warning"
+            android:tint="@color/color1"
+            android:visibility="gone"
+            android:contentDescription="@null"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintTop_toTopOf="@id/range"
+            app:layout_constraintBottom_toBottomOf="@id/repeat"
+            app:layout_constraintEnd_toStartOf="@id/timezone"/>
+
+        <ImageView
             android:id="@+id/timezone"
             android:layout_width="18dp"
             android:layout_height="18dp"

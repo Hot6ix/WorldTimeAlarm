@@ -9,7 +9,9 @@
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">搜索</string>
-    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Wiki%EF%BC%88%E4%B8%AD%E6%96%87%EF%BC%89</string>
+    <string name="wiki_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Wiki%EF%BC%88%E4%B8%AD%E6%96%87%EF%BC%89</string>
+    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/帮助</string>
+    <string name="change_log_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/补丁说明</string>
     <string name="default_notification_channel">注意</string>
     <string name="alarm_notification_channel">报警</string>
     <string name="missed_notification_channel">错过警报</string>
@@ -87,6 +89,7 @@
     <string name="apply">应用</string>
     <string name="set_to_system_time_zone">Reset</string>
     <string name="time_zone_with_diff">%1$s (%2$s)</string>
+    <string name="change_log">变更记录</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>
@@ -112,6 +115,8 @@
     <string name="error_message">呼叫无效。 如果继续，请重新创建警报。 对造成的不便表示歉意。</string>
     <string name="exist_ringtone">所选铃声已在列表中。</string>
     <string name="unable_to_create_alarm">无法创建警报。 请稍后再试。</string>
+    <string name="confirm_before_change">更改前确认</string>
+    <string name="v22_time_set_message">Due to summer time support, date and time of %1$d alarms will be changed. Click here to see more details.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>

@@ -8,7 +8,9 @@
     <string name="test">test</string>
     <string name="hint">Los Angeles, Seoul, etc&#8230;</string>
     <string name="search_title">Search</string>
-    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Wiki-(English)</string>
+    <string name="wiki_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Wiki-(English)</string>
+    <string name="help_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Help</string>
+    <string name="change_log_link">https://github.com/Hot6ix/WorldTimeAlarm/wiki/Patch-Note</string>
     <string name="default_notification_channel">Notice</string>
     <string name="alarm_notification_channel">Alarm</string>
     <string name="missed_notification_channel">Missed Alarm</string>
@@ -86,6 +88,7 @@
     <string name="apply">Apply</string>
     <string name="set_to_system_time_zone">Reset</string>
     <string name="time_zone_with_diff">%1$s (%2$s)</string>
+    <string name="change_log">Change log</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm has been removed.</string>
@@ -111,6 +114,10 @@
     <string name="error_message">Invalid call. If you keep seeing this error, please re-create alarm. Sorry for inconvenience.</string>
     <string name="exist_ringtone">Selected ringtone is already added in the list.</string>
     <string name="unable_to_create_alarm">Unable to create alarm. Please try again later.</string>
+    <string name="confirm_before_change">Confirm before change</string>
+    <string name="v22_time_set_message">Due to summer time support, date and time of %1$d alarm(s) will be changed. Click here to see more details before change.</string>
+    <string name="v22_change_dialog_title">Change</string>
+    <string name="v22_change_dialog_message">Before change\n%1$s\n%2$s\n\nAfter change\n%3$s\n%4$s</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>
@@ -172,7 +179,8 @@
     <string name="setting_privacy_policy_key">PRIVACY</string>
     <string name="setting_privacy_policy_title">Privacy Policy</string>
     <string name="setting_source_key">GITHUB</string>
-`    <string name="setting_source_title">Visit GitHub</string>
+    `
+    <string name="setting_source_title">Visit GitHub</string>
 
     <string-array name="time_selector">
         <item>ID</item>

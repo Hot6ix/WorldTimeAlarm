@@ -63,42 +63,9 @@ class AlarmReceiver: BroadcastReceiver() {
         // If alarm type is snooze ignore, if not set alarm
         dbCursor = DatabaseCursor(context)
 
-        if(!item.isInstantAlarm()) {
-            with(item.endDate) {
-                try {
-                    val endTimeInMillis = this
-                    if(endTimeInMillis != null && endTimeInMillis > 0) {
-                        val endDate = Calendar.getInstance().apply {
-                            timeInMillis = endTimeInMillis
-                        }
-
-                        val today = Calendar.getInstance()
-                        val difference = endDate.timeInMillis - today.timeInMillis
-                        if(TimeUnit.MILLISECONDS.toDays(difference) < 7) {
-                            if(item.hasRepeatDay()) {
-                                val tmpCal = today.clone() as Calendar
-                                while(!tmpCal.after(endDate)) {
-                                    tmpCal.add(Calendar.DATE, 1)
-                                    if(item.repeat.contains(tmpCal.get(Calendar.DAY_OF_WEEK))) {
-                                        isExpired = false
-                                        break
-                                    }
-                                    else isExpired = true
-                                }
-                            }
-
-                            if((today.get(Calendar.YEAR) == endDate.get(Calendar.YEAR) && today.get(Calendar.MONTH) == endDate.get(Calendar.MONTH) && today.get(Calendar.DAY_OF_MONTH) == endDate.get(Calendar.DAY_OF_MONTH)) || today.after(endDate))
-                                isExpired = true
-                        }
-                    }
-                } catch (e: NumberFormatException) {
-                    e.printStackTrace()
-                }
-            }
-
-            if(!isExpired) {
-                AlarmController.getInstance().scheduleLocalAlarm(context, item, AlarmController.TYPE_ALARM)
-            }
+        isExpired = item.isExpired()
+        if(!item.isInstantAlarm() && !isExpired) {
+            AlarmController.getInstance().scheduleLocalAlarm(context, item, AlarmController.TYPE_ALARM)
         }
 
         // Only a single alarm will be shown to user, even if several alarm triggered at same time.

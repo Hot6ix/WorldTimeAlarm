@@ -4,11 +4,8 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.drawable.RippleDrawable
 import android.os.Handler
-import android.text.Spannable
-import android.text.SpannableString
 import android.text.format.DateFormat
 import android.text.format.DateUtils
-import android.text.style.RelativeSizeSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +17,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
+import com.simples.j.worldtimealarm.etc.AlarmStatus
+import com.simples.j.worldtimealarm.etc.AlarmWarningReason
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
@@ -39,6 +38,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
     private lateinit var listener: OnItemClickListener
     private var highlightId: Int = -1
+    private var warningList: List<Pair<String, AlarmWarningReason>>? = null
 
     init {
         setHasStableIds(true)
@@ -97,24 +97,13 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                     else null
                 }
 
+        val isExpired = item.isExpired()
         if(startDate == null && endDate == null) {
             holder.range.visibility = View.GONE
             holder.switch.isEnabled = true
         }
         else {
-            // alarm is one-time and start date is set
-            // if start date passed, disable alarm
-            holder.switch.isEnabled = startDate.let { date ->
-                if(date != null && !item.repeat.any { it > 0 }) {
-                    date.isAfter(ZonedDateTime.now())
-                }
-                else true
-            }
-
-            // disable switch if alarm is expired
-            endDate?.let {
-                holder.switch.isEnabled = expect?.isBefore(it) ?: false
-            }
+            holder.switch.isEnabled = !isExpired
 
             val rangeText = when {
                 startDate != null && endDate != null -> {
@@ -156,10 +145,9 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             }
             holder.localTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
         }
-//        holder.localTime.text = mainZonedDateTime?.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
 
         with(item.repeat) {
-            if(this.any { it > 0 }) {
+            if (this.any { it > 0 }) {
                 val difference = TimeZone.getTimeZone(item.timeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
                 val itemCalendar = Calendar.getInstance().apply {
                     timeInMillis = item.timeSet.toLong()
@@ -169,10 +157,10 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
                 // for support old version of app
                 val repeat = item.repeat.mapIndexed { index, i ->
-                    if(i > 0) index + 1 else 0
+                    if (i > 0) index + 1 else 0
                 }.filter { it != 0 }.map {
                     var converted = it - 1
-                    if(converted == 0) converted = 7
+                    if (converted == 0) converted = 7
 
                     DayOfWeek.of(converted)
                 }
@@ -186,24 +174,22 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                 }
 
                 holder.repeat.text =
-                        if(repeatLocal.size == 7) context.resources.getString(R.string.everyday)
-                        else if(repeatLocal.contains(DayOfWeek.SATURDAY) && repeatLocal.contains(DayOfWeek.SUNDAY) && repeatLocal.size == 2) context.resources.getString(R.string.weekend)
-                        else if(repeatLocal.contains(DayOfWeek.MONDAY)
+                        if (repeatLocal.size == 7) context.resources.getString(R.string.everyday)
+                        else if (repeatLocal.contains(DayOfWeek.SATURDAY) && repeatLocal.contains(DayOfWeek.SUNDAY) && repeatLocal.size == 2) context.resources.getString(R.string.weekend)
+                        else if (repeatLocal.contains(DayOfWeek.MONDAY)
                                 && repeatLocal.contains(DayOfWeek.TUESDAY)
                                 && repeatLocal.contains(DayOfWeek.WEDNESDAY)
                                 && repeatLocal.contains(DayOfWeek.THURSDAY)
                                 && repeatLocal.contains(DayOfWeek.FRIDAY)
                                 && repeatLocal.size == 5) context.resources.getString(R.string.weekday)
-                        else if(repeatLocal.size == 1) {
+                        else if (repeatLocal.size == 1) {
                             repeatLocal[0].getDisplayName(TextStyle.FULL, Locale.getDefault())
-                        }
-                        else {
+                        } else {
                             repeatLocal.joinToString {
                                 it.getDisplayName(TextStyle.SHORT, Locale.getDefault())
                             }
                         }
-            }
-            else {
+            } else {
                 mainZonedDateTime?.toInstant()?.let {
                     holder.repeat.text =
                             when {
@@ -227,9 +213,17 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             }
         }
 
-        holder.itemView.setOnClickListener { listener.onItemClicked(it, item) }
         holder.switch.setOnCheckedChangeListener(null)
         holder.switch.isChecked = item.on_off != 0
+
+        if(warningList?.any { it.first.toIntOrNull() == item.id } == true) {
+            holder.warning.visibility = View.VISIBLE
+            holder.itemView.setOnClickListener { listener.onItemClicked(it, item, AlarmStatus.STATUS_V22_UPDATE_ERROR) }
+        }
+        else {
+            holder.warning.visibility = View.GONE
+            holder.itemView.setOnClickListener { listener.onItemClicked(it, item) }
+        }
 
         if(item.timeZone != TimeZone.getDefault().id)
             holder.timezone.visibility = View.VISIBLE
@@ -248,8 +242,9 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             if(this != null && this.isNotEmpty()) {
                 holder.vibration.visibility = View.VISIBLE
             }
-            else
+            else {
                 holder.vibration.visibility = View.GONE
+            }
         }
 
         if(item.snooze > 0L) {
@@ -276,6 +271,16 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         list.add(index, item)
         notifyItemInserted(index)
         notifyItemRangeChanged(index, itemCount)
+    }
+
+    fun updateItem(index: Int, item: AlarmItem) {
+        list[index] = item
+        notifyItemChanged(index)
+    }
+
+    fun setWarningMark(list: List<Pair<String, AlarmWarningReason>>?) {
+        warningList = list
+        notifyItemRangeChanged(0, itemCount)
     }
 
     fun setOnItemListener(listener: OnItemClickListener) {
@@ -314,6 +319,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         var switch: Switch = view.on_off
         var colorTag: View = view.colorTag
         var range: TextView = view.range
+        var warning: ImageView = view.warning
         var timezone: ImageView = view.timezone
         var ringtone: ImageView = view.ringtone
         var vibration: ImageView = view.vibration
@@ -321,7 +327,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
     }
 
     interface OnItemClickListener {
-        fun onItemClicked(view: View, item: AlarmItem)
+        fun onItemClicked(view: View, item: AlarmItem, status: AlarmStatus = AlarmStatus.STATUS_NORMAL)
         fun onItemStatusChanged(b: Boolean, item: AlarmItem)
     }
 }
