@@ -79,7 +79,7 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                                     putExtra(NotificationActionReceiver.NOTIFICATION_ACTION, NotificationActionReceiver.ACTION_APPLY_V22_UPDATE)
                                 }
                                 val applyPendingIntent = PendingIntent.getBroadcast(context, BuildConfig.VERSION_CODE, applyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-                                val applyAction = NotificationCompat.Action(0, "Apply changes", applyPendingIntent)
+                                val applyAction = NotificationCompat.Action(0, context.getString(R.string.apply_changes), applyPendingIntent)
 
                                 val msg = context.getString(R.string.v22_time_set_message, it.size)
                                 val notification = getNotification(
@@ -87,7 +87,6 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                                         context.getString(R.string.confirm_before_change),
                                         msg,
                                         Bundle().apply {
-                                            Log.d(C.TAG, IntArray(it.size) { AlarmWarningReason.REASON_V22_UPDATE.reason }.joinToString(","))
                                             putString(WARNING, it.map { item -> item.id }.joinToString(","))
                                             putString(REASON, IntArray(it.size) { AlarmWarningReason.REASON_V22_UPDATE.reason }.joinToString(","))
                                         }

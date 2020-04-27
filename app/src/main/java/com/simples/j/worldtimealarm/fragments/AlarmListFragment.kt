@@ -27,7 +27,11 @@ import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.*
 import kotlinx.android.synthetic.main.fragment_alarm_list.*
 import kotlinx.coroutines.*
+import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.format.FormatStyle
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
@@ -276,13 +280,50 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     override fun onItemClicked(view: View, item: AlarmItem, status: AlarmStatus) {
         when(status) {
             AlarmStatus.STATUS_V22_UPDATE_ERROR -> {
+                val startDate = item.startDate?.let { if(it > 0) ZonedDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.systemDefault()) else null }
+                val endDate = item.endDate?.let { if(it > 0) ZonedDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.systemDefault()) else null }
+
+                val date = AlarmStringFormatHelper.getDisplayLocalDate(
+                        fragmentContext,
+                        startDate,
+                        endDate,
+                        item.hasRepeatDay())
+
+                val applyRepeat = preference.getBoolean(getString(R.string.setting_time_zone_affect_repetition_key), false)
+
+                val oldStringBuilder = StringBuilder()
+                val newStringBuilder = StringBuilder()
+
+                val oldResult = ZonedDateTime.ofInstant(Instant.ofEpochMilli(alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyRepeat).timeInMillis), ZoneId.systemDefault())
+                val oldRepeat = AlarmStringFormatHelper.getDisplayLocalRepeatArray(
+                        fragmentContext,
+                        item.repeat,
+                        oldResult,
+                        item.timeZone,
+                        applyRepeat
+                )
+
+                val newResult = alarmController.calculateDateTime(item, AlarmController.TYPE_ALARM).withZoneSameInstant(ZoneId.systemDefault())
+                val newRepeat = AlarmStringFormatHelper.getDisplayLocalRepeatArray(
+                        fragmentContext,
+                        item.repeat,
+                        newResult,
+                        item.timeZone
+                )
+
+                oldStringBuilder.appendln(oldResult.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
+                date?.let { oldStringBuilder.appendln(it) }
+                oldStringBuilder.append(oldRepeat)
+
+                newStringBuilder.appendln(newResult.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
+                date?.let { newStringBuilder.appendln(it) }
+                newStringBuilder.append(newRepeat)
+
                 val title = getString(R.string.v22_change_dialog_title)
                 val msg = getString(
                         R.string.v22_change_dialog_message,
-                        DateUtils.formatDateTime(fragmentContext, alarmController.calculateDate(item, AlarmController.TYPE_ALARM, preference.getBoolean(getString(R.string.setting_time_zone_affect_repetition_key), false)).timeInMillis, DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL),
-                        getFormattedTimeZoneName(ZoneId.systemDefault().id),
-                        DateUtils.formatDateTime(fragmentContext, alarmController.calculateDateTime(item, AlarmController.TYPE_ALARM).toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL),
-                        getFormattedTimeZoneName(ZoneId.systemDefault().id)
+                        oldStringBuilder.toString(),
+                        newStringBuilder.toString()
                 )
                 SimpleDialogFragment.newInstance(title, msg, SimpleDialogFragment.CANCELABLE_NO_BUTTON).show(parentFragmentManager, SimpleDialogFragment.TAG)
             }

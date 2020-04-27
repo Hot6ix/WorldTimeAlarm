@@ -115,9 +115,10 @@
     <string name="exist_ringtone">Selected ringtone is already added in the list.</string>
     <string name="unable_to_create_alarm">Unable to create alarm. Please try again later.</string>
     <string name="confirm_before_change">Confirm before change</string>
-    <string name="v22_time_set_message">Due to summer time support, date and time of %1$d alarm(s) will be changed. Click here to see more details before change.</string>
-    <string name="v22_change_dialog_title">Change</string>
-    <string name="v22_change_dialog_message">Before change\n%1$s\n%2$s\n\nAfter change\n%3$s\n%4$s</string>
+    <string name="v22_time_set_message">Due to summer time support, time and repeat of %1$d alarm(s) will be changed. The scheduled date and time won\'t change immediately, but will take effect from next. Click here to see the affected alarms.</string>
+    <string name="apply_changes">Apply changes</string>
+    <string name="v22_change_dialog_title">Change Notice</string>
+    <string name="v22_change_dialog_message">Before change\n%1$s\n\nAfter change\n%2$s\n\nTo apply immediately, click Apply Changes in notification.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>

@@ -25,6 +25,7 @@ import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
 import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
+import com.simples.j.worldtimealarm.utils.AlarmStringFormatHelper
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_alarm.action
@@ -236,7 +237,12 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             isNestedScrollingEnabled = false
         }
 
-        date.text = formatDate()
+        date.text = AlarmStringFormatHelper.formatDate(
+                fragmentContext,
+                viewModel.startDate,
+                viewModel.endDate,
+                viewModel.recurrences.value?.any { it > 0 } ?: false
+        )
 
         // init dialog
         labelDialog = getLabelDialog()
@@ -375,7 +381,12 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                         }
                     }
 
-                    date.text = formatDate()
+                    date.text = AlarmStringFormatHelper.formatDate(
+                            fragmentContext,
+                            viewModel.startDate,
+                            viewModel.endDate,
+                            viewModel.recurrences.value?.any { it > 0 } ?: false
+                    )
                     updateEstimated()
                 }
             }
@@ -468,7 +479,12 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             }
         }
 
-        date.text = formatDate()
+        date.text = AlarmStringFormatHelper.formatDate(
+                fragmentContext,
+                viewModel.startDate,
+                viewModel.endDate,
+                viewModel.recurrences.value?.any { it > 0 } ?: false
+        )
         updateEstimated()
     }
 
@@ -544,31 +560,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(timeZoneId))
         }
         else timeZoneId ?: getString(R.string.time_zone_unknown)
-    }
-
-    private fun formatDate(): String {
-        val s = viewModel.startDate?.withZoneSameLocal(ZoneId.systemDefault())?.toInstant()
-        val e = viewModel.endDate?.withZoneSameLocal(ZoneId.systemDefault())?.toInstant()
-
-        return when {
-            s != null && e != null -> {
-                DateUtils.formatDateRange(fragmentContext, s.toEpochMilli(), e.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_ALL)
-            }
-            s != null -> {
-                viewModel.recurrences.value.let { array ->
-                    if(array != null && array.any { it > 0 }) {
-                        fragmentContext.getString(R.string.range_begin).format(DateUtils.formatDateTime(context, s.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
-                    }
-                    else null
-                } ?: DateUtils.formatDateTime(fragmentContext, s.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
-            }
-            e != null -> {
-                fragmentContext.getString(R.string.range_until).format(DateUtils.formatDateTime(fragmentContext, e.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
-            }
-            else -> {
-                getString(R.string.range_not_set)
-            }
-        }
     }
 
     private fun getLabelDialog(): LabelDialogFragment {

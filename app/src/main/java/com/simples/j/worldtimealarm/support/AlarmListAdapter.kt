@@ -20,6 +20,7 @@ import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.AlarmStatus
 import com.simples.j.worldtimealarm.etc.AlarmWarningReason
 import com.simples.j.worldtimealarm.utils.AlarmController
+import com.simples.j.worldtimealarm.utils.AlarmStringFormatHelper
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
 import org.threeten.bp.DayOfWeek
@@ -97,7 +98,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                     else null
                 }
 
-        val isExpired = item.isExpired()
+        val isExpired = item.isExpired(expect)
         if(startDate == null && endDate == null) {
             holder.range.visibility = View.GONE
             holder.switch.isEnabled = true
@@ -105,21 +106,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         else {
             holder.switch.isEnabled = !isExpired
 
-            val rangeText = when {
-                startDate != null && endDate != null -> {
-                    DateUtils.formatDateRange(context, startDate.toInstant().toEpochMilli(), endDate.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_ALL)
-                }
-                startDate != null -> {
-                    if(item.repeat.any { it > 0 }) context.getString(R.string.range_begin).format(DateUtils.formatDateTime(context, startDate.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
-                    else null
-                }
-                endDate != null -> {
-                    context.getString(R.string.range_until).format(DateUtils.formatDateTime(context, endDate.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
-                }
-                else -> {
-                    null
-                }
-            }
+            val rangeText = AlarmStringFormatHelper.getDisplayLocalDate(context, startDate, endDate, item.hasRepeatDay())
 
             if(rangeText.isNullOrEmpty())
                 holder.range.visibility = View.GONE
@@ -148,47 +135,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
         with(item.repeat) {
             if (this.any { it > 0 }) {
-                val difference = TimeZone.getTimeZone(item.timeZone).getOffset(System.currentTimeMillis()) - TimeZone.getDefault().getOffset(System.currentTimeMillis())
-                val itemCalendar = Calendar.getInstance().apply {
-                    timeInMillis = item.timeSet.toLong()
-                }
-                val tmp = itemCalendar.clone() as Calendar
-                tmp.add(Calendar.MILLISECOND, difference)
-
-                // for support old version of app
-                val repeat = item.repeat.mapIndexed { index, i ->
-                    if (i > 0) index + 1 else 0
-                }.filter { it != 0 }.map {
-                    var converted = it - 1
-                    if (converted == 0) converted = 7
-
-                    DayOfWeek.of(converted)
-                }
-
-                val repeatLocal = repeat.mapNotNull {
-                    val nextRepeatDateTime = mainZonedDateTime
-                            ?.withZoneSameInstant(ZoneId.of(item.timeZone))
-                            ?.with(TemporalAdjusters.nextOrSame(it))
-
-                    nextRepeatDateTime?.withZoneSameInstant(ZoneId.systemDefault())?.dayOfWeek
-                }
-
-                holder.repeat.text =
-                        if (repeatLocal.size == 7) context.resources.getString(R.string.everyday)
-                        else if (repeatLocal.contains(DayOfWeek.SATURDAY) && repeatLocal.contains(DayOfWeek.SUNDAY) && repeatLocal.size == 2) context.resources.getString(R.string.weekend)
-                        else if (repeatLocal.contains(DayOfWeek.MONDAY)
-                                && repeatLocal.contains(DayOfWeek.TUESDAY)
-                                && repeatLocal.contains(DayOfWeek.WEDNESDAY)
-                                && repeatLocal.contains(DayOfWeek.THURSDAY)
-                                && repeatLocal.contains(DayOfWeek.FRIDAY)
-                                && repeatLocal.size == 5) context.resources.getString(R.string.weekday)
-                        else if (repeatLocal.size == 1) {
-                            repeatLocal[0].getDisplayName(TextStyle.FULL, Locale.getDefault())
-                        } else {
-                            repeatLocal.joinToString {
-                                it.getDisplayName(TextStyle.SHORT, Locale.getDefault())
-                            }
-                        }
+                holder.repeat.text = AlarmStringFormatHelper.getDisplayLocalRepeatArray(context, item.repeat, mainZonedDateTime, item.timeZone)
             } else {
                 mainZonedDateTime?.toInstant()?.let {
                     holder.repeat.text =

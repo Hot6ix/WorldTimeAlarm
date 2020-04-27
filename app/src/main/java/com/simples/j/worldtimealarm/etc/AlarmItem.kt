@@ -2,6 +2,7 @@ package com.simples.j.worldtimealarm.etc
 
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.Log
 import com.simples.j.worldtimealarm.utils.AlarmController
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.Instant
@@ -83,7 +84,7 @@ data class AlarmItem(
 
     fun hasRepeatDay(): Boolean = repeat.any { it > 0 }
 
-    fun isExpired(): Boolean {
+    fun isExpired(dateTime: ZonedDateTime? = null): Boolean {
         if(startDate == null && endDate == null) return false
 
         val s =
@@ -113,7 +114,7 @@ data class AlarmItem(
         }
 
         e?.let {
-            val next = AlarmController().calculateDateTime(this, AlarmController.TYPE_ALARM)
+            val next = dateTime ?: AlarmController().calculateDateTime(this, AlarmController.TYPE_ALARM)
 
             val repeatValues = intArrayOf(7, 1, 2, 3, 4, 5, 6)
 
@@ -122,7 +123,7 @@ data class AlarmItem(
                 else null
             }.filterNotNull().contains(next.dayOfWeek)
 
-            isExpired = next.isAfter(it) || !isLastAlarmEndDate || next.isBefore(ZonedDateTime.now()) || next.isEqual(ZonedDateTime.now().withSecond(0).withNano(0))
+            isExpired = next.isAfter(it) || next.isBefore(ZonedDateTime.now()) || (next.isEqual(ZonedDateTime.now().withSecond(0).withNano(0)) && !isLastAlarmEndDate)
         }
 
         return isExpired

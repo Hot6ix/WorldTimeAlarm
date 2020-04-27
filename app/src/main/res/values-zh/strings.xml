@@ -116,7 +116,10 @@
     <string name="exist_ringtone">所选铃声已在列表中。</string>
     <string name="unable_to_create_alarm">无法创建警报。 请稍后再试。</string>
     <string name="confirm_before_change">更改前确认</string>
-    <string name="v22_time_set_message">Due to summer time support, date and time of %1$d alarms will be changed. Click here to see more details.</string>
+    <string name="v22_time_set_message">由于夏时制支持,将更改%1$d次警报的时间和重复时间。 预定日期和时间不会立即改变,而是从下月开始生效。 按这里看受影响的警报器。</string>
+    <string name="apply_changes">应用更改</string>
+    <string name="v22_change_dialog_title">变更通知</string>
+    <string name="v22_change_dialog_message">变更前\n%1$s\n\n变更后\n%2$s\n\n要立即应用，请单击在通知中"应用更改”。</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>
