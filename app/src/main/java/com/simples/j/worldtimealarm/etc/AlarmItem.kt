@@ -121,9 +121,9 @@ data class AlarmItem(
             val isLastAlarmEndDate = repeat.mapIndexed { index, i ->
                 if (i > 0) DayOfWeek.of(repeatValues[index])
                 else null
-            }.filterNotNull().contains(next.dayOfWeek)
+            }.contains(it.dayOfWeek)
 
-            isExpired = next.isAfter(it) || next.isBefore(ZonedDateTime.now()) || (next.isEqual(ZonedDateTime.now().withSecond(0).withNano(0)) && !isLastAlarmEndDate)
+            isExpired = next.isAfter(it) || next.isBefore(ZonedDateTime.now()) || (next.isEqual(it.withSecond(0).withNano(0)) && !isLastAlarmEndDate && hasRepeatDay())
         }
 
         return isExpired

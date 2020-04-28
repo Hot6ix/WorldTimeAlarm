@@ -516,16 +516,29 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 val resultInLocal = result.withZoneSameInstant(ZoneId.systemDefault())
                 viewModel.estimated = resultInLocal
 
+                if(createAlarm().isExpired(resultInLocal)) {
+                    est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
+                    est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
+                    est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_warning))
+                    est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.color1))
+                }
+                else {
+                    est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorEnabled))
+                    est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColor))
+                    est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_event_available))
+                    est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.textColor))
+                }
+
                 val diff = ZoneId.systemDefault().rules.getOffset(resultInLocal.toInstant()).totalSeconds - viewModel.remoteZonedDateTime.zone.rules.getOffset(resultInLocal.toInstant()).totalSeconds
 
                 val diffHour = diff.div(60 * 60)
                 val diffMin = diff.rem(60 * 60).div(60)
 
                 val hourFormat =
-                    if(diffHour < 0 || diffMin < 0)
-                        DecimalFormat("-00")
-                    else
-                        DecimalFormat("+00")
+                        if(diffHour < 0 || diffMin < 0)
+                            DecimalFormat("-00")
+                        else
+                            DecimalFormat("+00")
 
 
                 val minFormat = DecimalFormat("00")
@@ -668,8 +681,8 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 }
             }
             end != null -> {
-                if(end.toEpochMilli() < System.currentTimeMillis()) {
-                    Snackbar.make(fragment_container, getString(R.string.end_date_earlier_than_today), Snackbar.LENGTH_SHORT)
+                if(item.isExpired()) {
+                    Snackbar.make(fragment_container, getString(R.string.unreachable_alarm), Snackbar.LENGTH_SHORT)
                             .setAnchorView(action)
                             .show()
                     return
@@ -677,22 +690,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
                 val difference = end.toEpochMilli() - System.currentTimeMillis()
                 when(TimeUnit.MILLISECONDS.toDays(difference)) {
-                    in 1..6 -> {
-                        val expect = try {
-                            viewModel.alarmController.calculateDateTime(item, TYPE_ALARM)
-                        } catch (e: IllegalStateException) {
-                            null
-                        }
-
-                        val now = ZonedDateTime.now()
-                        if(expect == null || expect.isBefore(now) || expect.isEqual(now) || expect.isAfter(viewModel.endDate)) {
-                            Snackbar.make(fragment_container, getString(R.string.invalid_repeat), Snackbar.LENGTH_SHORT)
-                                    .setAnchorView(action)
-                                    .show()
-                            return
-                        }
-                    }
-                    else -> {
+                    !in 0..6 -> {
                         viewModel.recurrences.value.let { recurrences ->
                             if(recurrences == null || recurrences.all { it == 0 }) {
                                 Snackbar.make(fragment_container, getString(R.string.must_check_repeat), Snackbar.LENGTH_SHORT)

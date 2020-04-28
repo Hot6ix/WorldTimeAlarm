@@ -65,7 +65,13 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
 
                         alarmList.filter { it.on_off == 1 }.filter {
                             val applyDayRepeat = preference.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
-                            val oldResult = alarmController.calculateDate(it, AlarmController.TYPE_ALARM, applyDayRepeat)
+                            val oldResult =
+                                    try {
+                                        alarmController.calculateDate(it, AlarmController.TYPE_ALARM, applyDayRepeat)
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                        return
+                                    }
                             val newResult = alarmController.calculateDateTime(it, AlarmController.TYPE_ALARM).toInstant().toEpochMilli()
 
                             val old = ZonedDateTime.ofInstant(Instant.ofEpochMilli(oldResult.timeInMillis), ZoneId.systemDefault())

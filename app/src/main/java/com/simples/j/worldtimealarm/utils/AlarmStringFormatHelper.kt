@@ -2,9 +2,7 @@ package com.simples.j.worldtimealarm.utils
 
 import android.content.Context
 import android.text.format.DateUtils
-import android.util.Log
 import com.simples.j.worldtimealarm.R
-import com.simples.j.worldtimealarm.etc.C
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
@@ -39,7 +37,6 @@ object AlarmStringFormatHelper {
     }
 
     fun getDisplayLocalDate(context: Context, startDate: ZonedDateTime?, endDate: ZonedDateTime?, hasRepeat: Boolean): String? {
-        Log.d(C.TAG, "$startDate, $endDate")
         return when {
             startDate != null && endDate != null -> {
                 DateUtils.formatDateRange(context, startDate.toInstant().toEpochMilli(), endDate.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_ALL)

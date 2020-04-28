@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.preference.PreferenceManager
 import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.etc.AlarmWarningReason
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
@@ -50,7 +49,13 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
                     dbCursor.getActivatedAlarms().filter {
                         val applyDayRepeat = preference.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
-                        val oldResult = alarmController.calculateDate(it, TYPE_ALARM, applyDayRepeat)
+                        val oldResult =
+                                try {
+                                    alarmController.calculateDate(it, TYPE_ALARM, applyDayRepeat)
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    return
+                                }
                         val newResult = alarmController.calculateDateTime(it, TYPE_ALARM).toInstant().toEpochMilli()
 
                         val old = ZonedDateTime.ofInstant(Instant.ofEpochMilli(oldResult.timeInMillis), ZoneId.systemDefault())

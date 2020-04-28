@@ -294,7 +294,14 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 val oldStringBuilder = StringBuilder()
                 val newStringBuilder = StringBuilder()
 
-                val oldResult = ZonedDateTime.ofInstant(Instant.ofEpochMilli(alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyRepeat).timeInMillis), ZoneId.systemDefault())
+                val oldResult =
+                        try {
+                            val oldDateTimeMillis = alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyRepeat)
+                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(oldDateTimeMillis.timeInMillis), ZoneId.systemDefault())
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(item.pickerTime), ZoneId.systemDefault())
+                        }
                 val oldRepeat = AlarmStringFormatHelper.getDisplayLocalRepeatArray(
                         fragmentContext,
                         item.repeat,

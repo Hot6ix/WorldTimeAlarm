@@ -23,12 +23,9 @@ import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.AlarmStringFormatHelper
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.alarm_list_item.view.*
-import org.threeten.bp.DayOfWeek
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
-import org.threeten.bp.format.TextStyle
-import org.threeten.bp.temporal.TemporalAdjusters
 import java.util.*
 
 /**
@@ -218,11 +215,6 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         list.add(index, item)
         notifyItemInserted(index)
         notifyItemRangeChanged(index, itemCount)
-    }
-
-    fun updateItem(index: Int, item: AlarmItem) {
-        list[index] = item
-        notifyItemChanged(index)
     }
 
     fun setWarningMark(list: List<Pair<String, AlarmWarningReason>>?) {
