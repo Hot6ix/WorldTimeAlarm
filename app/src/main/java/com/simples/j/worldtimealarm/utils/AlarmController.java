@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.simples.j.worldtimealarm.AlarmReceiver;
 import com.simples.j.worldtimealarm.MainActivity;
 import com.simples.j.worldtimealarm.R;
@@ -48,10 +50,7 @@ public class AlarmController {
         return ourInstance;
     }
 
-    public ZonedDateTime calculateDateTime(AlarmItem item, int type) {
-
-        if(item == null) return null;
-
+    public ZonedDateTime calculateDateTime(@NonNull AlarmItem item, int type) {
         Instant timeSet = Instant.ofEpochMilli(item.getPickerTime());
         ZoneId targetZoneId = ZoneId.of(item.getTimeZone());
         ZonedDateTime now = ZonedDateTime.now().withZoneSameInstant(targetZoneId);
@@ -62,7 +61,7 @@ public class AlarmController {
                 .withSecond(0)
                 .withNano(0);
         ZonedDateTime start = now;
-        ZonedDateTime end = null;
+        ZonedDateTime end;
 
         if(type == TYPE_ALARM) {
             if(item.getEndDate() != null && item.getEndDate() > 0) {
@@ -151,11 +150,6 @@ public class AlarmController {
         else {
             long seconds = item.getSnooze() / 1000;
             target = ZonedDateTime.now().plusSeconds(seconds);
-        }
-
-        if(end != null && target.isAfter(end)) {
-            target = end;
-            return target.withSecond(0).withNano(0);
         }
 
         return target.withSecond(0).withNano(0);
