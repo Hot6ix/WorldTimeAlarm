@@ -103,26 +103,36 @@ data class AlarmItem(
                     else null
                 }
 
-        var isExpired: Boolean
+        var isExpired = false
 
-        isExpired = s.let { date ->
-            if(date != null && !repeat.any { it > 0 }) {
-                !date.isAfter(ZonedDateTime.now())
+        when {
+            s != null && e != null -> {
+                when {
+                    s.isAfter(e) -> return true
+                    e.isBefore(ZonedDateTime.now()) || e.isEqual(ZonedDateTime.now()) -> return true
+                }
             }
-            else false
-        }
+            s != null -> {
+                isExpired =
+                    if(!repeat.any { it > 0 }) {
+                        !s.isAfter(ZonedDateTime.now())
+                    }
+                    else false
+            }
+            e != null -> {
+                if(e.isBefore(ZonedDateTime.now())) return true
 
-        e?.let {
-            val next = dateTime ?: AlarmController().calculateDateTime(this, AlarmController.TYPE_ALARM)
+                val next = dateTime ?: AlarmController().calculateDateTime(this, AlarmController.TYPE_ALARM)
 
-            val repeatValues = intArrayOf(7, 1, 2, 3, 4, 5, 6)
+                val repeatValues = intArrayOf(7, 1, 2, 3, 4, 5, 6)
 
-            val isLastAlarmEndDate = repeat.mapIndexed { index, i ->
-                if (i > 0) DayOfWeek.of(repeatValues[index])
-                else null
-            }.contains(it.dayOfWeek)
+                val isLastAlarmEndDate = repeat.mapIndexed { index, i ->
+                    if (i > 0) DayOfWeek.of(repeatValues[index])
+                    else null
+                }.contains(e.dayOfWeek)
 
-            isExpired = next.isAfter(it) || next.isBefore(ZonedDateTime.now()) || (next.isEqual(it.withSecond(0).withNano(0)) && !isLastAlarmEndDate && next.isBefore(ZonedDateTime.now()))
+                isExpired = next.isAfter(e) || next.isBefore(ZonedDateTime.now()) || (next.isEqual(e.withSecond(0).withNano(0)) && !isLastAlarmEndDate && next.isBefore(ZonedDateTime.now()))
+            }
         }
 
         return isExpired

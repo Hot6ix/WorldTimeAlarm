@@ -465,7 +465,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
                         }
                     }
 
-            if(a.apply { timeSet = r.toInstant().toEpochMilli().toString() }.isExpired()) {
+            if(a.copy(timeSet = r.toInstant().toEpochMilli().toString()).isExpired()) {
                 Log.d(C.TAG, "expired")
                 break
             }
@@ -480,10 +480,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
                 Assert.assertEquals(13, r.withZoneSameInstant(ZoneId.systemDefault()).hour)
             Assert.assertEquals(answer.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
 
-            if(ZonedDateTime.now().year == endDate.year && ZonedDateTime.now().monthValue == endDate.monthValue && ZonedDateTime.now().dayOfMonth == endDate.dayOfMonth)
-                Assert.assertEquals(time.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
-            else
-                Assert.assertNotEquals(time.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
+            Assert.assertNotEquals(time.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
 
             time = r
         }
