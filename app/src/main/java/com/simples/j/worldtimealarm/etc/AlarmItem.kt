@@ -105,34 +105,34 @@ data class AlarmItem(
 
         var isExpired = false
 
-        when {
-            s != null && e != null -> {
-                when {
-                    s.isAfter(e) -> return true
-                    e.isBefore(ZonedDateTime.now()) || e.isEqual(ZonedDateTime.now()) -> return true
-                }
+        if(s != null && e != null) {
+            when {
+                s.isAfter(e) -> return true
+                e.isBefore(ZonedDateTime.now()) || e.isEqual(ZonedDateTime.now()) -> return true
             }
-            s != null -> {
-                isExpired =
+        }
+
+        s?.let {
+            isExpired =
                     if(!repeat.any { it > 0 }) {
                         !s.isAfter(ZonedDateTime.now())
                     }
                     else false
-            }
-            e != null -> {
-                if(e.isBefore(ZonedDateTime.now())) return true
+        }
 
-                val next = dateTime ?: AlarmController().calculateDateTime(this, AlarmController.TYPE_ALARM)
+        e?.let {
+            if(e.isBefore(ZonedDateTime.now())) return true
 
-                val repeatValues = intArrayOf(7, 1, 2, 3, 4, 5, 6)
+            val next = dateTime ?: AlarmController().calculateDateTime(this, AlarmController.TYPE_ALARM)
 
-                val isLastAlarmEndDate = repeat.mapIndexed { index, i ->
-                    if (i > 0) DayOfWeek.of(repeatValues[index])
-                    else null
-                }.contains(e.dayOfWeek)
+            val repeatValues = intArrayOf(7, 1, 2, 3, 4, 5, 6)
 
-                isExpired = next.isAfter(e) || next.isBefore(ZonedDateTime.now()) || (next.isEqual(e.withSecond(0).withNano(0)) && !isLastAlarmEndDate && next.isBefore(ZonedDateTime.now()))
-            }
+            val isLastAlarmEndDate = repeat.mapIndexed { index, i ->
+                if (i > 0) DayOfWeek.of(repeatValues[index])
+                else null
+            }.contains(e.dayOfWeek)
+
+            isExpired = next.isAfter(e) || next.isBefore(ZonedDateTime.now()) || (next.isEqual(e.withSecond(0).withNano(0)) && !isLastAlarmEndDate && next.isBefore(ZonedDateTime.now()))
         }
 
         return isExpired
