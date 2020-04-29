@@ -117,7 +117,8 @@
     <string name="exist_ringtone">이미 추가된 벨소리입니다.</string>
     <string name="unable_to_create_alarm">알람을 생성할 수 없습니다. 잠시 후에 다시 시도해주세요.</string>
     <string name="confirm_before_change">변경 전 확인</string>
-    <string name="v22_time_set_message">서머 타임 기능 지원으로 인해 %1$d개 알람의 날짜와 시간이 변경될 예정입니다. 예정된 날짜와 시간은 바로 변경되지 않고 다음부터 적용됩니다. 여기를 눌러 영향을 받는 알람을 확인할 수 있습니다.</string>
+    <string name="v22_time_set_message_change">서머 타임 지원으로 인해 %1$d개 알람의 날짜와 시간이 변경될 예정입니다. 예정된 날짜와 시간은 바로 변경되지 않고 다음부터 적용됩니다. 여기를 눌러 영향을 받는 알람을 확인할 수 있습니다.</string>
+    <string name="v22_time_set_message">서머 타임 지원으로 인해 알람 스케줄 방식이 변경되었습니다. 예정된 날짜와 시간은 바로 변경되지 않고 다음부터 적용됩니다. 더 자세한 정보는 설정 내 위키 방문을 통해 확인하실 수 있습니다.</string>
     <string name="apply_changes">적용하기</string>
     <string name="v22_change_dialog_title">변경 알림</string>
     <string name="v22_change_dialog_message">변경 전\n%1$s\n\n변경 후\n%2$s\n\n즉시 적용하려면, 알림 내 적용하기 버튼을 누르세요.</string>

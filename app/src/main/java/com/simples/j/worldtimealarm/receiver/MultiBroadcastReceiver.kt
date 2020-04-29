@@ -63,45 +63,59 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                             db.updateAlarmIndex(updated)
                         }
 
-                        alarmList.filter { it.on_off == 1 }.filter {
-                            val applyDayRepeat = preference.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
-                            val oldResult =
-                                    try {
-                                        alarmController.calculateDate(it, AlarmController.TYPE_ALARM, applyDayRepeat)
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
-                                        return
-                                    }
-                            val newResult = alarmController.calculateDateTime(it, AlarmController.TYPE_ALARM).toInstant().toEpochMilli()
-
-                            val old = ZonedDateTime.ofInstant(Instant.ofEpochMilli(oldResult.timeInMillis), ZoneId.systemDefault())
-                                    .withNano(0)
-                            val new = ZonedDateTime.ofInstant(Instant.ofEpochMilli(newResult), ZoneId.systemDefault())
-
-                            !old.isEqual(new)
-                        }.also {
-                            if(it.isNotEmpty()) {
-                                val applyIntent = Intent(context, NotificationActionReceiver::class.java).apply {
-                                    putExtra(NotificationActionReceiver.NOTIFICATION_ACTION, NotificationActionReceiver.ACTION_APPLY_V22_UPDATE)
-                                }
-                                val applyPendingIntent = PendingIntent.getBroadcast(context, BuildConfig.VERSION_CODE, applyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-                                val applyAction = NotificationCompat.Action(0, context.getString(R.string.apply_changes), applyPendingIntent)
-
-                                val msg = context.getString(R.string.v22_time_set_message, it.size)
-                                val notification = getNotification(
-                                        context,
-                                        context.getString(R.string.confirm_before_change),
-                                        msg,
-                                        Bundle().apply {
-                                            putString(WARNING, it.map { item -> item.id }.joinToString(","))
-                                            putString(REASON, IntArray(it.size) { AlarmWarningReason.REASON_V22_UPDATE.reason }.joinToString(","))
+                        if(alarmList.isNotEmpty()) {
+                            alarmList.filter { it.on_off == 1 }.filter {
+                                val applyDayRepeat = preference.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
+                                val oldResult =
+                                        try {
+                                            alarmController.calculateDate(it, AlarmController.TYPE_ALARM, applyDayRepeat)
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                            return
                                         }
-                                ).apply {
-                                    setStyle(NotificationCompat.BigTextStyle().bigText(msg))
-                                    setAutoCancel(false)
-                                    addAction(applyAction)
-                                }.build()
-                                notificationManager.notify(BuildConfig.VERSION_CODE, notification)
+                                val newResult = alarmController.calculateDateTime(it, AlarmController.TYPE_ALARM).toInstant().toEpochMilli()
+
+                                val old = ZonedDateTime.ofInstant(Instant.ofEpochMilli(oldResult.timeInMillis), ZoneId.systemDefault())
+                                        .withNano(0)
+                                val new = ZonedDateTime.ofInstant(Instant.ofEpochMilli(newResult), ZoneId.systemDefault())
+
+                                !old.isEqual(new)
+                            }.also {
+                                if(it.isEmpty()) {
+                                    val msg = context.getString(R.string.v22_time_set_message)
+                                    val notification = getNotification(
+                                            context,
+                                            context.getString(R.string.v22_change_dialog_title),
+                                            msg
+                                    ).apply {
+                                        setStyle(NotificationCompat.BigTextStyle().bigText(msg))
+                                        setAutoCancel(true)
+                                    }.build()
+                                    notificationManager.notify(BuildConfig.VERSION_CODE, notification)
+                                }
+                                else {
+                                    val applyIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+                                        putExtra(NotificationActionReceiver.NOTIFICATION_ACTION, NotificationActionReceiver.ACTION_APPLY_V22_UPDATE)
+                                    }
+                                    val applyPendingIntent = PendingIntent.getBroadcast(context, BuildConfig.VERSION_CODE, applyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                                    val applyAction = NotificationCompat.Action(0, context.getString(R.string.apply_changes), applyPendingIntent)
+
+                                    val msg = context.getString(R.string.v22_time_set_message_change, it.size)
+                                    val notification = getNotification(
+                                            context,
+                                            context.getString(R.string.confirm_before_change),
+                                            msg,
+                                            Bundle().apply {
+                                                putString(WARNING, it.map { item -> item.id }.joinToString(","))
+                                                putString(REASON, IntArray(it.size) { AlarmWarningReason.REASON_V22_UPDATE.reason }.joinToString(","))
+                                            }
+                                    ).apply {
+                                        setStyle(NotificationCompat.BigTextStyle().bigText(msg))
+                                        setAutoCancel(false)
+                                        addAction(applyAction)
+                                    }.build()
+                                    notificationManager.notify(BuildConfig.VERSION_CODE, notification)
+                                }
                             }
                         }
 

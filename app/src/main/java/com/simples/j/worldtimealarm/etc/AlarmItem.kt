@@ -114,10 +114,8 @@ data class AlarmItem(
 
         s?.let {
             isExpired =
-                    if(!repeat.any { it > 0 }) {
-                        !s.isAfter(ZonedDateTime.now())
-                    }
-                    else false
+                if(!hasRepeatDay()) !s.isAfter(ZonedDateTime.now())
+                else false
         }
 
         e?.let {
