@@ -13,6 +13,7 @@ import android.os.PowerManager
 import android.text.format.DateUtils
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_MISSED
@@ -39,6 +40,7 @@ class AlarmReceiver: BroadcastReceiver() {
     private var isExpired = false
 
     override fun onReceive(context: Context, intent: Intent) {
+        AndroidThreeTen.init(context)
         notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
@@ -52,15 +54,21 @@ class AlarmReceiver: BroadcastReceiver() {
             return
         }
 
-        val item = option?.getParcelable<AlarmItem>(ITEM)
+        // If alarm type is snooze ignore, if not set alarm
+        dbCursor = DatabaseCursor(context)
+
+        val itemFromIntent = option?.getParcelable<AlarmItem>(ITEM)
+        val item = dbCursor.getSingleAlarmByNotificationId(itemFromIntent?.notiId)
+
+        option = option?.apply {
+            remove(ITEM)
+            putParcelable(ITEM, item)
+        }
         if(item == null) {
             Log.d(C.TAG, "AlarmReceiver failed to get AlarmItem.")
             return
         }
         Log.d(C.TAG, "Alarm(id=${item.notiId+1}, type=${intent.action}) triggered")
-
-        // If alarm type is snooze ignore, if not set alarm
-        dbCursor = DatabaseCursor(context)
 
         isExpired = item.isExpired()
         if(!item.isInstantAlarm() && !isExpired) {
