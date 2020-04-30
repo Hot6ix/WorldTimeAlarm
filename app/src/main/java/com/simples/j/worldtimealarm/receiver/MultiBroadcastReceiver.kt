@@ -51,7 +51,7 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
         when(intent.action) {
             Intent.ACTION_MY_PACKAGE_REPLACED -> {
                 when(BuildConfig.VERSION_CODE) {
-                    22 -> {
+                    22, 23 -> {
                         // reset order of list
                         alarmList.forEachIndexed { index, alarmItem ->
                             val updated = alarmItem.apply {
@@ -62,6 +62,7 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                             db.updateAlarm(updated)
                             db.updateAlarmIndex(updated)
                         }
+
 
                         if(alarmList.isNotEmpty()) {
                             alarmList.filter { it.on_off == 1 }.filter {

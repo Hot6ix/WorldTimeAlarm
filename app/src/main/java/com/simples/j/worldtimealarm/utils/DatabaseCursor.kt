@@ -108,6 +108,62 @@ class DatabaseCursor(val context: Context) {
         return item
     }
 
+    fun getSingleAlarmByNotificationId(nId: Int?): AlarmItem? {
+        if(nId == null) return null
+
+        val db = dbManager.readableDatabase
+
+        val cursor = db.query(DatabaseManager.TABLE_ALARM_LIST, null, "${DatabaseManager.COLUMN_NOTI_ID} = ?", arrayOf(nId.toString()), null, null, null)
+
+        var item: AlarmItem? = null
+
+        while(cursor.moveToNext()) {
+            val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+            val timeZone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_ZONE))
+            val timeSet = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
+            val repeat = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
+            val ringtone = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_RINGTONE))
+            val vibration = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_VIBRATION)).replace("[", "").replace("]", "")
+            val snooze = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_SNOOZE))
+            val label = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_LABEL))
+            val switch = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ON_OFF))
+            val notiId = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_NOTI_ID))
+            val colorTag = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_COLOR_TAG))
+            val index = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_INDEX))
+            val startDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_START_DATE))
+            val endDate = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_END_DATE))
+            val pickerTime = cursor.getLong(cursor.getColumnIndex(DatabaseManager.COLUMN_PICKER_TIME))
+
+            val repeatValues = repeat.split(",").map { it.trim().toInt() }.toIntArray()
+            val vibrationValues =
+                    if(vibration == "null") null
+                    else vibration.split(",").map { it.trim().toLong() }.toLongArray()
+
+            item = AlarmItem(
+                    id,
+                    timeZone,
+                    timeSet,
+                    repeatValues,
+                    ringtone,
+                    vibrationValues,
+                    snooze.toLong(),
+                    label,
+                    switch,
+                    notiId,
+                    colorTag,
+                    index,
+                    startDate,
+                    endDate,
+                    pickerTime
+            )
+        }
+
+        cursor.close()
+        db.close()
+
+        return item
+    }
+
     fun getAlarmList(): ArrayList<AlarmItem> {
         val db = dbManager.readableDatabase
         val alarmList = ArrayList<AlarmItem>()

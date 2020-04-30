@@ -79,7 +79,7 @@ data class AlarmItem(
         writeLong(pickerTime)
     }
 
-    fun isInstantAlarm(): Boolean = repeat.all { it == 0 } && endDate == null
+    fun isInstantAlarm(): Boolean = repeat.all { it == 0 } && (endDate == null || endDate == 0L)
 
     fun hasRepeatDay(): Boolean = repeat.any { it > 0 }
 
