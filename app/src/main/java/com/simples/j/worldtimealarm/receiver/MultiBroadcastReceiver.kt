@@ -12,7 +12,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
-import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.BuildConfig
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
@@ -45,8 +44,6 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
             }
             notificationManager.createNotificationChannel(notificationChannel)
         }
-
-        AndroidThreeTen.init(context)
 
         when(intent.action) {
             Intent.ACTION_MY_PACKAGE_REPLACED -> {
