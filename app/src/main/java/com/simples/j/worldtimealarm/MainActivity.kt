@@ -13,7 +13,6 @@ import androidx.preference.PreferenceManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
@@ -44,7 +43,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
         setContentView(R.layout.activity_main)
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         createNotificationChannels()
-        AndroidThreeTen.init(application)
 
         launch(coroutineContext) {
             withContext(Dispatchers.IO) {

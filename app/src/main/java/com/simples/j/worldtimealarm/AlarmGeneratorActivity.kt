@@ -6,7 +6,6 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.AlarmStatus
 import com.simples.j.worldtimealarm.fragments.AlarmGeneratorFragment
@@ -19,8 +18,6 @@ class AlarmGeneratorActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alarm_generator)
-
-        AndroidThreeTen.init(this)
 
         viewModel = ViewModelProvider(this)[AlarmGeneratorViewModel::class.java]
 

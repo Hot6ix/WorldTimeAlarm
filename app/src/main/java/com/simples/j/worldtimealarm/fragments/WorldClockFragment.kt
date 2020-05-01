@@ -19,7 +19,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.*
 import com.google.android.material.snackbar.Snackbar
-import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
@@ -38,7 +37,6 @@ import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
-import java.lang.NumberFormatException
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
@@ -82,8 +80,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        AndroidThreeTen.init(fragmentContext)
 
         dbCursor = DatabaseCursor(fragmentContext)
         activity?.run {
