@@ -37,13 +37,11 @@ import kotlinx.android.synthetic.main.fragment_alarm_generator.date_view
 import kotlinx.android.synthetic.main.fragment_alarm_generator.detail_content_layout
 import kotlinx.android.synthetic.main.fragment_alarm_generator.time_picker
 import kotlinx.android.synthetic.main.fragment_alarm_generator.time_zone_view
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
+import java.lang.Exception
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -63,7 +61,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     private lateinit var ringtoneList: ArrayList<RingtoneItem>
     private lateinit var vibratorPatternList: ArrayList<PatternItem>
     private lateinit var snoozeList: ArrayList<SnoozeItem>
-    private lateinit var now: ZonedDateTime
 
     private lateinit var preference: SharedPreferences
 
@@ -122,7 +119,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             viewModel.alarmItem.let {
                 if (it != null) {
                     viewModel.timeZone.value = it.timeZone.replace(" ", "_")
-                    now = ZonedDateTime.now(ZoneId.of(viewModel.timeZone.value))
 
                     val instant = Instant.ofEpochMilli(it.pickerTime)
                     val local = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
@@ -148,6 +144,8 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
                     viewModel.startDate.let { start ->
                         if (start == null) {
+                            val now = ZonedDateTime.now(ZoneId.of(viewModel.timeZone.value))
+
                             viewModel.remoteZonedDateTime =
                                     viewModel.remoteZonedDateTime
                                             .withYear(now.year)
@@ -185,7 +183,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 }
                 else {
                     viewModel.timeZone.value = TimeZone.getDefault().id
-                    now = ZonedDateTime.now(ZoneId.systemDefault())
 
                     viewModel.ringtone.value = defaultRingtone
                     viewModel.vibration.value = vibratorPatternList[0]
@@ -296,6 +293,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
     override fun onDestroy() {
         super.onDestroy()
+
         fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
     }
 
@@ -366,6 +364,8 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                     }
 
                     viewModel.startDate.let {
+                        val now = ZonedDateTime.now(ZoneId.of(viewModel.timeZone.value))
+
                         viewModel.remoteZonedDateTime =
                         if(it == null) {
                             viewModel.remoteZonedDateTime
@@ -512,40 +512,53 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 viewModel.alarmController.calculateDateTime(createAlarm(), TYPE_ALARM)
             }
 
-            if(result != null) {
-                val resultInLocal = result.withZoneSameInstant(ZoneId.systemDefault())
-                viewModel.estimated = resultInLocal
+            try {
+                if(result != null) {
+                    val resultInLocal = result.withZoneSameInstant(ZoneId.systemDefault())
+                    viewModel.estimated = resultInLocal
 
-                if(createAlarm().isExpired(resultInLocal)) {
+                    if(createAlarm().isExpired(resultInLocal)) {
+                        est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
+                        est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
+                        est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_warning))
+                        est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.color1))
+                    }
+                    else {
+                        est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorEnabled))
+                        est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColor))
+                        est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_event_available))
+                        est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.textColor))
+                    }
+
+                    val diff = ZoneId.systemDefault().rules.getOffset(resultInLocal.toInstant()).totalSeconds - viewModel.remoteZonedDateTime.zone.rules.getOffset(resultInLocal.toInstant()).totalSeconds
+
+                    val diffHour = diff.div(60 * 60)
+                    val diffMin = diff.rem(60 * 60).div(60)
+
+                    val hourFormat =
+                            if(diffHour < 0 || diffMin < 0)
+                                DecimalFormat("-00")
+                            else
+                                DecimalFormat("+00")
+
+
+                    val minFormat = DecimalFormat("00")
+                    val diffText = "${hourFormat.format(diffHour.absoluteValue)}:${minFormat.format(diffMin.absoluteValue)}"
+
+                    est_time_zone.text = getString(R.string.time_zone_with_diff, getFormattedTimeZoneName(resultInLocal.zone.id), diffText)
+                    est_date_time.text = DateUtils.formatDateTime(fragmentContext, resultInLocal.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
+                }
+                else {
                     est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
                     est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
                     est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_warning))
                     est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.color1))
+
+                    est_time_zone.text = getFormattedTimeZoneName(ZoneId.systemDefault().id)
+                    est_date_time.text = getString(R.string.unreachable_alarm)
                 }
-                else {
-                    est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorEnabled))
-                    est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColor))
-                    est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_event_available))
-                    est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.textColor))
-                }
-
-                val diff = ZoneId.systemDefault().rules.getOffset(resultInLocal.toInstant()).totalSeconds - viewModel.remoteZonedDateTime.zone.rules.getOffset(resultInLocal.toInstant()).totalSeconds
-
-                val diffHour = diff.div(60 * 60)
-                val diffMin = diff.rem(60 * 60).div(60)
-
-                val hourFormat =
-                        if(diffHour < 0 || diffMin < 0)
-                            DecimalFormat("-00")
-                        else
-                            DecimalFormat("+00")
-
-
-                val minFormat = DecimalFormat("00")
-                val diffText = "${hourFormat.format(diffHour.absoluteValue)}:${minFormat.format(diffMin.absoluteValue)}"
-
-                est_time_zone.text = getString(R.string.time_zone_with_diff, getFormattedTimeZoneName(resultInLocal.zone.id), diffText)
-                est_date_time.text = DateUtils.formatDateTime(fragmentContext, resultInLocal.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
@@ -569,10 +582,15 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     }
 
     private fun getFormattedTimeZoneName(timeZoneId: String?): String {
-        return if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(timeZoneId))
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            try {
+                return MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(timeZoneId))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
-        else timeZoneId ?: getString(R.string.time_zone_unknown)
+
+        return timeZoneId ?: getString(R.string.time_zone_unknown)
     }
 
     private fun getLabelDialog(): LabelDialogFragment {

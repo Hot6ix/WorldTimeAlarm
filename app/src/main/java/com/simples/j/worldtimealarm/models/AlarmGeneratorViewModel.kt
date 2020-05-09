@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.utils.AlarmController
+import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 
 class AlarmGeneratorViewModel(app: Application): AndroidViewModel(app) {
@@ -16,7 +17,9 @@ class AlarmGeneratorViewModel(app: Application): AndroidViewModel(app) {
     var alarmItem: AlarmItem? = null
 
     val timeZone: MutableLiveData<String> by lazy {
-        MutableLiveData<String>()
+        MutableLiveData<String>().also {
+            it.value = ZoneId.systemDefault().id
+        }
     }
 
     var remoteZonedDateTime: ZonedDateTime = ZonedDateTime.now()
