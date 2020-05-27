@@ -51,7 +51,11 @@ class AlarmGeneratorViewModel(app: Application): AndroidViewModel(app) {
         MutableLiveData<Int>()
     }
 
-    var estimated: ZonedDateTime = ZonedDateTime.now()
+    val estimated: MutableLiveData<ZonedDateTime> by lazy {
+        MutableLiveData<ZonedDateTime>().also {
+            it.value = ZonedDateTime.now()
+        }
+    }
 
     var status: AlarmStatus = AlarmStatus.STATUS_NORMAL
 

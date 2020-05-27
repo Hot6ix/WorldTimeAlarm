@@ -262,6 +262,9 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         detail_content_layout.isNestedScrollingEnabled = false
 
         // Init observers
+        viewModel.estimated.observe(viewLifecycleOwner, Observer {
+            updateEstimatedLayout(it)
+        })
         viewModel.ringtone.observe(viewLifecycleOwner, Observer {
             alarmOptionAdapter.notifyItemChanged(0)
         })
@@ -508,58 +511,55 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
     private fun updateEstimated() {
         launch(coroutineContext) {
-            val result = withContext(Dispatchers.IO) {
+            viewModel.estimated.value = withContext(Dispatchers.IO) {
                 viewModel.alarmController.calculateDateTime(createAlarm(), TYPE_ALARM)
             }
+        }
+    }
 
-            try {
-                if(result != null) {
-                    val resultInLocal = result.withZoneSameInstant(ZoneId.systemDefault())
-                    viewModel.estimated = resultInLocal
+    private fun updateEstimatedLayout(result: ZonedDateTime?) {
+        if(result != null) {
+            val resultInLocal = result.withZoneSameInstant(ZoneId.systemDefault())
 
-                    if(createAlarm().isExpired(resultInLocal)) {
-                        est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
-                        est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
-                        est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_warning))
-                        est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.color1))
-                    }
-                    else {
-                        est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorEnabled))
-                        est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColor))
-                        est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_event_available))
-                        est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.textColor))
-                    }
-
-                    val diff = ZoneId.systemDefault().rules.getOffset(resultInLocal.toInstant()).totalSeconds - viewModel.remoteZonedDateTime.zone.rules.getOffset(resultInLocal.toInstant()).totalSeconds
-
-                    val diffHour = diff.div(60 * 60)
-                    val diffMin = diff.rem(60 * 60).div(60)
-
-                    val hourFormat =
-                            if(diffHour < 0 || diffMin < 0)
-                                DecimalFormat("-00")
-                            else
-                                DecimalFormat("+00")
-
-
-                    val minFormat = DecimalFormat("00")
-                    val diffText = "${hourFormat.format(diffHour.absoluteValue)}:${minFormat.format(diffMin.absoluteValue)}"
-
-                    est_time_zone.text = getString(R.string.time_zone_with_diff, getFormattedTimeZoneName(resultInLocal.zone.id), diffText)
-                    est_date_time.text = DateUtils.formatDateTime(fragmentContext, resultInLocal.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
-                }
-                else {
-                    est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
-                    est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
-                    est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_warning))
-                    est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.color1))
-
-                    est_time_zone.text = getFormattedTimeZoneName(ZoneId.systemDefault().id)
-                    est_date_time.text = getString(R.string.unreachable_alarm)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            if(createAlarm().isExpired(resultInLocal)) {
+                est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
+                est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
+                est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_warning))
+                est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.color1))
             }
+            else {
+                est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorEnabled))
+                est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColor))
+                est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_event_available))
+                est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.textColor))
+            }
+
+            val diff = ZoneId.systemDefault().rules.getOffset(resultInLocal.toInstant()).totalSeconds - viewModel.remoteZonedDateTime.zone.rules.getOffset(resultInLocal.toInstant()).totalSeconds
+
+            val diffHour = diff.div(60 * 60)
+            val diffMin = diff.rem(60 * 60).div(60)
+
+            val hourFormat =
+                    if(diffHour < 0 || diffMin < 0)
+                        DecimalFormat("-00")
+                    else
+                        DecimalFormat("+00")
+
+
+            val minFormat = DecimalFormat("00")
+            val diffText = "${hourFormat.format(diffHour.absoluteValue)}:${minFormat.format(diffMin.absoluteValue)}"
+
+            est_time_zone.text = getString(R.string.time_zone_with_diff, getFormattedTimeZoneName(resultInLocal.zone.id), diffText)
+            est_date_time.text = DateUtils.formatDateTime(fragmentContext, resultInLocal.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
+        }
+        else {
+            est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
+            est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
+            est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_warning))
+            est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.color1))
+
+            est_time_zone.text = getFormattedTimeZoneName(ZoneId.systemDefault().id)
+            est_date_time.text = getString(R.string.unreachable_alarm)
         }
     }
 
