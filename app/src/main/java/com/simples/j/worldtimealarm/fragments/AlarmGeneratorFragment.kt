@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.widget.TimePicker
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -109,7 +108,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
         val userRingtone = DatabaseCursor(fragmentContext).getUserRingtoneList()
         val systemRingtone = MediaCursor.getRingtoneList(fragmentContext)
-        val defaultRingtone = systemRingtone[1]
+        val defaultRingtone = if(systemRingtone.size > 1) systemRingtone[1] else systemRingtone[0] // use first ringtone if phone has system ringtone, if not set to no ringtone.
 
         ringtoneList = ArrayList<RingtoneItem>().apply {
             addAll(userRingtone)
@@ -265,19 +264,19 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         detail_content_layout.isNestedScrollingEnabled = false
 
         // Init observers
-        viewModel.ringtone.observe(viewLifecycleOwner, Observer {
+        viewModel.ringtone.observe(viewLifecycleOwner, {
             alarmOptionAdapter.notifyItemChanged(0)
         })
-        viewModel.vibration.observe(viewLifecycleOwner, Observer {
+        viewModel.vibration.observe(viewLifecycleOwner, {
             alarmOptionAdapter.notifyItemChanged(1)
         })
-        viewModel.snooze.observe(viewLifecycleOwner, Observer {
+        viewModel.snooze.observe(viewLifecycleOwner, {
             alarmOptionAdapter.notifyItemChanged(2)
         })
-        viewModel.label.observe(viewLifecycleOwner, Observer {
+        viewModel.label.observe(viewLifecycleOwner, {
             alarmOptionAdapter.notifyItemChanged(3)
         })
-        viewModel.colorTag.observe(viewLifecycleOwner, Observer {
+        viewModel.colorTag.observe(viewLifecycleOwner, {
             alarmOptionAdapter.notifyItemChanged(4)
         })
 

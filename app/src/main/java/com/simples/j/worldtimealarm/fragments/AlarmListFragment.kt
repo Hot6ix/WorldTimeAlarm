@@ -4,10 +4,9 @@ package com.simples.j.worldtimealarm.fragments
 import android.app.Activity
 import android.content.*
 import android.media.AudioManager
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.text.format.DateUtils
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -97,6 +96,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             }
             recyclerLayoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
 
+            // TODO: Fix NullPointerException at setLayoutManager()
             alarmList.apply {
                 layoutManager = recyclerLayoutManager
                 adapter = alarmListAdapter
@@ -119,7 +119,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         val unMute = getString(R.string.unmute)
         if(!muteStatusIsShown) {
             if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
-                Handler().postDelayed({
+                Handler(Looper.getMainLooper()).postDelayed({
                     Snackbar.make(fragmentLayout, muted, Snackbar.LENGTH_LONG)
                             .setAction(unMute) {
                         audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
@@ -318,12 +318,12 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         item.timeZone
                 )
 
-                oldStringBuilder.appendln(oldResult.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
-                date?.let { oldStringBuilder.appendln(it) }
+                oldStringBuilder.appendLine(oldResult.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
+                date?.let { oldStringBuilder.appendLine(it) }
                 oldStringBuilder.append(oldRepeat)
 
-                newStringBuilder.appendln(newResult.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
-                date?.let { newStringBuilder.appendln(it) }
+                newStringBuilder.appendLine(newResult.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
+                date?.let { newStringBuilder.appendLine(it) }
                 newStringBuilder.append(newRepeat)
 
                 val title = getString(R.string.v22_change_dialog_title)
@@ -418,13 +418,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             snackBar = Snackbar.make(fragmentLayout, getString(R.string.alarm_on, MediaCursor.getRemainTime(fragmentContext, calendar)), Snackbar.LENGTH_LONG)
             snackBar?.show()
         }
-    }
-
-    private fun getFormattedTimeZoneName(timeZoneId: String?): String {
-        return if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(timeZoneId))
-        }
-        else timeZoneId ?: getString(R.string.time_zone_unknown)
     }
 
     private inner class UpdateRequestReceiver: BroadcastReceiver() {

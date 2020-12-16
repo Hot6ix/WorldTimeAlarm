@@ -21,8 +21,8 @@ class LicenseActivity : AppCompatActivity() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when(item!!.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
             android.R.id.home -> {
                 NavUtils.navigateUpFromSameTask(this)
                 true

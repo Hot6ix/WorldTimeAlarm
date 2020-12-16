@@ -137,6 +137,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             clockListAdapter = ClockListAdapter(fragmentContext, clockItems, viewModel)
             recyclerLayoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
 
+            // TODO: Fix NullPointerException at setLayoutManager()
             clockList.apply {
                 layoutManager = recyclerLayoutManager
                 adapter = clockListAdapter
@@ -159,7 +160,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             fragmentContext.registerReceiver(timeZoneChangedReceiver, intentFilter)
         }
 
-        viewModel.mainZonedDateTime.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+        viewModel.mainZonedDateTime.observe(viewLifecycleOwner, {
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, it.hour)
                 set(Calendar.MINUTE, it.minute)
