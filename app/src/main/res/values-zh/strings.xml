@@ -90,6 +90,8 @@
     <string name="set_to_system_time_zone">Reset</string>
     <string name="time_zone_with_diff">%1$s (%2$s)</string>
     <string name="change_log">变更记录</string>
+    <string name="change">Change</string>
+    <string name="revoke">Revoke</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>
@@ -122,6 +124,7 @@
     <string name="apply_changes">应用更改</string>
     <string name="v22_change_dialog_title">变更通知</string>
     <string name="v22_change_dialog_message">变更前\n%1$s\n\n变更后\n%2$s\n\n要立即应用，请单击在通知中"应用更改”。</string>
+    <string name="eu_consent">Please open app to select European user advertisement policy.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>
@@ -185,6 +188,10 @@
     <string name="setting_privacy_policy_title">隐私政策</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">访问GitHub</string>
+    <string name="setting_eea_key">EEA</string>
+    <string name="setting_eea_title">Change/Revoke consent of advertisements for EU user</string>
+    <string name="setting_eea_dialog_title">Change or Revoke</string>
+    <string name="setting_eea_dialog_summary">Change or Revoke</string>
 
     <string-array name="time_selector">
         <item>ID</item>

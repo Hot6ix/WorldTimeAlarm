@@ -13,6 +13,8 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import com.google.ads.consent.ConsentInformation
+import com.google.ads.consent.ConsentStatus
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.simples.j.worldtimealarm.etc.AlarmItem
@@ -22,6 +24,7 @@ import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import com.simples.j.worldtimealarm.utils.WakeUpService
 import kotlinx.android.synthetic.main.activity_wake_up.*
+import java.lang.IllegalArgumentException
 import java.util.*
 
 class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
@@ -42,8 +45,15 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             finish()
         }
 
+        val consentInfo = ConsentInformation.getInstance(this)
+        if(consentInfo.consentStatus == ConsentStatus.UNKNOWN) {
+            // show toast
+            Toast.makeText(this, "Please launch app to set EU", Toast.LENGTH_LONG).show()
+        }
+
         MobileAds.setRequestConfiguration(C.getAdsTestConfig())
-        MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
+        MobileAds.initialize(this)
+
         adViewWakeUp.loadAd(AdRequest.Builder().build())
 
         @Suppress("DEPRECATION")
@@ -123,7 +133,12 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         vibrator.cancel()
 
         stopService(Intent(applicationContext, WakeUpService::class.java))
-        unregisterReceiver(actionBroadcastReceiver)
+
+        try {
+            unregisterReceiver(actionBroadcastReceiver)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        }
     }
 
     override fun onBackPressed() {

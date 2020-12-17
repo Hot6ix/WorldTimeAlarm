@@ -120,6 +120,7 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
+
         try {
             fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
         } catch (e: IllegalArgumentException) {

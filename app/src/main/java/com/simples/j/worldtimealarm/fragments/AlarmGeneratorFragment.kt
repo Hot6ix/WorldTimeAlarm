@@ -43,6 +43,7 @@ import kotlinx.coroutines.withContext
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
+import java.lang.IllegalArgumentException
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -295,7 +296,12 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
     override fun onDestroy() {
         super.onDestroy()
-        fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
+
+        try {
+            fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

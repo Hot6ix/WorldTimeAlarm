@@ -15,6 +15,8 @@ class SimpleDialogFragment: DialogFragment() {
     private var title: String? = null
     private var message: String? = null
     private var cancelableValue: Int = CANCELABLE_ALL
+    private var positiveButtonTitle: String? = null
+    private var negativeButtonTitle: String? = null
     private var neutralButtonTitle: String? = null
 
     private lateinit var fragmentContext: Context
@@ -32,6 +34,8 @@ class SimpleDialogFragment: DialogFragment() {
             title = it.getString(TITLE)
             message = it.getString(MESSAGE)
             cancelableValue = it.getInt(CANCELABLE)
+            positiveButtonTitle = it.getString(POSITIVE)
+            negativeButtonTitle = it.getString(NEGATIVE)
             neutralButtonTitle = it.getString(NEUTRAL)
         }
     }
@@ -47,12 +51,12 @@ class SimpleDialogFragment: DialogFragment() {
         val dialog = AlertDialog.Builder(fragmentContext)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton(resources.getString(R.string.ok)) { dialogInterface, _ ->
+                .setPositiveButton(positiveButtonTitle ?: resources.getString(R.string.ok)) { dialogInterface, _ ->
                     listener?.onPositiveButtonClicked(dialogInterface)
                 }
 
         if(cancelableValue == CANCELABLE_ALL) {
-            dialog.setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
+            dialog.setNegativeButton(negativeButtonTitle ?: resources.getString(R.string.cancel)) { dialogInterface, _ ->
                 listener?.onNegativeButtonClicked(dialogInterface)
             }
         }
@@ -86,11 +90,13 @@ class SimpleDialogFragment: DialogFragment() {
     }
 
     companion object {
-        fun newInstance(title: String, msg: String, cancelable: Int = 0, neutralBtnTitle: String? = null) = SimpleDialogFragment().apply {
+        fun newInstance(title: String, msg: String, cancelable: Int = 0, positiveBtnTitle: String? = null, negativeBtnTitle: String? = null, neutralBtnTitle: String? = null) = SimpleDialogFragment().apply {
             arguments = Bundle().apply {
                 putString(TITLE, title)
                 putString(MESSAGE, msg)
                 putInt(CANCELABLE, cancelable)
+                putString(POSITIVE, positiveBtnTitle)
+                putString(NEGATIVE, negativeBtnTitle)
                 putString(NEUTRAL, neutralBtnTitle)
             }
         }
@@ -101,6 +107,8 @@ class SimpleDialogFragment: DialogFragment() {
         const val CANCELABLE_ALL = 0
         const val CANCELABLE_NO_BUTTON = 1
         const val NOT_CANCELABLE = 2
+        const val POSITIVE = "POSITIVE"
+        const val NEGATIVE = "NEGATIVE"
         const val NEUTRAL = "NEUTRAL"
         const val TAG = "SimpleDialogFragment"
     }

@@ -1,22 +1,32 @@
 package com.simples.j.worldtimealarm.fragments
 
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
+import androidx.fragment.app.FragmentManager
 import androidx.preference.*
+import com.google.ads.consent.ConsentInformation
 import com.simples.j.worldtimealarm.LicenseActivity
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.etc.C
+import com.simples.j.worldtimealarm.utils.MediaCursor
 
-class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
+class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
     private var mTimeZoneSelectorPref: ListPreference? = null
+    private lateinit var mFragmentManager: FragmentManager
+    private lateinit var mConsentInformation: ConsentInformation
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.settings)
         activity?.volumeControlStream = AudioManager.STREAM_ALARM
+        mFragmentManager = requireActivity().supportFragmentManager
+        mConsentInformation = ConsentInformation.getInstance(context)
 
         mTimeZoneSelectorPref = findPreference<ListPreference>(getString(R.string.setting_time_zone_selector_key))?.let {
             it.isEnabled = Build.VERSION.SDK_INT > Build.VERSION_CODES.M
@@ -47,9 +57,18 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChang
 
             val version = findPreference<Preference>(getString(R.string.setting_version_key))
             version?.summary = pName
-        }
 
-//        findPreference<androidx.preference.SwitchPreference>(getString(R.string.setting_time_zone_affect_repetition_key))?.onPreferenceChangeListener = this
+            val categoryOther = version?.parent as PreferenceCategory
+
+            if(mConsentInformation.isRequestLocationInEeaOrUnknown) {
+                val eeaConsentPref = Preference(context).apply {
+                    key = getString(R.string.setting_eea_key)
+                    title = getString(R.string.setting_eea_title)
+                    onPreferenceClickListener = this@SettingFragment
+                }
+                categoryOther.addPreference(eeaConsentPref)
+            }
+        }
 
         findPreference<Preference>(getString(R.string.setting_converter_goto_key))?.setOnPreferenceClickListener {
             startActivity(Intent(Settings.ACTION_DATE_SETTINGS))
@@ -84,9 +103,40 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChang
                     context?.sendBroadcast(intent)
                 }
             }
-//            getString(R.string.setting_time_zone_affect_repetition_key) -> {
-//                context?.sendBroadcast(Intent(MainActivity.ACTION_RESCHEDULE_ACTIVATED))
-//            }
+
+        }
+
+        return true
+    }
+
+    override fun onPreferenceClick(preference: Preference?): Boolean {
+        when(preference?.key) {
+            getString(R.string.setting_eea_key) -> {
+                val form = MediaCursor.getConsentForm(context).apply {
+                    load()
+                }
+
+                SimpleDialogFragment.newInstance(getString(R.string.setting_eea_dialog_title), getString(R.string.setting_eea_dialog_summary), SimpleDialogFragment.CANCELABLE_ALL, getString(R.string.change), getString(R.string.revoke), getString(R.string.cancel)).apply {
+                    setOnDialogEventListener(object : SimpleDialogFragment.OnDialogEventListener {
+                        override fun onPositiveButtonClicked(inter: DialogInterface) {
+                            // change
+                            form.show()
+                        }
+
+                        override fun onNegativeButtonClicked(inter: DialogInterface) {
+                            // revoke
+                            mConsentInformation.reset()
+                            activity?.finish()
+                        }
+
+                        override fun onNeutralButtonClicked(inter: DialogInterface) {
+                            // cancel
+                            Log.d(C.TAG, "EEA dialog cancelled")
+                        }
+
+                    })
+                }.show(mFragmentManager, SimpleDialogFragment.TAG)
+            }
         }
 
         return true

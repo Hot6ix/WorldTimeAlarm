@@ -37,6 +37,7 @@ import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
+import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
@@ -184,12 +185,20 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         super.onDestroy()
 
         if(::timeZoneChangedReceiver.isInitialized)
-            fragmentContext.unregisterReceiver(timeZoneChangedReceiver)
+            try {
+                fragmentContext.unregisterReceiver(timeZoneChangedReceiver)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
+            }
         else {
             launch(coroutineContext) {
                 job.cancelAndJoin()
 
-                fragmentContext.unregisterReceiver(timeZoneChangedReceiver)
+                try {
+                    fragmentContext.unregisterReceiver(timeZoneChangedReceiver)
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
+                }
             }
         }
     }

@@ -90,6 +90,8 @@
     <string name="set_to_system_time_zone">초기화</string>
     <string name="time_zone_with_diff">%1$s (%2$s)</string>
     <string name="change_log">업데이트 내역</string>
+    <string name="change">변경</string>
+    <string name="revoke">철회</string>
 
     <!-- Message -->
     <string name="alarm_removed">알람이 삭제되었습니다.</string>
@@ -122,6 +124,7 @@
     <string name="apply_changes">적용하기</string>
     <string name="v22_change_dialog_title">변경 알림</string>
     <string name="v22_change_dialog_message">변경 전\n%1$s\n\n변경 후\n%2$s\n\n즉시 적용하려면, 알림 내 적용하기 버튼을 누르세요.</string>
+    <string name="eu_consent">유럽 사용자에 대한 광고 정책 선택을 위해 앱을 실행해 주세요.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">시간대 선택</string>
@@ -184,6 +187,10 @@
     <string name="setting_privacy_policy_title">개인정보취급방침</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">GitHub 놀러가기</string>
+    <string name="setting_eea_key">EEA</string>
+    <string name="setting_eea_title">유럽 사용자에 대한 광고 동의 변경 및 철회</string>
+    <string name="setting_eea_dialog_title">변경 또는 철회</string>
+    <string name="setting_eea_dialog_summary">변경 또는 철회</string>
 
     <string-array name="time_selector">
         <item>ID</item>

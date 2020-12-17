@@ -31,6 +31,7 @@ import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
+import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
@@ -206,12 +207,20 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         super.onDestroy()
 
         if(::updateRequestReceiver.isInitialized)
-            fragmentContext.unregisterReceiver(updateRequestReceiver)
+            try {
+                fragmentContext.unregisterReceiver(updateRequestReceiver)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
+            }
         else {
             launch(coroutineContext) {
                 job.cancelAndJoin()
 
-                fragmentContext.unregisterReceiver(updateRequestReceiver)
+                try {
+                    fragmentContext.unregisterReceiver(updateRequestReceiver)
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
+                }
             }
         }
     }

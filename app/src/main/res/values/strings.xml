@@ -89,6 +89,8 @@
     <string name="set_to_system_time_zone">Reset</string>
     <string name="time_zone_with_diff">%1$s (%2$s)</string>
     <string name="change_log">Change log</string>
+    <string name="change">Change</string>
+    <string name="revoke">Revoke</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm has been removed.</string>
@@ -121,6 +123,7 @@
     <string name="apply_changes">Apply Changes</string>
     <string name="v22_change_dialog_title">Change Notice</string>
     <string name="v22_change_dialog_message">Before change\n%1$s\n\nAfter change\n%2$s\n\nTo apply immediately, click Apply Changes in notification.</string>
+    <string name="eu_consent">Please open app to select European user advertisement policy.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>
@@ -182,6 +185,10 @@
     <string name="setting_privacy_policy_key">PRIVACY</string>
     <string name="setting_privacy_policy_title">Privacy Policy</string>
     <string name="setting_source_key">GITHUB</string>
+    <string name="setting_eea_key">EEA</string>
+    <string name="setting_eea_title">Change/Revoke consent of advertisements for EU user</string>
+    <string name="setting_eea_dialog_title">Change or Revoke</string>
+    <string name="setting_eea_dialog_summary">Change or Revoke</string>
     `
     <string name="setting_source_title">Visit GitHub</string>
 

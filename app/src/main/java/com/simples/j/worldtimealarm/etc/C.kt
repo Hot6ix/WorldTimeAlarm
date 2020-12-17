@@ -68,7 +68,7 @@ class C {
         }
 
         fun getAdsTestConfig(): RequestConfiguration {
-            val testDevices = arrayListOf("5E85E343F2722B2AE300110EE20B92D8")
+            val testDevices = arrayListOf("F633E6E9AA78884E34056B9A7AF08F6")
             val reqConfig = RequestConfiguration.Builder()
                     .setTestDeviceIds(testDevices)
 

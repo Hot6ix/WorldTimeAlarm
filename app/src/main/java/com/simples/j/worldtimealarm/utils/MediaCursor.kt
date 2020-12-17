@@ -13,9 +13,13 @@ import android.text.style.RelativeSizeSpan
 import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
+import com.google.ads.consent.ConsentForm
+import com.google.ads.consent.ConsentFormListener
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.*
 import org.threeten.bp.ZonedDateTime
+import java.net.MalformedURLException
+import java.net.URL
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -216,6 +220,7 @@ class MediaCursor {
         @RequiresApi(Build.VERSION_CODES.N)
         fun getGmtOffsetString(locale: Locale, timeZone: TimeZone?, now: Date): String {
             if(timeZone == null) return ""
+            // TODO:  update code
             val gmtFormatter = SimpleDateFormat("ZZZZ").apply {
                 this.timeZone = timeZone
             }
@@ -300,6 +305,25 @@ class MediaCursor {
             spannable.setSpan(RelativeSizeSpan(0.5f), amPmPos, amPmPos + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
             return spannable
+        }
+
+        fun getConsentForm(context: Context?, listener: ConsentFormListener? = null): ConsentForm {
+            val url =
+                    try {
+                        URL("https://github.com/Hot6ix/WorldTimeAlarm/blob/master/privacy_policy.md")
+                    } catch (e: MalformedURLException) {
+                        e.printStackTrace()
+                        null
+                    }
+
+            val form = ConsentForm.Builder(context, url)
+                    .withPersonalizedAdsOption()
+                    .withNonPersonalizedAdsOption()
+                    .withListener(listener)
+                    .build()
+            form.load()
+
+            return form
         }
     }
 

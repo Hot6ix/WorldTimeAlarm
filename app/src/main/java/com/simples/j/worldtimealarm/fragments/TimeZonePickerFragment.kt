@@ -21,6 +21,7 @@ import com.simples.j.worldtimealarm.support.BaseTimeZonePickerAdapter
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.fragment_time_zone_picker.*
 import kotlinx.coroutines.*
+import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
@@ -129,7 +130,12 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
 
     override fun onDestroy() {
         super.onDestroy()
-        fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
+
+        try {
+            fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        }
     }
 
     override fun onAttach(context: Context) {
@@ -287,7 +293,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
         fun onTimeZoneChanged(timeZone: String)
     }
 
-    private class PickerItemComparator internal constructor(private val mCollator: Collator) : Comparator<PickerItem> {
+    private class PickerItemComparator(private val mCollator: Collator) : Comparator<PickerItem> {
         override fun compare(o1: PickerItem, o2: PickerItem): Int {
             return mCollator.compare(o1.title, o2.title)
         }

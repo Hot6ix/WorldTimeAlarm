@@ -107,7 +107,7 @@ class WakeUpService : Service() {
                         }.also {  runnable ->
                             timerRunnable = runnable
 
-                            timer = Handler().apply {
+                            timer = Handler(Looper.getMainLooper()).apply {
                                 postDelayed(runnable, alarmMuteTime)
                             }
                         }
@@ -150,7 +150,11 @@ class WakeUpService : Service() {
             }
         }
 
-        unregisterReceiver(serviceActionReceiver)
+        try {
+            unregisterReceiver(serviceActionReceiver)
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        }
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {

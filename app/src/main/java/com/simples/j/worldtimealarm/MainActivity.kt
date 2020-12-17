@@ -7,9 +7,12 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import com.google.ads.consent.*
+import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -23,8 +26,10 @@ import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.fragments.SettingFragment
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.receiver.MultiBroadcastReceiver
+import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
+import java.net.URL
 import kotlin.coroutines.CoroutineContext
 
 class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.OnNavigationItemSelectedListener {
@@ -33,6 +38,9 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
     private lateinit var alarmListFragment: AlarmListFragment
     private lateinit var clockListFragment: WorldClockFragment
     private lateinit var settingFragment: SettingFragment
+    private lateinit var consentForm: ConsentForm
+
+    private var currentConsentStatus: ConsentStatus? = null
 
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
@@ -43,13 +51,55 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
         setContentView(R.layout.activity_main)
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         createNotificationChannels()
+        consentForm = MediaCursor.getConsentForm(this)
 
         launch(coroutineContext) {
+
+            ConsentInformation.getInstance(this@MainActivity).apply {
+                addTestDevice("0AD9CDC9B7C888D7B3E986949DBFC66D")
+                debugGeography = DebugGeography.DEBUG_GEOGRAPHY_EEA
+
+                // TODO:  eea 옵션과 다이얼로그 개선, eea 선택 시 다음 광고부터 적용된다는 메세지 출력
+                requestConsentInfoUpdate(arrayOf("pub-1459869098528763"), object : ConsentInfoUpdateListener {
+                    override fun onConsentInfoUpdated(consentStatus: ConsentStatus?) {
+                        // User's consent status successfully updated
+                        currentConsentStatus = consentStatus
+                        when(consentStatus) {
+                            ConsentStatus.PERSONALIZED, ConsentStatus.NON_PERSONALIZED -> {
+                                // User agreed
+                                Log.d(C.TAG, consentStatus.name)
+                            }
+                            ConsentStatus.UNKNOWN -> {
+                                if(isRequestLocationInEeaOrUnknown) consentForm.show()
+                            }
+                            else -> {
+                                Log.d(C.TAG, "Couldn't figure out consent status")
+                                if(isRequestLocationInEeaOrUnknown) consentForm.show()
+                            }
+                        }
+                    }
+
+                    override fun onFailedToUpdateConsentInfo(errorDescription: String) {
+                        // User's consent status failed to update.
+                        Log.d(C.TAG, "error: $errorDescription")
+                    }
+                })
+            }
+
             withContext(Dispatchers.IO) {
                 MobileAds.setRequestConfiguration(C.getAdsTestConfig())
-                MobileAds.initialize(applicationContext, resources.getString(R.string.ad_app_id))
+                MobileAds.initialize(this@MainActivity)
             }
+
             val builder = AdRequest.Builder()
+
+            // put non-personalized ads flag before request
+            if(currentConsentStatus == ConsentStatus.NON_PERSONALIZED) {
+                val bundle = Bundle().apply {
+                    putString("npa", "1")
+                }
+                builder.addNetworkExtrasBundle(AdMobAdapter::class.java, bundle)
+            }
             adViewMain.loadAd(builder.build())
         }
 
@@ -155,7 +205,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
 
             val alarmChannel = NotificationChannel(ALARM_NOTIFICATION_CHANNEL, getString(R.string.alarm_notification_channel), NotificationManager.IMPORTANCE_HIGH).apply {
                 enableVibration(false)
-                setSound(null,  null)
+                setSound(null, null)
             }
 
             val missedChannel = NotificationChannel(MISSED_NOTIFICATION_CHANNEL, getString(R.string.missed_notification_channel), NotificationManager.IMPORTANCE_DEFAULT).apply {
