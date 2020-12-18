@@ -4,6 +4,8 @@
     <string name="banner_ad_unit_id_2" translatable="false">ca-app-pub-1459869098528763/2970704508</string>
     <string name="banner_ad_unit_id_3" translatable="false">ca-app-pub-1459869098528763/6976910817</string>
 
+    <string name="eu_consent_link" translatable="false">https://www.google.com/about/company/user-consent-policy/</string>
+
     <string-array name="time_selector_values">
         <item>0</item>
         <item>1</item>

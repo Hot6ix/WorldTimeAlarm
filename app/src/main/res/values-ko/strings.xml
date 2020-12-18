@@ -92,6 +92,7 @@
     <string name="change_log">업데이트 내역</string>
     <string name="change">변경</string>
     <string name="revoke">철회</string>
+    <string name="detail">자세히</string>
 
     <!-- Message -->
     <string name="alarm_removed">알람이 삭제되었습니다.</string>
@@ -125,6 +126,7 @@
     <string name="v22_change_dialog_title">변경 알림</string>
     <string name="v22_change_dialog_message">변경 전\n%1$s\n\n변경 후\n%2$s\n\n즉시 적용하려면, 알림 내 적용하기 버튼을 누르세요.</string>
     <string name="eu_consent">유럽 사용자에 대한 광고 정책 선택을 위해 앱을 실행해 주세요.</string>
+    <string name="eea_update_message">변경된 설정은 다음 앱 실행부터 적용됩니다.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">시간대 선택</string>
@@ -189,8 +191,8 @@
     <string name="setting_source_title">GitHub 놀러가기</string>
     <string name="setting_eea_key">EEA</string>
     <string name="setting_eea_title">유럽 사용자에 대한 광고 동의 변경 및 철회</string>
-    <string name="setting_eea_dialog_title">변경 또는 철회</string>
-    <string name="setting_eea_dialog_summary">변경 또는 철회</string>
+    <string name="setting_eea_dialog_title">광고 동의 정책 변경 또는 철회</string>
+    <string name="setting_eea_dialog_summary">유럽 사용자는 유럽 사용자 동의 정책에 따라 개인정보(AdID 같은)를 사용하는 광고 정책을 변경 또는 철회할 수 있습니다. 변경 시 변경 사항은 다음 앱 실행부터 적용됩니다. 철회 시 앱은 종료되며 정책에 재 동의하는 경우 다시 사용하실 수 있습니다. 본 앱은 광고 수익을 통해 유지보수되고 있습니다.</string>
 
     <string-array name="time_selector">
         <item>ID</item>

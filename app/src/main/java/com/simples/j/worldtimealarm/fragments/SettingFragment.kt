@@ -1,16 +1,19 @@
 package com.simples.j.worldtimealarm.fragments
 
 
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.media.AudioManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.fragment.app.FragmentManager
 import androidx.preference.*
-import com.google.ads.consent.ConsentInformation
+import com.google.ads.consent.*
 import com.simples.j.worldtimealarm.LicenseActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.C
@@ -21,12 +24,14 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChang
     private var mTimeZoneSelectorPref: ListPreference? = null
     private lateinit var mFragmentManager: FragmentManager
     private lateinit var mConsentInformation: ConsentInformation
+    private lateinit var mConsentForm: ConsentForm
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.settings)
         activity?.volumeControlStream = AudioManager.STREAM_ALARM
         mFragmentManager = requireActivity().supportFragmentManager
         mConsentInformation = ConsentInformation.getInstance(context)
+        mConsentForm = MediaCursor.getConsentForm(context, ConsentListener(context))
 
         mTimeZoneSelectorPref = findPreference<ListPreference>(getString(R.string.setting_time_zone_selector_key))?.let {
             it.isEnabled = Build.VERSION.SDK_INT > Build.VERSION_CODES.M
@@ -112,26 +117,23 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChang
     override fun onPreferenceClick(preference: Preference?): Boolean {
         when(preference?.key) {
             getString(R.string.setting_eea_key) -> {
-                val form = MediaCursor.getConsentForm(context).apply {
-                    load()
-                }
-
-                SimpleDialogFragment.newInstance(getString(R.string.setting_eea_dialog_title), getString(R.string.setting_eea_dialog_summary), SimpleDialogFragment.CANCELABLE_ALL, getString(R.string.change), getString(R.string.revoke), getString(R.string.cancel)).apply {
+                SimpleDialogFragment.newInstance(getString(R.string.setting_eea_dialog_title), getString(R.string.setting_eea_dialog_summary), SimpleDialogFragment.CANCELABLE_ALL, getString(R.string.change), getString(R.string.revoke), getString(R.string.detail)).apply {
                     setOnDialogEventListener(object : SimpleDialogFragment.OnDialogEventListener {
                         override fun onPositiveButtonClicked(inter: DialogInterface) {
                             // change
-                            form.show()
+                            mConsentForm.load()
                         }
 
                         override fun onNegativeButtonClicked(inter: DialogInterface) {
                             // revoke
-                            mConsentInformation.reset()
+                            mConsentInformation.consentStatus = ConsentStatus.UNKNOWN
                             activity?.finish()
                         }
 
                         override fun onNeutralButtonClicked(inter: DialogInterface) {
-                            // cancel
-                            Log.d(C.TAG, "EEA dialog cancelled")
+                            // detail
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.eu_consent_link)))
+                            startActivity(intent)
                         }
 
                     })
@@ -140,6 +142,33 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChang
         }
 
         return true
+    }
+
+    inner class ConsentListener(private val context: Context?): ConsentFormListener() {
+        override fun onConsentFormLoaded() {
+            super.onConsentFormLoaded()
+            Log.d(C.TAG, "Consent form loaded")
+            mConsentForm.show()
+        }
+
+        override fun onConsentFormOpened() {
+            super.onConsentFormOpened()
+            Log.d(C.TAG, "Consent form opened")
+        }
+
+        override fun onConsentFormClosed(consentStatus: ConsentStatus?, userPrefersAdFree: Boolean?) {
+            super.onConsentFormClosed(consentStatus, userPrefersAdFree)
+            Log.d(C.TAG, "Consent form closed")
+
+            if(consentStatus == ConsentStatus.NON_PERSONALIZED || consentStatus == ConsentStatus.PERSONALIZED) {
+                Toast.makeText(context, getString(R.string.eea_update_message), Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        override fun onConsentFormError(reason: String?) {
+            super.onConsentFormError(reason)
+            Log.d(C.TAG, "Consent form error: $reason")
+        }
     }
 
     companion object {

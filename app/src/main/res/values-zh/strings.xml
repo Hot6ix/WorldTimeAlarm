@@ -92,6 +92,7 @@
     <string name="change_log">变更记录</string>
     <string name="change">Change</string>
     <string name="revoke">Revoke</string>
+    <string name="detail">Detail</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>
@@ -125,6 +126,7 @@
     <string name="v22_change_dialog_title">变更通知</string>
     <string name="v22_change_dialog_message">变更前\n%1$s\n\n变更后\n%2$s\n\n要立即应用，请单击在通知中"应用更改”。</string>
     <string name="eu_consent">Please open app to select European user advertisement policy.</string>
+    <string name="eea_update_message">The change wil be applied next app launch.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>

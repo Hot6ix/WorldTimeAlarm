@@ -220,8 +220,7 @@ class MediaCursor {
         @RequiresApi(Build.VERSION_CODES.N)
         fun getGmtOffsetString(locale: Locale, timeZone: TimeZone?, now: Date): String {
             if(timeZone == null) return ""
-            // TODO:  update code
-            val gmtFormatter = SimpleDateFormat("ZZZZ").apply {
+            val gmtFormatter = SimpleDateFormat("ZZZZ", Locale.getDefault()).apply {
                 this.timeZone = timeZone
             }
             var gmtString = gmtFormatter.format(now)
@@ -316,14 +315,11 @@ class MediaCursor {
                         null
                     }
 
-            val form = ConsentForm.Builder(context, url)
+            return ConsentForm.Builder(context, url)
                     .withPersonalizedAdsOption()
                     .withNonPersonalizedAdsOption()
                     .withListener(listener)
                     .build()
-            form.load()
-
-            return form
         }
     }
 

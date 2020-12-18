@@ -29,7 +29,6 @@ import com.simples.j.worldtimealarm.receiver.MultiBroadcastReceiver
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
-import java.net.URL
 import kotlin.coroutines.CoroutineContext
 
 class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.OnNavigationItemSelectedListener {
@@ -40,8 +39,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
     private lateinit var settingFragment: SettingFragment
     private lateinit var consentForm: ConsentForm
 
-    private var currentConsentStatus: ConsentStatus? = null
-
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -51,56 +48,37 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
         setContentView(R.layout.activity_main)
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         createNotificationChannels()
-        consentForm = MediaCursor.getConsentForm(this)
 
-        launch(coroutineContext) {
+        consentForm = MediaCursor.getConsentForm(this, ConsentListener(applicationContext))
+        ConsentInformation.getInstance(this@MainActivity).apply {
+            addTestDevice("0AD9CDC9B7C888D7B3E986949DBFC66D")
+            debugGeography = DebugGeography.DEBUG_GEOGRAPHY_EEA
 
-            ConsentInformation.getInstance(this@MainActivity).apply {
-                addTestDevice("0AD9CDC9B7C888D7B3E986949DBFC66D")
-                debugGeography = DebugGeography.DEBUG_GEOGRAPHY_EEA
-
-                // TODO:  eea 옵션과 다이얼로그 개선, eea 선택 시 다음 광고부터 적용된다는 메세지 출력
-                requestConsentInfoUpdate(arrayOf("pub-1459869098528763"), object : ConsentInfoUpdateListener {
-                    override fun onConsentInfoUpdated(consentStatus: ConsentStatus?) {
-                        // User's consent status successfully updated
-                        currentConsentStatus = consentStatus
-                        when(consentStatus) {
-                            ConsentStatus.PERSONALIZED, ConsentStatus.NON_PERSONALIZED -> {
-                                // User agreed
-                                Log.d(C.TAG, consentStatus.name)
-                            }
-                            ConsentStatus.UNKNOWN -> {
-                                if(isRequestLocationInEeaOrUnknown) consentForm.show()
-                            }
-                            else -> {
-                                Log.d(C.TAG, "Couldn't figure out consent status")
-                                if(isRequestLocationInEeaOrUnknown) consentForm.show()
-                            }
+            // TODO:  EU Consent Policy 중국어 번역
+            requestConsentInfoUpdate(arrayOf("pub-1459869098528763"), object : ConsentInfoUpdateListener {
+                override fun onConsentInfoUpdated(consentStatus: ConsentStatus?) {
+                    // User's consent status successfully updated
+                    when(consentStatus) {
+                        ConsentStatus.PERSONALIZED, ConsentStatus.NON_PERSONALIZED -> {
+                            initAdmob(consentStatus)
+                        }
+                        ConsentStatus.UNKNOWN -> {
+                            if(isRequestLocationInEeaOrUnknown) consentForm.load()
+                            else initAdmob()
+                        }
+                        else -> {
+                            Log.d(C.TAG, "Couldn't figure out consent status")
+                            if(isRequestLocationInEeaOrUnknown) consentForm.load()
+                            else initAdmob()
                         }
                     }
-
-                    override fun onFailedToUpdateConsentInfo(errorDescription: String) {
-                        // User's consent status failed to update.
-                        Log.d(C.TAG, "error: $errorDescription")
-                    }
-                })
-            }
-
-            withContext(Dispatchers.IO) {
-                MobileAds.setRequestConfiguration(C.getAdsTestConfig())
-                MobileAds.initialize(this@MainActivity)
-            }
-
-            val builder = AdRequest.Builder()
-
-            // put non-personalized ads flag before request
-            if(currentConsentStatus == ConsentStatus.NON_PERSONALIZED) {
-                val bundle = Bundle().apply {
-                    putString("npa", "1")
                 }
-                builder.addNetworkExtrasBundle(AdMobAdapter::class.java, bundle)
-            }
-            adViewMain.loadAd(builder.build())
+
+                override fun onFailedToUpdateConsentInfo(errorDescription: String) {
+                    // User's consent status failed to update.
+                    Log.d(C.TAG, "error: $errorDescription")
+                }
+            })
         }
 
         alarmListFragment = AlarmListFragment.newInstance()
@@ -149,6 +127,22 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         handleNavigationClick(item.itemId)
         return true
+    }
+
+    private fun initAdmob(consentStatus: ConsentStatus = ConsentStatus.PERSONALIZED) {
+        MobileAds.setRequestConfiguration(C.getAdsTestConfig())
+        MobileAds.initialize(this@MainActivity)
+
+        val builder = AdRequest.Builder()
+
+        // put non-personalized ads flag before request
+        if(consentStatus == ConsentStatus.NON_PERSONALIZED) {
+            val bundle = Bundle().apply {
+                putString("npa", "1")
+            }
+            builder.addNetworkExtrasBundle(AdMobAdapter::class.java, bundle)
+        }
+        adViewMain.loadAd(builder.build())
     }
 
     private fun handleNavigationClick(id: Int) {
@@ -220,6 +214,43 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
 
             notificationManager.createNotificationChannels(listOf(defaultChannel, alarmChannel, missedChannel, expiredChannel))
             preference.edit().putBoolean(PREF_NOTIFICATION_CHANNEL, true).apply()
+        }
+    }
+
+    inner class ConsentListener(private val context: Context): ConsentFormListener() {
+        override fun onConsentFormLoaded() {
+            super.onConsentFormLoaded()
+            Log.d(C.TAG, "Consent form loaded")
+
+            consentForm.show()
+        }
+
+        override fun onConsentFormOpened() {
+            super.onConsentFormOpened()
+            Log.d(C.TAG, "Consent form opened")
+        }
+
+        override fun onConsentFormClosed(consentStatus: ConsentStatus?, userPrefersAdFree: Boolean?) {
+            super.onConsentFormClosed(consentStatus, userPrefersAdFree)
+            Log.d(C.TAG, "Consent form closed")
+
+            when(consentStatus) {
+                ConsentStatus.PERSONALIZED -> {
+                    initAdmob()
+                }
+                ConsentStatus.NON_PERSONALIZED -> {
+                    initAdmob(ConsentStatus.NON_PERSONALIZED)
+                }
+                ConsentStatus.UNKNOWN -> { }
+                else -> {
+                    // unknown
+                }
+            }
+        }
+
+        override fun onConsentFormError(reason: String?) {
+            super.onConsentFormError(reason)
+            Log.d(C.TAG, "Consent form error: $reason")
         }
     }
 
