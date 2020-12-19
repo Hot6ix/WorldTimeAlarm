@@ -87,12 +87,12 @@
     <string name="date">日期</string>
     <string name="reset">还原为默认值</string>
     <string name="apply">应用</string>
-    <string name="set_to_system_time_zone">Reset</string>
+    <string name="set_to_system_time_zone">重启</string>
     <string name="time_zone_with_diff">%1$s (%2$s)</string>
     <string name="change_log">变更记录</string>
-    <string name="change">Change</string>
-    <string name="revoke">Revoke</string>
-    <string name="detail">Detail</string>
+    <string name="change">更改</string>
+    <string name="revoke">撤消</string>
+    <string name="detail">详情</string>
 
     <!-- Message -->
     <string name="alarm_removed">该警报已被删除。</string>
@@ -125,8 +125,8 @@
     <string name="apply_changes">应用更改</string>
     <string name="v22_change_dialog_title">变更通知</string>
     <string name="v22_change_dialog_message">变更前\n%1$s\n\n变更后\n%2$s\n\n要立即应用，请单击在通知中"应用更改”。</string>
-    <string name="eu_consent">Please open app to select European user advertisement policy.</string>
-    <string name="eea_update_message">The change wil be applied next app launch.</string>
+    <string name="eu_consent">请打开应用以查看Google欧盟用户同意政策。</string>
+    <string name="eea_update_message">更改将在下次应用启动时应用。</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>
@@ -191,9 +191,9 @@
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_source_title">访问GitHub</string>
     <string name="setting_eea_key">EEA</string>
-    <string name="setting_eea_title">Change/Revoke consent of advertisements for EU user</string>
-    <string name="setting_eea_dialog_title">Change or Revoke</string>
-    <string name="setting_eea_dialog_summary">Change or Revoke</string>
+    <string name="setting_eea_title">更改或撤消Google EU用户同意政策</string>
+    <string name="setting_eea_dialog_title">变更或撤销</string>
+    <string name="setting_eea_dialog_summary">欧盟用户可以根据Google欧盟用户同意政策更改或撤消使用隐私的广告（例如AdID）的同意。 更改将在下次启动应用程序时应用。 如果撤消该应用程序，则该应用程序将完成；如果重新同意，该应用程序可以再次使用。 这个应用程序是由广告收入维护的。</string>
 
     <string-array name="time_selector">
         <item>ID</item>

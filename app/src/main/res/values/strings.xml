@@ -124,7 +124,7 @@
     <string name="apply_changes">Apply Changes</string>
     <string name="v22_change_dialog_title">Change Notice</string>
     <string name="v22_change_dialog_message">Before change\n%1$s\n\nAfter change\n%2$s\n\nTo apply immediately, click Apply Changes in notification.</string>
-    <string name="eu_consent">Please open app to select European user advertisement policy.</string>
+    <string name="eu_consent">Please open app to review Google EU User Consent Policy.</string>
     <string name="eea_update_message">The change wil be applied next app launch.</string>
 
     <!-- Text -->
@@ -188,9 +188,9 @@
     <string name="setting_privacy_policy_title">Privacy Policy</string>
     <string name="setting_source_key">GITHUB</string>
     <string name="setting_eea_key">EEA</string>
-    <string name="setting_eea_title">Change or revoke consent of ads for EU user</string>
+    <string name="setting_eea_title">Change or revoke Google EU User Consent Policy</string>
     <string name="setting_eea_dialog_title">Change or Revoke</string>
-    <string name="setting_eea_dialog_summary">EU user can change or revoke consent of ads that uses privacy (like AdID) by EU User Consent Policy. Change will be applied next app launch. The app will be finished if revoked and can use again if re-consent. This app is maintained by advertising revenue.</string>
+    <string name="setting_eea_dialog_summary">EU user can change or revoke consent of ads that uses privacy (like AdID) by Google EU User Consent Policy. Change will be applied next app launch. The app will be finished if revoked and can use again if re-consent. This app is maintained by advertising revenue.</string>
     `
     <string name="setting_source_title">Visit GitHub</string>
 
