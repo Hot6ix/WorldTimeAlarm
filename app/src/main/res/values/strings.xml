@@ -91,7 +91,7 @@
     <string name="change_log">Change log</string>
     <string name="change">Change</string>
     <string name="revoke">Revoke</string>
-    <string name="detail">Detail</string>
+    <string name="detail">More</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm has been removed.</string>

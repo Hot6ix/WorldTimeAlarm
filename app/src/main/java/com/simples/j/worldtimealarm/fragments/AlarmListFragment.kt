@@ -206,21 +206,13 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     override fun onDestroy() {
         super.onDestroy()
 
-        if(::updateRequestReceiver.isInitialized)
+        launch(coroutineContext) {
+            job.cancelAndJoin()
+
             try {
                 fragmentContext.unregisterReceiver(updateRequestReceiver)
             } catch (e: IllegalArgumentException) {
                 e.printStackTrace()
-            }
-        else {
-            launch(coroutineContext) {
-                job.cancelAndJoin()
-
-                try {
-                    fragmentContext.unregisterReceiver(updateRequestReceiver)
-                } catch (e: IllegalArgumentException) {
-                    e.printStackTrace()
-                }
             }
         }
     }
