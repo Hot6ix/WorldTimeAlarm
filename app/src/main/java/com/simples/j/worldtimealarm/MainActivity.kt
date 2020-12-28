@@ -52,9 +52,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
         consentForm = MediaCursor.getConsentForm(this, ConsentListener(applicationContext))
         ConsentInformation.getInstance(this@MainActivity).apply {
             addTestDevice("0AD9CDC9B7C888D7B3E986949DBFC66D")
-            debugGeography = DebugGeography.DEBUG_GEOGRAPHY_EEA
+            debugGeography = DebugGeography.DEBUG_GEOGRAPHY_NOT_EEA
 
-            // TODO:  EU Consent Policy 중국어 번역
             requestConsentInfoUpdate(arrayOf("pub-1459869098528763"), object : ConsentInfoUpdateListener {
                 override fun onConsentInfoUpdated(consentStatus: ConsentStatus?) {
                     // User's consent status successfully updated

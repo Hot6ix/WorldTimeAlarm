@@ -10,8 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.Switch
 import android.widget.TextView
+import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -255,7 +255,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         var mainView: ConstraintLayout = view.list_item_layout
         var localTime: TextView = view.local_time
         var repeat: TextView = view.repeat
-        var switch: Switch = view.on_off
+        var switch: SwitchCompat = view.on_off
         var colorTag: View = view.colorTag
         var range: TextView = view.range
         var warning: ImageView = view.warning
