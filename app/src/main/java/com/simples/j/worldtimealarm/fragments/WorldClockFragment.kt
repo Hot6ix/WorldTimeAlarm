@@ -186,10 +186,12 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         launch(coroutineContext) {
             job.cancelAndJoin()
 
-            try {
-                fragmentContext.unregisterReceiver(timeZoneChangedReceiver)
-            } catch (e: IllegalArgumentException) {
-                e.printStackTrace()
+            if(::timeZoneChangedReceiver.isInitialized) {
+                try {
+                    fragmentContext.unregisterReceiver(timeZoneChangedReceiver)
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
+                }
             }
         }
     }
@@ -300,18 +302,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     }
 
     private fun updateList(scrollToLast: Boolean = false) {
-        if(::clockListAdapter.isInitialized) {
-            clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
+        launch(coroutineContext) {
+            job.join()
 
-            if(clockItems.isNotEmpty() && scrollToLast)
-                clockList?.smoothScrollToPosition(clockItems.count() - 1)
-        }
-        else {
-            launch(coroutineContext) {
-                job.join()
+            if(::clockListAdapter.isInitialized) {
                 clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
 
-                if(clockItems.isNotEmpty() && scrollToLast)
+                if (clockItems.isNotEmpty() && scrollToLast)
                     clockList?.smoothScrollToPosition(clockItems.count() - 1)
             }
         }

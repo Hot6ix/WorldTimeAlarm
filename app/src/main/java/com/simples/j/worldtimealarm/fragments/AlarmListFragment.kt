@@ -208,10 +208,12 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         launch(coroutineContext) {
             job.cancelAndJoin()
 
-            try {
-                fragmentContext.unregisterReceiver(updateRequestReceiver)
-            } catch (e: IllegalArgumentException) {
-                e.printStackTrace()
+            if(::updateRequestReceiver.isInitialized) {
+                try {
+                    fragmentContext.unregisterReceiver(updateRequestReceiver)
+                } catch (e: IllegalArgumentException) {
+                    e.printStackTrace()
+                }
             }
         }
     }
