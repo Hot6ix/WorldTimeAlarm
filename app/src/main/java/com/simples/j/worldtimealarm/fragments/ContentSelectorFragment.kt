@@ -103,6 +103,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             MediaCursor.getRingtoneList(it)
                         }
 
+                        // TODO: Check IllegalStateException
                         defaultRingtone = systemRingtone[1]
                         val ringtoneList = ArrayList<RingtoneItem>().apply {
                             add(RingtoneItem(getString(R.string.my_ringtone), ContentSelectorAdapter.URI_USER_RINGTONE))

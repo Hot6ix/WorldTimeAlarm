@@ -47,6 +47,7 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
                 "$COLUMN_ALARM_ID INTEGER);")
     }
 
+    // TODO: Check SQLiteException
     override fun onUpgrade(db: SQLiteDatabase, old: Int, new: Int) {
         if(old < 2) {
             db.execSQL("ALTER TABLE $TABLE_ALARM_LIST ADD COLUMN $COLUMN_COLOR_TAG INTEGER DEFAULT 0")
