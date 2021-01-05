@@ -138,7 +138,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             clockListAdapter = ClockListAdapter(fragmentContext, clockItems, viewModel)
             recyclerLayoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
 
-            // TODO: Fix NullPointerException at setLayoutManager()
             clockList.apply {
                 layoutManager = recyclerLayoutManager
                 adapter = clockListAdapter
@@ -184,21 +183,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onDestroy() {
         super.onDestroy()
 
-        if(::timeZoneChangedReceiver.isInitialized)
+        launch(coroutineContext) {
+            job.cancelAndJoin()
+
             try {
                 fragmentContext.unregisterReceiver(timeZoneChangedReceiver)
             } catch (e: IllegalArgumentException) {
                 e.printStackTrace()
-            }
-        else {
-            launch(coroutineContext) {
-                job.cancelAndJoin()
-
-                try {
-                    fragmentContext.unregisterReceiver(timeZoneChangedReceiver)
-                } catch (e: IllegalArgumentException) {
-                    e.printStackTrace()
-                }
             }
         }
     }

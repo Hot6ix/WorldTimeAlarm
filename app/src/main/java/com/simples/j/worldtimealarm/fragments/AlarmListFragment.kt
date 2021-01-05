@@ -97,7 +97,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             }
             recyclerLayoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
 
-            // TODO: Fix NullPointerException at setLayoutManager()
             alarmList.apply {
                 layoutManager = recyclerLayoutManager
                 adapter = alarmListAdapter

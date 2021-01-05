@@ -113,6 +113,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="center|bottom"
+        android:contentDescription="@string/world_clock"
         app:tint="?attr/colorPrimary"
         app:backgroundTint="@color/background"
         app:srcCompat="@drawable/ic_action_world_white"/>
