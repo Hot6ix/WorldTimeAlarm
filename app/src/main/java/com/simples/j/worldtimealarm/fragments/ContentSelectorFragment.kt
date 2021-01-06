@@ -183,6 +183,10 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     override fun onStop() {
         super.onStop()
 
+        launch(coroutineContext) {
+            job.cancelAndJoin()
+        }
+
         activity?.run {
             if(!isChangingConfigurations) {
                 viewModel.ringtone?.let {
