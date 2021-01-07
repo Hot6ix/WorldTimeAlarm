@@ -103,13 +103,13 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             MediaCursor.getRingtoneList(it)
                         }
 
-                        // TODO: Check IllegalStateException
+                        // TODO: IllegalStateException: Fragment not attached to Activity is still valid at getString(), but most of tries don't throw exception
                         defaultRingtone = systemRingtone[1]
                         val ringtoneList = ArrayList<RingtoneItem>().apply {
-                            add(RingtoneItem(getString(R.string.my_ringtone), ContentSelectorAdapter.URI_USER_RINGTONE))
-                            add(RingtoneItem(getString(R.string.add_new), ContentSelectorAdapter.URI_ADD_RINGTONE))
+                            add(RingtoneItem(it.getString(R.string.my_ringtone), ContentSelectorAdapter.URI_USER_RINGTONE))
+                            add(RingtoneItem(it.getString(R.string.add_new), ContentSelectorAdapter.URI_ADD_RINGTONE))
                             addAll(userRingtone)
-                            add(RingtoneItem(getString(R.string.system_ringtone), ContentSelectorAdapter.URI_SYSTEM_RINGTONE))
+                            add(RingtoneItem(it.getString(R.string.system_ringtone), ContentSelectorAdapter.URI_SYSTEM_RINGTONE))
                             addAll(systemRingtone)
 
                             if(!contains(viewModel.lastSelectedValue)) viewModel.lastSelectedValue = defaultRingtone
