@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
-import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -43,7 +42,6 @@ import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
-import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
@@ -220,8 +218,15 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                     clockItems.addAll(dbCursor.getClockList())
                     scrollToLast = true
 
-                    showMessage(TYPE_RECYCLER_VIEW)
                     updateList(scrollToLast)
+                    if(!job.isCancelled) showMessage(TYPE_RECYCLER_VIEW)
+                    else {
+                        progressBar.visibility = View.VISIBLE
+                        showMessage(TYPE_NOTHING)
+                        job = launch(coroutineContext) {
+                            setUpClockList()
+                        }
+                    }
                 }
             }
         }

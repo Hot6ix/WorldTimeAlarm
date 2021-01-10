@@ -231,8 +231,15 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                             }
                         }
 
-                        showMessage(TYPE_RECYCLER_VIEW)
                         showSnackBar(scheduledTime)
+                        if(!job.isCancelled) showMessage(TYPE_RECYCLER_VIEW)
+                        else {
+                            progressBar.visibility = View.VISIBLE
+                            showMessage(TYPE_NOTHING)
+                            job = launch(coroutineContext) {
+                                setUpAlarmList()
+                            }
+                        }
                     }
                 }
             }
