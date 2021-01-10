@@ -36,10 +36,7 @@ import kotlinx.android.synthetic.main.fragment_alarm_generator.date_view
 import kotlinx.android.synthetic.main.fragment_alarm_generator.detail_content_layout
 import kotlinx.android.synthetic.main.fragment_alarm_generator.time_picker
 import kotlinx.android.synthetic.main.fragment_alarm_generator.time_zone_view
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
@@ -67,7 +64,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
     private lateinit var preference: SharedPreferences
 
-//    private var job: Job = Job()
+    private var job: Job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main
 
@@ -297,10 +294,14 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     override fun onDestroy() {
         super.onDestroy()
 
-        try {
-            fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
+        launch(coroutineContext) {
+            job.cancelAndJoin()
+
+            try {
+                fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -512,7 +513,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     }
 
     private fun updateEstimated() {
-        launch(coroutineContext) {
+        job = launch(coroutineContext) {
             val result = withContext(Dispatchers.IO) {
                 viewModel.alarmController.calculateDateTime(createAlarm(), TYPE_ALARM)
             }
