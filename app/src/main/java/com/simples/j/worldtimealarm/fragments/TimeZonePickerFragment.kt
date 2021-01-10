@@ -9,11 +9,13 @@ import android.icu.util.ULocale
 import android.os.Build
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
@@ -39,13 +41,23 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
     private var mType: Int = -1
     private var mList: List<PickerItem> = emptyList()
 
+    private val crashlytics = FirebaseCrashlytics.getInstance()
     private var mSearchMenu: MenuItem? = null
     private var mSearchView: SearchView? = null
     private val dateTimeChangedReceiver = DateTimeChangedReceiver()
 
-    private var mJob = Job()
+    private var job: Job = Job()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + mJob
+        get() = Dispatchers.Main + coroutineExceptionHandler
+
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
+
+        crashlytics.recordException(throwable)
+        if(activity?.isFinishing == false) {
+            Toast.makeText(context, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -78,7 +90,7 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
 
         updateActionBarTitleByType(mRequestType)
 
-        launch(coroutineContext) {
+        job = launch(coroutineContext) {
             if(mList.isEmpty()) {
                 mList = withContext(Dispatchers.IO) {
                     if(mRequestType == TimeZonePickerActivity.REQUEST_COUNTRY) createCountryListAdapterItem()

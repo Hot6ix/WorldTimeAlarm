@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         createNotificationChannels()
 
+        // EU Consent
         consentForm = MediaCursor.getConsentForm(this, ConsentListener(applicationContext))
         ConsentInformation.getInstance(this@MainActivity).apply {
             addTestDevice("0AD9CDC9B7C888D7B3E986949DBFC66D") // real

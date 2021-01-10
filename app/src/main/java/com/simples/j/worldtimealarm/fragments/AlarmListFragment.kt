@@ -11,11 +11,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.*
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.crashlytics.internal.common.CrashlyticsCore
+import com.google.firebase.crashlytics.internal.common.CrashlyticsReportDataCapture
+import com.google.firebase.crashlytics.internal.model.CrashlyticsReport
+import com.google.firebase.ktx.Firebase
 import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.AlarmStatus
@@ -32,6 +38,7 @@ import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
 import java.lang.IllegalArgumentException
+import java.lang.NullPointerException
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
@@ -54,13 +61,21 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private lateinit var fragmentLayout: CoordinatorLayout
     private lateinit var preference: SharedPreferences
 
+    private val crashlytics = FirebaseCrashlytics.getInstance()
     private var alarmItems = ArrayList<AlarmItem>()
     private var snackBar: Snackbar? = null
     private var muteStatusIsShown = false
 
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main
+        get() = Dispatchers.Main + coroutineExceptionHandler
+
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
+
+        crashlytics.recordException(throwable)
+        Toast.makeText(context, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
