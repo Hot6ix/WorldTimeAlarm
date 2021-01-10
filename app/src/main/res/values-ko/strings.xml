@@ -93,6 +93,7 @@
     <string name="change">변경</string>
     <string name="revoke">철회</string>
     <string name="detail">자세히</string>
+    <string name="retry">다시 시도</string>
 
     <!-- Message -->
     <string name="alarm_removed">알람이 삭제되었습니다.</string>

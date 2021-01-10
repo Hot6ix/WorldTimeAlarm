@@ -11,17 +11,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.*
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.crashlytics.internal.common.CrashlyticsCore
-import com.google.firebase.crashlytics.internal.common.CrashlyticsReportDataCapture
-import com.google.firebase.crashlytics.internal.model.CrashlyticsReport
-import com.google.firebase.ktx.Firebase
 import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.AlarmStatus
@@ -37,8 +32,6 @@ import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
-import java.lang.IllegalArgumentException
-import java.lang.NullPointerException
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
@@ -74,7 +67,8 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         throwable.printStackTrace()
 
         crashlytics.recordException(throwable)
-        Toast.makeText(context, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
+        progressBar.visibility = View.GONE
+        showMessage(TYPE_RETRY)
     }
 
     override fun onAttach(context: Context) {
@@ -100,32 +94,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
 
         job = launch(coroutineContext) {
-            withContext(Dispatchers.IO) {
-                alarmItems = dbCursor.getAlarmList()
-            }
-
-            alarmListAdapter = AlarmListAdapter(
-                    alarmItems,
-                    fragmentContext).apply {
-                setOnItemListener(this@AlarmListFragment)
-                setHasStableIds(true)
-            }
-            recyclerLayoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
-
-            alarmList.apply {
-                layoutManager = recyclerLayoutManager
-                adapter = alarmListAdapter
-                addItemDecoration(DividerItemDecoration(fragmentContext, DividerItemDecoration.VERTICAL))
-                (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-            }
-
-            swipeController = ListSwipeController()
-            swipeController.setOnSwipeListener(this@AlarmListFragment)
-
-            swipeHelper = ItemTouchHelper(swipeController)
-            swipeHelper.attachToRecyclerView(alarmList)
-            setEmptyMessage()
-            progressBar.visibility = View.GONE
+            setUpAlarmList()
         }
 
         // If alarm volume is muted, show snackBar
@@ -150,6 +119,13 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
         new_alarm.setOnClickListener {
             startActivityForResult(Intent(fragmentContext, AlarmGeneratorActivity::class.java), REQUEST_CODE_NEW)
+        }
+        retry.setOnClickListener {
+            progressBar.visibility = View.VISIBLE
+            showMessage(TYPE_NOTHING)
+            job = launch {
+                setUpAlarmList()
+            }
         }
 
         val intentFilter = IntentFilter()
@@ -254,7 +230,8 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                                 alarmList?.scrollToPosition(alarmItems.size - 1)
                             }
                         }
-                        setEmptyMessage()
+
+                        showMessage(TYPE_RECYCLER_VIEW)
                         showSnackBar(scheduledTime)
                     }
                 }
@@ -392,8 +369,8 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             if(it.on_off == 1) alarmController.cancelAlarm(fragmentContext, it.notiId)
             alarmListAdapter.removeItem(itemPosition)
             dbCursor.removeAlarm(it.notiId)
-            setEmptyMessage()
         }
+        if(alarmItems.isEmpty()) showMessage(TYPE_EMPTY)
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
             removedItem.let {
@@ -402,8 +379,9 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 if(removedItem.on_off == 1) alarmController.scheduleLocalAlarm(fragmentContext, it, AlarmController.TYPE_ALARM)
                 alarmListAdapter.addItem(itemPosition, it)
                 recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
-                setEmptyMessage()
             }
+
+            showMessage(TYPE_RECYCLER_VIEW)
         }.show()
     }
 
@@ -416,14 +394,64 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         alarmItems[to].index = tmp
     }
 
-    private fun setEmptyMessage() {
-        if(alarmItems.size < 1) {
-            alarmList.visibility = View.GONE
-            list_empty.visibility = View.VISIBLE
+    private suspend fun setUpAlarmList() {
+        withContext(Dispatchers.IO) {
+            alarmItems = dbCursor.getAlarmList()
         }
-        else {
-            alarmList.visibility = View.VISIBLE
-            list_empty.visibility = View.GONE
+
+        alarmListAdapter = AlarmListAdapter(
+                alarmItems,
+                fragmentContext).apply {
+            setOnItemListener(this@AlarmListFragment)
+            setHasStableIds(true)
+        }
+        recyclerLayoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
+
+        alarmList.apply {
+            layoutManager = recyclerLayoutManager
+            adapter = alarmListAdapter
+            (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+
+            if(itemDecorationCount <= 0) addItemDecoration(DividerItemDecoration(fragmentContext, DividerItemDecoration.VERTICAL))
+        }
+
+        if(!::swipeController.isInitialized) {
+            swipeController = ListSwipeController()
+            swipeController.setOnSwipeListener(this@AlarmListFragment)
+        }
+
+        if(!::swipeHelper.isInitialized) {
+            swipeHelper = ItemTouchHelper(swipeController)
+            swipeHelper.attachToRecyclerView(alarmList)
+        }
+
+        progressBar.visibility = View.GONE
+        if(alarmItems.isEmpty()) showMessage(TYPE_EMPTY)
+        else showMessage(TYPE_RECYCLER_VIEW)
+    }
+
+    private fun showMessage(type: Int) {
+        when(type) {
+            TYPE_EMPTY -> {
+                alarmList.visibility = View.GONE
+                list_empty.visibility = View.VISIBLE
+                retry.visibility = View.GONE
+            }
+            TYPE_RETRY -> {
+                alarmList.visibility = View.GONE
+                list_empty.visibility = View.GONE
+                retry.visibility = View.VISIBLE
+            }
+            TYPE_RECYCLER_VIEW -> {
+                alarmList.visibility = View.VISIBLE
+                list_empty.visibility = View.GONE
+                retry.visibility = View.GONE
+            }
+            else -> {
+                alarmList.visibility = View.GONE
+                list_empty.visibility = View.GONE
+                retry.visibility = View.GONE
+            }
         }
     }
 
@@ -532,6 +560,11 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         const val REQUEST_CODE_MODIFY = 20
         const val STATE_SNACK_BAR = "STATE_SNACK_BAR"
         const val HIGHLIGHT_KEY = "HIGHLIGHT_KEY"
+
+        const val TYPE_EMPTY = 0
+        const val TYPE_RETRY = 1
+        const val TYPE_RECYCLER_VIEW = 2
+        const val TYPE_NOTHING = 3
 
         @JvmStatic
         fun newInstance() = AlarmListFragment()
