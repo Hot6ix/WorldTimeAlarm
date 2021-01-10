@@ -92,6 +92,7 @@
     <string name="change">Change</string>
     <string name="revoke">Revoke</string>
     <string name="detail">More</string>
+    <string name="retry">Retry</string>
 
     <!-- Message -->
     <string name="alarm_removed">Alarm has been removed.</string>
