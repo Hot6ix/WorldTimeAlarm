@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TimePicker
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
@@ -36,14 +38,10 @@ import kotlinx.android.synthetic.main.fragment_alarm_generator.date_view
 import kotlinx.android.synthetic.main.fragment_alarm_generator.detail_content_layout
 import kotlinx.android.synthetic.main.fragment_alarm_generator.time_picker
 import kotlinx.android.synthetic.main.fragment_alarm_generator.time_zone_view
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
-import java.lang.IllegalArgumentException
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -64,12 +62,22 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     private lateinit var vibratorPatternList: ArrayList<PatternItem>
     private lateinit var snoozeList: ArrayList<SnoozeItem>
     private lateinit var now: ZonedDateTime
-
     private lateinit var preference: SharedPreferences
 
-//    private var job: Job = Job()
+    private val crashlytics = FirebaseCrashlytics.getInstance()
+
+    private var job: Job = Job()
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main
+        get() = Dispatchers.Main + coroutineExceptionHandler
+
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
+
+        crashlytics.recordException(throwable)
+        if(activity?.isFinishing == false) {
+            Toast.makeText(context, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private var timeZoneSelectorOption: String = ""
     private val dateTimeChangedReceiver = DateTimeChangedReceiver()
@@ -297,10 +305,14 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     override fun onDestroy() {
         super.onDestroy()
 
-        try {
-            fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
+        launch(coroutineContext) {
+            job.cancelAndJoin()
+
+            try {
+                fragmentContext.unregisterReceiver(dateTimeChangedReceiver)
+            } catch (e: IllegalArgumentException) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -512,7 +524,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     }
 
     private fun updateEstimated() {
-        launch(coroutineContext) {
+        job = launch(coroutineExceptionHandler) {
             val result = withContext(Dispatchers.IO) {
                 viewModel.alarmController.calculateDateTime(createAlarm(), TYPE_ALARM)
             }

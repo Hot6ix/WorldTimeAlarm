@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.ContentSelectorActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.PatternItem
@@ -41,10 +42,22 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     private lateinit var recyclerLayoutManager: LinearLayoutManager
     private lateinit var audioManager: AudioManager
     private lateinit var vibrator: Vibrator
-
     private lateinit var defaultRingtone: RingtoneItem
 
+    private val crashlytics = FirebaseCrashlytics.getInstance()
+
     private var job: Job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + coroutineExceptionHandler
+
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
+
+        crashlytics.recordException(throwable)
+        if(activity?.isFinishing == false) {
+            Toast.makeText(context, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private fun ArrayList<out Any>.contentEquals(list: ArrayList<out Any>?): Boolean {
         if(list == null) return false
@@ -67,9 +80,6 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
 
         return isSame
     }
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
