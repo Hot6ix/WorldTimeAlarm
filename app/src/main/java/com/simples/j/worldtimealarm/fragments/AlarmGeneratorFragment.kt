@@ -42,6 +42,7 @@ import kotlinx.coroutines.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
+import java.lang.Exception
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -181,8 +182,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                     }
 
                     // options
-                    viewModel.ringtone.value = ringtoneList.find { item -> item.uri == it.ringtone }
-                            ?: defaultRingtone
+                    viewModel.ringtone.value = ringtoneList.find { item -> item.uri == it.ringtone } ?: defaultRingtone
                     viewModel.vibration.value = vibratorPatternList.find { item ->
                         if (item.array == null && it.vibration == null) true
                         else item.array?.contentEquals(it.vibration ?: longArrayOf(0)) ?: false
@@ -586,10 +586,19 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     }
 
     private fun getFormattedTimeZoneName(timeZoneId: String?): String {
-        return if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-            MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(timeZoneId))
+        timeZoneId?.let {
+            return try {
+                if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(it))
+                else it
+            } catch (e: Exception) {
+                e.printStackTrace()
+
+                crashlytics.recordException(e.fillInStackTrace())
+                it
+            }
         }
-        else timeZoneId ?: getString(R.string.time_zone_unknown)
+
+        return getString(R.string.time_zone_unknown)
     }
 
     private fun getLabelDialog(): LabelDialogFragment {

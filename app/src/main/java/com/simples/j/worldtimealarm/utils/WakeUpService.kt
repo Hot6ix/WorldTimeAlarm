@@ -44,7 +44,7 @@ class WakeUpService : Service() {
     private var timerRunnable: Runnable? = null
     private var serviceAction: String? = null
     private var serviceActionReceiver: BroadcastReceiver? = null
-    private lateinit var defaultRingtone: RingtoneItem
+    private var defaultRingtone: RingtoneItem? = null
 
     private var isExpired = false
 
@@ -69,7 +69,11 @@ class WakeUpService : Service() {
         val filter = IntentFilter(REQUEST_SERVICE_ACTION)
         registerReceiver(serviceActionReceiver, filter)
 
-        defaultRingtone = MediaCursor.getRingtoneList(applicationContext)[1]
+        with(MediaCursor.getRingtoneList(applicationContext)) {
+            defaultRingtone =
+                    if(size > 1) this[1]
+                    else this[0]
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -300,22 +304,34 @@ class WakeUpService : Service() {
         } catch (e: Exception) {
             e.printStackTrace()
 
-            // check uri that exists in system ringtone
-            // play default alarm sound if error occurred.
+            /*
+                system caught exception when playing ringtone.
+                now system will check whether the ringtone is valid or not.
+                and if the ringtone is user-owned, but is not valid then will replace it to system default ringtone.
+                also will play default ringtone.
+            */
             if(!isSystemRingtone(ringtone)) {
                 DatabaseCursor(applicationContext).findUserRingtone(ringtone).also {
                     if(it == null) {
                         // if ringtone is not in list, set to default ringtone
                         item?.also { item ->
-                            item.ringtone = defaultRingtone.uri
+                            item.ringtone = defaultRingtone?.uri
                             DatabaseCursor(applicationContext).updateAlarm(item)
+
+                            // update alarm item in AlarmListFragment if fragment is attached and visible
+                            val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
+                                val bundle = Bundle()
+                                bundle.putParcelable(AlarmReceiver.ITEM, item)
+                                putExtra(AlarmReceiver.OPTIONS, bundle)
+                            }
+                            sendBroadcast(requestIntent)
                         }
                     }
                 }
             }
 
             val sound = try {
-                Uri.parse(defaultRingtone.uri)
+                Uri.parse(defaultRingtone?.uri)
             } catch (e: Exception) {
                 RingtoneManager.getActualDefaultRingtoneUri(applicationContext, RingtoneManager.TYPE_ALARM)
             }

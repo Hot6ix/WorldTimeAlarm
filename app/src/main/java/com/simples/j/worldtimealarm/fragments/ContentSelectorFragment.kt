@@ -113,8 +113,11 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             MediaCursor.getRingtoneList(it)
                         }
 
+                        defaultRingtone =
+                                if(systemRingtone.size > 1) systemRingtone[1] // system has some ringtone, set first valid ringtone as default
+                                else systemRingtone[0] // system doesn't have any valid ringtone, set no ringtone
+
                         // TODO: IllegalStateException: Fragment not attached to Activity is still valid at getString(), but most of tries don't throw exception
-                        defaultRingtone = systemRingtone[1]
                         val ringtoneList = ArrayList<RingtoneItem>().apply {
                             add(RingtoneItem(it.getString(R.string.my_ringtone), ContentSelectorAdapter.URI_USER_RINGTONE))
                             add(RingtoneItem(it.getString(R.string.add_new), ContentSelectorAdapter.URI_ADD_RINGTONE))
