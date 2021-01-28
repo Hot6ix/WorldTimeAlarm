@@ -36,7 +36,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     private var item: AlarmItem? = null
     private var actionBroadcastReceiver: BroadcastReceiver? = null
 
-    // TODO:  Fix extended floating action button padding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wake_up)
