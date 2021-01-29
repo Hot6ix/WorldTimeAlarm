@@ -58,7 +58,7 @@ class LabelDialogFragment: DialogFragment() {
 
         })
 
-        val dialog = AlertDialog.Builder(context!!)
+        val dialog = AlertDialog.Builder(fragmentContext)
                 .setTitle(resources.getString(R.string.label))
                 .setView(labelView)
                 .setPositiveButton(resources.getString(R.string.ok)) { dialogInterface, _ ->

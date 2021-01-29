@@ -65,6 +65,7 @@
         android:layout_gravity="center|bottom"
         android:text="@string/apply"
         android:textColor="?attr/colorPrimary"
+        android:gravity="center"
         app:icon="@drawable/ic_action_done_white"
         app:iconTint="?attr/colorPrimary"
         app:backgroundTint="@color/background"/>

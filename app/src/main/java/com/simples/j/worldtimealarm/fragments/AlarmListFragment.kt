@@ -549,13 +549,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         private fun updateList(item: AlarmItem) {
             val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
             if(index > -1) {
-                if(item.repeat.any { it > 0 }) {
-                    alarmItems[index].on_off = item.on_off
-                }
-                else {
-                    // One time alarm
-                    alarmItems[index].on_off = 0
-                }
+                alarmItems[index] = item
                 alarmListAdapter.notifyItemChanged(index)
             }
         }

@@ -16,6 +16,7 @@ import com.google.ads.mediation.admob.AdMobAdapter
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
@@ -39,6 +40,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
     private lateinit var settingFragment: SettingFragment
     private lateinit var consentForm: ConsentForm
 
+    private val crashlytics = FirebaseCrashlytics.getInstance()
+
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
@@ -50,7 +53,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
         createNotificationChannels()
 
         // EU Consent
-        consentForm = MediaCursor.getConsentForm(this, ConsentListener(applicationContext))
+        consentForm = MediaCursor.getConsentForm(this, ConsentListener())
         ConsentInformation.getInstance(this@MainActivity).apply {
             addTestDevice("0AD9CDC9B7C888D7B3E986949DBFC66D") // real
             addTestDevice("8E6D92F7C7055016AD3510BBB1762671") // emulator
@@ -218,12 +221,17 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
         }
     }
 
-    inner class ConsentListener(private val context: Context): ConsentFormListener() {
+    inner class ConsentListener(): ConsentFormListener() {
         override fun onConsentFormLoaded() {
             super.onConsentFormLoaded()
             Log.d(C.TAG, "Consent form loaded")
 
-            consentForm.show()
+            try {
+                consentForm.show()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                crashlytics.recordException(e.fillInStackTrace())
+            }
         }
 
         override fun onConsentFormOpened() {

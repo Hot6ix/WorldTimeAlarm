@@ -305,6 +305,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/padding20"
         android:layout_gravity="center|bottom"
+        android:gravity="center"
         android:textColor="?attr/colorPrimary"
         app:iconTint="?attr/colorPrimary"
         app:backgroundTint="@color/background"/>
