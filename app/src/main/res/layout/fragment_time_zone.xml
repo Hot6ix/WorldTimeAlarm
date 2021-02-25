@@ -21,13 +21,15 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/time_zone_country_layout"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
                 android:padding="@dimen/padding20"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <TextView
                     android:id="@+id/time_zone_country_title"
@@ -64,13 +66,15 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/time_zone_region_layout"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
                 android:padding="@dimen/padding20"
-                app:layout_constraintTop_toBottomOf="@id/divider0">
+                app:layout_constraintTop_toBottomOf="@id/divider0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <TextView
                     android:id="@+id/time_zone_region_title"
@@ -109,7 +113,7 @@
 
             <TextView
                 android:id="@+id/time_zone_change_info"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/text_small"
                 android:textColor="?android:attr/textColorPrimary"

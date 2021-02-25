@@ -17,6 +17,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.simples.j.worldtimealarm.databinding.ActivityMainBinding
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.ALARM_NOTIFICATION_CHANNEL
@@ -28,7 +29,6 @@ import com.simples.j.worldtimealarm.fragments.SettingFragment
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.receiver.MultiBroadcastReceiver
 import com.simples.j.worldtimealarm.utils.MediaCursor
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
     private lateinit var clockListFragment: WorldClockFragment
     private lateinit var settingFragment: SettingFragment
     private lateinit var consentForm: ConsentForm
+    private lateinit var binding: ActivityMainBinding
 
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
@@ -48,7 +49,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         createNotificationChannels()
 
@@ -112,9 +114,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
 
         sendHighlightRequest(intent)
 
-        navigationView.setOnNavigationItemSelectedListener(this)
+        binding.navigationView.setOnNavigationItemSelectedListener(this)
+//        navigationView.setOnNavigationItemSelectedListener(this)
         if(!transaction.isEmpty) {
-            navigationView.selectedItemId = R.id.view_alarm
+            binding.navigationView.selectedItemId = R.id.view_alarm
+//            navigationView.selectedItemId = R.id.view_alarm
         }
     }
 
@@ -125,7 +129,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
 
     override fun onDestroy() {
         super.onDestroy()
-        adViewMain.destroy()
+        binding.adViewMain.destroy()
+//        adViewMain.destroy()
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -146,7 +151,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
             }
             builder.addNetworkExtrasBundle(AdMobAdapter::class.java, bundle)
         }
-        adViewMain.loadAd(builder.build())
+        binding.adViewMain.loadAd(builder.build())
+//        adViewMain.loadAd(builder.build())
     }
 
     private fun handleNavigationClick(id: Int) {
@@ -176,7 +182,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
     private fun sendHighlightRequest(intent: Intent?) {
         intent?.getIntExtra(AlarmListFragment.HIGHLIGHT_KEY, 0)?.let {
             if(it > 0) {
-                navigationView.selectedItemId = R.id.view_alarm
+                binding.navigationView.selectedItemId = R.id.view_alarm
+//                navigationView.selectedItemId = R.id.view_alarm
                 val bundle = Bundle().apply {
                     putInt(AlarmListFragment.HIGHLIGHT_KEY, it)
                 }
@@ -185,7 +192,8 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
             }
         }
         intent?.getBundleExtra(MultiBroadcastReceiver.BUNDLE)?.let { bundle ->
-            navigationView.selectedItemId = R.id.view_alarm
+            binding.navigationView.selectedItemId = R.id.view_alarm
+//            navigationView.selectedItemId = R.id.view_alarm
             bundle.getString(AlarmItem.WARNING, null)?.let {
                 alarmListFragment.arguments = bundle
             }

@@ -7,6 +7,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.ViewModelProvider
+import com.simples.j.worldtimealarm.databinding.ActivityContentSelectorBinding
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.etc.SnoozeItem
@@ -20,10 +21,12 @@ class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickList
     private lateinit var viewModel: ContentSelectorViewModel
     private lateinit var contentSelectorFragment: ContentSelectorFragment
     private lateinit var datePickerFragment: DatePickerFragment
+    private lateinit var binding: ActivityContentSelectorBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_content_selector)
+        binding = ActivityContentSelectorBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.simples.j.worldtimealarm.databinding.ActivityTimeZonePickerBinding
 import com.simples.j.worldtimealarm.fragments.TimeZoneFragment
 import com.simples.j.worldtimealarm.fragments.TimeZonePickerFragment
 
@@ -16,10 +17,12 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
     private var mType: Int = -1
     private lateinit var mTimeZoneFragment: TimeZoneFragment
     private lateinit var mTimeZonePickerFragment: TimeZonePickerFragment
+    private lateinit var binding: ActivityTimeZonePickerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_time_zone_picker)
+        binding = ActivityTimeZonePickerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mTimeZoneId = intent.getStringExtra(TIME_ZONE_ID)

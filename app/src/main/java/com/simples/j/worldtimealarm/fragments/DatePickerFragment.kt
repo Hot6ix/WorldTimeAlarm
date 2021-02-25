@@ -25,6 +25,8 @@ import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
 
+// https://stackoverflow.com/a/58659241
+// This fragment doesn't use view binding due to issue of tab items with view binding
 class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, CalendarView.OnDateChangeListener, View.OnClickListener {
 
     private lateinit var fragmentContext: Context
@@ -78,7 +80,7 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
         tab_layout.addOnTabSelectedListener(this)
 
         // Observe
-        viewModel.startDate.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+        viewModel.startDate.observe(viewLifecycleOwner, {
             if(it == null || it < 0) {
                 setTabSummary(startDateTab, getString(R.string.range_not_set))
             }
@@ -86,7 +88,7 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
                 setTabSummary(startDateTab, formatDate(it))
             }
         })
-        viewModel.endDate.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+        viewModel.endDate.observe(viewLifecycleOwner, {
             if(it == null || it < 0) {
                 setTabSummary(endDateTab, getString(R.string.range_not_set))
             }

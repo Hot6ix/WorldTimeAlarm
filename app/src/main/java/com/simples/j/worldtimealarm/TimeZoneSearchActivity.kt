@@ -12,10 +12,10 @@ import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.simples.j.worldtimealarm.databinding.ActivityTimeZoneSearchBinding
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.support.TimeZoneAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import kotlinx.android.synthetic.main.activity_time_zone_search.*
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -24,13 +24,15 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
 
     private lateinit var timeZoneArray: MutableList<String>
     private lateinit var timeZoneAdapter: TimeZoneAdapter
+    private lateinit var binding: ActivityTimeZoneSearchBinding
     private var query: String? = null
     private var resultArray = ArrayList<String>()
     private var code: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_time_zone_search)
+        binding = ActivityTimeZoneSearchBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         code = intent.getStringExtra(WorldClockFragment.TIME_ZONE_NEW_KEY)
@@ -50,8 +52,10 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
 
         timeZoneAdapter = TimeZoneAdapter(resultArray, applicationContext)
         timeZoneAdapter.setOnItemClickListener(this)
-        time_zone_search_list.adapter = timeZoneAdapter
-        time_zone_search_list.layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
+        binding.timeZoneSearchList.adapter = timeZoneAdapter
+//        time_zone_search_list.adapter = timeZoneAdapter
+        binding.timeZoneSearchList.layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
+//        time_zone_search_list.layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -96,12 +100,16 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
             resultArray.addAll(timeZoneArray.filter { it.toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)) })
         }
         if(resultArray.isEmpty()) {
-            time_zone_search_list.visibility = View.GONE
-            no_result.visibility = View.VISIBLE
+            binding.timeZoneSearchList.visibility = View.GONE
+//            time_zone_search_list.visibility = View.GONE
+            binding.noResult.visibility = View.VISIBLE
+//            no_result.visibility = View.VISIBLE
         }
         else {
-            time_zone_search_list.visibility = View.VISIBLE
-            no_result.visibility = View.GONE
+            binding.timeZoneSearchList.visibility = View.VISIBLE
+//            time_zone_search_list.visibility = View.VISIBLE
+            binding.noResult.visibility = View.GONE
+//            no_result.visibility = View.GONE
         }
         timeZoneAdapter.notifyDataSetChanged()
 

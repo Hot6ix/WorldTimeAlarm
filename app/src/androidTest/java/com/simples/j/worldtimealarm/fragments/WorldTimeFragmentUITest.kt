@@ -9,10 +9,13 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -20,7 +23,10 @@ import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
+import com.simples.j.worldtimealarm.ViewMatcherExtension.withNeighbor
 import com.simples.j.worldtimealarm.utils.DatabaseManager
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.not
 import org.junit.*
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -78,6 +84,33 @@ class WorldTimeFragmentUITest {
         else {
             intended(hasComponent(TimeZoneSearchActivity::class.java.name))
         }
+    }
+
+    @Test
+    fun b_testFragmentElements() {
+        // check world time
+        onView(withId(R.id.world_time))
+                .check(matches(not(withText(""))))
+        // check world date
+        onView(withId(R.id.world_date))
+                .check(matches(not(withText(""))))
+        // check world timezone
+        onView(withId(R.id.time_zone))
+                .check(matches(not(withText(""))))
+        // retry button should not be displayed
+        onView(allOf(
+                withId(R.id.retry),
+                withNeighbor(withId(R.id.clockList))
+        )).check(matches(withEffectiveVisibility(Visibility.GONE)))
+        // empty text view should be displayed
+        onView(allOf(
+                withId(R.id.list_empty),
+                withNeighbor(withId(R.id.clockList))
+        )).check(matches(isDisplayed()))
+        // check new timezone button
+        onView(withId(R.id.new_timezone))
+                .check(matches(isDisplayed()))
+                .check(matches(isClickable()))
     }
 
     @After

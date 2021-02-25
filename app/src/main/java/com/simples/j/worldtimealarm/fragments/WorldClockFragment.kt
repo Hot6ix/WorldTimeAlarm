@@ -25,17 +25,13 @@ import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_NEW_CODE
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
+import com.simples.j.worldtimealarm.databinding.FragmentWorldClockBinding
 import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.models.WorldClockViewModel
 import com.simples.j.worldtimealarm.support.ClockListAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.ListSwipeController
 import com.simples.j.worldtimealarm.utils.MediaCursor
-import kotlinx.android.synthetic.main.fragment_alarm_list.*
-import kotlinx.android.synthetic.main.fragment_world_clock.*
-import kotlinx.android.synthetic.main.fragment_world_clock.list_empty
-import kotlinx.android.synthetic.main.fragment_world_clock.progressBar
-import kotlinx.android.synthetic.main.fragment_world_clock.retry
 import kotlinx.coroutines.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -58,6 +54,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private lateinit var dbCursor: DatabaseCursor
     private lateinit var timeDialog: TimePickerDialogFragment
     private lateinit var dateDialog: DatePickerDialogFragment
+    private lateinit var binding: FragmentWorldClockBinding
 
     private val crashlytics = FirebaseCrashlytics.getInstance()
     private var clockItems = ArrayList<ClockItem>()
@@ -74,7 +71,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         throwable.printStackTrace()
 
         crashlytics.recordException(throwable)
-        progressBar.visibility = View.GONE
+        binding.progressBar.visibility = View.GONE
+//        progressBar.visibility = View.GONE
         showMessage(TYPE_RETRY)
     }
 
@@ -85,11 +83,12 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_world_clock, container, false)
-        fragmentLayout = view.findViewById(R.id.fragment_list)
-        return view
+        binding = FragmentWorldClockBinding.inflate(inflater, container, false)
+        fragmentLayout = binding.fragmentList
+//        fragmentLayout = view.findViewById(R.id.fragment_list)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -121,8 +120,10 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
         }
 
-        time_zone_layout.setOnClickListener(this)
-        new_timezone.setOnClickListener(this)
+        binding.timeZoneLayout.setOnClickListener(this)
+//        time_zone_layout.setOnClickListener(this)
+        binding.newTimezone.setOnClickListener(this)
+//        new_timezone.setOnClickListener(this)
 
         timeDialog =
                 parentFragmentManager.findFragmentByTag(TAG_FRAGMENT_TIME_DIALOG) as? TimePickerDialogFragment ?:
@@ -136,14 +137,18 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                 }
         dateDialog.setDateSetListener(this)
 
-        world_time.setOnClickListener {
+        binding.worldTime.setOnClickListener {
+//        world_time.setOnClickListener {
             if(!timeDialog.isAdded) timeDialog.show(parentFragmentManager, TAG_FRAGMENT_TIME_DIALOG)
         }
-        world_date.setOnClickListener {
+        binding.worldDate.setOnClickListener {
+//        world_date.setOnClickListener {
             if(!dateDialog.isAdded) dateDialog.show(parentFragmentManager, TAG_FRAGMENT_DATE_DIALOG)
         }
-        retry.setOnClickListener {
-            progressBar.visibility = View.VISIBLE
+        binding.retry.setOnClickListener {
+//        retry.setOnClickListener {
+            binding.progressBar.visibility = View.VISIBLE
+//            progressBar.visibility = View.VISIBLE
             showMessage(TYPE_NOTHING)
             job = launch(coroutineContext) {
                 setUpClockList()
@@ -160,10 +165,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                 set(Calendar.MINUTE, it.minute)
             }
 
-            world_time.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
-            world_date.text = it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
+            binding.worldTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
+//            world_time.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
+            binding.worldDate.text = it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
+//            world_date.text = it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
 
-            time_zone.text = getNameForTimeZone(it.zone.id)
+            binding.timeZone.text = getNameForTimeZone(it.zone.id)
+//            time_zone.text = getNameForTimeZone(it.zone.id)
 
             updateList()
 
@@ -221,7 +229,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                     updateList(scrollToLast)
                     if(!job.isCancelled) showMessage(TYPE_RECYCLER_VIEW)
                     else {
-                        progressBar.visibility = View.VISIBLE
+                        binding.progressBar.visibility = View.VISIBLE
+//                        progressBar.visibility = View.VISIBLE
                         showMessage(TYPE_NOTHING)
                         job = launch(coroutineContext) {
                             setUpClockList()
@@ -318,7 +327,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         clockListAdapter = ClockListAdapter(fragmentContext, clockItems, viewModel)
         recyclerLayoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
 
-        clockList.apply {
+        binding.clockList.apply {
+//        clockList.apply {
             layoutManager = recyclerLayoutManager
             adapter = clockListAdapter
             (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -333,10 +343,12 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         if(!::swipeHelper.isInitialized) {
             swipeHelper = ItemTouchHelper(swipeController)
-            swipeHelper.attachToRecyclerView(clockList)
+            swipeHelper.attachToRecyclerView(binding.clockList)
+//            swipeHelper.attachToRecyclerView(clockList)
         }
 
-        progressBar.visibility = View.GONE
+        binding.progressBar.visibility = View.GONE
+//        progressBar.visibility = View.GONE
         if(clockItems.isEmpty()) showMessage(AlarmListFragment.TYPE_EMPTY)
         else showMessage(AlarmListFragment.TYPE_RECYCLER_VIEW)
     }
@@ -349,7 +361,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                 clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
 
                 if (clockItems.isNotEmpty() && scrollToLast)
-                    clockList?.smoothScrollToPosition(clockItems.count() - 1)
+                    binding.clockList.smoothScrollToPosition(clockItems.count() - 1)
+//                    clockList?.smoothScrollToPosition(clockItems.count() - 1)
             }
         }
     }
@@ -357,24 +370,36 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private fun showMessage(type: Int) {
         when(type) {
             TYPE_EMPTY -> {
-                clockList.visibility = View.GONE
-                list_empty.visibility = View.VISIBLE
-                retry.visibility = View.GONE
+                binding.clockList.visibility = View.GONE
+                binding.listEmpty.visibility = View.VISIBLE
+                binding.retry.visibility = View.GONE
+//                clockList.visibility = View.GONE
+//                list_empty.visibility = View.VISIBLE
+//                retry.visibility = View.GONE
             }
             TYPE_RETRY -> {
-                clockList.visibility = View.GONE
-                list_empty.visibility = View.GONE
-                retry.visibility = View.VISIBLE
+                binding.clockList.visibility = View.GONE
+                binding.listEmpty.visibility = View.GONE
+                binding.retry.visibility = View.VISIBLE
+//                clockList.visibility = View.GONE
+//               list_empty.visibility = View.GONE
+//                retry.visibility = View.VISIBLE
             }
             TYPE_RECYCLER_VIEW -> {
-                clockList.visibility = View.VISIBLE
-                list_empty.visibility = View.GONE
-                retry.visibility = View.GONE
+                binding.clockList.visibility = View.VISIBLE
+                binding.listEmpty.visibility = View.GONE
+                binding.retry.visibility = View.GONE
+//                clockList.visibility = View.VISIBLE
+//                list_empty.visibility = View.GONE
+//                retry.visibility = View.GONE
             }
             else -> {
-                clockList.visibility = View.GONE
-                list_empty.visibility = View.GONE
-                retry.visibility = View.GONE
+                binding.clockList.visibility = View.GONE
+                binding.listEmpty.visibility = View.GONE
+                binding.retry.visibility = View.GONE
+//                clockList.visibility = View.GONE
+//                list_empty.visibility = View.GONE
+//                retry.visibility = View.GONE
             }
         }
     }

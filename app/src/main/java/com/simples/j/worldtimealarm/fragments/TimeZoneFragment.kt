@@ -20,6 +20,7 @@ import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
+import com.simples.j.worldtimealarm.databinding.FragmentTimeZoneBinding
 import com.simples.j.worldtimealarm.etc.TimeZoneInfo
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
@@ -35,6 +36,7 @@ import java.util.*
 class TimeZoneFragment : Fragment(), View.OnClickListener {
 
     private lateinit var fragmentContext: Context
+    private lateinit var binding: FragmentTimeZoneBinding
 
     private var mPreviousTimeZone: TimeZone? = null
     private var mTimeZone: TimeZone? = null
@@ -57,9 +59,11 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
+        binding = FragmentTimeZoneBinding.inflate(inflater, container, false)
+
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_time_zone, container, false)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -101,17 +105,28 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
         updateSummariesByTimeZone()
 
-        time_zone_country_layout.setOnClickListener(this)
-        time_zone_region_layout.setOnClickListener(this)
-        action.setOnClickListener(this)
+        binding.timeZoneCountryLayout.setOnClickListener(this)
+//        time_zone_country_layout.setOnClickListener(this)
+        binding.timeZoneRegionLayout.setOnClickListener(this)
+//        time_zone_region_layout.setOnClickListener(this)
+        binding.action.setOnClickListener(this)
+//        action.setOnClickListener(this)
 
         if(mAction == TimeZonePickerActivity.ACTION_ADD) {
-            action.text = getString(R.string.time_zone_add)
-            action.icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
+            binding.action.apply {
+                text = getString(R.string.time_zone_add)
+                icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
+            }
+//            action.text = getString(R.string.time_zone_add)
+//            action.icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
         }
         else {
-            action.text = getString(R.string.apply)
-            action.icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_done_white)
+            binding.action.apply {
+                text = getString(R.string.apply)
+                icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_done_white)
+            }
+//            action.text = getString(R.string.apply)
+//            action.icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_done_white)
         }
 
         val intentFilter = IntentFilter(MainActivity.ACTION_UPDATE_ALL)
@@ -177,16 +192,20 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
 
     private fun updateSummariesByTimeZone() {
         with(MediaCursor.getCountryNameByTimeZone(mTimeZone)) {
-            if(this.isNotEmpty()) time_zone_country_summary.text = this
+            if(this.isNotEmpty()) binding.timeZoneCountrySummary.text = this
+//            if(this.isNotEmpty()) time_zone_country_summary.text = this
         }
 
         with(mTimeZoneInfo) {
             if(this == null) {
-                time_zone_region_layout.isEnabled = false
+                binding.timeZoneRegionLayout.isEnabled = false
+//                time_zone_region_layout.isEnabled = false
             }
             else {
-                time_zone_region_layout.isEnabled = true
-                time_zone_region_summary.text = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), this.mGmtOffset)
+                binding.timeZoneRegionLayout.isEnabled = true
+                binding.timeZoneRegionSummary.text = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), this.mGmtOffset)
+//                time_zone_region_layout.isEnabled = true
+//                time_zone_region_summary.text = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), this.mGmtOffset)
 
                 val timeZoneName = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), MediaCursor.getGmtOffsetString(Locale.getDefault(), mTimeZone, mDate))
 
@@ -194,23 +213,34 @@ class TimeZoneFragment : Fragment(), View.OnClickListener {
                     val nextTransition = ZoneId.of(mTimeZone.id).rules.nextTransition(Instant.now())
                     val nextTransitionLocal = ZonedDateTime.of(nextTransition.dateTimeBefore, ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.SHORT))
 
-                    time_zone_change_info.text =
+                    binding.timeZoneChangeInfo.text =
                             if(mTimeZone.inDaylightTime(Date())) {
                                 getString(R.string.time_zone_dst_end_msg, timeZoneName, nextTransitionLocal)
                             }
                             else {
                                 getString(R.string.time_zone_dst_start_msg, timeZoneName, nextTransitionLocal)
                             }
+//                    time_zone_change_info.text =
+//                            if(mTimeZone.inDaylightTime(Date())) {
+//                                getString(R.string.time_zone_dst_end_msg, timeZoneName, nextTransitionLocal)
+//                            }
+//                            else {
+//                                getString(R.string.time_zone_dst_start_msg, timeZoneName, nextTransitionLocal)
+//                            }
                 }
                 else {
-                    time_zone_change_info.text = getString(R.string.time_zone_no_dst_msg, timeZoneName)
+                    binding.timeZoneChangeInfo.text = getString(R.string.time_zone_no_dst_msg, timeZoneName)
+//                    time_zone_change_info.text = getString(R.string.time_zone_no_dst_msg, timeZoneName)
                 }
 
                 val found = MediaCursor.getULocaleByTimeZoneId(mTimeZone.id)
                 val isSingleTimeZone = found != null && (MediaCursor.getTimeZoneListByCountry(found.country).size == 1)
-                time_zone_region_layout.apply {
+                binding.timeZoneRegionLayout.apply {
                     isEnabled = !isSingleTimeZone
                 }
+//                time_zone_region_layout.apply {
+//                    isEnabled = !isSingleTimeZone
+//                }
             }
         }
     }

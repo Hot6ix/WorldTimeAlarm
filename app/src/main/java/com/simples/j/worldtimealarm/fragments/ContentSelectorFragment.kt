@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.ContentSelectorActivity
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.databinding.ContentSelectorFragmentBinding
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.etc.SnoozeItem
@@ -31,7 +32,6 @@ import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
 import com.simples.j.worldtimealarm.support.ContentSelectorAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.MediaCursor
-import kotlinx.android.synthetic.main.content_selector_fragment.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -43,6 +43,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     private lateinit var audioManager: AudioManager
     private lateinit var vibrator: Vibrator
     private lateinit var defaultRingtone: RingtoneItem
+    private lateinit var binding: ContentSelectorFragmentBinding
 
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
@@ -83,7 +84,9 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.content_selector_fragment, container, false)
+        binding = ContentSelectorFragmentBinding.inflate(inflater, container, false)
+
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -164,7 +167,8 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
 
                     recyclerLayoutManager = LinearLayoutManager(it, LinearLayoutManager.VERTICAL, false)
 
-                    content_recyclerview.apply {
+                    binding.contentRecyclerview.apply {
+//                    content_recyclerview.apply {
                         adapter = contentSelectorAdapter
                         layoutManager = recyclerLayoutManager
                         (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false

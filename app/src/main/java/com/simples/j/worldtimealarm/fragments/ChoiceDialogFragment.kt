@@ -24,7 +24,7 @@ class ChoiceDialogFragment: DialogFragment() {
             currentChoice = savedInstanceState.getInt(CURRENT_CHOICE)
         }
 
-        val dialog = AlertDialog.Builder(context!!)
+        val dialog = AlertDialog.Builder(requireContext())
                 .setTitle(arguments?.getString(CONTENT_TITLE))
                 .setSingleChoiceItems(array, lastChoice) { dialogInterface, index ->
                     listener?.onItemSelect(dialogInterface, index)
