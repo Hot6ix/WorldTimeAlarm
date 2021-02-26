@@ -1,4 +1,4 @@
-package com.simples.j.worldtimealarm
+package com.simples.j.worldtimealarm.utils
 
 import android.content.Context
 import android.icu.text.TimeZoneNames
@@ -9,7 +9,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.TimeZoneInfo
-import com.simples.j.worldtimealarm.utils.MediaCursor
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

@@ -1,9 +1,8 @@
-package com.simples.j.worldtimealarm
+package com.simples.j.worldtimealarm.utils
 
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import com.simples.j.worldtimealarm.etc.AlarmItem
-import com.simples.j.worldtimealarm.utils.AlarmController
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

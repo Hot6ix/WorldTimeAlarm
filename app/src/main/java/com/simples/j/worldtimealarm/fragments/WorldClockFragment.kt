@@ -449,8 +449,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         const val TYPE_RECYCLER_VIEW = 2
         const val TYPE_NOTHING = 3
 
-        private const val TAG_FRAGMENT_TIME_DIALOG = "TAG_FRAGMENT_TIME_DIALOG"
-        private const val TAG_FRAGMENT_DATE_DIALOG = "TAG_FRAGMENT_DATE_DIALOG"
+        const val TAG_FRAGMENT_TIME_DIALOG = "TAG_FRAGMENT_TIME_DIALOG"
+        const val TAG_FRAGMENT_DATE_DIALOG = "TAG_FRAGMENT_DATE_DIALOG"
 
         @JvmStatic
         fun newInstance() = WorldClockFragment()
