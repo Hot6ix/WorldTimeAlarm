@@ -15,6 +15,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.*
+import androidx.room.Room
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.*
@@ -47,7 +48,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     private lateinit var updateRequestReceiver: UpdateRequestReceiver
     private lateinit var swipeHelper: ItemTouchHelper
     private lateinit var swipeController: ListSwipeController
-    private lateinit var dbCursor: DatabaseCursor
+    private lateinit var db: AppDatabase
     private lateinit var recyclerLayoutManager: LinearLayoutManager
     private lateinit var alarmController: AlarmController
     private lateinit var audioManager: AudioManager
@@ -69,7 +70,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
         crashlytics.recordException(throwable)
         binding.progressBar.visibility = View.GONE
-//        progressBar.visibility = View.GONE
         showMessage(TYPE_RETRY)
     }
 
@@ -82,7 +82,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentAlarmListBinding.inflate(inflater, container, false)
         fragmentLayout = binding.fragmentList
-//        fragmentLayout = view.findViewById(R.id.fragment_list)
 
         return binding.root
     }
@@ -91,7 +90,9 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         super.onActivityCreated(savedInstanceState)
 
         updateRequestReceiver = UpdateRequestReceiver()
-        dbCursor = DatabaseCursor(fragmentContext)
+        db = Room.databaseBuilder(fragmentContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
+                .addMigrations(AppDatabase.MIGRATION_7_8)
+                .build()
         alarmController = AlarmController.getInstance()
         audioManager = fragmentContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
@@ -121,15 +122,12 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         binding.newAlarm.setOnClickListener {
-//        new_alarm.setOnClickListener {
             startActivityForResult(Intent(fragmentContext, AlarmGeneratorActivity::class.java), REQUEST_CODE_NEW)
         }
         binding.retry.setOnClickListener {
-//        retry.setOnClickListener {
             binding.progressBar.visibility = View.VISIBLE
-//            progressBar.visibility = View.VISIBLE
             showMessage(TYPE_NOTHING)
-            job = launch {
+            job = launch(coroutineContext) {
                 setUpAlarmList()
             }
         }
@@ -156,7 +154,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         val index = alarmItems.indexOfFirst { it.notiId == id }
                         if(index > -1) {
                             binding.alarmList.smoothScrollToPosition(index)
-//                                alarmList?.smoothScrollToPosition(index)
                             alarmListAdapter.setHighlightId(id)
                             alarmListAdapter.notifyItemChanged(index)
                         }
@@ -221,13 +218,11 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         if(::alarmListAdapter.isInitialized) {
                             alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
                             binding.alarmList.scrollToPosition(alarmItems.size - 1)
-//                            alarmList?.scrollToPosition(alarmItems.size - 1)
                         }
                         else {
                             launch(coroutineContext) {
                                 job.join()
                                 binding.alarmList.scrollToPosition(alarmItems.size - 1)
-//                                alarmList?.scrollToPosition(alarmItems.size - 1)
                             }
                         }
 
@@ -235,7 +230,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                         if(!job.isCancelled) showMessage(TYPE_RECYCLER_VIEW)
                         else {
                             binding.progressBar.visibility = View.VISIBLE
-//                            progressBar.visibility = View.VISIBLE
                             showMessage(TYPE_NOTHING)
                             job = launch(coroutineContext) {
                                 setUpAlarmList()
@@ -256,7 +250,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                             val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
                             if(index > -1) {
                                 binding.alarmList.scrollToPosition(index)
-//                                    alarmList?.scrollToPosition(index)
                                 alarmItems[index] = item
                                 alarmListAdapter.notifyItemChanged(index)
                             }
@@ -343,20 +336,31 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     }
 
     override fun onItemStatusChanged(b: Boolean, item: AlarmItem) {
-        if(b) {
-            alarmItems.find { it.notiId == item.notiId }?.on_off = 1
-            val scheduledTime = alarmController.scheduleLocalAlarm(fragmentContext, item, AlarmController.TYPE_ALARM)
-            dbCursor.updateAlarmOnOffByNotiId(item.notiId, true)
-            showSnackBar(scheduledTime)
-        }
-        else {
-            alarmItems.find { it.notiId == item.notiId }?.on_off = 0
-            dbCursor.updateAlarmOnOffByNotiId(item.notiId, false)
-            alarmController.cancelAlarm(fragmentContext, item.notiId)
-            snackBar?.dismiss()
+        launch(coroutineContext) {
+            if(b) {
+                alarmItems.find { it.notiId == item.notiId }?.on_off = 1
+                val scheduledTime = alarmController.scheduleLocalAlarm(fragmentContext, item, AlarmController.TYPE_ALARM)
 
-            if(WakeUpService.isWakeUpServiceRunning && WakeUpService.currentAlarmItemId == item.notiId) {
-                fragmentContext.stopService(Intent(fragmentContext, WakeUpService::class.java))
+                item.apply {
+                    on_off = 1
+                }.also {
+                    db.alarmItemDao().update(it)
+                }
+                showSnackBar(scheduledTime)
+            }
+            else {
+                alarmItems.find { it.notiId == item.notiId }?.on_off = 0
+                item.apply {
+                    on_off = 0
+                }.also {
+                    db.alarmItemDao().update(it)
+                }
+                alarmController.cancelAlarm(fragmentContext, item.notiId)
+                snackBar?.dismiss()
+
+                if(WakeUpService.isWakeUpServiceRunning && WakeUpService.currentAlarmItemId == item.notiId) {
+                    fragmentContext.stopService(Intent(fragmentContext, WakeUpService::class.java))
+                }
             }
         }
     }
@@ -370,17 +374,25 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             removedItem = it
             if(it.on_off == 1) alarmController.cancelAlarm(fragmentContext, it.notiId)
             alarmListAdapter.removeItem(itemPosition)
-            dbCursor.removeAlarm(it.notiId)
+            launch(coroutineContext) { db.alarmItemDao().delete(it.notiId) }
         }
         if(alarmItems.isEmpty()) showMessage(TYPE_EMPTY)
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.alarm_removed), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
             removedItem.let {
-                val id = dbCursor.insertAlarm(it)
-                it.id = id.toInt()
-                if(removedItem.on_off == 1) alarmController.scheduleLocalAlarm(fragmentContext, it, AlarmController.TYPE_ALARM)
-                alarmListAdapter.addItem(itemPosition, it)
-                recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
+                launch(coroutineContext) {
+                    // add delete item to db
+                    val newId = db.alarmItemDao().insert(it)
+                    it.apply {
+                        id = newId.toInt()
+                    }.also {
+                        if(it.on_off == 1) alarmController.scheduleLocalAlarm(fragmentContext, it, AlarmController.TYPE_ALARM)
+
+                        // add deleted item to list
+                        alarmListAdapter.addItem(itemPosition, it)
+                        recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
+                    }
+                }
             }
 
             showMessage(TYPE_RECYCLER_VIEW)
@@ -388,17 +400,27 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     }
 
     override fun onItemMove(from: Int, to: Int) {
-        Collections.swap(alarmItems,  from, to)
-        alarmListAdapter.notifyItemMoved(from, to)
-        dbCursor.swapAlarmOrder(alarmItems[from], alarmItems[to])
-        val tmp = alarmItems[from].index
-        alarmItems[from].index = alarmItems[to].index
-        alarmItems[to].index = tmp
+        launch(coroutineContext) {
+            Collections.swap(alarmItems, from, to)
+            alarmListAdapter.notifyItemMoved(from, to)
+            // update item index
+            val tmp = alarmItems[from].index
+            alarmItems[from].apply {
+                index = alarmItems[to].index
+            }.also {
+                db.alarmItemDao().update(it)
+            }
+            alarmItems[to].apply {
+                index = tmp
+            }.also {
+                db.alarmItemDao().update(it)
+            }
+        }
     }
 
     private suspend fun setUpAlarmList() {
         withContext(Dispatchers.IO) {
-            alarmItems = dbCursor.getAlarmList()
+            alarmItems = ArrayList(db.alarmItemDao().getAll())
         }
 
         alarmListAdapter = AlarmListAdapter(
@@ -410,7 +432,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         recyclerLayoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
 
         binding.alarmList.apply {
-//        alarmList.apply {
             layoutManager = recyclerLayoutManager
             adapter = alarmListAdapter
             (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -426,11 +447,9 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         if(!::swipeHelper.isInitialized) {
             swipeHelper = ItemTouchHelper(swipeController)
             swipeHelper.attachToRecyclerView(binding.alarmList)
-//            swipeHelper.attachToRecyclerView(alarmList)
         }
 
         binding.progressBar.visibility = View.GONE
-//        progressBar.visibility = View.GONE
         if(alarmItems.isEmpty()) showMessage(TYPE_EMPTY)
         else showMessage(TYPE_RECYCLER_VIEW)
     }
@@ -441,33 +460,21 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 binding.alarmList.visibility = View.GONE
                 binding.listEmpty.visibility = View.VISIBLE
                 binding.retry.visibility = View.GONE
-//                alarmList.visibility = View.GONE
-//                list_empty.visibility = View.VISIBLE
-//                retry.visibility = View.GONE
             }
             TYPE_RETRY -> {
                 binding.alarmList.visibility = View.GONE
                 binding.listEmpty.visibility = View.GONE
                 binding.retry.visibility = View.VISIBLE
-//                alarmList.visibility = View.GONE
-//                list_empty.visibility = View.GONE
-//                retry.visibility = View.VISIBLE
             }
             TYPE_RECYCLER_VIEW -> {
                 binding.alarmList.visibility = View.VISIBLE
                 binding.listEmpty.visibility = View.GONE
-                binding.retry.visibility = View.GONE
-//                alarmList.visibility = View.VISIBLE
-//                list_empty.visibility = View.GONE
-//                retry.visibility = View.GONE
+                binding.retry.visibility = View.INVISIBLE
             }
             else -> {
                 binding.alarmList.visibility = View.GONE
                 binding.listEmpty.visibility = View.GONE
                 binding.retry.visibility = View.GONE
-//                alarmList.visibility = View.GONE
-//                list_empty.visibility = View.GONE
-//                retry.visibility = View.GONE
             }
         }
     }
@@ -539,7 +546,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 }
                 MainActivity.ACTION_RESCHEDULE_ACTIVATED -> {
                     launch(coroutineContext) {
-                        dbCursor.getActivatedAlarms().forEach {
+                        db.alarmItemDao().getActivated().forEach {
                             alarmController.cancelAlarm(context, it.notiId)
                             alarmController.scheduleLocalAlarm(context, it, AlarmController.TYPE_ALARM)
 

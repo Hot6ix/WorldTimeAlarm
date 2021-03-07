@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.*
+import androidx.room.Room
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.R
@@ -29,9 +30,7 @@ import com.simples.j.worldtimealarm.databinding.FragmentWorldClockBinding
 import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.models.WorldClockViewModel
 import com.simples.j.worldtimealarm.support.ClockListAdapter
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import com.simples.j.worldtimealarm.utils.ListSwipeController
-import com.simples.j.worldtimealarm.utils.MediaCursor
+import com.simples.j.worldtimealarm.utils.*
 import kotlinx.coroutines.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -39,6 +38,7 @@ import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
 class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener, CoroutineScope, DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
@@ -51,10 +51,10 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     private lateinit var recyclerLayoutManager: LinearLayoutManager
     private lateinit var fragmentLayout: CoordinatorLayout
     private lateinit var timeZoneChangedReceiver: UpdateRequestReceiver
-    private lateinit var dbCursor: DatabaseCursor
     private lateinit var timeDialog: TimePickerDialogFragment
     private lateinit var dateDialog: DatePickerDialogFragment
     private lateinit var binding: FragmentWorldClockBinding
+    private lateinit var db: AppDatabase
 
     private val crashlytics = FirebaseCrashlytics.getInstance()
     private var clockItems = ArrayList<ClockItem>()
@@ -72,7 +72,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         crashlytics.recordException(throwable)
         binding.progressBar.visibility = View.GONE
-//        progressBar.visibility = View.GONE
         showMessage(TYPE_RETRY)
     }
 
@@ -87,14 +86,15 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         // Inflate the layout for this fragment
         binding = FragmentWorldClockBinding.inflate(inflater, container, false)
         fragmentLayout = binding.fragmentList
-//        fragmentLayout = view.findViewById(R.id.fragment_list)
         return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        dbCursor = DatabaseCursor(fragmentContext)
+        db = Room.databaseBuilder(fragmentContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
+                .addMigrations(AppDatabase.MIGRATION_7_8)
+                .build()
         activity?.run {
             viewModel = ViewModelProvider(this)[WorldClockViewModel::class.java]
         }
@@ -121,9 +121,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         }
 
         binding.timeZoneLayout.setOnClickListener(this)
-//        time_zone_layout.setOnClickListener(this)
         binding.newTimezone.setOnClickListener(this)
-//        new_timezone.setOnClickListener(this)
 
         timeDialog =
                 parentFragmentManager.findFragmentByTag(TAG_FRAGMENT_TIME_DIALOG) as? TimePickerDialogFragment ?:
@@ -138,17 +136,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         dateDialog.setDateSetListener(this)
 
         binding.worldTime.setOnClickListener {
-//        world_time.setOnClickListener {
             if(!timeDialog.isAdded) timeDialog.show(parentFragmentManager, TAG_FRAGMENT_TIME_DIALOG)
         }
         binding.worldDate.setOnClickListener {
-//        world_date.setOnClickListener {
             if(!dateDialog.isAdded) dateDialog.show(parentFragmentManager, TAG_FRAGMENT_DATE_DIALOG)
         }
         binding.retry.setOnClickListener {
-//        retry.setOnClickListener {
             binding.progressBar.visibility = View.VISIBLE
-//            progressBar.visibility = View.VISIBLE
             showMessage(TYPE_NOTHING)
             job = launch(coroutineContext) {
                 setUpClockList()
@@ -166,12 +160,9 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
 
             binding.worldTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
-//            world_time.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
             binding.worldDate.text = it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
-//            world_date.text = it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
 
             binding.timeZone.text = getNameForTimeZone(it.zone.id)
-//            time_zone.text = getNameForTimeZone(it.zone.id)
 
             updateList()
 
@@ -208,7 +199,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        val scrollToLast: Boolean
+        var scrollToLast: Boolean
 
         when {
             requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
@@ -221,21 +212,31 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             }
             requestCode == TIME_ZONE_NEW_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    dbCursor.insertClock(ClockItem(null, data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID), -1))
-                    clockItems.clear()
-                    clockItems.addAll(dbCursor.getClockList())
-                    scrollToLast = true
+                    launch(coroutineContext) {
+                        data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.let {
+                            val clockItem = ClockItem(null, it, -1)
+                            val id = db.clockItemDao().insert(clockItem)
+                            clockItem.apply {
+                                index = id.toInt()
+                            }.also {
+                                db.clockItemDao().update(it)
+                            }
+                            clockItems.add(clockItem)
 
-                    updateList(scrollToLast)
-                    if(!job.isCancelled) showMessage(TYPE_RECYCLER_VIEW)
-                    else {
-                        binding.progressBar.visibility = View.VISIBLE
-//                        progressBar.visibility = View.VISIBLE
-                        showMessage(TYPE_NOTHING)
-                        job = launch(coroutineContext) {
-                            setUpClockList()
+                            scrollToLast = true
+
+                            updateList(scrollToLast)
+                            if(!job.isCancelled) showMessage(TYPE_RECYCLER_VIEW)
+                            else {
+                                binding.progressBar.visibility = View.VISIBLE
+                                showMessage(TYPE_NOTHING)
+                                job = launch(coroutineContext) {
+                                    setUpClockList()
+                                }
+                            }
                         }
                     }
+
                 }
             }
         }
@@ -279,16 +280,21 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         clockListAdapter.removeItem(itemPosition)
 
         removedItem?.let { clockItem ->
-            dbCursor.removeClock(clockItem)
+            launch(coroutineContext) { db.clockItemDao().delete(clockItem) }
         }
         if(clockItems.isEmpty()) showMessage(TYPE_EMPTY)
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.clock_removed, getNameForTimeZone(removedItem?.timezone)), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
             removedItem?.let { clockItem ->
-                val id = dbCursor.insertClock(clockItem)
-                clockItem.id = id.toInt()
-                clockListAdapter.addItem(itemPosition, clockItem)
-                recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
+                runBlocking(coroutineContext) {
+                    val newId = db.clockItemDao().insert(clockItem)
+                    clockItem.apply {
+                        id = newId.toInt()
+                    }.also {
+                        clockListAdapter.addItem(itemPosition, clockItem)
+                        recyclerLayoutManager.scrollToPositionWithOffset(previousPosition, 0)
+                    }
+                }
             }
 
             showMessage(TYPE_RECYCLER_VIEW)
@@ -296,12 +302,22 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     }
 
     override fun onItemMove(from: Int, to: Int) {
-        Collections.swap(clockItems, from, to)
-        clockListAdapter.notifyItemMoved(from, to)
-        dbCursor.swapClockOrder(clockItems[from], clockItems[to])
-        val tmp = clockItems[from].index
-        clockItems[from].index = clockItems[to].index
-        clockItems[to].index = tmp
+        launch(coroutineContext) {
+            Collections.swap(clockItems, from, to)
+            clockListAdapter.notifyItemMoved(from, to)
+            // update item index
+            val tmp = clockItems[from].index
+            clockItems[from].apply {
+                index = clockItems[to].index
+            }.also {
+                db.clockItemDao().update(it)
+            }
+            clockItems[to].apply {
+                index = tmp
+            }.also {
+                db.clockItemDao().update(it)
+            }
+        }
     }
 
     override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
@@ -321,14 +337,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
     private suspend fun setUpClockList() {
         withContext(Dispatchers.IO) {
-            clockItems = dbCursor.getClockList()
+            clockItems = ArrayList(db.clockItemDao().getAll())
         }
 
         clockListAdapter = ClockListAdapter(fragmentContext, clockItems, viewModel)
         recyclerLayoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
 
         binding.clockList.apply {
-//        clockList.apply {
             layoutManager = recyclerLayoutManager
             adapter = clockListAdapter
             (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -344,11 +359,9 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         if(!::swipeHelper.isInitialized) {
             swipeHelper = ItemTouchHelper(swipeController)
             swipeHelper.attachToRecyclerView(binding.clockList)
-//            swipeHelper.attachToRecyclerView(clockList)
         }
 
         binding.progressBar.visibility = View.GONE
-//        progressBar.visibility = View.GONE
         if(clockItems.isEmpty()) showMessage(AlarmListFragment.TYPE_EMPTY)
         else showMessage(AlarmListFragment.TYPE_RECYCLER_VIEW)
     }
@@ -362,7 +375,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
                 if (clockItems.isNotEmpty() && scrollToLast)
                     binding.clockList.smoothScrollToPosition(clockItems.count() - 1)
-//                    clockList?.smoothScrollToPosition(clockItems.count() - 1)
             }
         }
     }
@@ -373,33 +385,21 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                 binding.clockList.visibility = View.GONE
                 binding.listEmpty.visibility = View.VISIBLE
                 binding.retry.visibility = View.GONE
-//                clockList.visibility = View.GONE
-//                list_empty.visibility = View.VISIBLE
-//                retry.visibility = View.GONE
             }
             TYPE_RETRY -> {
                 binding.clockList.visibility = View.GONE
                 binding.listEmpty.visibility = View.GONE
                 binding.retry.visibility = View.VISIBLE
-//                clockList.visibility = View.GONE
-//               list_empty.visibility = View.GONE
-//                retry.visibility = View.VISIBLE
             }
             TYPE_RECYCLER_VIEW -> {
                 binding.clockList.visibility = View.VISIBLE
                 binding.listEmpty.visibility = View.GONE
                 binding.retry.visibility = View.GONE
-//                clockList.visibility = View.VISIBLE
-//                list_empty.visibility = View.GONE
-//                retry.visibility = View.GONE
             }
             else -> {
                 binding.clockList.visibility = View.GONE
                 binding.listEmpty.visibility = View.GONE
                 binding.retry.visibility = View.GONE
-//                clockList.visibility = View.GONE
-//                list_empty.visibility = View.GONE
-//                retry.visibility = View.GONE
             }
         }
     }

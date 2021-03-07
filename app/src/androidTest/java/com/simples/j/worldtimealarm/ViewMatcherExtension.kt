@@ -81,9 +81,9 @@ object ViewMatcherExtension {
             }
 
             override fun matches(item: Any?): Boolean {
-                (item as TextView).let {
-                    return text.contains(it.text.toString())
-                }
+                return if(item is TextView) {
+                    text.contains(item.text.toString())
+                } else false
             }
         }
     }

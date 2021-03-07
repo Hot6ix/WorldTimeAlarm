@@ -84,7 +84,7 @@ class AlarmListFragmentUITest {
     }
 
     @Test
-    fun b_checkIfNewAlarmHasCreated() {
+    fun b_checkIfNewAlarmIsCreated() {
         createNewAlarm(10, 0)
     }
 
@@ -102,7 +102,7 @@ class AlarmListFragmentUITest {
     }
 
     @Test
-    fun d_checkIfAlarmHasBeenDisabled() {
+    fun d_checkIfAlarmIsDisabled() {
         val localTime = getLocalTimeText(10, 0)
 
         onView(
@@ -129,7 +129,7 @@ class AlarmListFragmentUITest {
     }
 
     @Test
-    fun e_checkIfAlarmHasDeleted() {
+    fun e_checkIfAlarmIsDeleted() {
         val itemView = getAlarmItemViewByTime(10, 0)
 
         // Check if new alarm has been delete by swiping

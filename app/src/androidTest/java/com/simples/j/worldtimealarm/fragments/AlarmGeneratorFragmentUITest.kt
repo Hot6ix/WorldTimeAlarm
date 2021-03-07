@@ -1,31 +1,32 @@
 package com.simples.j.worldtimealarm.fragments
 
 import android.content.Context
+import android.widget.EditText
+import android.widget.TextView
+import androidx.appcompat.widget.AppCompatEditText
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.Intents.times
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
-import com.simples.j.worldtimealarm.AlarmGeneratorActivity
-import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.ViewMatcherExtension.exists
 import com.simples.j.worldtimealarm.ViewMatcherExtension.withNeighbor
 import com.simples.j.worldtimealarm.ViewMatcherExtension.withOneOfText
 import com.simples.j.worldtimealarm.ViewMatcherExtension.withTime
 import com.simples.j.worldtimealarm.utils.MediaCursor
-import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.not
+import org.hamcrest.Matchers.*
+import org.junit.*
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.FixMethodOrder
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import java.util.*
@@ -58,7 +59,13 @@ class AlarmGeneratorFragmentUITest {
         Intents.init()
     }
 
+    @After
+    fun terminate() {
+        Intents.release()
+    }
+
     @Test
+    @Throws(Exception::class)
     fun a_checkFragmentElements() {
         // check if support action bar has text "New Alarm" in title
         activityScenario.onActivity {
@@ -77,8 +84,8 @@ class AlarmGeneratorFragmentUITest {
         onView(withId(R.id.time_picker)).check(
                 matches(
                         withTime(
-                                Pair(now.get(Calendar.HOUR), now.get(Calendar.MINUTE)),
-                                Pair(minuteLater.get(Calendar.HOUR), minuteLater.get(Calendar.MINUTE))
+                                Pair(now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE)),
+                                Pair(minuteLater.get(Calendar.HOUR_OF_DAY), minuteLater.get(Calendar.MINUTE))
                         )
                 )
         )
@@ -138,5 +145,115 @@ class AlarmGeneratorFragmentUITest {
                 withText(context.getString(R.string.create)),
                 withId(R.id.action)
         )).check(matches(isDisplayed()))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun b_testInteraction() {
+        // click time zone layout
+        onView(withId(R.id.time_zone_view)).perform(click())
+        // check TimeZonePickerActivity has launched
+        intended(hasComponent(TimeZonePickerActivity::class.java.name))
+        // go back
+        pressBack()
+
+        // click date layout
+        onView(withId(R.id.date_view)).perform(click())
+        // check ContentSelectorActivity has launched
+        intended(hasComponent(ContentSelectorActivity::class.java.name))
+        // go back
+        pressBack()
+
+        // click and check day recurrences
+        onView(withId(R.id.sunday)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.monday)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.tuesday)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.wednesday)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.thursday)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.friday)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.saturday)).perform(click()).check(matches(isChecked()))
+        // click ringtone
+        onView(allOf(
+                withId(R.id.option_summary),
+                withNeighbor(allOf(
+                        withId(R.id.option_title),
+                        withText(context.resources.getStringArray(R.array.alarm_options)[0])
+                ))
+        )).perform(click())
+        // check ContentSelectorActivity has launched
+        intended(hasComponent(ContentSelectorActivity::class.java.name), times(2))
+        // check action bar title is "Ringtone"
+        onView(allOf(
+                instanceOf(TextView::class.java),
+                withParent(withResourceName("action_bar"))
+        )).check(matches(withText("Ringtone")))
+        // go back
+        pressBack()
+
+        // click vibration
+        onView(allOf(
+                withId(R.id.option_summary),
+                withText(context.getString(R.string.no_vibrator)),
+                withNeighbor(allOf(
+                        withId(R.id.option_title),
+                        withText(context.resources.getStringArray(R.array.alarm_options)[1])
+                ))
+        )).perform(click())
+        // check ContentSelectorActivity has launched
+        intended(hasComponent(ContentSelectorActivity::class.java.name), times(3))
+        // check action bar title is "Vibration"
+        onView(allOf(
+                instanceOf(TextView::class.java),
+                withParent(withResourceName("action_bar"))
+        )).check(matches(withText("Vibration")))
+        // go back
+        pressBack()
+
+        // click snooze
+        onView(allOf(
+                withId(R.id.option_summary),
+                withText(context.resources.getStringArray(R.array.snooze_array)[0]),
+                withNeighbor(allOf(
+                        withId(R.id.option_title),
+                        withText(context.resources.getStringArray(R.array.alarm_options)[2])
+                ))
+        )).perform(ViewActionExtension.NestedScrollViewExtension(), click())
+        // check ContentSelectorActivity has launched
+        intended(hasComponent(ContentSelectorActivity::class.java.name), times(4))
+        // check action bar title is "Snooze"
+        onView(allOf(
+                instanceOf(TextView::class.java),
+                withParent(withResourceName("action_bar"))
+        )).check(matches(withText("Snooze")))
+        // go back
+        pressBack()
+
+        // click label
+        onView(allOf(
+                withId(R.id.option_summary),
+                withText(""),
+                withNeighbor(allOf(
+                        withId(R.id.option_title),
+                        withText(context.resources.getStringArray(R.array.alarm_options)[3])
+                ))
+        )).perform(ViewActionExtension.NestedScrollViewExtension(), click())
+        // check dialog components are displayed
+        onView(allOf(
+                withId(R.id.label),
+                withClassName(`is`(AppCompatEditText::class.java.canonicalName))
+        )).check(matches(isDisplayed()))
+        // close dialog using button
+        onView(allOf(
+                withId(android.R.id.button1),
+                withText("OK")
+        )).perform(click())
+
+        // check action button text
+        onView(allOf(
+                withText(context.getString(R.string.create)),
+                withId(R.id.action)
+        )).perform(click())
+        // check if AlarmGeneratorActivity has finished
+        assertTrue(activityScenario.state == Lifecycle.State.DESTROYED)
     }
 }

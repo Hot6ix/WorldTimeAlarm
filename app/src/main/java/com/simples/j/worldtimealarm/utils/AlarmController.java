@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.room.Room;
 
 import com.simples.j.worldtimealarm.AlarmReceiver;
 import com.simples.j.worldtimealarm.MainActivity;
@@ -178,7 +179,7 @@ public class AlarmController {
             if(item.getStartDate() != null && item.getStartDate() > 0)
                 start.setTimeInMillis(item.getStartDate());
 
-            calendar.setTimeInMillis(Long.valueOf(item.getTimeSet()));
+            calendar.setTimeInMillis(Long.parseLong(item.getTimeSet()));
             if(start.after(today)) {
                 calendar.setTimeInMillis(start.getTimeInMillis());
             }
@@ -401,7 +402,12 @@ public class AlarmController {
 
     public void disableAlarm(Context context, AlarmItem item) {
         item.setOn_off(0);
-        new DatabaseCursor(context).updateAlarm(item);
+
+        AppDatabase db = Room.databaseBuilder(context, AppDatabase.class, DatabaseManager.DB_NAME)
+                .allowMainThreadQueries()
+                .addMigrations(AppDatabase.Companion.getMIGRATION_7_8())
+                .build();
+        db.alarmItemDao().updateItem(item);
 
         Intent requestIntent = new Intent(MainActivity.ACTION_UPDATE_SINGLE);
         Bundle bundle = new Bundle();

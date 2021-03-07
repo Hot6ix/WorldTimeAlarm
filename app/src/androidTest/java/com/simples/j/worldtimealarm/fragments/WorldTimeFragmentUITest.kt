@@ -19,6 +19,7 @@ import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.Intents.times
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.RootMatchers.isDialog
@@ -122,7 +123,7 @@ class WorldTimeFragmentUITest {
     }
 
     @Test
-    fun b_testClickableElements() {
+    fun b_testInteraction() {
         // should show time picker dialog
         onView(withId(R.id.world_time)).perform(click())
         onView(allOf(
@@ -150,13 +151,14 @@ class WorldTimeFragmentUITest {
         else {
             intended(hasComponent(TimeZoneSearchActivity::class.java.name))
         }
+        pressBack()
         // should start TimeZonePickerActivity or TimeZoneSearchActivity
         onView(withId(R.id.new_timezone)).perform(click())
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M && timeZoneSelector == SettingFragment.SELECTOR_NEW) {
-            intended(hasComponent(TimeZonePickerActivity::class.java.name))
+            intended(hasComponent(TimeZonePickerActivity::class.java.name), times(2))
         }
         else {
-            intended(hasComponent(TimeZoneSearchActivity::class.java.name))
+            intended(hasComponent(TimeZoneSearchActivity::class.java.name), times(2))
         }
     }
 

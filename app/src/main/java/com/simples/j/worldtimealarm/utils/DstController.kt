@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import androidx.room.Room
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.DstItem
@@ -18,17 +19,19 @@ import java.util.*
 
 class DstController(private val context: Context) {
 
-    private val dbCursor = DatabaseCursor(context)
+    private val db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
+            .addMigrations(AppDatabase.MIGRATION_7_8)
+            .build()
 
-    fun handleSystemDst() {
+    suspend fun handleSystemDst() {
         val timeZone = TimeZone.getDefault()
         val zoneId = ZoneId.systemDefault()
 
         if(timeZone.useDaylightTime()) {
-            val systemDst = dbCursor.getSystemDst()
+            val systemDst = db.dstItemDao().getSystemDst()
             val nextDateTimeAfter = zoneId.rules.nextTransition(Instant.now()).dateTimeAfter.atZone(zoneId).toInstant()
             if(systemDst == null) {
-                val id = dbCursor.insertDst(nextDateTimeAfter.toEpochMilli(), timeZone.id, -1)
+                val id = db.dstItemDao().insert(DstItem(-1, nextDateTimeAfter.toEpochMilli(), timeZone.id, -1))
 
                 if(id > 0) {
                     checkAndScheduleDst(DstItem(id, nextDateTimeAfter.toEpochMilli(), zoneId.id, -1))
@@ -37,21 +40,21 @@ class DstController(private val context: Context) {
             }
         }
         else {
-            dbCursor.getSystemDst()?.let {
+            db.dstItemDao().getSystemDst()?.let {
                 cancelDaylightSavingTimeAlarm(it.millis)
-                dbCursor.removeSystemDst()
+                db.dstItemDao().deleteSystemDst()
                 Log.d(C.TAG, "System time zone doesn't use dst")
             }
         }
     }
 
-    fun checkAndScheduleDst(item: DstItem?) {
+    suspend fun checkAndScheduleDst(item: DstItem?) {
         if(item == null) return
 
-        val list = dbCursor.getDstList()
+        val list = db.dstItemDao().getAll()
 
         with(list.filter { it.millis == item.millis && it.alarmId != item.alarmId }) {
-            if(size == 0 || this.all { dbCursor.getSingleAlarm(it.alarmId)?.on_off == 0 }) {
+            if(size == 0 || this.all { db.alarmItemDao().getAlarmItemFromId(it.alarmId)?.on_off == 0 }) {
                 scheduleNextDaylightSavingTimeAlarm(item.millis)
                 Log.d(C.TAG, "Schedule dstItem($item) alarm for ${ZonedDateTime.ofInstant(Instant.ofEpochMilli(item.millis), ZoneId.systemDefault())}.")
             }
@@ -61,11 +64,11 @@ class DstController(private val context: Context) {
         }
     }
 
-    fun requestDstCancellation(item: DstItem) {
-        val list = dbCursor.getDstList()
+    suspend fun requestDstCancellation(item: DstItem) {
+        val list = db.dstItemDao().getAll()
 
         with(list.filter { it.millis == item.millis && it.alarmId != item.alarmId }) {
-            if(size == 0 || this.all { dbCursor.getSingleAlarm(it.alarmId)?.on_off == 0 }) {
+            if(size == 0 || this.all { db.alarmItemDao().getAlarmItemFromId(it.alarmId)?.on_off == 0 }) {
                 cancelDaylightSavingTimeAlarm(item.millis)
                 Log.d(C.TAG, "dstItem($item) alarm cancelled.")
             }

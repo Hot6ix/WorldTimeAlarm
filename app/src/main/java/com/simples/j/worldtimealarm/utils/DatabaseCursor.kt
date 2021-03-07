@@ -470,6 +470,7 @@ class DatabaseCursor(val context: Context) {
                 val uri = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_URI))
 
                 val item = RingtoneItem(
+                        id,
                         title,
                         uri)
 
@@ -500,10 +501,11 @@ class DatabaseCursor(val context: Context) {
         val cursor = db.query(DatabaseManager.TABLE_USER_RINGTONE, null, "${DatabaseManager.COLUMN_URI}=?", arrayOf(userRingtoneUri), null, null, null)
         if(cursor.count > 0) {
             cursor.moveToNext()
+            val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
             val title = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_TITLE))
             val uri = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_URI))
 
-            ringtoneItem = RingtoneItem(title, uri)
+            ringtoneItem = RingtoneItem(id, title, uri)
         }
         cursor.close()
 

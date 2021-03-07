@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
+import androidx.room.Room
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.ContentSelectorActivity
 import com.simples.j.worldtimealarm.R
@@ -30,7 +31,9 @@ import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.etc.SnoozeItem
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
 import com.simples.j.worldtimealarm.support.ContentSelectorAdapter
+import com.simples.j.worldtimealarm.utils.AppDatabase
 import com.simples.j.worldtimealarm.utils.DatabaseCursor
+import com.simples.j.worldtimealarm.utils.DatabaseManager
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
@@ -44,6 +47,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     private lateinit var vibrator: Vibrator
     private lateinit var defaultRingtone: RingtoneItem
     private lateinit var binding: ContentSelectorFragmentBinding
+    private lateinit var db: AppDatabase
 
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
@@ -92,6 +96,9 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        db = Room.databaseBuilder(requireContext(), AppDatabase::class.java, DatabaseManager.DB_NAME)
+                .addMigrations(AppDatabase.MIGRATION_7_8)
+                .build()
         audioManager = requireContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
@@ -110,7 +117,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                 when(viewModel.action) {
                     ContentSelectorActivity.ACTION_REQUEST_AUDIO -> {
                         val userRingtone = withContext(Dispatchers.IO) {
-                            DatabaseCursor(it).getUserRingtoneList()
+                            db.ringtoneItemDao().getAll()
                         }
                         val systemRingtone = withContext(Dispatchers.IO) {
                             MediaCursor.getRingtoneList(it)
@@ -122,10 +129,10 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
 
                         // TODO: IllegalStateException: Fragment not attached to Activity is still valid at getString(), but most of tries don't throw exception
                         val ringtoneList = ArrayList<RingtoneItem>().apply {
-                            add(RingtoneItem(it.getString(R.string.my_ringtone), ContentSelectorAdapter.URI_USER_RINGTONE))
-                            add(RingtoneItem(it.getString(R.string.add_new), ContentSelectorAdapter.URI_ADD_RINGTONE))
+                            add(RingtoneItem(title = it.getString(R.string.my_ringtone), uri = ContentSelectorAdapter.URI_USER_RINGTONE))
+                            add(RingtoneItem(title = it.getString(R.string.add_new), uri = ContentSelectorAdapter.URI_ADD_RINGTONE))
                             addAll(userRingtone)
-                            add(RingtoneItem(it.getString(R.string.system_ringtone), ContentSelectorAdapter.URI_SYSTEM_RINGTONE))
+                            add(RingtoneItem(title = it.getString(R.string.system_ringtone), uri = ContentSelectorAdapter.URI_SYSTEM_RINGTONE))
                             addAll(systemRingtone)
 
                             if(!contains(viewModel.lastSelectedValue)) viewModel.lastSelectedValue = defaultRingtone
@@ -168,7 +175,6 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                     recyclerLayoutManager = LinearLayoutManager(it, LinearLayoutManager.VERTICAL, false)
 
                     binding.contentRecyclerview.apply {
-//                    content_recyclerview.apply {
                         adapter = contentSelectorAdapter
                         layoutManager = recyclerLayoutManager
                         (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -184,13 +190,16 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                 data?.data?.also {
                     context?.contentResolver?.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     val name = getNameFromUri(it)
-                    val isInserted = DatabaseCursor(requireContext()).insertUserRingtone(RingtoneItem(name, it.toString()))
-                    if(!isInserted) {
-                        Toast.makeText(context, getString(R.string.exist_ringtone), Toast.LENGTH_SHORT).show()
-                    }
-                    else {
-                        viewModel.lastSelectedValue = RingtoneItem(getNameFromUri(it), it.toString())
-                        play(it.toString())
+
+                    launch(coroutineContext) {
+                        val isInserted = DatabaseCursor(requireContext()).insertUserRingtone(RingtoneItem(title = name, uri = it.toString()))
+                        if(!isInserted) {
+                            Toast.makeText(context, getString(R.string.exist_ringtone), Toast.LENGTH_SHORT).show()
+                        }
+                        else {
+                            viewModel.lastSelectedValue = RingtoneItem(title = getNameFromUri(it), uri = it.toString())
+                            play(it.toString())
+                        }
                     }
                 }
             }
@@ -229,7 +238,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                     else {
                         // user selected user ringtone
                         viewModel.ringtone.let {
-                            if(item.uri.isNullOrEmpty() || item.uri != "null") {
+                            if(item.uri != "null") {
                                 if(viewModel.lastSelectedValue != item && action != ContentSelectorAdapter.ACTION_NOT_PLAY) {
                                     it?.stop()
                                     play(item.uri)
@@ -280,18 +289,19 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                         }
 
                         // update all alarm items that have deleted ringtone
-                        val dbCursor = DatabaseCursor(requireContext())
-                        item.uri?.let { uri ->
-                            dbCursor.getAlarmList()
-                                    .filter { it.ringtone == uri }
-                                    .forEach {
-                                        val modified = it.apply {
-                                            this.ringtone = defaultRingtone.uri
+                        item.uri.let { uri ->
+                            launch(coroutineExceptionHandler) {
+                                db.alarmItemDao().getAll()
+                                        .filter { it.ringtone == uri }
+                                        .forEach {
+                                            val modified = it.apply {
+                                                this.ringtone = defaultRingtone.uri
+                                            }
+                                            db.alarmItemDao().update(modified)
                                         }
-                                        dbCursor.updateAlarm(modified)
-                                    }
 
-                            dbCursor.removeUserRingtone(uri)
+                                db.ringtoneItemDao().delete(uri)
+                            }
                         }
                     }
                 }

@@ -2,7 +2,11 @@ package com.simples.j.worldtimealarm.etc
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.simples.j.worldtimealarm.utils.AlarmController
+import com.simples.j.worldtimealarm.utils.DatabaseManager
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -12,22 +16,23 @@ import org.threeten.bp.ZonedDateTime
  * Created by j on 26/02/2018.
  *
  */
+@Entity(tableName = DatabaseManager.TABLE_ALARM_LIST)
 data class AlarmItem(
-        var id: Int?,
-        var timeZone: String,
-        var timeSet: String,
-        var repeat: IntArray,
-        var ringtone: String?,
-        var vibration: LongArray?,
-        var snooze: Long,
-        var label: String? = null,
-        var on_off: Int,
-        var notiId: Int,
-        var colorTag: Int,
-        var index: Int?,
-        var startDate: Long? = null,
-        var endDate: Long? = null,
-        var pickerTime: Long
+        @PrimaryKey var id: Int?,
+        @ColumnInfo(name = DatabaseManager.COLUMN_TIME_ZONE) var timeZone: String,
+        @ColumnInfo(name = DatabaseManager.COLUMN_TIME_SET) var timeSet: String,
+        @ColumnInfo(name = DatabaseManager.COLUMN_REPEAT) var repeat: IntArray,
+        @ColumnInfo(name = DatabaseManager.COLUMN_RINGTONE) var ringtone: String?,
+        @ColumnInfo(name = DatabaseManager.COLUMN_VIBRATION) var vibration: LongArray?,
+        @ColumnInfo(name = DatabaseManager.COLUMN_SNOOZE) var snooze: Long,
+        @ColumnInfo(name = DatabaseManager.COLUMN_LABEL) var label: String? = null,
+        @ColumnInfo(name = DatabaseManager.COLUMN_ON_OFF) var on_off: Int,
+        @ColumnInfo(name = DatabaseManager.COLUMN_NOTI_ID) var notiId: Int,
+        @ColumnInfo(name = DatabaseManager.COLUMN_COLOR_TAG) var colorTag: Int,
+        @ColumnInfo(name = DatabaseManager.COLUMN_INDEX) var index: Int?,
+        @ColumnInfo(name = DatabaseManager.COLUMN_START_DATE) var startDate: Long? = null,
+        @ColumnInfo(name = DatabaseManager.COLUMN_END_DATE) var endDate: Long? = null,
+        @ColumnInfo(name = DatabaseManager.COLUMN_PICKER_TIME) var pickerTime: Long
 ) : Parcelable {
 
     override fun toString(): String {

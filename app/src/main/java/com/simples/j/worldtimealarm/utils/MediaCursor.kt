@@ -39,14 +39,14 @@ class MediaCursor {
 
         fun getRingtoneList(context: Context): ArrayList<RingtoneItem> {
             val array = ArrayList<RingtoneItem>()
-            array.add(RingtoneItem(context.resources.getString(R.string.no_ringtone), null))
+            array.add(RingtoneItem(title = context.resources.getString(R.string.no_ringtone), uri = ""))
             val ringtoneManager = RingtoneManager(context)
             ringtoneManager.getRingtone(RingtoneManager.TYPE_ALARM)
 
             try {
                 val cursor = ringtoneManager.cursor
                 while(cursor.moveToNext()) {
-                    array.add(RingtoneItem(cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX), ringtoneManager.getRingtoneUri(cursor.position).toString()))
+                    array.add(RingtoneItem(title = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX), uri = ringtoneManager.getRingtoneUri(cursor.position).toString()))
                 }
             } catch (e: SecurityException) {
                 e.printStackTrace()

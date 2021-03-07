@@ -6,6 +6,7 @@ import android.content.*
 import android.os.Build
 import android.os.Bundle
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.room.Room
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.snackbar.Snackbar
@@ -26,10 +28,9 @@ import com.simples.j.worldtimealarm.databinding.FragmentAlarmGeneratorBinding
 import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
+import com.simples.j.worldtimealarm.utils.*
 import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
-import com.simples.j.worldtimealarm.utils.AlarmStringFormatHelper
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import com.simples.j.worldtimealarm.utils.MediaCursor
+import kotlinx.android.synthetic.main.fragment_alarm_generator.*
 import kotlinx.coroutines.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -55,6 +56,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     private lateinit var snoozeList: ArrayList<SnoozeItem>
     private lateinit var now: ZonedDateTime
     private lateinit var preference: SharedPreferences
+    private lateinit var db: AppDatabase
 
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
@@ -90,6 +92,10 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         super.onActivityCreated(savedInstanceState)
         setHasOptionsMenu(true)
 
+        db = Room.databaseBuilder(fragmentContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
+                .addMigrations(AppDatabase.MIGRATION_7_8)
+                .build()
+
         preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
         timeZoneSelectorOption = preference.getString(resources.getString(R.string.setting_time_zone_selector_key), SettingFragment.SELECTOR_OLD)
                 ?: SettingFragment.SELECTOR_OLD
@@ -98,124 +104,149 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             viewModel = ViewModelProvider(this)[AlarmGeneratorViewModel::class.java]
         }
 
-        val dayIds = arrayOf(
-                R.id.sunday,
-                R.id.monday,
-                R.id.tuesday,
-                R.id.wednesday,
-                R.id.thursday,
-                R.id.friday,
-                R.id.saturday
-        )
-        val recurrenceDays = fragmentContext.resources.getStringArray(R.array.day_of_week)
+        launch(coroutineExceptionHandler) {
+            val userRingtone = db.ringtoneItemDao().getAll()
+            val systemRingtone = MediaCursor.getRingtoneList(fragmentContext)
+            // use first ringtone if phone has system ringtone, if not set to no ringtone.
+            val defaultRingtone = if(systemRingtone.size > 1) systemRingtone[1] else systemRingtone[0]
 
-        val userRingtone = DatabaseCursor(fragmentContext).getUserRingtoneList()
-        val systemRingtone = MediaCursor.getRingtoneList(fragmentContext)
-        val defaultRingtone = if(systemRingtone.size > 1) systemRingtone[1] else systemRingtone[0] // use first ringtone if phone has system ringtone, if not set to no ringtone.
+            ringtoneList = ArrayList<RingtoneItem>().apply {
+                addAll(userRingtone)
+                addAll(systemRingtone)
+            }
 
-        ringtoneList = ArrayList<RingtoneItem>().apply {
-            addAll(userRingtone)
-            addAll(systemRingtone)
-        }
-        vibratorPatternList = MediaCursor.getVibratorPatterns(fragmentContext)
-        snoozeList = MediaCursor.getSnoozeList(fragmentContext)
+            vibratorPatternList = MediaCursor.getVibratorPatterns(fragmentContext)
+            snoozeList = MediaCursor.getSnoozeList(fragmentContext)
 
-        if (savedInstanceState == null) {
-            viewModel.alarmItem.let {
-                if (it != null) {
-                    viewModel.timeZone.value = it.timeZone.replace(" ", "_")
-                    now = ZonedDateTime.now(ZoneId.of(viewModel.timeZone.value))
+            // init values
+            if (savedInstanceState == null) {
+                viewModel.alarmItem.let {
+                    if (it != null) {
+                        viewModel.timeZone.value = it.timeZone.replace(" ", "_")
+                        now = ZonedDateTime.now(ZoneId.of(viewModel.timeZone.value))
 
-                    val instant = Instant.ofEpochMilli(it.pickerTime)
-                    val local = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
-                    viewModel.remoteZonedDateTime = local.withZoneSameInstant(ZoneId.of(it.timeZone))
+                        val instant = Instant.ofEpochMilli(it.pickerTime)
+                        val local = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
+                        viewModel.remoteZonedDateTime = local.withZoneSameInstant(ZoneId.of(it.timeZone))
 
-                    it.startDate?.let { startDateInMillis ->
-                        if (startDateInMillis > 0) {
-                            val startInstant = Instant.ofEpochMilli(startDateInMillis)
-                            viewModel.startDate = ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
-                                    .withHour(viewModel.remoteZonedDateTime.hour)
-                                    .withMinute(viewModel.remoteZonedDateTime.minute)
+                        it.startDate?.let { startDateInMillis ->
+                            if (startDateInMillis > 0) {
+                                val startInstant = Instant.ofEpochMilli(startDateInMillis)
+                                viewModel.startDate = ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
+                                        .withHour(viewModel.remoteZonedDateTime.hour)
+                                        .withMinute(viewModel.remoteZonedDateTime.minute)
+                            }
                         }
-                    }
 
-                    it.endDate?.let { endDateInMillis ->
-                        if (endDateInMillis > 0) {
-                            val endInstant = Instant.ofEpochMilli(endDateInMillis)
-                            viewModel.endDate = ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
-                                    .withHour(viewModel.remoteZonedDateTime.hour)
-                                    .withMinute(viewModel.remoteZonedDateTime.minute)
+                        it.endDate?.let { endDateInMillis ->
+                            if (endDateInMillis > 0) {
+                                val endInstant = Instant.ofEpochMilli(endDateInMillis)
+                                viewModel.endDate = ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
+                                        .withHour(viewModel.remoteZonedDateTime.hour)
+                                        .withMinute(viewModel.remoteZonedDateTime.minute)
+                            }
                         }
-                    }
 
-                    viewModel.startDate.let { start ->
-                        if (start == null) {
-                            viewModel.remoteZonedDateTime =
-                                    viewModel.remoteZonedDateTime
-                                            .withYear(now.year)
-                                            .withMonth(now.monthValue)
-                                            .withDayOfMonth(now.dayOfMonth)
-                        } else {
-                            viewModel.remoteZonedDateTime =
-                                    viewModel.remoteZonedDateTime
-                                            .withYear(start.year)
-                                            .withMonth(start.monthValue)
-                                            .withDayOfMonth(start.dayOfMonth)
+                        viewModel.startDate.let { start ->
+                            if (start == null) {
+                                viewModel.remoteZonedDateTime =
+                                        viewModel.remoteZonedDateTime
+                                                .withYear(now.year)
+                                                .withMonth(now.monthValue)
+                                                .withDayOfMonth(now.dayOfMonth)
+                            } else {
+                                viewModel.remoteZonedDateTime =
+                                        viewModel.remoteZonedDateTime
+                                                .withYear(start.year)
+                                                .withMonth(start.monthValue)
+                                                .withDayOfMonth(start.dayOfMonth)
+                            }
                         }
-                    }
 
-                    viewModel.recurrences.value = it.repeat
-                    viewModel.recurrences.value?.let { recurrences ->
-                        if (recurrences.any { day -> day == 1 }) {
-                            viewModel.recurrences.value = viewModel.recurrences.value?.mapIndexed { index, i ->
-                                if (i > 0) index + 1
-                                else 0
-                            }?.toIntArray()
+                        viewModel.recurrences.value = it.repeat
+                        viewModel.recurrences.value?.let { recurrences ->
+                            if (recurrences.any { day -> day == 1 }) {
+                                viewModel.recurrences.value = viewModel.recurrences.value?.mapIndexed { index, i ->
+                                    if (i > 0) index + 1
+                                    else 0
+                                }?.toIntArray()
+                            }
                         }
-                    }
 
-                    // options
-                    viewModel.ringtone.value = ringtoneList.find { item -> item.uri == it.ringtone } ?: defaultRingtone
-                    viewModel.vibration.value = vibratorPatternList.find { item ->
-                        if (item.array == null && it.vibration == null) true
-                        else item.array?.contentEquals(it.vibration ?: longArrayOf(0)) ?: false
+                        // options
+                        viewModel.ringtone.value = ringtoneList.find { item -> item.uri == it.ringtone } ?: defaultRingtone
+                        viewModel.vibration.value = vibratorPatternList.find { item ->
+                            if (item.array == null && it.vibration == null) true
+                            else item.array?.contentEquals(it.vibration ?: longArrayOf(0)) ?: false
+                        }
+                        viewModel.snooze.value = snoozeList.find { item -> item.duration == it.snooze }
+                        viewModel.label.value = it.label
+                        viewModel.colorTag.value = it.colorTag
                     }
-                    viewModel.snooze.value = snoozeList.find { item -> item.duration == it.snooze }
-                    viewModel.label.value = it.label
-                    viewModel.colorTag.value = it.colorTag
-                }
-                else {
-                    viewModel.timeZone.value = TimeZone.getDefault().id
-                    now = ZonedDateTime.now(ZoneId.systemDefault())
+                    else {
+                        viewModel.timeZone.value = TimeZone.getDefault().id
+                        now = ZonedDateTime.now(ZoneId.systemDefault())
 
-                    viewModel.ringtone.value = defaultRingtone
-                    viewModel.vibration.value = vibratorPatternList[0]
-                    viewModel.snooze.value = snoozeList[0]
+                        viewModel.ringtone.value = defaultRingtone
+                        viewModel.vibration.value = vibratorPatternList[0]
+                        viewModel.snooze.value = snoozeList[0]
+                    }
                 }
             }
+
+            // init time
+            val hour = viewModel.remoteZonedDateTime.hour
+            val minute = viewModel.remoteZonedDateTime.minute
+            if (Build.VERSION.SDK_INT < 23) {
+                @Suppress("DEPRECATION")
+                binding.timePicker.currentHour = hour
+                @Suppress("DEPRECATION")
+                binding.timePicker.currentMinute = minute
+            } else {
+                binding.timePicker.hour = hour
+                binding.timePicker.minute = minute
+            }
+
+            // init alarm options
+            viewModel.optionList = getAlarmOptions()
+            alarmOptionAdapter = AlarmOptionAdapter(viewModel.optionList, fragmentContext)
+            alarmOptionAdapter.setOnItemClickListener(this@AlarmGeneratorFragment)
+
+            binding.alarmOptions.apply {
+                adapter = alarmOptionAdapter
+                layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
+
+                addItemDecoration(DividerItemDecoration(fragmentContext, DividerItemDecoration.VERTICAL))
+                isNestedScrollingEnabled = false
+            }
+
+            // init observers
+            viewModel.ringtone.observe(viewLifecycleOwner, {
+                alarmOptionAdapter.notifyItemChanged(0)
+            })
+            viewModel.vibration.observe(viewLifecycleOwner, {
+                alarmOptionAdapter.notifyItemChanged(1)
+            })
+            viewModel.snooze.observe(viewLifecycleOwner, {
+                alarmOptionAdapter.notifyItemChanged(2)
+            })
+            viewModel.label.observe(viewLifecycleOwner, {
+                alarmOptionAdapter.notifyItemChanged(3)
+            })
+            viewModel.colorTag.observe(viewLifecycleOwner, {
+                alarmOptionAdapter.notifyItemChanged(4)
+            })
+
+            // init timezone
+            binding.timeZoneName.text = getFormattedTimeZoneName(viewModel.timeZone.value)
+
+            // show components & hide progress bar
+            binding.detailContentLayout.visibility = View.VISIBLE
+            binding.action.visibility = View.VISIBLE
+            binding.progressBar.visibility = View.INVISIBLE
         }
 
-        val hour = viewModel.remoteZonedDateTime.hour
-        val minute = viewModel.remoteZonedDateTime.minute
-        if (Build.VERSION.SDK_INT < 23) {
-            @Suppress("DEPRECATION")
-            binding.timePicker.currentHour = hour
-            @Suppress("DEPRECATION")
-            binding.timePicker.currentMinute = minute
-//            @Suppress("DEPRECATION")
-//            time_picker.currentHour = hour
-//            @Suppress("DEPRECATION")
-//            time_picker.currentMinute = minute
-        } else {
-            binding.timePicker.hour = hour
-            binding.timePicker.minute = minute
-//            time_picker.hour = hour
-//            time_picker.minute = minute
-        }
-
-        binding.timeZoneName.text = getFormattedTimeZoneName(viewModel.timeZone.value)
-//        time_zone_name.text = getFormattedTimeZoneName(viewModel.timeZone.value)
-
+        // init action button
         binding.action.apply {
             if (viewModel.alarmItem != null) {
                 text = getString(R.string.apply)
@@ -225,42 +256,32 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
             }
         }
-//        action.apply {
-//            if (viewModel.alarmItem != null) {
-//                text = getString(R.string.apply)
-//                icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_done_white)
-//            } else {
-//                text = getString(R.string.create)
-//                icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
-//            }
-//        }
 
+        // init recurrences
+        val dayIds = arrayOf(
+                R.id.sunday,
+                R.id.monday,
+                R.id.tuesday,
+                R.id.wednesday,
+                R.id.thursday,
+                R.id.friday,
+                R.id.saturday
+        )
         viewModel.recurrences.value?.let { recurrences ->
             recurrences.forEachIndexed { index, day ->
                 if (day > 0) binding.dayRecurrence.check(dayIds[index])
-//                if (day > 0) day_recurrence.check(dayIds[index])
             }
         }
 
-        // init alarm options
-        viewModel.optionList = getAlarmOptions()
-        alarmOptionAdapter = AlarmOptionAdapter(viewModel.optionList, fragmentContext)
-        alarmOptionAdapter.setOnItemClickListener(this)
-
-        binding.alarmOptions.apply {
-            adapter = alarmOptionAdapter
-            layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
-
-            addItemDecoration(DividerItemDecoration(fragmentContext, DividerItemDecoration.VERTICAL))
-            isNestedScrollingEnabled = false
+        // init alarm recurrences
+        val recurrenceDays = fragmentContext.resources.getStringArray(R.array.day_of_week)
+        recurrenceDays.forEachIndexed { index, s ->
+            (binding.dayRecurrence.getChildAt(index) as MaterialButton).apply {
+                text = s
+                if (index == 0) setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_red_light))
+                else if (index == 6) setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_blue_light))
+            }
         }
-//        alarm_options.apply {
-//            adapter = alarmOptionAdapter
-//            layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
-//
-//            addItemDecoration(DividerItemDecoration(fragmentContext, DividerItemDecoration.VERTICAL))
-//            isNestedScrollingEnabled = false
-//        }
 
         binding.date.text = AlarmStringFormatHelper.formatDate(
                 fragmentContext,
@@ -268,12 +289,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 viewModel.endDate,
                 viewModel.recurrences.value?.any { it > 0 } ?: false
         )
-//        date.text = AlarmStringFormatHelper.formatDate(
-//                fragmentContext,
-//                viewModel.startDate,
-//                viewModel.endDate,
-//                viewModel.recurrences.value?.any { it > 0 } ?: false
-//        )
 
         // init dialog
         labelDialog = getLabelDialog()
@@ -281,47 +296,11 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
         binding.timePicker.setOnTimeChangedListener(this)
         binding.timeZoneView.setOnClickListener(this)
-//        time_picker.setOnTimeChangedListener(this)
-//        time_zone_view.setOnClickListener(this)
-
-        // init alarm recurrences
-        recurrenceDays.forEachIndexed { index, s ->
-            (binding.dayRecurrence.getChildAt(index) as MaterialButton).apply {
-                text = s
-                if (index == 0) setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_red_light))
-                else if (index == 6) setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_blue_light))
-            }
-//            val button = day_recurrence.getChildAt(index) as MaterialButton
-//            button.text = s
-//            if (index == 0) button.setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_red_light))
-//            else if (index == 6) button.setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_blue_light))
-        }
 
         binding.dateView.setOnClickListener(this)
-//        date_view.setOnClickListener(this)
         binding.dayRecurrence.addOnButtonCheckedListener(this)
-//        day_recurrence.addOnButtonCheckedListener(this)
         binding.action.setOnClickListener(this)
-//        action.setOnClickListener(this)
         binding.detailContentLayout.isNestedScrollingEnabled = false
-//        detail_content_layout.isNestedScrollingEnabled = false
-
-        // Init observers
-        viewModel.ringtone.observe(viewLifecycleOwner, {
-            alarmOptionAdapter.notifyItemChanged(0)
-        })
-        viewModel.vibration.observe(viewLifecycleOwner, {
-            alarmOptionAdapter.notifyItemChanged(1)
-        })
-        viewModel.snooze.observe(viewLifecycleOwner, {
-            alarmOptionAdapter.notifyItemChanged(2)
-        })
-        viewModel.label.observe(viewLifecycleOwner, {
-            alarmOptionAdapter.notifyItemChanged(3)
-        })
-        viewModel.colorTag.observe(viewLifecycleOwner, {
-            alarmOptionAdapter.notifyItemChanged(4)
-        })
 
         val intentFilter = IntentFilter().apply {
             addAction(MainActivity.ACTION_UPDATE_ALL)
@@ -357,7 +336,8 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             when (requestCode) {
                 TimeZoneSearchActivity.TIME_ZONE_REQUEST_CODE -> {
                     if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                        data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.also {
+                        val replacedTz = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.replace(" ", "_")
+                        replacedTz?.let {
                             viewModel.timeZone.value = it.replace(" ", "_")
 
                             viewModel.remoteZonedDateTime =
@@ -368,8 +348,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                             viewModel.endDate = viewModel.endDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
                         }
 
-                        binding.timeZoneName.text = getFormattedTimeZoneName(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID))
-//                        time_zone_name.text = getFormattedTimeZoneName(data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID))
+                        binding.timeZoneName.text = getFormattedTimeZoneName(replacedTz)
                         updateEstimated()
                     }
                 }
@@ -439,12 +418,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                             viewModel.endDate,
                             viewModel.recurrences.value?.any { it > 0 } ?: false
                     )
-//                    date.text = AlarmStringFormatHelper.formatDate(
-//                            fragmentContext,
-//                            viewModel.startDate,
-//                            viewModel.endDate,
-//                            viewModel.recurrences.value?.any { it > 0 } ?: false
-//                    )
                     updateEstimated()
                 }
             }
@@ -543,12 +516,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 viewModel.endDate,
                 viewModel.recurrences.value?.any { it > 0 } ?: false
         )
-//        date.text = AlarmStringFormatHelper.formatDate(
-//                fragmentContext,
-//                viewModel.startDate,
-//                viewModel.endDate,
-//                viewModel.recurrences.value?.any { it > 0 } ?: false
-//        )
         updateEstimated()
     }
 
@@ -582,23 +549,15 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
                 if(createAlarm().isExpired(resultInLocal)) {
                     binding.estTimeZone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
-//                    est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
                     binding.estDateTime.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
-//                    est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.color1))
                     binding.estIcon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_warning))
-//                    est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_warning))
                     binding.estIcon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.color1))
-//                    est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.color1))
                 }
                 else {
                     binding.estTimeZone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorEnabled))
-//                    est_time_zone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorEnabled))
                     binding.estDateTime.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColor))
-//                    est_date_time.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColor))
                     binding.estIcon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_event_available))
-//                    est_icon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_event_available))
                     binding.estIcon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.textColor))
-//                    est_icon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.textColor))
                 }
 
                 val diff = ZoneId.systemDefault().rules.getOffset(resultInLocal.toInstant()).totalSeconds - viewModel.remoteZonedDateTime.zone.rules.getOffset(resultInLocal.toInstant()).totalSeconds
@@ -617,9 +576,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 val diffText = "${hourFormat.format(diffHour.absoluteValue)}:${minFormat.format(diffMin.absoluteValue)}"
 
                 binding.estTimeZone.text = getString(R.string.time_zone_with_diff, getFormattedTimeZoneName(resultInLocal.zone.id), diffText)
-//                est_time_zone.text = getString(R.string.time_zone_with_diff, getFormattedTimeZoneName(resultInLocal.zone.id), diffText)
                 binding.estDateTime.text = DateUtils.formatDateTime(fragmentContext, resultInLocal.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
-//                est_date_time.text = DateUtils.formatDateTime(fragmentContext, resultInLocal.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
             }
         }
     }
@@ -643,6 +600,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     }
 
     private fun getFormattedTimeZoneName(timeZoneId: String?): String {
+        Log.d(C.TAG, "$timeZoneId")
         timeZoneId?.let {
             return try {
                 if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(it))
@@ -732,14 +690,17 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         val end = viewModel.endDate?.toInstant()
 
         when {
+            viewModel.timeZone.value.isNullOrEmpty() -> {
+                Snackbar.make(binding.fragmentContainer, getString(R.string.time_zone_select), Snackbar.LENGTH_SHORT)
+                        .setAnchorView(binding.action)
+                        .show()
+                return
+            }
             start != null && end != null -> {
                 if(start.toEpochMilli() >= end.toEpochMilli() || end.toEpochMilli() <= System.currentTimeMillis()) {
                     Snackbar.make(binding.fragmentContainer, getString(R.string.end_date_earlier_than_start_date), Snackbar.LENGTH_SHORT)
                             .setAnchorView(binding.action)
                             .show()
-//                    Snackbar.make(fragment_container, getString(R.string.end_date_earlier_than_start_date), Snackbar.LENGTH_SHORT)
-//                            .setAnchorView(action)
-//                            .show()
                     return
                 }
 
@@ -751,9 +712,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                             Snackbar.make(binding.fragmentContainer, getString(R.string.must_check_repeat), Snackbar.LENGTH_SHORT)
                                     .setAnchorView(binding.action)
                                     .show()
-//                            Snackbar.make(fragment_container, getString(R.string.must_check_repeat), Snackbar.LENGTH_SHORT)
-//                                    .setAnchorView(action)
-//                                    .show()
                             return
                         }
                     }
@@ -765,9 +723,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                         Snackbar.make(binding.fragmentContainer, getString(R.string.start_date_and_time_is_wrong), Snackbar.LENGTH_SHORT)
                                 .setAnchorView(binding.action)
                                 .show()
-//                        Snackbar.make(fragment_container, getString(R.string.start_date_and_time_is_wrong), Snackbar.LENGTH_SHORT)
-//                                .setAnchorView(action)
-//                                .show()
                         return
                     }
                 }
@@ -777,9 +732,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                     Snackbar.make(binding.fragmentContainer, getString(R.string.unreachable_alarm), Snackbar.LENGTH_SHORT)
                             .setAnchorView(binding.action)
                             .show()
-//                    Snackbar.make(fragment_container, getString(R.string.unreachable_alarm), Snackbar.LENGTH_SHORT)
-//                            .setAnchorView(action)
-//                            .show()
                     return
                 }
 
@@ -791,9 +743,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                                 Snackbar.make(binding.fragmentContainer, getString(R.string.must_check_repeat), Snackbar.LENGTH_SHORT)
                                         .setAnchorView(binding.action)
                                         .show()
-//                                Snackbar.make(fragment_container, getString(R.string.must_check_repeat), Snackbar.LENGTH_SHORT)
-//                                        .setAnchorView(action)
-//                                        .show()
                                 return
                             }
                         }
@@ -802,51 +751,44 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             }
         }
 
-        val scheduledTime = viewModel.alarmController.scheduleLocalAlarm(fragmentContext, item, TYPE_ALARM)
-        if(scheduledTime == -1L) {
-            Snackbar.make(binding.fragmentContainer, getString(R.string.unable_to_create_alarm), Snackbar.LENGTH_SHORT)
-                    .setAnchorView(binding.action)
-                    .show()
-//            Snackbar.make(fragment_container, getString(R.string.unable_to_create_alarm), Snackbar.LENGTH_SHORT)
-//                    .setAnchorView(action)
-//                    .show()
-            return
-        }
-
-        item.timeSet = scheduledTime.toString()
-
-        val dbCursor = DatabaseCursor(fragmentContext)
-        if(viewModel.alarmItem == null) {
-            item.id = dbCursor.insertAlarm(item).toInt()
-            item.index = item.id
-        }
-        else {
-            dbCursor.updateAlarm(item)
-        }
-
-        activity?.run {
-            if(isTaskRoot) {
-                val calendar = Calendar.getInstance().apply {
-                    timeInMillis = scheduledTime
-                }
-                Snackbar.make(binding.fragmentContainer, getString(R.string.alarm_on, MediaCursor.getRemainTime(fragmentContext, calendar)), Snackbar.LENGTH_SHORT)
+        runBlocking(coroutineExceptionHandler) {
+            // schedule alarm
+            val scheduledTime = viewModel.alarmController.scheduleLocalAlarm(fragmentContext, item, TYPE_ALARM)
+            if(scheduledTime == -1L) {
+                Snackbar.make(binding.fragmentContainer, getString(R.string.unable_to_create_alarm), Snackbar.LENGTH_SHORT)
                         .setAnchorView(binding.action)
                         .show()
-//                Snackbar.make(fragment_container, getString(R.string.alarm_on, MediaCursor.getRemainTime(fragmentContext, calendar)), Snackbar.LENGTH_SHORT)
-//                        .setAnchorView(action)
-//                        .show()
+                return@runBlocking
             }
-        }
 
-        activity?.run {
-            val intent = Intent()
-            val bundle = Bundle().apply {
-                putParcelable(AlarmReceiver.ITEM, item)
-                putLong(AlarmActivity.SCHEDULED_TIME, scheduledTime)
+            item.timeSet = scheduledTime.toString()
+
+            if(viewModel.alarmItem == null) {
+                item.id = db.alarmItemDao().insert(item).toInt()
+                item.index = item.id
             }
-            intent.putExtra(AlarmReceiver.OPTIONS, bundle)
-            setResult(Activity.RESULT_OK, intent)
-            finish()
+
+            db.alarmItemDao().update(item)
+
+            activity?.run {
+                if(isTaskRoot) {
+                    val calendar = Calendar.getInstance().apply {
+                        timeInMillis = scheduledTime
+                    }
+                    Snackbar.make(binding.fragmentContainer, getString(R.string.alarm_on, MediaCursor.getRemainTime(fragmentContext, calendar)), Snackbar.LENGTH_SHORT)
+                            .setAnchorView(binding.action)
+                            .show()
+                }
+
+                val intent = Intent()
+                val bundle = Bundle().apply {
+                    putParcelable(AlarmReceiver.ITEM, item)
+                    putLong(AlarmActivity.SCHEDULED_TIME, scheduledTime)
+                }
+                intent.putExtra(AlarmReceiver.OPTIONS, bundle)
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+            }
         }
     }
 

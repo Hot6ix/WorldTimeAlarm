@@ -9,11 +9,12 @@
         android:id="@+id/detail_content_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_gravity="fill"
         android:paddingBottom="@dimen/alarm_item_height"
         android:clipToPadding="false"
         android:scrollbars="none"
         android:overScrollMode="never"
-        android:layout_gravity="fill">
+        android:visibility="invisible">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -285,7 +286,15 @@
         android:layout_gravity="center|bottom"
         android:gravity="center"
         android:textColor="?attr/colorPrimary"
+        android:visibility="invisible"
         app:iconTint="?attr/colorPrimary"
         app:backgroundTint="@color/background"/>
+
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="?android:progressBarStyle" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

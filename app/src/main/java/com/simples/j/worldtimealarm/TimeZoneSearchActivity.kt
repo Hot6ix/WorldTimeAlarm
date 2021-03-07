@@ -12,16 +12,21 @@ import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.room.Room
 import com.simples.j.worldtimealarm.databinding.ActivityTimeZoneSearchBinding
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.support.TimeZoneAdapter
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
+import com.simples.j.worldtimealarm.utils.AppDatabase
+import com.simples.j.worldtimealarm.utils.DatabaseManager
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
 
 class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener, TimeZoneAdapter.OnItemClickListener {
 
+    private lateinit var db: AppDatabase
     private lateinit var timeZoneArray: MutableList<String>
     private lateinit var timeZoneAdapter: TimeZoneAdapter
     private lateinit var binding: ActivityTimeZoneSearchBinding
@@ -35,6 +40,9 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
+                .addMigrations(AppDatabase.MIGRATION_7_8)
+                .build()
         code = intent.getStringExtra(WorldClockFragment.TIME_ZONE_NEW_KEY)
 
         if(savedInstanceState != null) {
@@ -128,21 +136,23 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
 
     override fun onItemClick(view: View, position: Int) {
         if(code != null) {
-            val array = DatabaseCursor(applicationContext).getClockList()
-            var isExist = false
-            array.forEach {
-                if(it.timezone == resultArray[position]) {
-                    isExist = true
+            GlobalScope.launch {
+                val array = db.clockItemDao().getAll()
+                val sameClockItem = array.find {
+                    it.timezone == resultArray[position]
                 }
-            }
-            if(isExist) {
-                Toast.makeText(applicationContext, resources.getString(R.string.exist_timezone), Toast.LENGTH_SHORT).show()
-            }
-            else {
-                val intent = Intent()
-                intent.putExtra(TIME_ZONE_ID, resultArray[position])
-                setResult(Activity.RESULT_OK, intent)
-                finish()
+
+                if(sameClockItem != null) {
+                    runOnUiThread {
+                        Toast.makeText(applicationContext, resources.getString(R.string.exist_timezone), Toast.LENGTH_SHORT).show()
+                    }
+                }
+                else {
+                    val intent = Intent()
+                    intent.putExtra(TIME_ZONE_ID, resultArray[position])
+                    setResult(Activity.RESULT_OK, intent)
+                    finish()
+                }
             }
         }
         else {
