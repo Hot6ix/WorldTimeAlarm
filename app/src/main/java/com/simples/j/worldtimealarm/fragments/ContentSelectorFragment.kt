@@ -97,7 +97,6 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         super.onActivityCreated(savedInstanceState)
 
         db = Room.databaseBuilder(requireContext(), AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .addMigrations(AppDatabase.MIGRATION_7_8)
                 .build()
         audioManager = requireContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator

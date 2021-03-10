@@ -41,7 +41,6 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .addMigrations(AppDatabase.MIGRATION_7_8)
                 .build()
         code = intent.getStringExtra(WorldClockFragment.TIME_ZONE_NEW_KEY)
 

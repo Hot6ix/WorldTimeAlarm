@@ -93,12 +93,11 @@ public class AlarmController {
             }
 
             if(isRepeating) {
-                int[] repeatValues = {7,1,2,3,4,5,6};
                 ArrayList<DayOfWeek> repeat = new ArrayList<>();
 
                 for(int i=0; i<item.getRepeat().length; i++) {
                     if(item.getRepeat()[i] > 0) {
-                        repeat.add(DayOfWeek.of(repeatValues[i]));
+                        repeat.add(DayOfWeek.of(item.getRepeat()[i]));
                     }
                 }
                 Collections.sort(repeat);
@@ -405,7 +404,6 @@ public class AlarmController {
 
         AppDatabase db = Room.databaseBuilder(context, AppDatabase.class, DatabaseManager.DB_NAME)
                 .allowMainThreadQueries()
-                .addMigrations(AppDatabase.Companion.getMIGRATION_7_8())
                 .build();
         db.alarmItemDao().updateItem(item);
 

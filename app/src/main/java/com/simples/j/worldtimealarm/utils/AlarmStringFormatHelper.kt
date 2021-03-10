@@ -55,14 +55,8 @@ object AlarmStringFormatHelper {
     }
 
     fun getDisplayLocalRepeatArray(context: Context, repeats: IntArray, dateTimeInLocal: ZonedDateTime?, timeZone: String, applyRepeat: Boolean = true): String {
-        // for support old version of app
-        var repeat = repeats.mapIndexed { index, i ->
-            if (i > 0) index + 1 else 0
-        }.filter { it != 0 }.map {
-            var converted = it - 1
-            if (converted == 0) converted = 7
-
-            DayOfWeek.of(converted)
+        var repeat = repeats.filter { it != 0 }.map {
+            DayOfWeek.of(it)
         }
 
         if(applyRepeat) {

@@ -17,12 +17,16 @@ import com.google.ads.consent.ConsentForm
 import com.google.ads.consent.ConsentFormListener
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.*
+import org.threeten.bp.DayOfWeek
 import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.temporal.WeekFields
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
+import kotlin.collections.LinkedHashSet
 import kotlin.math.absoluteValue
 
 
@@ -197,7 +201,7 @@ class MediaCursor {
         @RequiresApi(Build.VERSION_CODES.N)
         fun getULocaleByTimeZoneId(id: String?): ULocale? {
             return ULocale.getAvailableLocales().find {
-                it.displayCountry.toLowerCase(Locale.ROOT) == LocaleDisplayNames.getInstance(ULocale.getDefault()).regionDisplayName(TimeZone.getRegion(id)).toLowerCase(Locale.ROOT)
+                it.displayCountry.equals(LocaleDisplayNames.getInstance(ULocale.getDefault()).regionDisplayName(TimeZone.getRegion(id)), ignoreCase = true)
             }
         }
 
@@ -320,6 +324,29 @@ class MediaCursor {
                     .withNonPersonalizedAdsOption()
                     .withListener(listener)
                     .build()
+        }
+
+        fun getWeekDaysInLocale(locale: Locale = Locale.getDefault()): List<DayOfWeek> {
+            val firstDayOfWeek = WeekFields.of(locale).firstDayOfWeek
+            val weekDays = DayOfWeek.values()
+            val weekDaysInLocale = ArrayList<DayOfWeek>()
+
+            var dayOfWeekValue = weekDays[weekDays.indexOf(firstDayOfWeek)].value
+            for(i in weekDays.indices) {
+                weekDaysInLocale.add(DayOfWeek.of(dayOfWeekValue))
+
+                dayOfWeekValue++
+                if(dayOfWeekValue > 7) dayOfWeekValue = 1
+            }
+
+            return weekDaysInLocale
+        }
+
+        fun getDayOfWeekValueFromCalendarToThreeTenBp(old: Int): Int {
+            var converted = old - 1
+            if(converted == 0) converted = 7
+
+            return converted
         }
     }
 

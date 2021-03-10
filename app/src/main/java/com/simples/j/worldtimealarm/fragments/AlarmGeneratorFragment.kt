@@ -6,13 +6,14 @@ import android.content.*
 import android.os.Build
 import android.os.Bundle
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TimePicker
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
@@ -32,9 +33,8 @@ import com.simples.j.worldtimealarm.utils.*
 import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
 import kotlinx.android.synthetic.main.fragment_alarm_generator.*
 import kotlinx.coroutines.*
-import org.threeten.bp.Instant
-import org.threeten.bp.ZoneId
-import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.*
+import org.threeten.bp.format.TextStyle
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -57,6 +57,9 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     private lateinit var now: ZonedDateTime
     private lateinit var preference: SharedPreferences
     private lateinit var db: AppDatabase
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private val icuCalendar = android.icu.util.Calendar.getInstance()
 
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
@@ -93,7 +96,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         setHasOptionsMenu(true)
 
         db = Room.databaseBuilder(fragmentContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .addMigrations(AppDatabase.MIGRATION_7_8)
                 .build()
 
         preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
@@ -163,15 +165,8 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                             }
                         }
 
+                        // recurrences
                         viewModel.recurrences.value = it.repeat
-                        viewModel.recurrences.value?.let { recurrences ->
-                            if (recurrences.any { day -> day == 1 }) {
-                                viewModel.recurrences.value = viewModel.recurrences.value?.mapIndexed { index, i ->
-                                    if (i > 0) index + 1
-                                    else 0
-                                }?.toIntArray()
-                            }
-                        }
 
                         // options
                         viewModel.ringtone.value = ringtoneList.find { item -> item.uri == it.ringtone } ?: defaultRingtone
@@ -193,6 +188,9 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                     }
                 }
             }
+
+            // init recurrence button group
+            setupRecurrences()
 
             // init time
             val hour = viewModel.remoteZonedDateTime.hour
@@ -254,32 +252,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             } else {
                 text = getString(R.string.create)
                 icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
-            }
-        }
-
-        // init recurrences
-        val dayIds = arrayOf(
-                R.id.sunday,
-                R.id.monday,
-                R.id.tuesday,
-                R.id.wednesday,
-                R.id.thursday,
-                R.id.friday,
-                R.id.saturday
-        )
-        viewModel.recurrences.value?.let { recurrences ->
-            recurrences.forEachIndexed { index, day ->
-                if (day > 0) binding.dayRecurrence.check(dayIds[index])
-            }
-        }
-
-        // init alarm recurrences
-        val recurrenceDays = fragmentContext.resources.getStringArray(R.array.day_of_week)
-        recurrenceDays.forEachIndexed { index, s ->
-            (binding.dayRecurrence.getChildAt(index) as MaterialButton).apply {
-                text = s
-                if (index == 0) setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_red_light))
-                else if (index == 6) setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_blue_light))
             }
         }
 
@@ -350,6 +322,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
                         binding.timeZoneName.text = getFormattedTimeZoneName(replacedTz)
                         updateEstimated()
+                        setupRecurrences()
                     }
                 }
                 ContentSelectorActivity.AUDIO_REQUEST_CODE -> {
@@ -487,26 +460,26 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     override fun onButtonChecked(group: MaterialButtonToggleGroup?, checkedId: Int, isChecked: Boolean) {
         if(viewModel.recurrences.value == null) viewModel.recurrences.value = IntArray(7) { 0 }
         when(checkedId) {
-            R.id.sunday -> {
-                viewModel.recurrences.value?.set(0, if(isChecked) 1 else 0)
+            R.id.firstDayOfWeek -> {
+                viewModel.recurrences.value?.set(0, if(isChecked) (binding.firstDayOfWeek.tag as DayOfWeek).value else 0)
             }
-            R.id.monday -> {
-                viewModel.recurrences.value?.set(1, if(isChecked) 2 else 0)
+            R.id.secondDayOfWeek -> {
+                viewModel.recurrences.value?.set(1, if(isChecked) (binding.secondDayOfWeek.tag as DayOfWeek).value else 0)
             }
-            R.id.tuesday -> {
-                viewModel.recurrences.value?.set(2, if(isChecked) 3 else 0)
+            R.id.thirdDayOfWeek -> {
+                viewModel.recurrences.value?.set(2, if(isChecked) (binding.thirdDayOfWeek.tag as DayOfWeek).value else 0)
             }
-            R.id.wednesday -> {
-                viewModel.recurrences.value?.set(3, if(isChecked) 4 else 0)
+            R.id.fourthDayOfWeek -> {
+                viewModel.recurrences.value?.set(3, if(isChecked) (binding.fourthDayOfWeek.tag as DayOfWeek).value else 0)
             }
-            R.id.thursday -> {
-                viewModel.recurrences.value?.set(4, if(isChecked) 5 else 0)
+            R.id.fifthDayOfWeek -> {
+                viewModel.recurrences.value?.set(4, if(isChecked) (binding.fifthDayOfWeek.tag as DayOfWeek).value else 0)
             }
-            R.id.friday -> {
-                viewModel.recurrences.value?.set(5, if(isChecked) 6 else 0)
+            R.id.sixthDayOfWeek -> {
+                viewModel.recurrences.value?.set(5, if(isChecked) (binding.sixthDayOfWeek.tag as DayOfWeek).value else 0)
             }
-            R.id.saturday -> {
-                viewModel.recurrences.value?.set(6, if(isChecked) 7 else 0)
+            R.id.seventhDayOfWeek -> {
+                viewModel.recurrences.value?.set(6, if(isChecked) (binding.seventhDayOfWeek.tag as DayOfWeek).value else 0)
             }
         }
 
@@ -581,6 +554,61 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         }
     }
 
+    private fun setupRecurrences() {
+        val locale =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                MediaCursor.getULocaleByTimeZoneId(viewModel.timeZone.value)?.toLocale() ?: Locale.getDefault()
+            else Locale.getDefault()
+
+        MediaCursor.getWeekDaysInLocale(locale).forEachIndexed { index, dayOfWeek ->
+            (binding.dayRecurrence.getChildAt(index) as MaterialButton).apply {
+                text = dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.getDefault())
+                tag = dayOfWeek
+
+                // set color for weekend
+                // color will be red if weekendCease and weekendOnset are same
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    with(icuCalendar.weekData) {
+                        when(dayOfWeek.value) {
+                            // weekend finish
+                            MediaCursor.getDayOfWeekValueFromCalendarToThreeTenBp(weekendCease) -> {
+                                (this@apply).setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_red_light))
+                            }
+                            // weekend start
+                            MediaCursor.getDayOfWeekValueFromCalendarToThreeTenBp(weekendOnset) -> {
+                                (this@apply).setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_blue_light))
+                            }
+                            else -> {
+                                (this@apply).setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.black))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // restore checked recurrences
+        viewModel.recurrences.value?.let { array ->
+            val checked = array.filter { recurrence ->
+                recurrence > 0
+            }
+
+            binding.dayRecurrence.children.forEach { view ->
+                with(view as MaterialButton) {
+                    val dayOfWeek = tag as DayOfWeek
+
+                    if(checked.contains(dayOfWeek.value)) {
+                        binding.dayRecurrence.check(this.id)
+                    }
+                    else {
+                        binding.dayRecurrence.uncheck(this.id)
+                    }
+                }
+
+            }
+        }
+    }
+
     private fun getAlarmOptions(): ArrayList<OptionItem> {
         val array = ArrayList<OptionItem>()
         val options = resources.getStringArray(R.array.alarm_options)
@@ -600,7 +628,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     }
 
     private fun getFormattedTimeZoneName(timeZoneId: String?): String {
-        Log.d(C.TAG, "$timeZoneId")
         timeZoneId?.let {
             return try {
                 if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) MediaCursor.getBestNameForTimeZone(android.icu.util.TimeZone.getTimeZone(it))

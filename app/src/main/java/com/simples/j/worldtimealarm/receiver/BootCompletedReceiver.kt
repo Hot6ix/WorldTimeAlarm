@@ -27,7 +27,6 @@ class BootCompletedReceiver : BroadcastReceiver() {
             Log.d(C.TAG, Intent.ACTION_BOOT_COMPLETED)
 
             db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                    .addMigrations(AppDatabase.MIGRATION_7_8)
                     .build()
 
             GlobalScope.launch(Dispatchers.IO) {

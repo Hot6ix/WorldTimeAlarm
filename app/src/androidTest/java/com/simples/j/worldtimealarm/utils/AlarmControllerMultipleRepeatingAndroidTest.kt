@@ -56,7 +56,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             Log.d(C.TAG, "now=${ZonedDateTime.now()}, ${ZonedDateTime.now().dayOfWeek}")
             Log.d(C.TAG, "given=${time}, ${time.dayOfWeek}")
 
-            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(1,0,0,0,0,1,0))
+            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(7,0,0,0,0,5,0))
             val r = alarmCtrl.calculateDateTime(a, AlarmController.TYPE_ALARM)
 
             val answer =
@@ -100,7 +100,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             Log.d(C.TAG, "now=${ZonedDateTime.now().toInstant()}, ${ZonedDateTime.now().dayOfWeek}")
             Log.d(C.TAG, "given=${time.toInstant()}, ${time.dayOfWeek}")
 
-            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(1,1,1,1,1,1,1))
+            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(1,2,3,4,5,6,7))
             val r = alarmCtrl.calculateDateTime(a, AlarmController.TYPE_ALARM)
 
             val answer = time.plusDays(1)
@@ -143,7 +143,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             Log.d(C.TAG, "now=${ZonedDateTime.now().toInstant()}, ${ZonedDateTime.now().dayOfWeek}")
             Log.d(C.TAG, "given=${time.toInstant()}, ${time.dayOfWeek}")
 
-            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(1,1,1,1,1,1,1))
+            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(1,2,3,4,5,6,7))
             val r = alarmCtrl.calculateDateTime(a, AlarmController.TYPE_ALARM)
 
             val answer =
@@ -194,7 +194,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             Log.d(C.TAG, "now=${ZonedDateTime.now().toInstant()}, ${ZonedDateTime.now().dayOfWeek}")
             Log.d(C.TAG, "given=${time.toInstant()}, ${time.dayOfWeek}")
 
-            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(1,0,1,0,0,0,1), timeZone = tz)
+            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(0,2,0,0,0,6,7), timeZone = tz)
             val r = alarmCtrl.calculateDateTime(a, AlarmController.TYPE_ALARM)
 
             val answer =
@@ -249,7 +249,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             Log.d(C.TAG, "nowInTargetTz=${ZonedDateTime.now().withZoneSameInstant(ZoneId.of(tz))}, ${ZonedDateTime.now().withZoneSameInstant(ZoneId.of(tz)).dayOfWeek}")
             Log.d(C.TAG, "given=${time.toInstant()}, ${time.dayOfWeek}")
 
-            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(1,0,1,0,0,0,1), timeZone = tz)
+            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(7,0,2,0,0,0,6), timeZone = tz)
             val r = alarmCtrl.calculateDateTime(a, AlarmController.TYPE_ALARM)
 
             val answer =
@@ -307,7 +307,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             Log.d(C.TAG, "now=${ZonedDateTime.now().toInstant()}, ${ZonedDateTime.now().dayOfWeek}")
             Log.d(C.TAG, "given=${time.toInstant()}, ${time.dayOfWeek}")
 
-            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(1,0,1,0,0,0,1), timeZone = tz)
+            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(0,2,0,0,0,6,7), timeZone = tz)
             val r = alarmCtrl.calculateDateTime(a, AlarmController.TYPE_ALARM)
 
             val answer =
@@ -372,16 +372,16 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             Log.d(C.TAG, "now=${ZonedDateTime.now()}, ${ZonedDateTime.now().dayOfWeek}")
             Log.d(C.TAG, "given=${time}, ${time.dayOfWeek}")
 
-            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(0,1,0,1,0,0,1), startDate = startDate.toInstant().toEpochMilli(), endDate = endDate.toInstant().toEpochMilli(), timeZone = tz)
+            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(0,1,0,3,0,0,6), startDate = startDate.toInstant().toEpochMilli(), endDate = endDate.toInstant().toEpochMilli(), timeZone = tz)
             val r = alarmCtrl.calculateDateTime(a, AlarmController.TYPE_ALARM)
 
             val answer =
-                    if(i == 0 || time.dayOfWeek == DayOfWeek.SATURDAY)
-                        time.with(TemporalAdjusters.next(DayOfWeek.MONDAY))
-                    else if(time.dayOfWeek == DayOfWeek.MONDAY)
-                        time.with(TemporalAdjusters.next(DayOfWeek.WEDNESDAY))
-                    else
-                        time.with(TemporalAdjusters.next(DayOfWeek.SATURDAY))
+                    when {
+                        i == 0 -> time.with(TemporalAdjusters.next(DayOfWeek.WEDNESDAY))
+                        time.dayOfWeek == DayOfWeek.SATURDAY -> time.with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+                        time.dayOfWeek == DayOfWeek.MONDAY -> time.with(TemporalAdjusters.next(DayOfWeek.WEDNESDAY))
+                        else -> time.with(TemporalAdjusters.next(DayOfWeek.SATURDAY))
+                    }
 
             if(a.apply { timeSet = r.toInstant().toEpochMilli().toString() }.isExpired()) {
                 Log.d(C.TAG, "expired")
@@ -447,11 +447,11 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             Log.d(C.TAG, "now=${ZonedDateTime.now()}, ${ZonedDateTime.now().dayOfWeek}")
             Log.d(C.TAG, "given=${time}, ${time.dayOfWeek}")
 
-            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(1,1,1,1,1,1,1), startDate = startDate.toInstant().toEpochMilli(), endDate = endDate.toInstant().toEpochMilli(), timeZone = tz)
+            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(7,1,2,3,4,5,6), startDate = startDate.toInstant().toEpochMilli(), endDate = endDate.toInstant().toEpochMilli(), timeZone = tz)
             val r = alarmCtrl.calculateDateTime(a, AlarmController.TYPE_ALARM)
 
             val answer =
-                    if(i == 0) time.with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+                    if(i == 0) time
                     else {
                         when (time.dayOfWeek) {
                             DayOfWeek.MONDAY -> time.with(TemporalAdjusters.next(DayOfWeek.TUESDAY))
@@ -479,8 +479,6 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             else
                 Assert.assertEquals(13, r.withZoneSameInstant(ZoneId.systemDefault()).hour)
             Assert.assertEquals(answer.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
-
-            Assert.assertNotEquals(time.toInstant().toEpochMilli(), r.withZoneSameInstant(ZoneId.systemDefault()).toInstant().toEpochMilli())
 
             time = r
         }
@@ -530,7 +528,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
             Log.d(C.TAG, "now=${ZonedDateTime.now()}, ${ZonedDateTime.now().dayOfWeek}")
             Log.d(C.TAG, "given=${time}, ${time.dayOfWeek}")
 
-            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(0,1,0,1,0,0,1), startDate = startDate.toInstant().toEpochMilli(), endDate = endDate.toInstant().toEpochMilli(), timeZone = tz)
+            val a = createAlarm(timeSet = time.toInstant(), repeat = intArrayOf(0,1,0,3,0,0,6), startDate = startDate.toInstant().toEpochMilli(), endDate = endDate.toInstant().toEpochMilli(), timeZone = tz)
             val r = alarmCtrl.calculateDateTime(a, AlarmController.TYPE_ALARM)
 
             val answer =

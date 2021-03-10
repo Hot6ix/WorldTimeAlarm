@@ -66,7 +66,6 @@ class WakeUpService : Service() {
 
         isWakeUpServiceRunning = true
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .addMigrations(AppDatabase.MIGRATION_7_8)
                 .build()
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

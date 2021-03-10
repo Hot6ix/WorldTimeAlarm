@@ -31,7 +31,6 @@ class NotificationActionReceiver : BroadcastReceiver() {
             Log.d(C.TAG, "Notification Action received: $action")
 
             db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                    .addMigrations(AppDatabase.MIGRATION_7_8)
                     .build()
 
             when(action) {

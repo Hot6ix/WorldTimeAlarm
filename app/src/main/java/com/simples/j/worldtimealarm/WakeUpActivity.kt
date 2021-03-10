@@ -64,7 +64,6 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .addMigrations(AppDatabase.MIGRATION_7_8)
                 .build()
         sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
 

@@ -93,7 +93,6 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         super.onActivityCreated(savedInstanceState)
 
         db = Room.databaseBuilder(fragmentContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .addMigrations(AppDatabase.MIGRATION_7_8)
                 .build()
         activity?.run {
             viewModel = ViewModelProvider(this)[WorldClockViewModel::class.java]

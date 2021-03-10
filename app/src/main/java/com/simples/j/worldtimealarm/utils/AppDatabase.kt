@@ -74,13 +74,56 @@ abstract class AppDatabase: RoomDatabase() {
                 database.execSQL("DROP TABLE ${DatabaseManager.TABLE_ALARM_LIST}")
                 database.execSQL("ALTER TABLE TMP_ALARM_LIST RENAME TO ${DatabaseManager.TABLE_ALARM_LIST}")
 
+                // get id and recurrences of all items
+                val cursor = database.query("SELECT * FROM ${DatabaseManager.TABLE_ALARM_LIST}")
+                if(cursor.count > 0) {
+                    val list = ArrayList<Pair<Int, IntArray>>()
+
+                    while(cursor.moveToNext()) {
+                        val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+                        val repeat = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
+
+                        val formattedRepeat =
+                                if(repeat.isEmpty()) {
+                                    IntArray(7) { 0 }
+                                }
+                                else {
+                                    repeat.split(",").map { it.trim().toInt() }.toIntArray()
+                                }
+
+                        list.add(Pair(id, formattedRepeat))
+                    }
+
+                    // convert recurrence value
+                    val updated = list.map {
+                        val updatedRecurrences = it.second.map { dayOfWeek ->
+                            if(dayOfWeek != 0) {
+                                var converted = dayOfWeek - 1
+                                if(converted == 0) converted = 7
+
+                                converted
+                            }
+                            else {
+                                dayOfWeek
+                            }
+                        }.toTypedArray()
+
+                        Pair(it.first, updatedRecurrences)
+                    }
+
+                    // update items
+                    updated.forEach {
+                        database.execSQL("UPDATE ${DatabaseManager.TABLE_ALARM_LIST} SET ${DatabaseManager.COLUMN_REPEAT} = '"+ it.second.contentToString() + "' WHERE ${DatabaseManager.COLUMN_ID} = ${it.first}")
+                    }
+                }
+
                 database.execSQL("CREATE TABLE IF NOT EXISTS TMP_CLOCK_LIST (" +
-                        "${DatabaseManager.COLUMN_ID} INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        "${DatabaseManager.COLUMN_TIME_ZONE} TEXT, " +
+                        "${DatabaseManager.COLUMN_ID} INTEGER, " +
+                        "${DatabaseManager.COLUMN_TIME_ZONE} TEXT PRIMARY KEY NOT NULL, " +
                         "${DatabaseManager.COLUMN_INDEX} INTEGER" +
                         ");")
 
-                database.execSQL("INSERT INTO TMP_CLOCK_LIST(" +
+                database.execSQL("INSERT INTO TMP_CLOCK_LIST (" +
                         "${DatabaseManager.COLUMN_ID}, " +
                         "${DatabaseManager.COLUMN_TIME_ZONE}, " +
                         "${DatabaseManager.COLUMN_INDEX}) " +
@@ -110,7 +153,7 @@ abstract class AppDatabase: RoomDatabase() {
                         "FROM ${DatabaseManager.TABLE_USER_RINGTONE}")
 
                 database.execSQL("DROP TABLE ${DatabaseManager.TABLE_USER_RINGTONE}")
-                database.execSQL("ALTER TABLE TMP_CLOCK_LIST RENAME TO ${DatabaseManager.TABLE_USER_RINGTONE}")
+                database.execSQL("ALTER TABLE TMP_RINGTONE RENAME TO ${DatabaseManager.TABLE_USER_RINGTONE}")
 
                 database.execSQL("CREATE TABLE IF NOT EXISTS TMP_DAYLIGHT_SAVING_TIME (" +
                         "${DatabaseManager.COLUMN_ID} INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT," +
@@ -132,7 +175,7 @@ abstract class AppDatabase: RoomDatabase() {
                         "FROM ${DatabaseManager.TABLE_DST_LIST}")
 
                 database.execSQL("DROP TABLE ${DatabaseManager.TABLE_DST_LIST}")
-                database.execSQL("ALTER TABLE TMP_CLOCK_LIST RENAME TO ${DatabaseManager.TABLE_DST_LIST}")
+                database.execSQL("ALTER TABLE TMP_DAYLIGHT_SAVING_TIME RENAME TO ${DatabaseManager.TABLE_DST_LIST}")
             }
         }
     }

@@ -101,7 +101,7 @@ dependencies {
     androidTestImplementation 'io.mockk:mockk-android:1.9.3'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 
-    debugImplementation 'com.amitshekhar.android:debug-db:1.0.0'
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
 
     // Android Room
     def room_version = "2.2.6"

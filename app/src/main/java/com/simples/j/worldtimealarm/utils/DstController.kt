@@ -20,7 +20,6 @@ import java.util.*
 class DstController(private val context: Context) {
 
     private val db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
-            .addMigrations(AppDatabase.MIGRATION_7_8)
             .build()
 
     suspend fun handleSystemDst() {

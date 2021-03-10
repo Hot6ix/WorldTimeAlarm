@@ -42,7 +42,6 @@ class AlarmReceiver: BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .addMigrations(AppDatabase.MIGRATION_7_8)
                 .build()
         notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
