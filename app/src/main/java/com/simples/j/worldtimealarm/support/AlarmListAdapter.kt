@@ -158,10 +158,13 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             }
         }
 
-        item.label?.let {
-            holder.label.apply {
-                text = item.label
-                visibility = View.VISIBLE
+        item.label.let {
+            if(it.isNullOrEmpty()) holder.label.visibility = View.GONE
+            else {
+                holder.label.apply {
+                    text = item.label
+                    visibility = View.VISIBLE
+                }
             }
         }
 

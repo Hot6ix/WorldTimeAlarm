@@ -449,6 +449,10 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 startActivityForResult(contentIntent, ContentSelectorActivity.SNOOZE_REQUEST_CODE)
             }
             3 -> { // Label
+                viewModel.label.value?.let {
+                    labelDialog.setLastLabel(it)
+                }
+
                 if(!labelDialog.isAdded) labelDialog.show(parentFragmentManager, AlarmGeneratorActivity.TAG_FRAGMENT_LABEL)
             }
             4 -> { // Color Tag
@@ -647,9 +651,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         var dialog = parentFragmentManager.findFragmentByTag(AlarmGeneratorActivity.TAG_FRAGMENT_LABEL) as? LabelDialogFragment
         if(dialog == null) dialog = LabelDialogFragment.newInstance()
 
-        viewModel.label.value?.let {
-            dialog.setLastLabel(it)
-        }
         dialog.setOnDialogEventListener(object: LabelDialogFragment.OnDialogEventListener {
             override fun onPositiveButtonClick(inter: DialogInterface, label: String) {
                 viewModel.label.value = label
@@ -659,10 +660,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
             override fun onNegativeButtonClick(inter: DialogInterface) { inter.cancel() }
 
-            override fun onNeutralButtonClick(inter: DialogInterface) {
-                viewModel.label.value = null
-                dialog.setLastLabel("")
-            }
+            override fun onNeutralButtonClick(inter: DialogInterface) {}
         })
         return dialog
     }
@@ -778,16 +776,16 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             }
         }
 
-        runBlocking(coroutineExceptionHandler) {
-            // schedule alarm
-            val scheduledTime = viewModel.alarmController.scheduleLocalAlarm(fragmentContext, item, TYPE_ALARM)
-            if(scheduledTime == -1L) {
-                Snackbar.make(binding.fragmentContainer, getString(R.string.unable_to_create_alarm), Snackbar.LENGTH_SHORT)
-                        .setAnchorView(binding.action)
-                        .show()
-                return@runBlocking
-            }
+        // schedule alarm
+        val scheduledTime = viewModel.alarmController.scheduleLocalAlarm(fragmentContext, item, TYPE_ALARM)
+        if(scheduledTime == -1L) {
+            Snackbar.make(binding.fragmentContainer, getString(R.string.unable_to_create_alarm), Snackbar.LENGTH_SHORT)
+                    .setAnchorView(binding.action)
+                    .show()
+            return
+        }
 
+        launch(coroutineExceptionHandler) {
             item.timeSet = scheduledTime.toString()
 
             if(viewModel.alarmItem == null) {

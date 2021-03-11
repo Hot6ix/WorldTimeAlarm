@@ -4,15 +4,16 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
-import androidx.appcompat.app.AlertDialog
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
 import android.view.WindowManager
-import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProvider
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.databinding.LabelDialogViewBinding
+import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
 
 class LabelDialogFragment: DialogFragment() {
 
@@ -20,8 +21,9 @@ class LabelDialogFragment: DialogFragment() {
     private var lastLabel: String = ""
     private var currentLabel: String = ""
 
-    private lateinit var labelEditor: EditText
     private lateinit var fragmentContext: Context
+    private lateinit var binding: LabelDialogViewBinding
+    private lateinit var viewModel: AlarmGeneratorViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -29,25 +31,30 @@ class LabelDialogFragment: DialogFragment() {
         this.fragmentContext = context
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-    }
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        activity?.run {
+            viewModel = ViewModelProvider(this)[AlarmGeneratorViewModel::class.java]
+        }
+
         if(savedInstanceState != null) {
             currentLabel = savedInstanceState.getString(CURRENT_LABEL, "")
         }
 
-        val labelView = View.inflate(fragmentContext, R.layout.label_dialog_view, null)
-        labelEditor = labelView.findViewById(R.id.label)
-        labelEditor.setText(lastLabel)
-        labelEditor.setTextColor(ContextCompat.getColor(fragmentContext, R.color.colorPrimary))
-        if(lastLabel.isNotEmpty()) {
-            labelEditor.selectAll()
+        viewModel.label.value?.let {
+            lastLabel = it
+            currentLabel = it
         }
-        labelEditor.addTextChangedListener(object: TextWatcher {
+
+        binding = LabelDialogViewBinding.inflate(layoutInflater, null, false)
+        binding.label.apply {
+            setText(lastLabel)
+            setTextColor(ContextCompat.getColor(fragmentContext, R.color.colorPrimary))
+            text?.length?.let {
+                setSelection(it)
+            }
+        }
+
+        binding.label.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(s: Editable) {
                 currentLabel = s.toString()
             }
@@ -60,27 +67,28 @@ class LabelDialogFragment: DialogFragment() {
 
         val dialog = AlertDialog.Builder(fragmentContext)
                 .setTitle(resources.getString(R.string.label))
-                .setView(labelView)
+                .setView(binding.root)
                 .setPositiveButton(resources.getString(R.string.ok)) { dialogInterface, _ ->
                     listener?.onPositiveButtonClick(dialogInterface, currentLabel)
                 }
                 .setNegativeButton(resources.getString(R.string.cancel)) { dialogInterface, _ ->
                     listener?.onNegativeButtonClick(dialogInterface)
                 }
-                .setNeutralButton(resources.getString(R.string.clear)) { dialogInterface, _ ->
-                    currentLabel = ""
-                    labelEditor.setText("")
-                    listener?.onNeutralButtonClick(dialogInterface)
-                }
                 .setOnCancelListener { currentLabel = lastLabel }
 
         return dialog.create()
     }
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.putString(CURRENT_LABEL, labelEditor.text.toString())
+        outState.putString(CURRENT_LABEL, binding.label.text.toString())
     }
 
     fun setOnDialogEventListener(listener: OnDialogEventListener) {

@@ -453,27 +453,29 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         else showMessage(TYPE_RECYCLER_VIEW)
     }
 
+    // TODO: Item is not visible when visibility is set to GONE
+    //  after item restored after remove for only first item is on the list
     private fun showMessage(type: Int) {
         when(type) {
             TYPE_EMPTY -> {
-                binding.alarmList.visibility = View.GONE
+                binding.alarmList.visibility = View.INVISIBLE
                 binding.listEmpty.visibility = View.VISIBLE
-                binding.retry.visibility = View.GONE
+                binding.retry.visibility = View.INVISIBLE
             }
             TYPE_RETRY -> {
-                binding.alarmList.visibility = View.GONE
-                binding.listEmpty.visibility = View.GONE
+                binding.alarmList.visibility = View.INVISIBLE
+                binding.listEmpty.visibility = View.INVISIBLE
                 binding.retry.visibility = View.VISIBLE
             }
             TYPE_RECYCLER_VIEW -> {
                 binding.alarmList.visibility = View.VISIBLE
-                binding.listEmpty.visibility = View.GONE
+                binding.listEmpty.visibility = View.INVISIBLE
                 binding.retry.visibility = View.INVISIBLE
             }
             else -> {
-                binding.alarmList.visibility = View.GONE
-                binding.listEmpty.visibility = View.GONE
-                binding.retry.visibility = View.GONE
+                binding.alarmList.visibility = View.INVISIBLE
+                binding.listEmpty.visibility = View.INVISIBLE
+                binding.retry.visibility = View.INVISIBLE
             }
         }
     }

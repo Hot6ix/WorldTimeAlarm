@@ -285,7 +285,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
         Snackbar.make(fragmentLayout, resources.getString(R.string.clock_removed, getNameForTimeZone(removedItem?.timezone)), Snackbar.LENGTH_LONG).setAction(resources.getString(R.string.undo)) {
             removedItem?.let { clockItem ->
-                runBlocking(coroutineContext) {
+                launch(coroutineContext) {
                     val newId = db.clockItemDao().insert(clockItem)
                     clockItem.apply {
                         id = newId.toInt()

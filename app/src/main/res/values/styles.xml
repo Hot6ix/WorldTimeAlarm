@@ -79,12 +79,4 @@
         <item name="android:textSize">@dimen/text_large</item>
     </style>
 
-    <style name="DayRecurrenceItem" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-    </style>
-
 </resources>
