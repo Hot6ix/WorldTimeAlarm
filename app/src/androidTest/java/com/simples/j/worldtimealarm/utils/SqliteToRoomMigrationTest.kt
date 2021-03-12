@@ -58,6 +58,11 @@ class SqliteToRoomMigrationTest {
     fun terminate() {
     }
 
+    /*
+        To test migration from SQLite to Room,
+        must delete app before each test start
+    */
+
     @Test
     fun migrateSqlite_Room_4_8() {
         val db = TestDatabase(InstrumentationRegistry.getInstrumentation().targetContext, 4)
@@ -125,10 +130,6 @@ class SqliteToRoomMigrationTest {
                     db?.execSQL("CREATE TABLE $TABLE_CLOCK_LIST ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                             "$COLUMN_TIME_ZONE TEXT, " +
                             "$COLUMN_INDEX INTEGER);")
-
-                    db?.execSQL("CREATE TABLE $TABLE_USER_RINGTONE ($COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "$COLUMN_TITLE TEXT, " +
-                            "$COLUMN_URI TEXT);")
                 }
                 5 -> {
                     println("Create database with version 5")
