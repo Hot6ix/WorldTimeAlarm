@@ -52,7 +52,9 @@ class SqliteToRoomMigrationTest {
     )
 
     @Before
-    fun init() {}
+    fun init() {
+
+    }
 
     @After
     fun terminate() {
@@ -66,7 +68,7 @@ class SqliteToRoomMigrationTest {
     @Test
     fun migrateSqlite_Room_4_8() {
         val db = TestDatabase(InstrumentationRegistry.getInstrumentation().targetContext, 4)
-        val w = db.writableDatabase
+        db.insertSampleData()
 
         helper.runMigrationsAndValidate(TEST_DB, 8, true, AppDatabase.MIGRATION_4_8)
     }
@@ -74,7 +76,7 @@ class SqliteToRoomMigrationTest {
     @Test
     fun migrateSqlite_Room_5_8() {
         val db = TestDatabase(InstrumentationRegistry.getInstrumentation().targetContext, 5)
-        val w = db.writableDatabase
+        db.insertSampleData()
 
         helper.runMigrationsAndValidate(TEST_DB, 8, true, AppDatabase.MIGRATION_5_8)
     }
@@ -82,28 +84,9 @@ class SqliteToRoomMigrationTest {
     @Test
     fun migrateSqlite_Room_7_8() {
         val db = TestDatabase(InstrumentationRegistry.getInstrumentation().targetContext, 7)
-        val w = db.writableDatabase
+        db.insertSampleData()
 
         helper.runMigrationsAndValidate(TEST_DB, 8, true, AppDatabase.MIGRATION_7_8)
-    }
-
-    @Throws(IOException::class)
-    fun migrateAll() {
-        helper.createDatabase(TEST_DB, 7).apply {
-            close()
-        }
-
-        // Open latest version of the database. Room will validate the schema
-        // once all migrations execute.
-        Room.databaseBuilder(
-                InstrumentationRegistry.getInstrumentation().targetContext,
-                AppDatabase::class.java,
-                TEST_DB
-        ).addMigrations(AppDatabase.MIGRATION_7_8).build().apply {
-            openHelper.writableDatabase
-            close()
-        }
-
     }
 
     // create test database
@@ -209,7 +192,10 @@ class SqliteToRoomMigrationTest {
                     put(COLUMN_INDEX, alarm.index)
                     put(COLUMN_START_DATE, alarm.startDate)
                     put(COLUMN_END_DATE, alarm.endDate)
-                    put(COLUMN_PICKER_TIME, alarm.pickerTime)
+
+                    if(version > 5) {
+                        put(COLUMN_PICKER_TIME, alarm.pickerTime)
+                    }
                 }
                 it.insert(TABLE_ALARM_LIST, null, alarmCv)
 
