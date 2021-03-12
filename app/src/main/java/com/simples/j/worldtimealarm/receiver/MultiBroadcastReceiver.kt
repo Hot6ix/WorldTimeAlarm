@@ -41,7 +41,7 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .addMigrations(AppDatabase.MIGRATION_7_8)
+                .addMigrations(AppDatabase.MIGRATION_4_8, AppDatabase.MIGRATION_5_8, AppDatabase.MIGRATION_7_8)
                 .build()
 
         // set up notification
