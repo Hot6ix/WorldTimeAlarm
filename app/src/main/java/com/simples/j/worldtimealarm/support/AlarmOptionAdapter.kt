@@ -30,7 +30,7 @@ class AlarmOptionAdapter(private val options: ArrayList<OptionItem>, private val
         holder.title.text = options[position].title
         holder.summary.text = options[position].summary
 
-        // colorTag doesn't use anymore.
+        // app doesn't use colorTag anymore.
 //        if(position == options.lastIndex) {
 //            if(options[position].summary == "0") {
 //                holder.summary.text = context.resources.getString(R.string.no_set)

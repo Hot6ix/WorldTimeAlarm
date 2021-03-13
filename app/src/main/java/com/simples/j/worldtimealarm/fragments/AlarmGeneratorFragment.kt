@@ -73,6 +73,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         crashlytics.recordException(throwable)
         if(activity?.isFinishing == false) {
             Toast.makeText(context, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
+            activity?.finish()
         }
     }
 
