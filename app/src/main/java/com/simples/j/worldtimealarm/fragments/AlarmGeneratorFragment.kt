@@ -122,71 +122,69 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             snoozeList = MediaCursor.getSnoozeList(fragmentContext)
 
             // init values
-            if (savedInstanceState == null) {
-                viewModel.alarmItem.let {
-                    if (it != null) {
-                        viewModel.timeZone.value = it.timeZone.replace(" ", "_")
-                        now = ZonedDateTime.now(ZoneId.of(viewModel.timeZone.value))
+            viewModel.alarmItem.let {
+                if (it != null) {
+                    viewModel.timeZone.value = it.timeZone.replace(" ", "_")
+                    now = ZonedDateTime.now(ZoneId.of(viewModel.timeZone.value))
 
-                        val instant = Instant.ofEpochMilli(it.pickerTime)
-                        val local = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
-                        viewModel.remoteZonedDateTime = local.withZoneSameInstant(ZoneId.of(it.timeZone))
+                    val instant = Instant.ofEpochMilli(it.pickerTime)
+                    val local = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault())
+                    viewModel.remoteZonedDateTime = local.withZoneSameInstant(ZoneId.of(it.timeZone))
 
-                        it.startDate?.let { startDateInMillis ->
-                            if (startDateInMillis > 0) {
-                                val startInstant = Instant.ofEpochMilli(startDateInMillis)
-                                viewModel.startDate = ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
-                                        .withHour(viewModel.remoteZonedDateTime.hour)
-                                        .withMinute(viewModel.remoteZonedDateTime.minute)
-                            }
+                    it.startDate?.let { startDateInMillis ->
+                        if (startDateInMillis > 0) {
+                            val startInstant = Instant.ofEpochMilli(startDateInMillis)
+                            viewModel.startDate = ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
+                                    .withHour(viewModel.remoteZonedDateTime.hour)
+                                    .withMinute(viewModel.remoteZonedDateTime.minute)
                         }
-
-                        it.endDate?.let { endDateInMillis ->
-                            if (endDateInMillis > 0) {
-                                val endInstant = Instant.ofEpochMilli(endDateInMillis)
-                                viewModel.endDate = ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
-                                        .withHour(viewModel.remoteZonedDateTime.hour)
-                                        .withMinute(viewModel.remoteZonedDateTime.minute)
-                            }
-                        }
-
-                        viewModel.startDate.let { start ->
-                            if (start == null) {
-                                viewModel.remoteZonedDateTime =
-                                        viewModel.remoteZonedDateTime
-                                                .withYear(now.year)
-                                                .withMonth(now.monthValue)
-                                                .withDayOfMonth(now.dayOfMonth)
-                            } else {
-                                viewModel.remoteZonedDateTime =
-                                        viewModel.remoteZonedDateTime
-                                                .withYear(start.year)
-                                                .withMonth(start.monthValue)
-                                                .withDayOfMonth(start.dayOfMonth)
-                            }
-                        }
-
-                        // recurrences
-                        viewModel.recurrences.value = it.repeat
-
-                        // options
-                        viewModel.ringtone.value = ringtoneList.find { item -> item.uri == it.ringtone } ?: defaultRingtone
-                        viewModel.vibration.value = vibratorPatternList.find { item ->
-                            if (item.array == null && it.vibration == null) true
-                            else item.array?.contentEquals(it.vibration ?: longArrayOf(0)) ?: false
-                        }
-                        viewModel.snooze.value = snoozeList.find { item -> item.duration == it.snooze }
-                        viewModel.label.value = it.label
-                        viewModel.colorTag.value = it.colorTag
                     }
-                    else {
-                        viewModel.timeZone.value = TimeZone.getDefault().id
-                        now = ZonedDateTime.now(ZoneId.systemDefault())
 
-                        viewModel.ringtone.value = defaultRingtone
-                        viewModel.vibration.value = vibratorPatternList[0]
-                        viewModel.snooze.value = snoozeList[0]
+                    it.endDate?.let { endDateInMillis ->
+                        if (endDateInMillis > 0) {
+                            val endInstant = Instant.ofEpochMilli(endDateInMillis)
+                            viewModel.endDate = ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
+                                    .withHour(viewModel.remoteZonedDateTime.hour)
+                                    .withMinute(viewModel.remoteZonedDateTime.minute)
+                        }
                     }
+
+                    viewModel.startDate.let { start ->
+                        if (start == null) {
+                            viewModel.remoteZonedDateTime =
+                                    viewModel.remoteZonedDateTime
+                                            .withYear(now.year)
+                                            .withMonth(now.monthValue)
+                                            .withDayOfMonth(now.dayOfMonth)
+                        } else {
+                            viewModel.remoteZonedDateTime =
+                                    viewModel.remoteZonedDateTime
+                                            .withYear(start.year)
+                                            .withMonth(start.monthValue)
+                                            .withDayOfMonth(start.dayOfMonth)
+                        }
+                    }
+
+                    // recurrences
+                    viewModel.recurrences.value = it.repeat
+
+                    // options
+                    viewModel.ringtone.value = ringtoneList.find { item -> item.uri == it.ringtone } ?: defaultRingtone
+                    viewModel.vibration.value = vibratorPatternList.find { item ->
+                        if (item.array == null && it.vibration == null) true
+                        else item.array?.contentEquals(it.vibration ?: longArrayOf(0)) ?: false
+                    }
+                    viewModel.snooze.value = snoozeList.find { item -> item.duration == it.snooze }
+                    viewModel.label.value = it.label
+                    viewModel.colorTag.value = it.colorTag
+                }
+                else {
+                    viewModel.timeZone.value = TimeZone.getDefault().id
+                    now = ZonedDateTime.now(ZoneId.systemDefault())
+
+                    viewModel.ringtone.value = defaultRingtone
+                    viewModel.vibration.value = vibratorPatternList[0]
+                    viewModel.snooze.value = snoozeList[0]
                 }
             }
 

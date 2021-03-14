@@ -104,6 +104,7 @@ class DatabaseManager(val context: Context): SQLiteOpenHelper(context, DB_NAME, 
         const val COLUMN_URI = "uri"
         const val COLUMN_PICKER_TIME = "picker_time"
         const val COLUMN_ALARM_ID = "alarm_id"
+        const val COLUMN_DAY_OF_WEEK_ORDINAL = "day_of_week_ordinal"
     }
 
 }

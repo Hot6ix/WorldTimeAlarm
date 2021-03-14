@@ -36,7 +36,8 @@ abstract class AppDatabase: RoomDatabase() {
                         "${DatabaseManager.COLUMN_INDEX} INTEGER," +
                         "${DatabaseManager.COLUMN_START_DATE} INTEGER," +
                         "${DatabaseManager.COLUMN_END_DATE} INTEGER," +
-                        "${DatabaseManager.COLUMN_PICKER_TIME} INTEGER NOT NULL" +
+                        "${DatabaseManager.COLUMN_PICKER_TIME} INTEGER NOT NULL," +
+                        "${DatabaseManager.COLUMN_DAY_OF_WEEK_ORDINAL} TEXT" +
                         ");")
 
                 database.execSQL("INSERT INTO TMP_ALARM_LIST (" +
@@ -171,7 +172,8 @@ abstract class AppDatabase: RoomDatabase() {
                         "${DatabaseManager.COLUMN_INDEX} INTEGER," +
                         "${DatabaseManager.COLUMN_START_DATE} INTEGER," +
                         "${DatabaseManager.COLUMN_END_DATE} INTEGER," +
-                        "${DatabaseManager.COLUMN_PICKER_TIME} INTEGER NOT NULL" +
+                        "${DatabaseManager.COLUMN_PICKER_TIME} INTEGER NOT NULL," +
+                        "${DatabaseManager.COLUMN_DAY_OF_WEEK_ORDINAL} TEXT" +
                         ");")
 
                 database.execSQL("INSERT INTO TMP_ALARM_LIST (" +
@@ -319,7 +321,8 @@ abstract class AppDatabase: RoomDatabase() {
                         "${DatabaseManager.COLUMN_INDEX} INTEGER," +
                         "${DatabaseManager.COLUMN_START_DATE} INTEGER," +
                         "${DatabaseManager.COLUMN_END_DATE} INTEGER," +
-                        "${DatabaseManager.COLUMN_PICKER_TIME} INTEGER NOT NULL" +
+                        "${DatabaseManager.COLUMN_PICKER_TIME} INTEGER NOT NULL," +
+                        "${DatabaseManager.COLUMN_DAY_OF_WEEK_ORDINAL} TEXT" +
                         ");")
 
                 database.execSQL("INSERT INTO TMP_ALARM_LIST (" +

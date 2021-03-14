@@ -1,12 +1,12 @@
 package com.simples.j.worldtimealarm.etc
 
-import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.DatabaseManager
+import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -16,6 +16,7 @@ import org.threeten.bp.ZonedDateTime
  * Created by j on 26/02/2018.
  *
  */
+@Parcelize
 @Entity(tableName = DatabaseManager.TABLE_ALARM_LIST)
 data class AlarmItem(
         @PrimaryKey var id: Int?,
@@ -32,7 +33,8 @@ data class AlarmItem(
         @ColumnInfo(name = DatabaseManager.COLUMN_INDEX) var index: Int?,
         @ColumnInfo(name = DatabaseManager.COLUMN_START_DATE) var startDate: Long? = null,
         @ColumnInfo(name = DatabaseManager.COLUMN_END_DATE) var endDate: Long? = null,
-        @ColumnInfo(name = DatabaseManager.COLUMN_PICKER_TIME) var pickerTime: Long
+        @ColumnInfo(name = DatabaseManager.COLUMN_PICKER_TIME) var pickerTime: Long,
+        @ColumnInfo(name = DatabaseManager.COLUMN_DAY_OF_WEEK_ORDINAL) var dayOfWeekOrdinal: Array<Pair<Int, IntArray>>? = null
 ) : Parcelable {
 
     override fun toString(): String {
@@ -46,43 +48,7 @@ data class AlarmItem(
 
     override fun hashCode() = repeat.contentHashCode()
 
-    constructor(source: Parcel) : this(
-            source.readValue(Int::class.java.classLoader) as Int?,
-            source.readString().toString(),
-            source.readString().toString(),
-            source.createIntArray() ?: IntArray(7) { 0 },
-            source.readString(),
-            source.createLongArray(),
-            source.readLong(),
-            source.readString(),
-            source.readInt(),
-            source.readInt(),
-            source.readInt(),
-            source.readValue(Int::class.java.classLoader) as Int?,
-            source.readValue(Long::class.java.classLoader) as Long?,
-            source.readValue(Long::class.java.classLoader) as Long?,
-            source.readLong()
-    )
-
     override fun describeContents() = 0
-
-    override fun writeToParcel(dest: Parcel, flags: Int) = with(dest) {
-        writeValue(id)
-        writeString(timeZone)
-        writeString(timeSet)
-        writeIntArray(repeat)
-        writeString(ringtone)
-        writeLongArray(vibration)
-        writeLong(snooze)
-        writeString(label)
-        writeInt(on_off)
-        writeInt(notiId)
-        writeInt(colorTag)
-        writeValue(index)
-        writeValue(startDate)
-        writeValue(endDate)
-        writeLong(pickerTime)
-    }
 
     fun isInstantAlarm(): Boolean = repeat.all { it == 0 } && (endDate == null || endDate == 0L)
 
@@ -142,12 +108,6 @@ data class AlarmItem(
     }
 
     companion object {
-        @JvmField
-        val CREATOR: Parcelable.Creator<AlarmItem> = object : Parcelable.Creator<AlarmItem> {
-            override fun createFromParcel(source: Parcel): AlarmItem = AlarmItem(source)
-            override fun newArray(size: Int): Array<AlarmItem?> = arrayOfNulls(size)
-        }
-
         const val ALARM_ITEM_STATUS = "ALARM_ITEM_STATUS"
         const val WARNING = "WARNING"
         const val REASON = "REASON"
