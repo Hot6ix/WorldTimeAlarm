@@ -4,6 +4,7 @@ import android.content.Context
 import android.icu.util.TimeZone
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.filters.MediumTest
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
@@ -20,6 +21,7 @@ import org.threeten.bp.ZonedDateTime
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
+@MediumTest
 class AlarmControllerSimpleTest {
 
     private lateinit var context: Context

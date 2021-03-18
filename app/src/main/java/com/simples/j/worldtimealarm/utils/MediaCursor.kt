@@ -19,14 +19,14 @@ import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.*
 import org.threeten.bp.DayOfWeek
 import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.temporal.ChronoField
+import org.threeten.bp.temporal.TemporalAdjusters
 import org.threeten.bp.temporal.WeekFields
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
-import kotlin.collections.LinkedHashSet
 import kotlin.math.absoluteValue
 
 
@@ -49,7 +49,7 @@ class MediaCursor {
 
             try {
                 val cursor = ringtoneManager.cursor
-                while(cursor.moveToNext()) {
+                while (cursor.moveToNext()) {
                     array.add(RingtoneItem(title = cursor.getString(RingtoneManager.TITLE_COLUMN_INDEX), uri = ringtoneManager.getRingtoneUri(cursor.position).toString()))
                 }
             } catch (e: SecurityException) {
@@ -66,7 +66,7 @@ class MediaCursor {
             val vibratorTitle = context.resources.getStringArray(R.array.vibrator_name)
 
             var index = 0
-            while(index < vibrators.length()) {
+            while (index < vibrators.length()) {
                 val pattern = context.resources.getIntArray(vibrators.getResourceId(index, 0))
                 val temp = LongArray(pattern.size)
                 pattern.forEachIndexed { position, i ->
@@ -92,7 +92,7 @@ class MediaCursor {
         }
 
         fun getOffsetOfDifference(context: Context, difference: Int, type: Int): String {
-            val offsetText = if(difference < 0) context.resources.getString(R.string.slow)
+            val offsetText = if (difference < 0) context.resources.getString(R.string.slow)
             else context.resources.getString(R.string.fast)
 
             val hours = TimeUnit.MILLISECONDS.toHours(difference.toLong()).absoluteValue
@@ -100,10 +100,10 @@ class MediaCursor {
 
             return when {
                 hours > 0 && minutes > 0 -> context.getString(R.string.hours_minutes, hours, minutes) + offsetText // hours & minutes
-                hours == 1L && minutes > 0 ->  context.getString(R.string.hour_minutes).format(hours, minutes) + offsetText // hour & minutes
+                hours == 1L && minutes > 0 -> context.getString(R.string.hour_minutes).format(hours, minutes) + offsetText // hour & minutes
                 hours == 1L -> context.getString(R.string.hour, hours) + offsetText // hour
                 hours > 0 && minutes.toInt() == 0 -> context.getString(R.string.hours, hours) + offsetText // hours
-                hours == 0L && minutes > 0-> context.getString(R.string.minutes, minutes) + offsetText // minutes
+                hours == 0L && minutes > 0 -> context.getString(R.string.minutes, minutes) + offsetText // minutes
                 hours == 0L && minutes.toInt() == 0 && type == TYPE_CURRENT -> context.getString(R.string.same_as_current) // same as current
                 hours == 0L && minutes.toInt() == 0 && type == TYPE_CONVERTER -> context.getString(R.string.same_as_set) // same as current
                 else -> ""
@@ -115,19 +115,18 @@ class MediaCursor {
             var difference = calendar.timeInMillis - today.timeInMillis
 
             val daysInYear =
-                    if(calendar.get(Calendar.YEAR) != today.get(Calendar.YEAR)) {
+                    if (calendar.get(Calendar.YEAR) != today.get(Calendar.YEAR)) {
                         val tmpCal = today.clone() as Calendar
                         var tmpMax = calendar.getActualMaximum(Calendar.DAY_OF_YEAR)
                         // this loop is for handle leap year
-                        while(tmpCal.get(Calendar.YEAR) <= calendar.get(Calendar.YEAR)) {
-                            if(tmpCal.getActualMaximum(Calendar.DAY_OF_YEAR) > tmpMax) {
+                        while (tmpCal.get(Calendar.YEAR) <= calendar.get(Calendar.YEAR)) {
+                            if (tmpCal.getActualMaximum(Calendar.DAY_OF_YEAR) > tmpMax) {
                                 tmpMax = tmpCal.getActualMaximum(Calendar.DAY_OF_YEAR)
                             }
                             tmpCal.add(Calendar.YEAR, 1)
                         }
                         tmpMax
-                    }
-                    else {
+                    } else {
                         calendar.getActualMaximum(Calendar.DAY_OF_YEAR)
                     }
 
@@ -144,7 +143,7 @@ class MediaCursor {
             val dateFormat = StringBuilder().apply {
                 append(
                         when {
-                            years == 1L-> context.getString(R.string.year, years)
+                            years == 1L -> context.getString(R.string.year, years)
                             years > 1 -> context.getString(R.string.years, years)
                             else -> ""
                         }
@@ -168,10 +167,9 @@ class MediaCursor {
                             minutes == 1L -> context.getString(R.string.minute, minutes)
                             minutes > 1 -> context.getString(R.string.minutes, minutes)
                             else -> {
-                                if(this.isEmpty()) {
+                                if (this.isEmpty()) {
                                     context.getString(R.string.less_than_a_minute)
-                                }
-                                else {
+                                } else {
                                     ""
                                 }
                             }
@@ -191,7 +189,7 @@ class MediaCursor {
 
         @RequiresApi(Build.VERSION_CODES.N)
         fun getCountryNameByTimeZone(timeZone: TimeZone?, uLocale: ULocale = ULocale.getDefault()): String {
-            if(timeZone == null) {
+            if (timeZone == null) {
                 Log.d(C.TAG, "Given timeZone is empty, return nothing.")
                 return ""
             }
@@ -210,7 +208,7 @@ class MediaCursor {
             val javaTimeZone = java.util.TimeZone.getAvailableIDs()
             val list = ArrayList<TimeZoneInfo>()
             TimeZone.getAvailableIDs(country).forEach {
-                if(javaTimeZone.contains(it)) {
+                if (javaTimeZone.contains(it)) {
                     val timeZone = TimeZone.getTimeZone(it)
                     val timeZoneInfo = TimeZoneInfo.Formatter(uLocale.toLocale(), Date()).format(timeZone)
 
@@ -223,7 +221,7 @@ class MediaCursor {
 
         @RequiresApi(Build.VERSION_CODES.N)
         fun getGmtOffsetString(locale: Locale, timeZone: TimeZone?, now: Date): String {
-            if(timeZone == null) return ""
+            if (timeZone == null) return ""
             val gmtFormatter = SimpleDateFormat("ZZZZ", Locale.getDefault()).apply {
                 this.timeZone = timeZone
             }
@@ -232,20 +230,20 @@ class MediaCursor {
             val bidiFormatter = BidiFormatter.getInstance()
             val isRtl = TextUtils.getLayoutDirectionFromLocale(locale) == View.LAYOUT_DIRECTION_RTL
 
-            gmtString = bidiFormatter.unicodeWrap(gmtString, if(isRtl) TextDirectionHeuristics.RTL else TextDirectionHeuristics.LTR)
+            gmtString = bidiFormatter.unicodeWrap(gmtString, if (isRtl) TextDirectionHeuristics.RTL else TextDirectionHeuristics.LTR)
             return gmtString
         }
 
         @RequiresApi(Build.VERSION_CODES.N)
         fun getBestNameForTimeZone(timeZone: TimeZone?): String {
-            if(timeZone == null) return ""
+            if (timeZone == null) return ""
 
             val timeZoneInfo = TimeZoneInfo.Formatter(Locale.getDefault(), Date()).format(timeZone)
 
             var name = timeZoneInfo.mExemplarName
-            if(name == null) {
+            if (name == null) {
                 name =
-                        if(timeZoneInfo.mTimeZone.inDaylightTime(Date())) timeZoneInfo.mDaylightName
+                        if (timeZoneInfo.mTimeZone.inDaylightTime(Date())) timeZoneInfo.mDaylightName
                         else timeZoneInfo.mStandardName
             }
             return name ?: timeZone.id
@@ -265,7 +263,7 @@ class MediaCursor {
         }
 
         fun getDayDifference(cal1: Calendar, cal2: Calendar, ignoreTime: Boolean): Long {
-            if(cal1.timeInMillis != cal2.timeInMillis && ignoreTime) {
+            if (cal1.timeInMillis != cal2.timeInMillis && ignoreTime) {
                 cal1.set(Calendar.HOUR_OF_DAY, cal2.get(Calendar.HOUR_OF_DAY))
                 cal1.set(Calendar.MINUTE, cal2.get(Calendar.MINUTE))
                 cal1.set(Calendar.SECOND, cal2.get(Calendar.SECOND))
@@ -279,21 +277,17 @@ class MediaCursor {
         fun getDstDifference(time: Date, timeZone: java.util.TimeZone): Int {
             var diff = 0
             val systemTimeZone = java.util.TimeZone.getDefault()
-            if(systemTimeZone.useDaylightTime() && timeZone.useDaylightTime()) {
-                if(systemTimeZone.inDaylightTime(time) && timeZone.inDaylightTime(time)) { // both system and item time zone are in dst
+            if (systemTimeZone.useDaylightTime() && timeZone.useDaylightTime()) {
+                if (systemTimeZone.inDaylightTime(time) && timeZone.inDaylightTime(time)) { // both system and item time zone are in dst
                     diff = systemTimeZone.dstSavings - timeZone.dstSavings
-                }
-                else if(systemTimeZone.inDaylightTime(time) && !timeZone.inDaylightTime(time)) { // only system time zone is in dst
+                } else if (systemTimeZone.inDaylightTime(time) && !timeZone.inDaylightTime(time)) { // only system time zone is in dst
                     diff = systemTimeZone.dstSavings
-                }
-                else if(!systemTimeZone.inDaylightTime(time) && timeZone.inDaylightTime(time)) { // only item time zone is in dst
+                } else if (!systemTimeZone.inDaylightTime(time) && timeZone.inDaylightTime(time)) { // only item time zone is in dst
                     diff = -timeZone.dstSavings
                 }
-            }
-            else if(systemTimeZone.useDaylightTime() && !timeZone.useDaylightTime()) {
+            } else if (systemTimeZone.useDaylightTime() && !timeZone.useDaylightTime()) {
                 diff = systemTimeZone.dstSavings
-            }
-            else if(!systemTimeZone.useDaylightTime() && timeZone.useDaylightTime()) {
+            } else if (!systemTimeZone.useDaylightTime() && timeZone.useDaylightTime()) {
                 diff = -timeZone.dstSavings
             }
 
@@ -332,11 +326,11 @@ class MediaCursor {
             val weekDaysInLocale = ArrayList<DayOfWeek>()
 
             var dayOfWeekValue = weekDays[weekDays.indexOf(firstDayOfWeek)].value
-            for(i in weekDays.indices) {
+            for (i in weekDays.indices) {
                 weekDaysInLocale.add(DayOfWeek.of(dayOfWeekValue))
 
                 dayOfWeekValue++
-                if(dayOfWeekValue > 7) dayOfWeekValue = 1
+                if (dayOfWeekValue > 7) dayOfWeekValue = 1
             }
 
             return weekDaysInLocale
@@ -344,10 +338,98 @@ class MediaCursor {
 
         fun getDayOfWeekValueFromCalendarToThreeTenBp(old: Int): Int {
             var converted = old - 1
-            if(converted == 0) converted = 7
+            if (converted == 0) converted = 7
 
             return converted
         }
-    }
 
+        fun getAvailableDayOfWeekOrdinal(given: Pair<Int, Int>, array: List<Pair<Int, Int>>, ignoreGiven: Boolean = false): List<Pair<Int, Int>> {
+            if (array.isEmpty()) return emptyList()
+
+            val list = array.toMutableList()
+
+            if (ignoreGiven) list.remove(given)
+
+            // filter ordinal
+            val sameOrAfterWeekOrdinal = list.filter { it.second >= given.second }
+            return if (sameOrAfterWeekOrdinal.isEmpty()) {
+                array.filter {
+                    it.second == array.minByOrNull { o -> o.second }?.second
+                }
+            } else {
+                if (sameOrAfterWeekOrdinal.all { it.second == 5 }) {
+                    val lowestAvailable = array.filter {
+                        it.second == array.minByOrNull { o -> o.second }?.second
+                    }
+
+                    lowestAvailable.toMutableList().apply {
+                        addAll(sameOrAfterWeekOrdinal.sortedBy { it.second })
+                    }.distinct()
+                } else {
+                    sameOrAfterWeekOrdinal.sortedBy { it.second }
+                }
+            }
+        }
+
+        fun filterLowestInOrdinal(array: List<Pair<Int, Int>>): List<Pair<Int, Int>> {
+            val list = ArrayList<Pair<Int, Int>>()
+            array.groupBy {
+                it.second
+            }.forEach { (_, u) ->
+                u.minByOrNull { it.first }?.let {
+                    list.add(it)
+                }
+            }
+
+            return list
+        }
+
+        fun filterLowestAndHighest(array: List<Pair<Int, Int>>): List<Pair<Int, Int>>? {
+            if (array.isEmpty()) return null
+
+            val list = array.sortedBy { it.second }
+
+            return if (list.size > 1) {
+                listOf(list.first(), list.last())
+            } else listOf(list.first(), list.first())
+        }
+
+        fun flatOrdinal(array: Array<Pair<Int, IntArray>>): ArrayList<Pair<Int, Int>> {
+            val list = ArrayList<Pair<Int, Int>>()
+            array.forEach { pair ->
+                val flatted = pair.second.map {
+                    Pair(pair.first, it)
+                }
+
+                list.addAll(flatted)
+            }
+
+            list.sortBy {
+                it.second
+            }
+
+            return list
+        }
+
+        fun findBest(atLeast: ZonedDateTime, start: ZonedDateTime, array: List<Pair<Int, Int>>): ZonedDateTime {
+            if (array.isEmpty()) throw Exception("list is empty")
+
+            var date = start
+
+            val result = array.map {
+                Pair(it.second, start.with(TemporalAdjusters.dayOfWeekInMonth(it.second, DayOfWeek.of(it.first))))
+            }.filter {
+                it.second.isAfter(atLeast) && it.second.get(ChronoField.ALIGNED_WEEK_OF_MONTH) == it.first
+            }.minByOrNull {
+                it.second.toInstant().toEpochMilli()
+            }
+
+            return if (result == null) {
+                date = date.plusMonths(1)
+                findBest(atLeast, date, array)
+            } else {
+                result.second
+            }
+        }
+    }
 }

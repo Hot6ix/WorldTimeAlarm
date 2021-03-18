@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.utils
 import android.content.Context
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.filters.MediumTest
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
@@ -32,6 +33,8 @@ import java.util.*
 * Time zone:
 * Day of week:
 */
+
+@MediumTest
 class AlarmControllerSingleRepeatingAndroidTest {
 
     private lateinit var context: Context

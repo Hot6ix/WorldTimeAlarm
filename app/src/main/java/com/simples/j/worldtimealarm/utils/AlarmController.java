@@ -24,6 +24,7 @@ import org.threeten.bp.ZoneId;
 import org.threeten.bp.ZonedDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 import org.threeten.bp.format.FormatStyle;
+import org.threeten.bp.temporal.ChronoField;
 import org.threeten.bp.temporal.TemporalAdjusters;
 
 import java.text.DateFormat;
@@ -31,8 +32,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import kotlin.Pair;
 
 /**
  * Created by j on 28/02/2018.
@@ -102,6 +106,15 @@ public class AlarmController {
                 }
                 Collections.sort(repeat);
 
+                ArrayList<Pair<Integer, Integer>> flattened = null;
+                if(item.getDayOfWeekOrdinal() != null)
+                    flattened = MediaCursor.Companion.flatOrdinal(item.getDayOfWeekOrdinal());
+
+                Pair<Integer, Integer> targetOrdinal = new Pair<>(
+                        start.getDayOfWeek().getValue(),
+                        start.get(ChronoField.ALIGNED_WEEK_OF_MONTH)
+                );
+
                 DayOfWeek nextDayOfWeek;
 
                 if(start.isAfter(now)) {
@@ -114,31 +127,53 @@ public class AlarmController {
                 boolean isContained = repeat.contains(nextDayOfWeek);
 
                 if(isContained) {
-                    // currentDay is contained in repeat
-                    if(now.isAfter(target) || now.isEqual(target)) {
-                        if(nextDayOfWeek == repeat.get(repeat.size() - 1))
-                            nextDayOfWeek = repeat.get(0);
-                        else
-                            nextDayOfWeek = repeat.get(repeat.indexOf(nextDayOfWeek) + 1);
+                    if(flattened == null) {
+                        // current day of week is in repeat
+                        if(now.isAfter(target) || now.isEqual(target)) {
+                            if(nextDayOfWeek == repeat.get(repeat.size() - 1))
+                                nextDayOfWeek = repeat.get(0);
+                            else
+                                nextDayOfWeek = repeat.get(repeat.indexOf(nextDayOfWeek) + 1);
+
+                            target = target.with(TemporalAdjusters.next(nextDayOfWeek));
+                        }
+                        else {
+                            target = target.with(TemporalAdjusters.nextOrSame(nextDayOfWeek));
+                        }
+                    }
+                    else {
+                        if(now.isAfter(target) || now.isEqual(target)) {
+                            List<Pair<Integer, Integer>> available = MediaCursor.Companion.getAvailableDayOfWeekOrdinal(targetOrdinal, flattened, true);
+
+                            target = MediaCursor.Companion.findBest(now, target, available);
+                        }
+                        else {
+                            List<Pair<Integer, Integer>> available = MediaCursor.Companion.getAvailableDayOfWeekOrdinal(targetOrdinal, flattened, false);
+
+                            target = MediaCursor.Companion.findBest(now, target, available);
+                        }
+                    }
+                }
+                else {
+                    if(flattened == null) {
+                        // simple repeat
+                        // current day of week is not in repeat
+                        // If today is not after from repeated day back to current week
+                        int nextIndex = nextDayOfWeek.getValue();
+                        while(!repeat.contains(nextDayOfWeek)) {
+                            nextIndex++;
+                            if(nextIndex > 7) nextIndex = 1;
+
+                            nextDayOfWeek = DayOfWeek.of(nextIndex);
+                        }
 
                         target = target.with(TemporalAdjusters.next(nextDayOfWeek));
                     }
                     else {
-                        target = target.with(TemporalAdjusters.nextOrSame(nextDayOfWeek));
-                    }
-                }
-                else {
-                    // currentDay is not contained in repeat
-                    // If today is not after from repeated day back to current week
-                    int nextIndex = nextDayOfWeek.getValue();
-                    while(!repeat.contains(nextDayOfWeek)) {
-                        nextIndex++;
-                        if(nextIndex > 7) nextIndex = 1;
+                        List<Pair<Integer, Integer>> available = MediaCursor.Companion.getAvailableDayOfWeekOrdinal(targetOrdinal, flattened, false);
 
-                        nextDayOfWeek = DayOfWeek.of(nextIndex);
+                        target = MediaCursor.Companion.findBest(now, target, available);
                     }
-
-                    target = target.with(TemporalAdjusters.next(nextDayOfWeek));
                 }
             }
             else {

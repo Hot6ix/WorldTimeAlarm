@@ -19,7 +19,8 @@ object TestUtils {
             index: Int = atomicIndex.getAndIncrement(),
             startDate: Long? = null,
             endDate: Long? = null,
-            pickerTime: Long = Calendar.getInstance().timeInMillis
+            pickerTime: Long = Calendar.getInstance().timeInMillis,
+            dayOfWeekOrdinal: Array<Pair<Int, IntArray>>? = null
     ): AlarmItem {
         return AlarmItem(
                 id = id,
@@ -36,7 +37,8 @@ object TestUtils {
                 index = index,
                 startDate = startDate,
                 endDate = endDate,
-                pickerTime = pickerTime
+                pickerTime = pickerTime,
+                dayOfWeekOrdinal = dayOfWeekOrdinal
         )
     }
 

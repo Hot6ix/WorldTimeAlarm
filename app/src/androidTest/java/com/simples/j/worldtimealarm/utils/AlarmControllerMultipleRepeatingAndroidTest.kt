@@ -3,6 +3,7 @@ package com.simples.j.worldtimealarm.utils
 import android.content.Context
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.filters.MediumTest
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
@@ -16,6 +17,7 @@ import org.threeten.bp.*
 import org.threeten.bp.temporal.TemporalAdjusters
 import java.util.*
 
+@MediumTest
 class AlarmControllerMultipleRepeatingAndroidTest {
 
     private lateinit var context: Context
