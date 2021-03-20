@@ -14,6 +14,7 @@ import com.simples.j.worldtimealarm.etc.SnoozeItem
 import com.simples.j.worldtimealarm.fragments.ContentSelectorFragment
 import com.simples.j.worldtimealarm.fragments.DatePickerFragment
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
+import java.time.LocalDate
 import java.util.*
 
 class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
@@ -57,13 +58,13 @@ class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickList
 
             viewModel.lastSelectedValue = intent.getSerializableExtra(LAST_SELECTED_KEY)
             intent.getLongExtra(START_DATE_KEY, -1).let {
-                viewModel.startDate.value =
-                        if(it > 0) it
+                viewModel.startDate =
+                        if(it > 0) LocalDate.ofEpochDay(it)
                         else null
             }
             intent.getLongExtra(END_DATE_KEY, -1).let {
-                viewModel.endDate.value =
-                        if(it > 0) it
+                viewModel.endDate =
+                        if(it > 0) LocalDate.ofEpochDay(it)
                         else null
             }
             viewModel.timeZone = intent.getStringExtra(TIME_ZONE_KEY) ?: TimeZone.getDefault().id

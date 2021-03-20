@@ -4,38 +4,49 @@ package com.simples.j.worldtimealarm.fragments
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
-import android.text.format.DateUtils
+import android.text.format.DateFormat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CalendarView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.tabs.TabLayout
+import androidx.recyclerview.widget.RecyclerView
+import com.kizitonwose.calendarview.model.CalendarDay
+import com.kizitonwose.calendarview.model.CalendarMonth
+import com.kizitonwose.calendarview.model.DayOwner
+import com.kizitonwose.calendarview.ui.DayBinder
+import com.kizitonwose.calendarview.ui.MonthHeaderFooterBinder
+import com.kizitonwose.calendarview.ui.ViewContainer
+import com.kizitonwose.calendarview.utils.yearMonth
 import com.simples.j.worldtimealarm.ContentSelectorActivity
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.databinding.FragmentDatePickerBinding
+import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
-import kotlinx.android.synthetic.main.fragment_date_picker.*
-import org.threeten.bp.Instant
-import org.threeten.bp.ZoneId
-import org.threeten.bp.ZonedDateTime
-import org.threeten.bp.format.DateTimeFormatter
-import org.threeten.bp.format.FormatStyle
+import com.simples.j.worldtimealarm.utils.MediaCursor
+import org.threeten.bp.format.TextStyle
+import java.time.*
+import java.time.format.DateTimeFormatter
+import java.time.temporal.WeekFields
+import java.util.*
 
 // https://stackoverflow.com/a/58659241
 // This fragment doesn't use view binding due to issue of tab items with view binding
-class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, CalendarView.OnDateChangeListener, View.OnClickListener {
+class DatePickerFragment : Fragment(), View.OnClickListener {
 
     private lateinit var fragmentContext: Context
     private lateinit var viewModel: ContentSelectorViewModel
-
-    private var startDateTab: TabLayout.Tab? = null
-    private var endDateTab: TabLayout.Tab? = null
+    private lateinit var binding: FragmentDatePickerBinding
 
     private var dateSet = ZonedDateTime.now()
+    private var currentMonth = YearMonth.now()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -44,8 +55,9 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_date_picker, container, false)
+                              savedInstanceState: Bundle?): View {
+        binding = FragmentDatePickerBinding.inflate(layoutInflater, container, false)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -57,78 +69,187 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
 
         dateSet = dateSet.withZoneSameInstant(ZoneId.of(viewModel.timeZone))
 
-        calendar.minDate = dateSet.toInstant().toEpochMilli()
-        calendar.setOnDateChangeListener(this)
+        // day header
+        binding.calendarView.dayBinder = object : DayBinder<DayViewContainer> {
+            override fun bind(container: DayViewContainer, day: CalendarDay) {
+                if(day.owner == DayOwner.THIS_MONTH) {
+                    container.textView.text = day.date.dayOfMonth.toString()
+                }
+                else {
+                    container.textView.text = null
+                }
 
-        when(viewModel.currentTab) {
-            0 -> {
-                setLocalizedDate(viewModel.startDate.value ?: System.currentTimeMillis())
+                val startDate = viewModel.startDate
+                val endDate = viewModel.endDate
+
+                when(day.owner) {
+                    DayOwner.THIS_MONTH -> {
+                        if(day.date.isBefore(dateSet.toLocalDate())) {
+                            container.textView.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorDisabled))
+                            container.roundView.setBackgroundResource(android.R.color.transparent)
+                            container.root.setBackgroundColor(ContextCompat.getColor(fragmentContext, android.R.color.transparent))
+                        }
+                        else {
+                            when {
+                                startDate != null && day.date.isEqual(startDate) && endDate == null -> {
+                                    container.textView.setTextColor(Color.WHITE)
+                                    container.roundView.setBackgroundResource(R.drawable.calendar_day_view_selected)
+                                }
+                                startDate != null && day.date.isEqual(startDate) -> {
+                                    container.textView.setTextColor(Color.WHITE)
+                                    container.root.setBackgroundColor(ContextCompat.getColor(fragmentContext, R.color.blueGrayDark))
+                                }
+                                startDate != null && endDate != null && (day.date.isAfter(startDate) && day.date.isBefore(endDate)) -> {
+                                    container.textView.setTextColor(Color.WHITE)
+                                    container.root.setBackgroundColor(ContextCompat.getColor(fragmentContext, R.color.blueGray))
+                                }
+                                endDate != null && day.date.isEqual(endDate) -> {
+                                    container.textView.setTextColor(Color.WHITE)
+                                    container.root.setBackgroundColor(ContextCompat.getColor(fragmentContext, R.color.blueGrayDark))
+                                }
+                                day.date.isEqual(dateSet.toLocalDate()) -> {
+                                    container.textView.setTextColor(Color.WHITE)
+                                    container.root.setBackgroundColor(ContextCompat.getColor(fragmentContext, R.color.color11))
+                                }
+                                else -> {
+                                    container.textView.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorEnabled))
+                                    container.roundView.setBackgroundResource(android.R.color.transparent)
+                                    container.root.setBackgroundColor(ContextCompat.getColor(fragmentContext, android.R.color.transparent))
+                                }
+                            }
+                        }
+                    }
+                    DayOwner.NEXT_MONTH -> {
+                        container.roundView.setBackgroundResource(android.R.color.transparent)
+                        if(startDate != null && endDate != null && highlightNextDate(day.date, startDate, endDate)) {
+                            container.root.setBackgroundColor(ContextCompat.getColor(fragmentContext, R.color.blueGray))
+                        }
+                        else {
+                            container.root.setBackgroundColor(ContextCompat.getColor(fragmentContext, android.R.color.transparent))
+                        }
+                    }
+                    DayOwner.PREVIOUS_MONTH -> {
+                        container.roundView.setBackgroundResource(android.R.color.transparent)
+                        if(startDate != null && endDate != null && highlightPrevDate(day.date, startDate, endDate)) {
+                            container.root.setBackgroundColor(ContextCompat.getColor(fragmentContext, R.color.blueGray))
+                        }
+                        else {
+                            container.root.setBackgroundColor(ContextCompat.getColor(fragmentContext, android.R.color.transparent))
+                        }
+                    }
+                }
+
+                container.root.setOnClickListener {
+                    if(day.date.isBefore(dateSet.toLocalDate())) {
+                        Toast.makeText(fragmentContext, "error", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    when {
+                        startDate == null && endDate == null -> {
+                            viewModel.startDate = day.date
+                        }
+                        endDate == null -> {
+                            if(day.date.isBefore(startDate)) {
+                                viewModel.endDate = viewModel.startDate
+                                viewModel.startDate = day.date
+                            }
+                            else {
+                                viewModel.endDate = day.date
+                            }
+                        }
+                        else -> {
+                            viewModel.startDate = day.date
+                            viewModel.endDate = null
+                        }
+                    }
+                    Log.d(C.TAG, "${viewModel.startDate}, ${viewModel.endDate}")
+
+                    binding.calendarView.notifyCalendarChanged()
+                }
             }
-            1 -> {
-                setLocalizedDate(viewModel.endDate.value ?: System.currentTimeMillis())
+
+            override fun create(view: View): DayViewContainer {
+                return DayViewContainer(view)
             }
+
         }
 
-        startDateTab = tab_layout.getTabAt(0)?.apply {
-            view.findViewById<TextView>(R.id.title)?.text = getString(R.string.range_start)
-        }
-        endDateTab = tab_layout.getTabAt(1)?.apply {
-            view.findViewById<TextView>(R.id.title)?.text = getString(R.string.range_end)
-        }
+        // month & day of week header
+        val dayOfWeek = MediaCursor.getWeekDaysInLocale()
+        binding.calendarView.monthHeaderBinder = object : MonthHeaderFooterBinder<MonthViewContainer> {
+            override fun bind(container: MonthViewContainer, month: CalendarMonth) {
+                if(month.yearMonth == YearMonth.of(dateSet.year, dateSet.monthValue)) {
+                    container.textView.setTypeface(container.textView.typeface, Typeface.BOLD)
+                }
+                else {
+                    container.textView.setTypeface(container.textView.typeface, Typeface.NORMAL)
+                }
 
-        tab_layout.getTabAt(viewModel.currentTab)?.select()
-        tab_layout.addOnTabSelectedListener(this)
+                val format = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy MMMM")
+                container.textView.text = month.yearMonth.format(DateTimeFormatter.ofPattern(format))
 
-        // Observe
-        viewModel.startDate.observe(viewLifecycleOwner, {
-            if(it == null || it < 0) {
-                setTabSummary(startDateTab, getString(R.string.range_not_set))
+                container.firstDayOfWeek.text = dayOfWeek[0].getDisplayName(TextStyle.NARROW, Locale.getDefault())
+                container.secondDayOfWeek.text = dayOfWeek[1].getDisplayName(TextStyle.NARROW, Locale.getDefault())
+                container.thirdDayOfWeek.text = dayOfWeek[2].getDisplayName(TextStyle.NARROW, Locale.getDefault())
+                container.fourthDayOfWeek.text = dayOfWeek[3].getDisplayName(TextStyle.NARROW, Locale.getDefault())
+                container.fifthDayOfWeek.text = dayOfWeek[4].getDisplayName(TextStyle.NARROW, Locale.getDefault())
+                container.sixthDayOfWeek.text = dayOfWeek[5].getDisplayName(TextStyle.NARROW, Locale.getDefault())
+                container.seventhDayOfWeek.text = dayOfWeek[6].getDisplayName(TextStyle.NARROW, Locale.getDefault())
             }
-            else {
-                setTabSummary(startDateTab, formatDate(it))
+
+            override fun create(view: View): MonthViewContainer {
+                return MonthViewContainer(view)
+            }
+
+        }
+
+        // set up calendar
+        binding.calendarView.apply {
+            setup(currentMonth, currentMonth.plusMonths(12), WeekFields.of(Locale.getDefault()).firstDayOfWeek)
+            scrollToMonth(currentMonth)
+        }
+
+        // endless scroll
+        binding.calendarView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                when {
+                    binding.calendarView.findFirstVisibleMonth()?.yearMonth == currentMonth.minusMonths(6) -> {
+                        currentMonth = currentMonth.minusMonths(6)
+
+                        when (currentMonth) {
+                            YearMonth.of(dateSet.year, dateSet.monthValue) -> {
+                                // do nothing
+                            }
+                            YearMonth.of(dateSet.year, dateSet.monthValue).plusMonths(6) -> {
+                                val now = YearMonth.of(dateSet.year, dateSet.monthValue)
+                                binding.calendarView.updateMonthRangeAsync(now, now.plusMonths(12))
+                            }
+                            else -> {
+                                binding.calendarView.updateMonthRangeAsync(currentMonth.minusMonths(6), currentMonth.plusMonths(6))
+                            }
+                        }
+                    }
+                    binding.calendarView.findLastVisibleMonth()?.yearMonth == currentMonth.plusMonths(6) -> {
+                        currentMonth = currentMonth.plusMonths(6)
+
+                        binding.calendarView.updateMonthRangeAsync(currentMonth.minusMonths(6), currentMonth.plusMonths(6))
+                    }
+                }
             }
         })
-        viewModel.endDate.observe(viewLifecycleOwner, {
-            if(it == null || it < 0) {
-                setTabSummary(endDateTab, getString(R.string.range_not_set))
-            }
-            else {
-                setTabSummary(endDateTab, formatDate(it))
-            }
-        })
 
-        action.setOnClickListener(this)
+        binding.action.setOnClickListener(this)
     }
 
     override fun onClick(view: View?) {
         when(view?.id) {
             R.id.action -> {
-                val s = viewModel.startDate.value
-                val e = viewModel.endDate.value
-
-                if(s != null && e != null) {
-                    if(s > 0 && e > 0) {
-                        if(s > e || s == e) {
-                            Snackbar.make(fragment_layout, getString(R.string.end_date_earlier_than_start_date), Snackbar.LENGTH_SHORT)
-                                    .setAnchorView(action)
-                                    .show()
-                            return
-                        }
-                    }
-                }
-
-                if(e != null && DateUtils.isToday(e)) {
-                    if(e > 0) {
-                        Snackbar.make(fragment_layout, getString(R.string.end_date_earlier_than_today), Snackbar.LENGTH_SHORT)
-                                .setAnchorView(action)
-                                .show()
-                        return
-                    }
-                }
-
                 val resultIntent = Intent().apply {
-                    putExtra(ContentSelectorActivity.START_DATE_KEY, viewModel.startDate.value)
-                    putExtra(ContentSelectorActivity.END_DATE_KEY, viewModel.endDate.value)
+                    putExtra(ContentSelectorActivity.START_DATE_KEY, viewModel.startDate?.toEpochDay())
+                    putExtra(ContentSelectorActivity.END_DATE_KEY, viewModel.endDate?.toEpochDay())
                 }
 
                 activity?.run {
@@ -139,71 +260,36 @@ class DatePickerFragment : Fragment(), TabLayout.OnTabSelectedListener, Calendar
         }
     }
 
-    override fun onTabSelected(tab: TabLayout.Tab?) {
-        viewModel.currentTab = tab?.position ?: 0
-
-        when(tab?.position) {
-            0 -> {
-                setLocalizedDate(viewModel.startDate.value ?: System.currentTimeMillis())
-            }
-            1 -> {
-                viewModel.startDate.value.let {
-                    if(it != null && viewModel.endDate.value == null) {
-                        setLocalizedDate(it)
-                    }
-                    else {
-                        setLocalizedDate(viewModel.endDate.value ?: System.currentTimeMillis())
-                    }
-                }
-            }
-        }
+    private fun highlightPrevDate(prevDate: LocalDate, startDate: LocalDate, endDate: LocalDate): Boolean {
+        if (startDate.yearMonth == endDate.yearMonth) return false
+        if (prevDate.yearMonth == startDate.yearMonth) return true
+        val firstDayInPrevMonth = prevDate.plusMonths(1).yearMonth.atDay(1)
+        return firstDayInPrevMonth >= startDate && firstDayInPrevMonth <= endDate && startDate != firstDayInPrevMonth
     }
 
-    override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
-    override fun onTabReselected(tab: TabLayout.Tab?) {
-        when(viewModel.currentTab) {
-            0 -> {
-                viewModel.startDate.value = null
-                setTabSummary(startDateTab, getString(R.string.range_not_set))
-            }
-            1 -> {
-                viewModel.endDate.value = null
-                setTabSummary(endDateTab, getString(R.string.range_not_set))
-            }
-        }
+    private fun highlightNextDate(nextDate: LocalDate, startDate: LocalDate, endDate: LocalDate): Boolean {
+        if (startDate.yearMonth == endDate.yearMonth) return false
+        if (nextDate.yearMonth == endDate.yearMonth) return true
+        val lastDayInNextMonth = nextDate.minusMonths(1).yearMonth.atEndOfMonth()
+        return lastDayInNextMonth >= startDate && lastDayInNextMonth <= endDate && endDate != lastDayInNextMonth
     }
 
-    override fun onSelectedDayChange(view: CalendarView, year: Int, month: Int, dayOfMonth: Int) {
-        dateSet = dateSet.withYear(year).withMonth(month+1).withDayOfMonth(dayOfMonth)
-
-        when(viewModel.currentTab) {
-            0 -> {
-                viewModel.startDate.value = dateSet.toInstant().toEpochMilli()
-            }
-            1 -> {
-                viewModel.endDate.value = dateSet.toInstant().toEpochMilli()
-            }
-        }
+    inner class DayViewContainer(view: View): ViewContainer(view) {
+        val root = view
+        val textView: TextView = view.findViewById(R.id.calendarDayText)
+        val roundView: View = view.findViewById(R.id.calendarRoundView)
     }
 
-    private fun setTabSummary(tab: TabLayout.Tab?, content: String?) {
-        tab?.view?.findViewById<TextView>(R.id.summary)?.text = content
-    }
-
-    private fun setLocalizedDate(millis: Long) {
-        val instant = Instant.ofEpochMilli(millis)
-        val target = ZonedDateTime.ofInstant(instant, ZoneId.of(viewModel.timeZone))
-
-        val calendarLocal = target.withZoneSameLocal(ZoneId.systemDefault())
-        calendar.date = calendarLocal.toInstant().toEpochMilli()
-    }
-
-    private fun formatDate(epochMillis: Long): String {
-        val instant = Instant.ofEpochMilli(epochMillis)
-
-        return ZonedDateTime.ofInstant(instant, ZoneId.of(viewModel.timeZone)).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG))
-//        return DateUtils.formatDateTime(fragmentContext, instant.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
+    inner class MonthViewContainer(view: View): ViewContainer(view) {
+        val root = view
+        val textView: TextView = view.findViewById(R.id.calendarMonthText)
+        val firstDayOfWeek: TextView = view.findViewById(R.id.firstDayOfWeek)
+        val secondDayOfWeek: TextView = view.findViewById(R.id.secondDayOfWeek)
+        val thirdDayOfWeek: TextView = view.findViewById(R.id.thirdDayOfWeek)
+        val fourthDayOfWeek: TextView = view.findViewById(R.id.fourthDayOfWeek)
+        val fifthDayOfWeek: TextView = view.findViewById(R.id.fifthDayOfWeek)
+        val sixthDayOfWeek: TextView = view.findViewById(R.id.sixthDayOfWeek)
+        val seventhDayOfWeek: TextView = view.findViewById(R.id.seventhDayOfWeek)
     }
 
     companion object {

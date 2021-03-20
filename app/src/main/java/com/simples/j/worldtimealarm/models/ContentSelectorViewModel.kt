@@ -1,8 +1,8 @@
 package com.simples.j.worldtimealarm.models
 
 import android.media.Ringtone
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import java.time.LocalDate
 import java.util.*
 
 class ContentSelectorViewModel : ViewModel() {
@@ -12,13 +12,8 @@ class ContentSelectorViewModel : ViewModel() {
 
     var ringtone: Ringtone? = null
 
-    var currentTab: Int = 0
-    val startDate: MutableLiveData<Long> by lazy {
-        MutableLiveData<Long>()
-    }
-    val endDate: MutableLiveData<Long> by lazy {
-        MutableLiveData<Long>()
-    }
+    var startDate: LocalDate? = null
+    var endDate: LocalDate? = null
 
     var timeZone: String = TimeZone.getDefault().id
 }

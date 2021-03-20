@@ -25,10 +25,10 @@ class TypeConverters {
     }
 
     @TypeConverter
-    fun intPairArrayToString(pairArray: Array<Pair<Int, IntArray>>): String {
-        return pairArray.joinToString(prefix = "[", postfix = "]", separator = ";") {
+    fun intPairArrayToString(pairArray: Array<Pair<Int, IntArray>>?): String {
+        return pairArray?.joinToString(prefix = "[", postfix = "]", separator = ";") {
             "(${it.first}@${it.second.joinToString(prefix = "[", postfix = "]")})"
-        }
+        } ?: ""
     }
 
     @TypeConverter

@@ -41,6 +41,7 @@ android {
     }
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
@@ -68,7 +69,7 @@ dependencies {
     implementation 'com.google.android.ads.consent:consent-library:1.0.8'
 
     // firebase
-    implementation 'com.google.firebase:firebase-ads:19.7.0'
+    implementation 'com.google.firebase:firebase-ads:19.8.0'
     implementation 'com.google.firebase:firebase-core:18.0.2'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
@@ -76,6 +77,8 @@ dependencies {
 
     // 3rd party libraries
     implementation 'com.jakewharton.threetenabp:threetenabp:1.2.2'
+    implementation 'com.github.kizitonwose:CalendarView:1.0.3'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
 
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.mockito:mockito-core:3.0.0'
