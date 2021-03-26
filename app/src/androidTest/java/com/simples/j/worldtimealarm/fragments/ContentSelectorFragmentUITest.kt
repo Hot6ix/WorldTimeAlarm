@@ -2,7 +2,7 @@ package com.simples.j.worldtimealarm.fragments
 
 import android.content.Context
 import android.content.Intent
-import android.widget.CalendarView
+import android.text.format.DateFormat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -18,6 +18,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.kizitonwose.calendarview.CalendarView
 import com.simples.j.worldtimealarm.ContentSelectorActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.ViewMatcherExtension.withOneOfText
@@ -27,6 +28,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @MediumTest
@@ -71,22 +74,29 @@ class ContentSelectorFragmentUITest {
 
         // check calendar is displaying
         onView(allOf(
-                withId(R.id.calendar),
+                withId(R.id.calendarView),
                 withClassName(`is`(CalendarView::class.java.canonicalName))
         )).check(matches(isDisplayed()))
         // check tab views are displaying
         onView(allOf(
-                withId(R.id.title),
+                withId(R.id.startDateTitle),
                 withText(context.getString(R.string.range_start))
         )).check(matches(isDisplayed()))
         onView(allOf(
-                withId(R.id.title),
+                withId(R.id.endDateTitle),
                 withText(context.getString(R.string.range_end))
         )).check(matches(isDisplayed()))
         // check action button
         onView(allOf(
                 withId(R.id.action),
                 withText(context.getString(R.string.apply))
+        )).check(matches(isDisplayed()))
+
+        val now = YearMonth.now()
+        val format = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy MMMM")
+        onView(allOf(
+                withId(R.id.month),
+                withText(now.format(DateTimeFormatter.ofPattern(format)))
         )).check(matches(isDisplayed()))
     }
 

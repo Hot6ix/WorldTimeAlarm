@@ -309,7 +309,7 @@ class AlarmControllerMultipleOrdinalTest {
                     assertEquals(4, r.dayOfMonth)
                 }
                 3 -> {
-                    assertEquals(Month.FEBRUARY, r.month)
+                    assertEquals(Month.JANUARY, r.month)
                     assertEquals(18, r.dayOfMonth)
                 }
                 4 -> {

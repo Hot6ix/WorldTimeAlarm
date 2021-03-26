@@ -20,7 +20,7 @@ import org.threeten.bp.temporal.ChronoField
 import kotlin.random.Random
 
 @MediumTest
-class AlarmControllerOrdinalTest {
+class AlarmControllerSingleOrdinalTest {
     private lateinit var context: Context
     private val alarmCtrl = AlarmController.getInstance()
 

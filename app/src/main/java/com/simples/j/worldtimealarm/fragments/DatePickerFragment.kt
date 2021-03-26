@@ -45,8 +45,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
     private lateinit var binding: FragmentDatePickerBinding
 
     private var dateSet = ZonedDateTime.now()
-    private var currentMonth = YearMonth.now()
-    private var selectedMonth = currentMonth
+    private var now = YearMonth.now()
 
     @RequiresApi(Build.VERSION_CODES.N)
     private val icuCalendar = Calendar.getInstance()
@@ -241,8 +240,8 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
             if(startDate != null) {
                 val startYearMonth = YearMonth.of(startDate.year, startDate.month)
 
-                if(currentMonth != startYearMonth && currentMonth.isBefore(startYearMonth)) {
-                    val difference = currentMonth.until(startYearMonth, ChronoUnit.MONTHS)
+                if(viewModel.currentYearMonth != startYearMonth && viewModel.currentYearMonth.isBefore(startYearMonth)) {
+                    val difference = viewModel.currentYearMonth.until(startYearMonth, ChronoUnit.MONTHS)
                     if(difference >= 6)
                         setup(startYearMonth.minusMonths(6), startYearMonth.plusMonths(6), WeekFields.of(locale).firstDayOfWeek)
                     else
@@ -251,35 +250,35 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                     scrollToMonth(startYearMonth)
                 }
                 else {
-                    setup(currentMonth, currentMonth.plusMonths(12), WeekFields.of(locale).firstDayOfWeek)
-                    scrollToMonth(currentMonth)
+                    setup(viewModel.currentYearMonth, viewModel.currentYearMonth.plusMonths(12), WeekFields.of(locale).firstDayOfWeek)
+                    scrollToMonth(viewModel.currentYearMonth)
                 }
             }
             else {
-                setup(currentMonth, currentMonth.plusMonths(12), WeekFields.of(locale).firstDayOfWeek)
-                scrollToMonth(currentMonth)
+                setup(viewModel.currentYearMonth, viewModel.currentYearMonth.plusMonths(12), WeekFields.of(locale).firstDayOfWeek)
+                scrollToMonth(viewModel.currentYearMonth)
             }
 
         }
-        updateMonthText(locale, currentMonth)
+        updateMonthText(locale, viewModel.currentYearMonth)
 
         binding.calendarView.monthScrollListener = object : MonthScrollListener {
             override fun invoke(calendarMonth: CalendarMonth) {
                 updateMonthText(locale, calendarMonth.yearMonth)
-                selectedMonth = calendarMonth.yearMonth
+                viewModel.currentYearMonth = calendarMonth.yearMonth
 
-                if(calendarMonth.yearMonth == currentMonth) binding.previousMonth.visibility = View.INVISIBLE
+                if(calendarMonth.yearMonth == now) binding.previousMonth.visibility = View.INVISIBLE
                 else binding.previousMonth.visibility = View.VISIBLE
 
                 when (calendarMonth.yearMonth) {
-                    currentMonth.plusMonths(6) -> {
-                        currentMonth = currentMonth.plusMonths(6)
-                        binding.calendarView.updateMonthRangeAsync(currentMonth.minusMonths(6), currentMonth.plusMonths(6))
+                    viewModel.currentYearMonth.plusMonths(6) -> {
+                        viewModel.currentYearMonth = viewModel.currentYearMonth.plusMonths(6)
+                        binding.calendarView.updateMonthRangeAsync(viewModel.currentYearMonth.minusMonths(6), viewModel.currentYearMonth.plusMonths(6))
                     }
-                    currentMonth.minusMonths(6) -> {
-                        currentMonth = currentMonth.minusMonths(6)
+                    viewModel.currentYearMonth.minusMonths(6) -> {
+                        viewModel.currentYearMonth = viewModel.currentYearMonth.minusMonths(6)
 
-                        when (currentMonth) {
+                        when (viewModel.currentYearMonth) {
                             YearMonth.of(dateSet.year, dateSet.monthValue) -> {
                                 // do nothing
                             }
@@ -288,7 +287,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                                 binding.calendarView.updateMonthRangeAsync(now, now.plusMonths(12))
                             }
                             else -> {
-                                binding.calendarView.updateMonthRangeAsync(currentMonth.minusMonths(6), currentMonth.plusMonths(6))
+                                binding.calendarView.updateMonthRangeAsync(viewModel.currentYearMonth.minusMonths(6), viewModel.currentYearMonth.plusMonths(6))
                             }
                         }
                     }
@@ -366,16 +365,15 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                 binding.calendarView.notifyCalendarChanged()
             }
             R.id.previousMonth -> {
-                binding.calendarView.smoothScrollToMonth(selectedMonth.minusMonths(1))
+                binding.calendarView.smoothScrollToMonth(viewModel.currentYearMonth.minusMonths(1))
             }
             R.id.nextMonth -> {
-                binding.calendarView.smoothScrollToMonth(selectedMonth.plusMonths(1))
+                binding.calendarView.smoothScrollToMonth(viewModel.currentYearMonth.plusMonths(1))
             }
         }
     }
 
     private fun highlightCardView(selected: Int) {
-        val d = 150L
         val t = TimeInterpolator {
             it * 30 / 30f
         }
@@ -387,7 +385,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.startDateTitle.textSize.toSp(),
                         resources.getDimension(R.dimen.text_middle).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -397,7 +395,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.startDate.textSize.toSp(),
                         resources.getDimension(R.dimen.text_large).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -407,7 +405,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.startDateCardView.cardElevation.toSp(),
                         resources.getDimension(R.dimen.highlighted_card_view_elevation).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -417,7 +415,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.endDateTitle.textSize.toSp(),
                         resources.getDimension(R.dimen.text_small).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -427,7 +425,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.endDate.textSize.toSp(),
                         resources.getDimension(R.dimen.text_middle).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -437,7 +435,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.endDateCardView.cardElevation.toSp(),
                         resources.getDimension(R.dimen.default_card_view_elevation).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -449,7 +447,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.startDateTitle.textSize.toSp(),
                         resources.getDimension(R.dimen.text_small).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -459,7 +457,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.startDate.textSize.toSp(),
                         resources.getDimension(R.dimen.text_middle).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -469,7 +467,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.startDateCardView.cardElevation.toSp(),
                         resources.getDimension(R.dimen.default_card_view_elevation).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -479,7 +477,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.endDateTitle.textSize.toSp(),
                         resources.getDimension(R.dimen.text_middle).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -489,7 +487,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.endDate.textSize.toSp(),
                         resources.getDimension(R.dimen.text_large).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -499,7 +497,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.endDateCardView.cardElevation.toSp(),
                         resources.getDimension(R.dimen.highlighted_card_view_elevation).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -511,7 +509,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.startDateTitle.textSize.toSp(),
                         resources.getDimension(R.dimen.text_small).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -521,7 +519,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.startDate.textSize.toSp(),
                         resources.getDimension(R.dimen.text_middle).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -531,7 +529,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.startDateCardView.cardElevation.toSp(),
                         resources.getDimension(R.dimen.default_card_view_elevation).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -541,7 +539,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.endDateTitle.textSize.toSp(),
                         resources.getDimension(R.dimen.text_small).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -551,7 +549,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.endDate.textSize.toSp(),
                         resources.getDimension(R.dimen.text_middle).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -561,7 +559,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         binding.endDateCardView.cardElevation.toSp(),
                         resources.getDimension(R.dimen.default_card_view_elevation).toSp()
                 ).apply {
-                    duration = d
+                    duration = ANIMATOR_DURATION
                     interpolator = t
                     start()
                 }
@@ -607,6 +605,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
 
     companion object {
         const val TAG = "ContentSelectorFragment"
+        const val ANIMATOR_DURATION = 150L
 
         @JvmStatic
         fun newInstance() = DatePickerFragment()

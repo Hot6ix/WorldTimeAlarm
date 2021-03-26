@@ -15,12 +15,9 @@ import com.simples.j.worldtimealarm.ViewActionExtension.setQueryAndSubmit
 import com.simples.j.worldtimealarm.fragments.TimeZoneFragment
 import com.simples.j.worldtimealarm.fragments.TimeZonePickerFragment
 import org.hamcrest.Matchers.*
+import org.junit.*
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.FixMethodOrder
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 
@@ -43,6 +40,11 @@ class TimeZonePickerActivityUITest {
         mainActivityScenario = mainActivityScenarioRule.scenario
 
         Intents.init()
+    }
+
+    @After
+    fun terminate() {
+        Intents.release()
     }
 
     // this test is not executed from AlarmGeneratorActivity

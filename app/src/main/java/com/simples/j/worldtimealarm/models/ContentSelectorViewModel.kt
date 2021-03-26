@@ -1,11 +1,10 @@
 package com.simples.j.worldtimealarm.models
 
 import android.media.Ringtone
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.simples.j.worldtimealarm.fragments.DatePickerFragment
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.*
 
 class ContentSelectorViewModel : ViewModel() {
@@ -24,4 +23,5 @@ class ContentSelectorViewModel : ViewModel() {
             it.value = 0
         }
     }
+    var currentYearMonth: YearMonth = YearMonth.now()
 }

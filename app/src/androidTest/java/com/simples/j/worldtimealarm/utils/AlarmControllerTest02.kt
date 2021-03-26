@@ -20,7 +20,8 @@ class AlarmControllerTest02 {
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Taipei"))
     }
 
-    @Test
+//    @Test
+    // old test
     fun test() {
         val a = TimeZone.getDefault()
         assertEquals("Asia/Taipei", a.id)
