@@ -365,7 +365,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     }
 
     override fun onSwipe(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        val itemPosition = viewHolder.adapterPosition
+        val itemPosition = viewHolder.bindingAdapterPosition
         val previousPosition = recyclerLayoutManager.findFirstCompletelyVisibleItemPosition()
         val removedItem: AlarmItem
 

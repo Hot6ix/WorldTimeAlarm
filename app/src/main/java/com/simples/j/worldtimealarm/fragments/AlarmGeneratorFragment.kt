@@ -44,25 +44,29 @@ import kotlin.math.absoluteValue
 
 class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.OnItemClickListener, View.OnClickListener, MaterialButtonToggleGroup.OnButtonCheckedListener, TimePicker.OnTimeChangedListener {
 
+    // init in main thread
     private lateinit var fragmentContext: Context
     private lateinit var binding: FragmentAlarmGeneratorBinding
-
     private lateinit var viewModel: AlarmGeneratorViewModel
-    private lateinit var alarmOptionAdapter: AlarmOptionAdapter
     private lateinit var labelDialog: LabelDialogFragment
     private lateinit var colorTagDialog: ColorTagDialogFragment
+    private lateinit var db: AppDatabase
+    private lateinit var preference: SharedPreferences
+
+    // init in coroutine launch
+    private lateinit var alarmOptionAdapter: AlarmOptionAdapter
     private lateinit var ringtoneList: ArrayList<RingtoneItem>
     private lateinit var vibratorPatternList: ArrayList<PatternItem>
     private lateinit var snoozeList: ArrayList<SnoozeItem>
-    private lateinit var now: ZonedDateTime
-    private lateinit var preference: SharedPreferences
-    private lateinit var db: AppDatabase
+
+    private var now = ZonedDateTime.now()
 
     @RequiresApi(Build.VERSION_CODES.N)
     private val icuCalendar = android.icu.util.Calendar.getInstance()
 
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
+    private var initJob: Job = Job()
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + coroutineExceptionHandler
@@ -107,7 +111,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             viewModel = ViewModelProvider(this)[AlarmGeneratorViewModel::class.java]
         }
 
-        launch(coroutineExceptionHandler) {
+        initJob = launch(coroutineExceptionHandler) {
             val userRingtone = db.ringtoneItemDao().getAll()
             val systemRingtone = MediaCursor.getRingtoneList(fragmentContext)
             // use first ringtone if phone has system ringtone, if not set to no ringtone.
@@ -180,7 +184,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 }
                 else {
                     viewModel.timeZone.value = TimeZone.getDefault().id
-                    now = ZonedDateTime.now(ZoneId.systemDefault())
 
                     viewModel.ringtone.value = defaultRingtone
                     viewModel.vibration.value = vibratorPatternList[0]
@@ -290,6 +293,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         super.onDestroy()
 
         launch(coroutineContext) {
+            initJob.cancelAndJoin()
             job.cancelAndJoin()
 
             try {
@@ -303,94 +307,98 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if(resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                TimeZoneSearchActivity.TIME_ZONE_REQUEST_CODE -> {
-                    if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                        val replacedTz = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.replace(" ", "_")
-                        replacedTz?.let {
-                            viewModel.timeZone.value = it.replace(" ", "_")
+        launch(coroutineContext) {
+            initJob.join()
 
+            if(resultCode == Activity.RESULT_OK) {
+                when (requestCode) {
+                    TimeZoneSearchActivity.TIME_ZONE_REQUEST_CODE -> {
+                        if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
+                            val replacedTz = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.replace(" ", "_")
+                            replacedTz?.let {
+                                viewModel.timeZone.value = it.replace(" ", "_")
+
+                                viewModel.remoteZonedDateTime =
+                                        viewModel.remoteZonedDateTime
+                                                .withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
+
+                                viewModel.startDate = viewModel.startDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
+                                viewModel.endDate = viewModel.endDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
+                            }
+
+                            binding.timeZoneName.text = getFormattedTimeZoneName(replacedTz)
+                            updateEstimated()
+                            setupRecurrences()
+                        }
+                    }
+                    ContentSelectorActivity.AUDIO_REQUEST_CODE -> {
+                        data?.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
+                            val ringtone = it as RingtoneItem
+                            viewModel.ringtone.value = ringtone
+                            viewModel.optionList[0].summary = ringtone.title
+                        }
+                    }
+                    ContentSelectorActivity.VIBRATION_REQUEST_CODE -> {
+                        data?.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
+                            val vibration = it as PatternItem
+                            viewModel.vibration.value = vibration
+                            viewModel.optionList[1].summary = vibration.title
+                        }
+                    }
+                    ContentSelectorActivity.SNOOZE_REQUEST_CODE -> {
+                        data?.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
+                            val snooze = it as SnoozeItem
+                            viewModel.snooze.value = snooze
+                            viewModel.optionList[2].summary = snooze.title
+                        }
+                    }
+                    ContentSelectorActivity.DATE_REQUEST_CODE -> {
+                        data?.getLongExtra(ContentSelectorActivity.START_DATE_KEY, -1)?.let {
+                            viewModel.startDate =
+                                    if(it > 0) {
+                                        val startInstant = Instant.ofEpochMilli(it)
+                                        ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
+                                                .withHour(viewModel.remoteZonedDateTime.hour)
+                                                .withMinute(viewModel.remoteZonedDateTime.minute)
+                                    }
+                                    else null
+                        }
+
+                        data?.getLongExtra(ContentSelectorActivity.END_DATE_KEY, -1)?.let {
+                            viewModel.endDate =
+                                    if(it > 0) {
+                                        val endInstant = Instant.ofEpochMilli(it)
+                                        ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
+                                                .withHour(viewModel.remoteZonedDateTime.hour)
+                                                .withMinute(viewModel.remoteZonedDateTime.minute)
+                                    }
+                                    else null
+                        }
+
+                        viewModel.startDate.let {
                             viewModel.remoteZonedDateTime =
-                                    viewModel.remoteZonedDateTime
-                                            .withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
-
-                            viewModel.startDate = viewModel.startDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
-                            viewModel.endDate = viewModel.endDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
+                                    if(it == null) {
+                                        viewModel.remoteZonedDateTime
+                                                .withYear(now.year)
+                                                .withMonth(now.monthValue)
+                                                .withDayOfMonth(now.dayOfMonth)
+                                    }
+                                    else {
+                                        viewModel.remoteZonedDateTime
+                                                .withYear(it.year)
+                                                .withMonth(it.monthValue)
+                                                .withDayOfMonth(it.dayOfMonth)
+                                    }
                         }
 
-                        binding.timeZoneName.text = getFormattedTimeZoneName(replacedTz)
+                        binding.date.text = AlarmStringFormatHelper.formatDate(
+                                fragmentContext,
+                                viewModel.startDate,
+                                viewModel.endDate,
+                                viewModel.recurrences.value?.any { it > 0 } ?: false
+                        )
                         updateEstimated()
-                        setupRecurrences()
                     }
-                }
-                ContentSelectorActivity.AUDIO_REQUEST_CODE -> {
-                    data?.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
-                        val ringtone = it as RingtoneItem
-                        viewModel.ringtone.value = ringtone
-                        viewModel.optionList[0].summary = ringtone.title
-                    }
-                }
-                ContentSelectorActivity.VIBRATION_REQUEST_CODE -> {
-                    data?.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
-                        val vibration = it as PatternItem
-                        viewModel.vibration.value = vibration
-                        viewModel.optionList[1].summary = vibration.title
-                    }
-                }
-                ContentSelectorActivity.SNOOZE_REQUEST_CODE -> {
-                    data?.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
-                        val snooze = it as SnoozeItem
-                        viewModel.snooze.value = snooze
-                        viewModel.optionList[2].summary = snooze.title
-                    }
-                }
-                ContentSelectorActivity.DATE_REQUEST_CODE -> {
-                    data?.getLongExtra(ContentSelectorActivity.START_DATE_KEY, -1)?.let {
-                        viewModel.startDate =
-                                if(it > 0) {
-                                    val startInstant = Instant.ofEpochMilli(it)
-                                    ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
-                                            .withHour(viewModel.remoteZonedDateTime.hour)
-                                            .withMinute(viewModel.remoteZonedDateTime.minute)
-                                }
-                                else null
-                    }
-
-                    data?.getLongExtra(ContentSelectorActivity.END_DATE_KEY, -1)?.let {
-                        viewModel.endDate =
-                                if(it > 0) {
-                                    val endInstant = Instant.ofEpochMilli(it)
-                                    ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
-                                            .withHour(viewModel.remoteZonedDateTime.hour)
-                                            .withMinute(viewModel.remoteZonedDateTime.minute)
-                                }
-                                else null
-                    }
-
-                    viewModel.startDate.let {
-                        viewModel.remoteZonedDateTime =
-                        if(it == null) {
-                            viewModel.remoteZonedDateTime
-                                    .withYear(now.year)
-                                    .withMonth(now.monthValue)
-                                    .withDayOfMonth(now.dayOfMonth)
-                        }
-                        else {
-                            viewModel.remoteZonedDateTime
-                                    .withYear(it.year)
-                                    .withMonth(it.monthValue)
-                                    .withDayOfMonth(it.dayOfMonth)
-                        }
-                    }
-
-                    binding.date.text = AlarmStringFormatHelper.formatDate(
-                            fragmentContext,
-                            viewModel.startDate,
-                            viewModel.endDate,
-                            viewModel.recurrences.value?.any { it > 0 } ?: false
-                    )
-                    updateEstimated()
                 }
             }
         }
@@ -582,7 +590,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                                 (this@apply).setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.holo_blue_light))
                             }
                             else -> {
-                                (this@apply).setTextColor(ContextCompat.getColor(fragmentContext, android.R.color.black))
+                                (this@apply).setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorEnabled))
                             }
                         }
                     }

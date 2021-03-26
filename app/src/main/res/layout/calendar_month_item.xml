@@ -1,114 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/monthLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginBottom="@dimen/padding5"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
-        android:id="@+id/calendarMonthText"
-        android:layout_width="wrap_content"
+        android:id="@+id/firstDayOfWeek"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/text_large"
-        android:layout_marginTop="@dimen/padding20"
-        android:layout_marginBottom="@dimen/padding20"
+        android:gravity="center"
+        app:layout_constraintHorizontal_weight="1"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/dayOfWeekText"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/dayOfWeekText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/padding10"
-        app:layout_constraintTop_toBottomOf="@id/calendarMonthText"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toStartOf="@id/secondDayOfWeek"/>
 
-        <TextView
-            android:id="@+id/firstDayOfWeek"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="M"
-            android:gravity="center"
-            app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/secondDayOfWeek"/>
+    <TextView
+        android:id="@+id/secondDayOfWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/firstDayOfWeek"
+        app:layout_constraintEnd_toStartOf="@id/thirdDayOfWeek"/>
 
-        <TextView
-            android:id="@+id/secondDayOfWeek"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="M"
-            android:gravity="center"
-            app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/firstDayOfWeek"
-            app:layout_constraintEnd_toStartOf="@id/thirdDayOfWeek"/>
+    <TextView
+        android:id="@+id/thirdDayOfWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/secondDayOfWeek"
+        app:layout_constraintEnd_toStartOf="@id/fourthDayOfWeek"/>
 
-        <TextView
-            android:id="@+id/thirdDayOfWeek"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="M"
-            android:gravity="center"
-            app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/secondDayOfWeek"
-            app:layout_constraintEnd_toStartOf="@id/fourthDayOfWeek"/>
+    <TextView
+        android:id="@+id/fourthDayOfWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/thirdDayOfWeek"
+        app:layout_constraintEnd_toStartOf="@id/fifthDayOfWeek"/>
 
-        <TextView
-            android:id="@+id/fourthDayOfWeek"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="M"
-            android:gravity="center"
-            app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/thirdDayOfWeek"
-            app:layout_constraintEnd_toStartOf="@id/fifthDayOfWeek"/>
+    <TextView
+        android:id="@+id/fifthDayOfWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/fourthDayOfWeek"
+        app:layout_constraintEnd_toStartOf="@id/sixthDayOfWeek"/>
 
-        <TextView
-            android:id="@+id/fifthDayOfWeek"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="M"
-            android:gravity="center"
-            app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/fourthDayOfWeek"
-            app:layout_constraintEnd_toStartOf="@id/sixthDayOfWeek"/>
+    <TextView
+        android:id="@+id/sixthDayOfWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/fifthDayOfWeek"
+        app:layout_constraintEnd_toStartOf="@id/seventhDayOfWeek"/>
 
-        <TextView
-            android:id="@+id/sixthDayOfWeek"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="M"
-            android:gravity="center"
-            app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/fifthDayOfWeek"
-            app:layout_constraintEnd_toStartOf="@id/seventhDayOfWeek"/>
-
-        <TextView
-            android:id="@+id/seventhDayOfWeek"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="M"
-            android:gravity="center"
-            app:layout_constraintHorizontal_weight="1"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/sixthDayOfWeek"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/seventhDayOfWeek"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/sixthDayOfWeek"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

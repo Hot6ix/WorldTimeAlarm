@@ -14,7 +14,9 @@ import com.simples.j.worldtimealarm.etc.SnoozeItem
 import com.simples.j.worldtimealarm.fragments.ContentSelectorFragment
 import com.simples.j.worldtimealarm.fragments.DatePickerFragment
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
-import java.time.LocalDate
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
@@ -57,17 +59,19 @@ class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickList
             viewModel.action = intent.action
 
             viewModel.lastSelectedValue = intent.getSerializableExtra(LAST_SELECTED_KEY)
+
+            viewModel.timeZone = intent.getStringExtra(TIME_ZONE_KEY) ?: TimeZone.getDefault().id
+
             intent.getLongExtra(START_DATE_KEY, -1).let {
                 viewModel.startDate =
-                        if(it > 0) LocalDate.ofEpochDay(it)
+                        if(it > 0) LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.of(viewModel.timeZone)).toLocalDate()
                         else null
             }
             intent.getLongExtra(END_DATE_KEY, -1).let {
                 viewModel.endDate =
-                        if(it > 0) LocalDate.ofEpochDay(it)
+                        if(it > 0) LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.of(viewModel.timeZone)).toLocalDate()
                         else null
             }
-            viewModel.timeZone = intent.getStringExtra(TIME_ZONE_KEY) ?: TimeZone.getDefault().id
 
             when (intent.action) {
                 ACTION_REQUEST_AUDIO, ACTION_REQUEST_VIBRATION, ACTION_REQUEST_SNOOZE -> {

@@ -212,6 +212,8 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             requestCode == TIME_ZONE_NEW_CODE && resultCode == Activity.RESULT_OK -> {
                 if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
                     launch(coroutineContext) {
+                        job.join()
+
                         data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.let {
                             val clockItem = ClockItem(null, it, -1)
                             val id = db.clockItemDao().insert(clockItem)
@@ -272,7 +274,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
     }
 
     override fun onSwipe(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        val itemPosition = viewHolder.adapterPosition
+        val itemPosition = viewHolder.bindingAdapterPosition
         val previousPosition = recyclerLayoutManager.findFirstCompletelyVisibleItemPosition()
 
         removedItem = clockItems[itemPosition]

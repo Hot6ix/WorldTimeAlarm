@@ -36,6 +36,37 @@ object AlarmStringFormatHelper {
         }
     }
 
+    fun formatSingleDate(context: Context, date: java.time.ZonedDateTime?): String {
+        return if(date != null) {
+            DateUtils.formatDateTime(context, date.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_SHOW_YEAR)
+        }
+        else context.getString(R.string.range_not_set)
+    }
+
+    fun formatJavaDate(context: Context, startDate: java.time.ZonedDateTime?, endDate: java.time.ZonedDateTime?, hasRepeat: Boolean): String {
+        val s = startDate?.withZoneSameLocal(java.time.ZoneId.systemDefault())?.toInstant()
+        val e = endDate?.withZoneSameLocal(java.time.ZoneId.systemDefault())?.toInstant()
+
+        return when {
+            s != null && e != null -> {
+                DateUtils.formatDateRange(context, s.toEpochMilli(), e.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_ALL)
+            }
+            s != null -> {
+                if(hasRepeat)
+                    context.getString(R.string.range_begin).format(DateUtils.formatDateTime(context, s.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
+                else
+                    DateUtils.formatDateTime(context, s.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
+
+            }
+            e != null -> {
+                context.getString(R.string.range_until).format(DateUtils.formatDateTime(context, e.toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL))
+            }
+            else -> {
+                context.getString(R.string.range_not_set)
+            }
+        }
+    }
+
     fun getDisplayLocalDate(context: Context, startDate: ZonedDateTime?, endDate: ZonedDateTime?, hasRepeat: Boolean): String? {
         return when {
             startDate != null && endDate != null -> {
