@@ -94,7 +94,7 @@ data class AlarmItem(
 
             val next = dateTime ?: AlarmController().calculateDateTime(this, AlarmController.TYPE_ALARM)
 
-            val repeatValues = intArrayOf(7, 1, 2, 3, 4, 5, 6)
+            val repeatValues = intArrayOf(1, 2, 3, 4, 5, 6, 7)
 
             val isLastAlarmEndDate = repeat.mapIndexed { index, i ->
                 if (i > 0) DayOfWeek.of(repeatValues[index])

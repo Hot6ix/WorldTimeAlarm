@@ -111,9 +111,9 @@
     <string name="end_date_removed">End date has been removed.</string>
     <string name="end_date_earlier_than_today">End date should be later than now.</string>
     <string name="end_date_earlier_than_start_date">End date should be later than start date.</string>
-    <string name="must_check_repeat">Repeats should be selected at least one when start date and end date are set.</string>
+    <string name="must_check_repeat">Repeats should be checked at least one.</string>
     <string name="invalid_repeat">Please check start date and end date.</string>
-    <string name="unreachable_alarm">Unreachable alarm. Please check the alarm.</string>
+    <string name="unreachable_alarm">Could not create an alarm. Please check setting.</string>
     <string name="alarm_no_long_fires">Alarm (%1$s) won\'t be fired anymore.</string>
     <string name="error_occurred">Error occurred.</string>
     <string name="error_message">Invalid call. If you keep seeing this error, please re-create alarm. Sorry for inconvenience.</string>

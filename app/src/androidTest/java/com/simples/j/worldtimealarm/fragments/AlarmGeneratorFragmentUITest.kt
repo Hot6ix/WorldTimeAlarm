@@ -90,13 +90,13 @@ class AlarmGeneratorFragmentUITest {
                 )
         )
         // check day recurrences are not checked
-        onView(withId(R.id.sunday)).check(matches(isNotChecked()))
-        onView(withId(R.id.monday)).check(matches(isNotChecked()))
-        onView(withId(R.id.tuesday)).check(matches(isNotChecked()))
-        onView(withId(R.id.wednesday)).check(matches(isNotChecked()))
-        onView(withId(R.id.thursday)).check(matches(isNotChecked()))
-        onView(withId(R.id.friday)).check(matches(isNotChecked()))
-        onView(withId(R.id.saturday)).check(matches(isNotChecked()))
+        onView(withId(R.id.firstDayOfWeek)).check(matches(isNotChecked()))
+        onView(withId(R.id.secondDayOfWeek)).check(matches(isNotChecked()))
+        onView(withId(R.id.thirdDayOfWeek)).check(matches(isNotChecked()))
+        onView(withId(R.id.fourthDayOfWeek)).check(matches(isNotChecked()))
+        onView(withId(R.id.fifthDayOfWeek)).check(matches(isNotChecked()))
+        onView(withId(R.id.sixthDayOfWeek)).check(matches(isNotChecked()))
+        onView(withId(R.id.seventhDayOfWeek)).check(matches(isNotChecked()))
         // check estimated
         onView(withId(R.id.est_time_zone)).check(matches(not(withText(""))))
         onView(withId(R.id.est_date_time)).check(matches(not(withText(""))))
@@ -165,13 +165,13 @@ class AlarmGeneratorFragmentUITest {
         pressBack()
 
         // click and check day recurrences
-        onView(withId(R.id.sunday)).perform(click()).check(matches(isChecked()))
-        onView(withId(R.id.monday)).perform(click()).check(matches(isChecked()))
-        onView(withId(R.id.tuesday)).perform(click()).check(matches(isChecked()))
-        onView(withId(R.id.wednesday)).perform(click()).check(matches(isChecked()))
-        onView(withId(R.id.thursday)).perform(click()).check(matches(isChecked()))
-        onView(withId(R.id.friday)).perform(click()).check(matches(isChecked()))
-        onView(withId(R.id.saturday)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.firstDayOfWeek)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.secondDayOfWeek)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.thirdDayOfWeek)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.fourthDayOfWeek)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.fifthDayOfWeek)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.sixthDayOfWeek)).perform(click()).check(matches(isChecked()))
+        onView(withId(R.id.seventhDayOfWeek)).perform(click()).check(matches(isChecked()))
         // click ringtone
         onView(allOf(
                 withId(R.id.option_summary),
