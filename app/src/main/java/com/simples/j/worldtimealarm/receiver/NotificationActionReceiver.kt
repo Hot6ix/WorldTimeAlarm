@@ -8,24 +8,30 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.preference.PreferenceManager
+import androidx.room.Room
 import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
-import com.simples.j.worldtimealarm.utils.AlarmController
+import com.simples.j.worldtimealarm.utils.*
 import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import com.simples.j.worldtimealarm.utils.WakeUpService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 
 class NotificationActionReceiver : BroadcastReceiver() {
     // TODO:  Check RuntimeException/SecurityException
+    private lateinit var db: AppDatabase
 
     override fun onReceive(context: Context, intent: Intent) {
         if(intent.hasExtra(NOTIFICATION_ACTION)) {
             val action = intent.getStringExtra(NOTIFICATION_ACTION)
             Log.d(C.TAG, "Notification Action received: $action")
+
+            db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
+                    .build()
 
             when(action) {
                 ACTION_SNOOZE -> {
@@ -46,29 +52,30 @@ class NotificationActionReceiver : BroadcastReceiver() {
                 ACTION_APPLY_V22_UPDATE -> {
                     val alarmController = AlarmController()
                     val preference = PreferenceManager.getDefaultSharedPreferences(context)
-                    val dbCursor = DatabaseCursor(context)
 
-                    dbCursor.getActivatedAlarms().filter {
-                        val applyDayRepeat = preference.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
-                        val oldResult =
-                                try {
-                                    alarmController.calculateDate(it, TYPE_ALARM, applyDayRepeat)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                    return
-                                }
-                        val newResult = alarmController.calculateDateTime(it, TYPE_ALARM).toInstant().toEpochMilli()
+                    GlobalScope.launch(Dispatchers.IO) {
+                        db.alarmItemDao().getActivated().filter {
+                            val applyDayRepeat = preference.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
+                            val oldResult =
+                                    try {
+                                        alarmController.calculateDate(it, TYPE_ALARM, applyDayRepeat)
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                        return@filter false
+                                    }
+                            val newResult = alarmController.calculateDateTime(it, TYPE_ALARM).toInstant().toEpochMilli()
 
-                        val old = ZonedDateTime.ofInstant(Instant.ofEpochMilli(oldResult.timeInMillis), ZoneId.systemDefault())
-                                .withNano(0)
-                        val new = ZonedDateTime.ofInstant(Instant.ofEpochMilli(newResult), ZoneId.systemDefault())
+                            val old = ZonedDateTime.ofInstant(Instant.ofEpochMilli(oldResult.timeInMillis), ZoneId.systemDefault())
+                                    .withNano(0)
+                            val new = ZonedDateTime.ofInstant(Instant.ofEpochMilli(newResult), ZoneId.systemDefault())
 
-                        !old.isEqual(new)
-                    }.forEach {
-                        alarmController.cancelAlarm(context, it.notiId)
-                        val newResult = alarmController.scheduleLocalAlarm(context, it, TYPE_ALARM)
+                            !old.isEqual(new)
+                        }.forEach {
+                            alarmController.cancelAlarm(context, it.notiId)
+                            val newResult = alarmController.scheduleLocalAlarm(context, it, TYPE_ALARM)
 
-                        dbCursor.updateAlarm(it.apply { timeSet = newResult.toString() })
+                            db.alarmItemDao().update(it.apply { timeSet = newResult.toString() })
+                        }
                     }
 
                     val requestIntent = Intent(MainActivity.ACTION_UPDATE_ALL).apply {

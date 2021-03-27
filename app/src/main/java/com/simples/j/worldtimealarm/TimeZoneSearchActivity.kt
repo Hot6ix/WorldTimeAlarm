@@ -12,27 +12,36 @@ import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.room.Room
+import com.simples.j.worldtimealarm.databinding.ActivityTimeZoneSearchBinding
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.support.TimeZoneAdapter
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import kotlinx.android.synthetic.main.activity_time_zone_search.*
+import com.simples.j.worldtimealarm.utils.AppDatabase
+import com.simples.j.worldtimealarm.utils.DatabaseManager
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
 
 
 class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener, TimeZoneAdapter.OnItemClickListener {
 
+    private lateinit var db: AppDatabase
     private lateinit var timeZoneArray: MutableList<String>
     private lateinit var timeZoneAdapter: TimeZoneAdapter
+    private lateinit var binding: ActivityTimeZoneSearchBinding
     private var query: String? = null
     private var resultArray = ArrayList<String>()
     private var code: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_time_zone_search)
+        binding = ActivityTimeZoneSearchBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
+                .build()
         code = intent.getStringExtra(WorldClockFragment.TIME_ZONE_NEW_KEY)
 
         if(savedInstanceState != null) {
@@ -50,8 +59,10 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
 
         timeZoneAdapter = TimeZoneAdapter(resultArray, applicationContext)
         timeZoneAdapter.setOnItemClickListener(this)
-        time_zone_search_list.adapter = timeZoneAdapter
-        time_zone_search_list.layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
+        binding.timeZoneSearchList.adapter = timeZoneAdapter
+//        time_zone_search_list.adapter = timeZoneAdapter
+        binding.timeZoneSearchList.layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
+//        time_zone_search_list.layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -96,12 +107,16 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
             resultArray.addAll(timeZoneArray.filter { it.toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)) })
         }
         if(resultArray.isEmpty()) {
-            time_zone_search_list.visibility = View.GONE
-            no_result.visibility = View.VISIBLE
+            binding.timeZoneSearchList.visibility = View.GONE
+//            time_zone_search_list.visibility = View.GONE
+            binding.noResult.visibility = View.VISIBLE
+//            no_result.visibility = View.VISIBLE
         }
         else {
-            time_zone_search_list.visibility = View.VISIBLE
-            no_result.visibility = View.GONE
+            binding.timeZoneSearchList.visibility = View.VISIBLE
+//            time_zone_search_list.visibility = View.VISIBLE
+            binding.noResult.visibility = View.GONE
+//            no_result.visibility = View.GONE
         }
         timeZoneAdapter.notifyDataSetChanged()
 
@@ -120,21 +135,23 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
 
     override fun onItemClick(view: View, position: Int) {
         if(code != null) {
-            val array = DatabaseCursor(applicationContext).getClockList()
-            var isExist = false
-            array.forEach {
-                if(it.timezone == resultArray[position]) {
-                    isExist = true
+            GlobalScope.launch {
+                val array = db.clockItemDao().getAll()
+                val sameClockItem = array.find {
+                    it.timezone == resultArray[position]
                 }
-            }
-            if(isExist) {
-                Toast.makeText(applicationContext, resources.getString(R.string.exist_timezone), Toast.LENGTH_SHORT).show()
-            }
-            else {
-                val intent = Intent()
-                intent.putExtra(TIME_ZONE_ID, resultArray[position])
-                setResult(Activity.RESULT_OK, intent)
-                finish()
+
+                if(sameClockItem != null) {
+                    runOnUiThread {
+                        Toast.makeText(applicationContext, resources.getString(R.string.exist_timezone), Toast.LENGTH_SHORT).show()
+                    }
+                }
+                else {
+                    val intent = Intent()
+                    intent.putExtra(TIME_ZONE_ID, resultArray[position])
+                    setResult(Activity.RESULT_OK, intent)
+                    finish()
+                }
             }
         }
         else {

@@ -4,26 +4,38 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <EditText
-        android:id="@+id/label"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/label_input_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxLines="4"
-        android:labelFor="@id/label"
-        android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
-        android:focusable="true"
-        android:textColor="@color/blueGrayDarker"
-        android:importantForAutofill="no"
+        android:layout_marginTop="@dimen/padding10"
         android:layout_marginStart="@dimen/padding20"
         android:layout_marginEnd="@dimen/padding20"
-        android:layout_marginTop="@dimen/padding10"
-        android:layout_marginBottom="@dimen/padding10"
+        app:boxBackgroundColor="@android:color/transparent"
+        app:boxBackgroundMode="outline"
+        app:endIconMode="clear_text"
+        app:endIconTint="@color/blueGray"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-        <requestFocus />
-    </EditText>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/test"
+            android:textColor="@color/blueGrayDarker"
+            android:focusable="true"
+            android:importantForAutofill="no"
+            android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
+            android:labelFor="@id/label"
+            android:maxLines="4">
+
+            <requestFocus />
+        </com.google.android.material.textfield.TextInputEditText>
+
+    </com.google.android.material.textfield.TextInputLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

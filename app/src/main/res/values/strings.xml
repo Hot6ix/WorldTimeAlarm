@@ -68,7 +68,7 @@
     <string name="new_alarm_short">New Alarm</string>
     <string name="modify_alarm">Modify Alarm</string>
     <string name="expected_time">Alarm will be fired at &#160;%1$s in local time.</string>
-    <string name="range_start">Start Date</string>
+    <string name="range_start">Start/Reservation Date</string>
     <string name="range_end">End Date</string>
     <string name="range_not_set">Not set</string>
     <string name="range_text">%1$s (%2$s) ~ %3$s (%4$s)</string>

@@ -54,6 +54,21 @@
             android:textSize="@dimen/text_small"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/range"
+            app:layout_constraintBottom_toTopOf="@id/label"/>
+
+        <TextView
+            android:id="@+id/label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_small"
+            android:text="@string/test"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:visibility="gone"
+            android:layout_marginEnd="@dimen/padding10"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/icon_layout"
+            app:layout_constraintTop_toBottomOf="@id/repeat"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
         <androidx.appcompat.widget.SwitchCompat
@@ -61,65 +76,73 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/local_time"
-            app:layout_constraintBottom_toTopOf="@id/local_time"/>
+            app:layout_constraintTop_toTopOf="@id/local_time"/>
 
-        <ImageView
-            android:id="@+id/warning"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@drawable/ic_warning"
-            android:visibility="gone"
-            android:contentDescription="@null"
-            android:layout_marginEnd="5dp"
-            app:tint="@color/color1"
-            app:layout_constraintTop_toTopOf="@id/range"
-            app:layout_constraintBottom_toBottomOf="@id/repeat"
-            app:layout_constraintEnd_toStartOf="@id/timezone"/>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/icon_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:id="@+id/timezone"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@drawable/ic_world_white"
-            android:contentDescription="@null"
-            android:layout_marginEnd="5dp"
-            app:layout_constraintTop_toTopOf="@id/range"
-            app:layout_constraintBottom_toBottomOf="@id/repeat"
-            app:layout_constraintEnd_toStartOf="@id/ringtone"/>
+            <ImageView
+                android:id="@+id/warning"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_warning"
+                android:visibility="gone"
+                android:contentDescription="@null"
+                android:layout_marginEnd="5dp"
+                app:tint="@color/color1"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/timezone"/>
 
-        <ImageView
-            android:id="@+id/ringtone"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@drawable/ic_ringtone_white"
-            android:contentDescription="@null"
-            android:layout_marginEnd="5dp"
-            app:layout_constraintTop_toTopOf="@id/range"
-            app:layout_constraintBottom_toBottomOf="@id/repeat"
-            app:layout_constraintEnd_toStartOf="@id/vibration"/>
+            <ImageView
+                android:id="@+id/timezone"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_world_white"
+                android:contentDescription="@null"
+                android:layout_marginEnd="5dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/ringtone"/>
 
-        <ImageView
-            android:id="@+id/vibration"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@drawable/ic_vibration_white"
-            android:contentDescription="@null"
-            android:layout_marginEnd="5dp"
-            app:layout_constraintTop_toTopOf="@id/range"
-            app:layout_constraintBottom_toBottomOf="@id/repeat"
-            app:layout_constraintEnd_toStartOf="@id/snooze"/>
+            <ImageView
+                android:id="@+id/ringtone"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_ringtone_white"
+                android:contentDescription="@null"
+                android:layout_marginEnd="5dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/vibration"/>
 
-        <ImageView
-            android:id="@+id/snooze"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@drawable/ic_snooze_white"
-            android:contentDescription="@null"
-            android:layout_marginEnd="5dp"
-            app:layout_constraintTop_toTopOf="@id/range"
-            app:layout_constraintBottom_toBottomOf="@id/repeat"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            <ImageView
+                android:id="@+id/vibration"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_vibration_white"
+                android:contentDescription="@null"
+                android:layout_marginEnd="5dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/snooze"/>
+
+            <ImageView
+                android:id="@+id/snooze"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_snooze_white"
+                android:contentDescription="@null"
+                android:layout_marginEnd="5dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

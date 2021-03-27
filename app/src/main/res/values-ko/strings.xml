@@ -69,7 +69,7 @@
     <string name="new_alarm_short">새 알람</string>
     <string name="modify_alarm">알람 수정</string>
     <string name="expected_time">현지 시각 %1$s에 알람이 울립니다.</string>
-    <string name="range_start">시작일</string>
+    <string name="range_start">시작/예약일</string>
     <string name="range_end">종료일</string>
     <string name="range_not_set">설정 안 함</string>
     <string name="range_text">%1$s (%2$s) ~ %3$s (%4$s)</string>

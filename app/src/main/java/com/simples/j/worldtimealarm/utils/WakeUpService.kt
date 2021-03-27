@@ -12,6 +12,7 @@ import android.text.format.DateUtils
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
+import androidx.room.Room
 import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
@@ -24,6 +25,9 @@ import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_EXPIRED
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.NotificationActionReceiver
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
@@ -32,6 +36,7 @@ import org.threeten.bp.format.FormatStyle
 
 class WakeUpService : Service() {
 
+    private lateinit var db: AppDatabase
     private lateinit var preference: SharedPreferences
     private lateinit var notificationManager: NotificationManager
 
@@ -48,14 +53,20 @@ class WakeUpService : Service() {
 
     private var isExpired = false
 
+    inner class WakeUpBinder: Binder() {
+        fun getService(): WakeUpService = this@WakeUpService
+    }
+
     override fun onBind(intent: Intent): IBinder {
-        throw Exception("Not implemented")
+        return WakeUpBinder()
     }
 
     override fun onCreate() {
         super.onCreate()
 
         isWakeUpServiceRunning = true
+        db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
+                .build()
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -105,16 +116,16 @@ class WakeUpService : Service() {
                     val alarmMuteTime = preference.getString(applicationContext.resources.getString(R.string.setting_alarm_mute_key), "0")?.toLong()
                     if(alarmMuteTime != null && alarmMuteTime != 0L) {
 
-                        Runnable {
-                            stopAll()
-                            Log.d(C.TAG, "Alarm muted : ID(${alarmItem.notiId.plus(1)})")
-                        }.also {  runnable ->
-                            timerRunnable = runnable
+                    Runnable {
+                        stopAll()
+                        Log.d(C.TAG, "Alarm muted : ID(${alarmItem.notiId.plus(1)})")
+                    }.also {  runnable ->
+                        timerRunnable = runnable
 
-                            timer = Handler(Looper.getMainLooper()).apply {
-                                postDelayed(runnable, alarmMuteTime)
-                            }
+                        timer = Handler(Looper.getMainLooper()).apply {
+                            postDelayed(runnable, alarmMuteTime)
                         }
+                    }
                     }
                 }
             }
@@ -311,20 +322,22 @@ class WakeUpService : Service() {
                 also will play default ringtone.
             */
             if(!isSystemRingtone(ringtone)) {
-                DatabaseCursor(applicationContext).findUserRingtone(ringtone).also {
-                    if(it == null) {
-                        // if ringtone is not in list, set to default ringtone
-                        item?.also { item ->
-                            item.ringtone = defaultRingtone?.uri
-                            DatabaseCursor(applicationContext).updateAlarm(item)
+                GlobalScope.launch(Dispatchers.IO) {
+                    db.ringtoneItemDao().getRingtoneFromUri(ringtone).also {
+                        if(it == null) {
+                            // if ringtone is not in list, set to default ringtone
+                            item?.also { item ->
+                                item.ringtone = defaultRingtone?.uri
+                                db.alarmItemDao().update(item)
 
-                            // update alarm item in AlarmListFragment if fragment is attached and visible
-                            val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
-                                val bundle = Bundle()
-                                bundle.putParcelable(AlarmReceiver.ITEM, item)
-                                putExtra(AlarmReceiver.OPTIONS, bundle)
+                                // update alarm item in AlarmListFragment if fragment is attached and visible
+                                val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
+                                    val bundle = Bundle()
+                                    bundle.putParcelable(AlarmReceiver.ITEM, item)
+                                    putExtra(AlarmReceiver.OPTIONS, bundle)
+                                }
+                                sendBroadcast(requestIntent)
                             }
-                            sendBroadcast(requestIntent)
                         }
                     }
                 }

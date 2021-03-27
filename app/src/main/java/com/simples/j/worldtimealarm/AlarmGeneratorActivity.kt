@@ -6,6 +6,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.simples.j.worldtimealarm.databinding.ActivityAlarmGeneratorBinding
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.AlarmStatus
 import com.simples.j.worldtimealarm.fragments.AlarmGeneratorFragment
@@ -14,10 +15,12 @@ import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
 class AlarmGeneratorActivity : AppCompatActivity() {
 
     private lateinit var viewModel: AlarmGeneratorViewModel
+    private lateinit var binding: ActivityAlarmGeneratorBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_alarm_generator)
+        binding = ActivityAlarmGeneratorBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         viewModel = ViewModelProvider(this)[AlarmGeneratorViewModel::class.java]
 

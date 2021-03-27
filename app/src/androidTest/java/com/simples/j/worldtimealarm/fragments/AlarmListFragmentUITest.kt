@@ -2,14 +2,9 @@
 
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.content.res.Configuration
 import android.text.format.DateFormat
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.TimePicker
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
@@ -17,14 +12,11 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
-import androidx.test.espresso.ViewAssertion
 import androidx.test.espresso.ViewInteraction
-import androidx.test.espresso.accessibility.AccessibilityChecks
 import androidx.test.espresso.action.*
 import androidx.test.espresso.action.ViewActions.*
-import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.contrib.PickerActions.setTime
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
@@ -33,19 +25,18 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.simples.j.worldtimealarm.AlarmGeneratorActivity
+import com.simples.j.worldtimealarm.ViewMatcherExtension.withTextColor
+import com.simples.j.worldtimealarm.ViewMatcherExtension.withTime
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseManager
 import com.simples.j.worldtimealarm.utils.MediaCursor
-import junit.framework.Assert.assertEquals
 import kotlinx.android.synthetic.main.fragment_alarm_list.*
-import org.hamcrest.BaseMatcher
-import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.*
-import org.hamcrest.TypeSafeMatcher
 import org.junit.*
+import org.junit.Assert.assertEquals
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import java.util.*
@@ -93,7 +84,7 @@ class AlarmListFragmentUITest {
     }
 
     @Test
-    fun b_checkIfNewAlarmHasCreated() {
+    fun b_checkIfNewAlarmIsCreated() {
         createNewAlarm(10, 0)
     }
 
@@ -111,7 +102,7 @@ class AlarmListFragmentUITest {
     }
 
     @Test
-    fun d_checkIfAlarmHasBeenDisabled() {
+    fun d_checkIfAlarmIsDisabled() {
         val localTime = getLocalTimeText(10, 0)
 
         onView(
@@ -138,7 +129,7 @@ class AlarmListFragmentUITest {
     }
 
     @Test
-    fun e_checkIfAlarmHasDeleted() {
+    fun e_checkIfAlarmIsDeleted() {
         val itemView = getAlarmItemViewByTime(10, 0)
 
         // Check if new alarm has been delete by swiping
@@ -228,51 +219,6 @@ class AlarmListFragmentUITest {
 
         activityScenario.apply {
             moveToState(Lifecycle.State.DESTROYED)
-        }
-    }
-
-    private fun setTime(h: Int, m: Int): ViewAction {
-        return object: ViewAction {
-            override fun getConstraints(): Matcher<View> = isAssignableFrom(TimePicker::class.java)
-
-            override fun getDescription(): String = "Set provided hour and minute into TimePicker"
-
-            override fun perform(uiController: UiController?, view: View?) {
-                (view as TimePicker).apply {
-                    hour = h
-                    minute = m
-                }
-            }
-
-        }
-    }
-
-    private fun withTime(h: Int, m: Int): Matcher<View> {
-        return object : BaseMatcher<View>() {
-            override fun describeTo(description: Description?) {
-                description?.appendText("with time hour($h) and minute($m)")
-            }
-
-            override fun matches(item: Any?): Boolean {
-                return (item as TimePicker).let {
-                    it.hour == h && it.minute == m
-                }
-            }
-
-        }
-    }
-
-    private fun withTextColor(id: Int): Matcher<View> {
-        return object : BaseMatcher<View>() {
-            override fun describeTo(description: Description?) {
-                description?.appendText("with text color: $id")
-            }
-
-            override fun matches(item: Any?): Boolean {
-                return (item as TextView).let {
-                    it.currentTextColor == ContextCompat.getColor(it.context, id)
-                }
-            }
         }
     }
 

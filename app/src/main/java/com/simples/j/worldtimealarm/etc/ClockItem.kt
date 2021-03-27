@@ -2,11 +2,20 @@ package com.simples.j.worldtimealarm.etc
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import com.simples.j.worldtimealarm.utils.DatabaseManager
 
-data class ClockItem(var id: Int?, var timezone: String?, var index: Int?) : Parcelable {
+@Entity(tableName = DatabaseManager.TABLE_CLOCK_LIST)
+data class ClockItem(
+        @ColumnInfo(name = DatabaseManager.COLUMN_ID) var id: Int?,
+        @PrimaryKey @ColumnInfo(name = DatabaseManager.COLUMN_TIME_ZONE) var timezone: String,
+        @ColumnInfo(name = DatabaseManager.COLUMN_INDEX) var index: Int?
+) : Parcelable {
     constructor(source: Parcel) : this(
             source.readValue(Int::class.java.classLoader) as Int?,
-            source.readString(),
+            source.readString().toString(),
             source.readValue(Int::class.java.classLoader) as Int?
     )
 

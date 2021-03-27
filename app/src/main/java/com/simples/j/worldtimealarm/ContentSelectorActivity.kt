@@ -7,12 +7,16 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.ViewModelProvider
+import com.simples.j.worldtimealarm.databinding.ActivityContentSelectorBinding
 import com.simples.j.worldtimealarm.etc.PatternItem
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.etc.SnoozeItem
 import com.simples.j.worldtimealarm.fragments.ContentSelectorFragment
 import com.simples.j.worldtimealarm.fragments.DatePickerFragment
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
@@ -20,10 +24,12 @@ class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickList
     private lateinit var viewModel: ContentSelectorViewModel
     private lateinit var contentSelectorFragment: ContentSelectorFragment
     private lateinit var datePickerFragment: DatePickerFragment
+    private lateinit var binding: ActivityContentSelectorBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_content_selector)
+        binding = ActivityContentSelectorBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -53,17 +59,19 @@ class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickList
             viewModel.action = intent.action
 
             viewModel.lastSelectedValue = intent.getSerializableExtra(LAST_SELECTED_KEY)
+
+            viewModel.timeZone = intent.getStringExtra(TIME_ZONE_KEY) ?: TimeZone.getDefault().id
+
             intent.getLongExtra(START_DATE_KEY, -1).let {
-                viewModel.startDate.value =
-                        if(it > 0) it
+                viewModel.startDate =
+                        if(it > 0) LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.of(viewModel.timeZone)).toLocalDate()
                         else null
             }
             intent.getLongExtra(END_DATE_KEY, -1).let {
-                viewModel.endDate.value =
-                        if(it > 0) it
+                viewModel.endDate =
+                        if(it > 0) LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.of(viewModel.timeZone)).toLocalDate()
                         else null
             }
-            viewModel.timeZone = intent.getStringExtra(TIME_ZONE_KEY) ?: TimeZone.getDefault().id
 
             when (intent.action) {
                 ACTION_REQUEST_AUDIO, ACTION_REQUEST_VIBRATION, ACTION_REQUEST_SNOOZE -> {

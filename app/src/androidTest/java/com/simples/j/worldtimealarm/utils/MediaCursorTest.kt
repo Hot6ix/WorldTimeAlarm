@@ -1,4 +1,4 @@
-package com.simples.j.worldtimealarm
+package com.simples.j.worldtimealarm.utils
 
 import android.content.Context
 import android.icu.text.TimeZoneNames
@@ -9,11 +9,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.TimeZoneInfo
-import com.simples.j.worldtimealarm.utils.MediaCursor
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.threeten.bp.DayOfWeek
 import java.time.ZoneId
 import java.util.*
 import kotlin.collections.ArrayList
@@ -25,7 +25,7 @@ class MediaCursorTest {
 
     @Before
     fun setup() {
-        context = InstrumentationRegistry.getInstrumentation().context
+        context = InstrumentationRegistry.getInstrumentation().targetContext
     }
 
     @Test
@@ -100,6 +100,43 @@ class MediaCursorTest {
             println("${it.offsetBefore}")
             println("${it.offsetAfter}")
             println("${it.timeDefinition}")
+        }
+    }
+
+    @Test
+    fun testGetWeekDaysInLocale() {
+        val us = MediaCursor.getWeekDaysInLocale(Locale.US)
+        assertEquals(DayOfWeek.SUNDAY, us.first())
+
+        val france = MediaCursor.getWeekDaysInLocale(Locale.FRANCE)
+        assertEquals(DayOfWeek.MONDAY, france.first())
+
+        val korea = MediaCursor.getWeekDaysInLocale(Locale.KOREA)
+        assertEquals(DayOfWeek.SUNDAY, korea.first())
+
+        val uk = MediaCursor.getWeekDaysInLocale(Locale.UK)
+        assertEquals(DayOfWeek.MONDAY, uk.first())
+    }
+
+    @Test
+    fun testRecurrenceArrayUsingLocale() {
+        val newYork = "America/New_York"
+
+        val usLocale = MediaCursor.getULocaleByTimeZoneId(newYork)
+        usLocale?.let {
+            assertEquals("US", it.country)
+
+            val dayOfWeekInLocale = MediaCursor.getWeekDaysInLocale(it.toLocale())
+            assertEquals(DayOfWeek.SUNDAY, dayOfWeekInLocale[0])
+        }
+
+        val paris = "Europe/Paris"
+        val franceLocale = MediaCursor.getULocaleByTimeZoneId(paris)
+        franceLocale?.let {
+            assertEquals("FR", it.country)
+
+            val dayOfWeekInLocale = MediaCursor.getWeekDaysInLocale(it.toLocale())
+            assertEquals(DayOfWeek.MONDAY, dayOfWeekInLocale[0])
         }
     }
 

@@ -19,6 +19,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
+import com.simples.j.worldtimealarm.databinding.FragmentTimeZonePickerBinding
 import com.simples.j.worldtimealarm.support.BaseTimeZonePickerAdapter
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.fragment_time_zone_picker.*
@@ -32,6 +33,7 @@ import kotlin.coroutines.CoroutineContext
 class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTextListener {
 
     private lateinit var fragmentContext: Context
+    private lateinit var binding: FragmentTimeZonePickerBinding
 
     private var mListener: OnTimeZoneChangeListener? = null
     private var mRequestType: Int = -1
@@ -60,9 +62,10 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
+        binding = FragmentTimeZonePickerBinding.inflate(inflater, container, false)
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_time_zone_picker, container, false)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -122,9 +125,12 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
             }
 
             if(view != null) {
-                time_zone_base_recycler_view.adapter = mAdapter
-                time_zone_base_recycler_view.layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
-                progressBar.visibility = View.GONE
+                binding.timeZoneBaseRecyclerView.adapter = mAdapter
+//                time_zone_base_recycler_view.adapter = mAdapter
+                binding.timeZoneBaseRecyclerView.layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
+//                time_zone_base_recycler_view.layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
+                binding.progressBar.visibility = View.GONE
+//                progressBar.visibility = View.GONE
             }
 
             mSearchView?.apply {

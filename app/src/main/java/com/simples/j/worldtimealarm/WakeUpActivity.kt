@@ -13,32 +13,31 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
+import androidx.room.Room
 import com.google.ads.consent.ConsentInformation
 import com.google.ads.consent.ConsentStatus
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
+import com.simples.j.worldtimealarm.databinding.ActivityWakeUpBinding
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
-import com.simples.j.worldtimealarm.utils.AlarmController
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
-import com.simples.j.worldtimealarm.utils.MediaCursor
-import com.simples.j.worldtimealarm.utils.WakeUpService
-import kotlinx.android.synthetic.main.activity_wake_up.*
-import java.lang.IllegalArgumentException
+import com.simples.j.worldtimealarm.utils.*
 import java.util.*
 
 class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
 
     private lateinit var notificationManager: NotificationManager
-    private lateinit var dbCursor: DatabaseCursor
+    private lateinit var db: AppDatabase
     private lateinit var sharedPref: SharedPreferences
+    private lateinit var binding: ActivityWakeUpBinding
 
     private var item: AlarmItem? = null
     private var actionBroadcastReceiver: BroadcastReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wake_up)
+        binding = ActivityWakeUpBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         if(!intent.hasExtra(AlarmReceiver.OPTIONS)) {
             Log.d(C.TAG, "Received Alarm came without information, Finish activity.")
@@ -54,7 +53,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         MobileAds.setRequestConfiguration(C.getAdsTestConfig())
         MobileAds.initialize(this)
 
-        adViewWakeUp.loadAd(AdRequest.Builder().build())
+        binding.adViewWakeUp.loadAd(AdRequest.Builder().build())
 
         @Suppress("DEPRECATION")
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
@@ -64,11 +63,12 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 or WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON)
 
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        dbCursor = DatabaseCursor(applicationContext)
+        db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
+                .build()
         sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
 
-        clock.format12Hour = MediaCursor.getLocalizedTimeFormat()
-        clock_date.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
+        binding.clock.format12Hour = MediaCursor.getLocalizedTimeFormat()
+        binding.clockDate.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
 
         val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
         item = if(option != null && !option.isEmpty) option.getParcelable(AlarmReceiver.ITEM) else null
@@ -77,41 +77,41 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
             Log.d(C.TAG, "Alarm alerted : ID(${it?.notiId?.plus(1)})")
 
             if(it == null) {
-                label.visibility = View.VISIBLE
-                label.text = getString(R.string.error_message)
+                binding.label.visibility = View.VISIBLE
+                binding.label.text = getString(R.string.error_message)
             }
             else {
                 // Show selected time zone's time, but not print if time zone is default
                 val timeZone = it.timeZone.replace(" ", "_")
                 if(TimeZone.getDefault().id != TimeZone.getTimeZone(timeZone).id) {
-                    time_zone_clock_layout.visibility = View.VISIBLE
+                    binding.timeZoneClockLayout.visibility = View.VISIBLE
                     val name = getNameForTimeZone(it.timeZone)
-                    time_zone_clock_title.text = name
+                    binding.timeZoneClockTitle.text = name
 
-                    time_zone_clock_time.timeZone = timeZone
-                    time_zone_clock_time.format12Hour = MediaCursor.getLocalizedTimeFormat()
-                    time_zone_clock_date.timeZone = timeZone
-                    time_zone_clock_date.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
+                    binding.timeZoneClockTime.timeZone = timeZone
+                    binding.timeZoneClockTime.format12Hour = MediaCursor.getLocalizedTimeFormat()
+                    binding.timeZoneClockDate.timeZone = timeZone
+                    binding.timeZoneClockDate.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
                 }
 
                 // Show label
                 if(!it.label.isNullOrEmpty()) {
-                    label.visibility = View.VISIBLE
-                    label.text = it.label
-                    label.movementMethod = ScrollingMovementMethod()
+                    binding.label.visibility = View.VISIBLE
+                    binding.label.text = it.label
+                    binding.label.movementMethod = ScrollingMovementMethod()
                 }
 
                 if(it.snooze > 0) {
-                    snooze.visibility = View.VISIBLE
+                    binding.snooze.visibility = View.VISIBLE
                 }
                 else {
-                    snooze.visibility = View.GONE
+                    binding.snooze.visibility = View.GONE
                 }
             }
         }
 
-        snooze.setOnClickListener(this)
-        dismiss.setOnClickListener(this)
+        binding.snooze.setOnClickListener(this)
+        binding.dismiss.setOnClickListener(this)
 
         actionBroadcastReceiver = object: BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {

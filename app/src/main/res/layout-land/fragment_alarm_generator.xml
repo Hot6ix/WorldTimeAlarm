@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.simples.j.worldtimealarm.AlarmActivity">
+    android:layout_height="match_parent">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/detail_content_layout"
@@ -14,7 +12,8 @@
         android:paddingBottom="@dimen/alarm_item_height"
         android:clipToPadding="false"
         android:overScrollMode="never"
-        android:scrollbars="none">
+        android:scrollbars="none"
+        android:visibility="invisible">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -170,60 +169,60 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/sunday"
+                        android:id="@+id/firstDayOfWeek"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        android:layout_weight="1"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/monday"
+                        android:id="@+id/secondDayOfWeek"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        android:layout_weight="1"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/tuesday"
+                        android:id="@+id/thirdDayOfWeek"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        android:layout_weight="1"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/wednesday"
+                        android:id="@+id/fourthDayOfWeek"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        android:layout_weight="1"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/thursday"
+                        android:id="@+id/fifthDayOfWeek"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        android:layout_weight="1"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/friday"
+                        android:id="@+id/sixthDayOfWeek"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        android:layout_weight="1"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/saturday"
+                        android:id="@+id/seventhDayOfWeek"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"
-                        android:layout_weight="1"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
@@ -307,7 +306,15 @@
         android:layout_gravity="center|bottom"
         android:gravity="center"
         android:textColor="?attr/colorPrimary"
+        android:visibility="invisible"
         app:iconTint="?attr/colorPrimary"
         app:backgroundTint="@color/background"/>
+
+    <androidx.core.widget.ContentLoadingProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="?android:progressBarStyleLarge" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -56,6 +56,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         super.setHasStableIds(hasStableIds)
     }
 
+    // TODO: Replace deprecated
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[holder.adapterPosition]
 
@@ -157,6 +158,16 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             }
         }
 
+        item.label.let {
+            if(it.isNullOrEmpty()) holder.label.visibility = View.GONE
+            else {
+                holder.label.apply {
+                    text = item.label
+                    visibility = View.VISIBLE
+                }
+            }
+        }
+
         holder.switch.setOnCheckedChangeListener(null)
         holder.switch.isChecked = item.on_off != 0
 
@@ -235,6 +246,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.textColorEnabled))
             holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.textColorEnabled))
             holder.range.setTextColor(ContextCompat.getColor(context, R.color.textColorEnabled))
+            holder.label.setTextColor(ContextCompat.getColor(context, R.color.textColorEnabled))
             holder.timezone.setColorFilter(ContextCompat.getColor(context, R.color.textColorEnabled), PorterDuff.Mode.SRC_ATOP)
             holder.ringtone.setColorFilter(ContextCompat.getColor(context, R.color.textColorEnabled), PorterDuff.Mode.SRC_ATOP)
             holder.vibration.setColorFilter(ContextCompat.getColor(context, R.color.textColorEnabled), PorterDuff.Mode.SRC_ATOP)
@@ -244,6 +256,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             holder.localTime.setTextColor(ContextCompat.getColor(context, R.color.textColorDisabled))
             holder.repeat.setTextColor(ContextCompat.getColor(context, R.color.textColorDisabled))
             holder.range.setTextColor(ContextCompat.getColor(context, R.color.textColorDisabled))
+            holder.label.setTextColor(ContextCompat.getColor(context, R.color.textColorDisabled))
             holder.timezone.setColorFilter(ContextCompat.getColor(context, R.color.textColorDisabled), PorterDuff.Mode.SRC_ATOP)
             holder.ringtone.setColorFilter(ContextCompat.getColor(context, R.color.textColorDisabled), PorterDuff.Mode.SRC_ATOP)
             holder.vibration.setColorFilter(ContextCompat.getColor(context, R.color.textColorDisabled), PorterDuff.Mode.SRC_ATOP)
@@ -258,6 +271,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
         var switch: SwitchCompat = view.on_off
         var colorTag: View = view.colorTag
         var range: TextView = view.range
+        var label: TextView = view.label
         var warning: ImageView = view.warning
         var timezone: ImageView = view.timezone
         var ringtone: ImageView = view.ringtone
