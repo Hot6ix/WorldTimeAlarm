@@ -305,6 +305,26 @@ abstract class AppDatabase: RoomDatabase() {
         val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 Log.d(C.TAG, "Migrate from 7 to 8")
+                // update picker time
+                val tmpCursor = database.query("SELECT * FROM ${DatabaseManager.TABLE_ALARM_LIST}")
+
+                if(tmpCursor.count > 0) {
+                    val list = ArrayList<Triple<Int, String, Int?>>()
+                    while(tmpCursor.moveToNext()) {
+                        val id = tmpCursor.getInt(tmpCursor.getColumnIndex(DatabaseManager.COLUMN_ID))
+                        val timeSet = tmpCursor.getString(tmpCursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
+                        val pickerTime = tmpCursor.getInt(tmpCursor.getColumnIndex(DatabaseManager.COLUMN_PICKER_TIME))
+
+                        list.add(Triple(id, timeSet, pickerTime))
+                    }
+
+                    list.filter { it.third == null || it.third == 0}.forEach {
+                        database.execSQL("UPDATE ${DatabaseManager.TABLE_ALARM_LIST} " +
+                                "SET ${DatabaseManager.COLUMN_PICKER_TIME} = '" + it.second + "' " +
+                                "WHERE ${DatabaseManager.COLUMN_ID} = ${it.first}")
+                    }
+                }
+
                 // due to migration issue, create new table and copy data to new table
                 database.execSQL("CREATE TABLE IF NOT EXISTS TMP_ALARM_LIST (" +
                         "${DatabaseManager.COLUMN_ID} INTEGER PRIMARY KEY AUTOINCREMENT," +
