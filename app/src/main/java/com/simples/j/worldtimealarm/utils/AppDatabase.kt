@@ -78,7 +78,10 @@ abstract class AppDatabase: RoomDatabase() {
                 database.execSQL("ALTER TABLE TMP_ALARM_LIST RENAME TO ${DatabaseManager.TABLE_ALARM_LIST}")
 
                 // get id and recurrences of all items
-                val cursor = database.query("SELECT * FROM ${DatabaseManager.TABLE_ALARM_LIST}")
+                val cursor = database.query("SELECT " +
+                        "${DatabaseManager.COLUMN_ID}," +
+                        "${DatabaseManager.COLUMN_REPEAT} " +
+                        "FROM ${DatabaseManager.TABLE_ALARM_LIST}")
                 if(cursor.count > 0) {
                     val list = ArrayList<Pair<Int, IntArray>>()
 
@@ -214,7 +217,10 @@ abstract class AppDatabase: RoomDatabase() {
                 database.execSQL("ALTER TABLE TMP_ALARM_LIST RENAME TO ${DatabaseManager.TABLE_ALARM_LIST}")
 
                 // get id and recurrences of all items
-                val cursor = database.query("SELECT * FROM ${DatabaseManager.TABLE_ALARM_LIST}")
+                val cursor = database.query("SELECT " +
+                        "${DatabaseManager.COLUMN_ID}," +
+                        "${DatabaseManager.COLUMN_REPEAT} " +
+                        "FROM ${DatabaseManager.TABLE_ALARM_LIST}")
                 if(cursor.count > 0) {
                     val list = ArrayList<Pair<Int, IntArray>>()
 
@@ -383,7 +389,10 @@ abstract class AppDatabase: RoomDatabase() {
                 database.execSQL("ALTER TABLE TMP_ALARM_LIST RENAME TO ${DatabaseManager.TABLE_ALARM_LIST}")
 
                 // get id and recurrences of all items
-                val cursor = database.query("SELECT * FROM ${DatabaseManager.TABLE_ALARM_LIST}")
+                val cursor = database.query("SELECT " +
+                        "${DatabaseManager.COLUMN_ID}," +
+                        "${DatabaseManager.COLUMN_REPEAT} " +
+                        "FROM ${DatabaseManager.TABLE_ALARM_LIST}")
                 if(cursor.count > 0) {
                     val list = ArrayList<Pair<Int, IntArray>>()
 
