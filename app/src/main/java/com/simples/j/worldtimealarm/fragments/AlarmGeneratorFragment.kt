@@ -730,7 +730,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             }
             start != null && end != null -> {
                 if(start.toEpochMilli() >= end.toEpochMilli() || end.toEpochMilli() <= System.currentTimeMillis()) {
-                    Snackbar.make(binding.fragmentContainer, getString(R.string.end_date_earlier_than_start_date), Snackbar.LENGTH_SHORT)
+                    Snackbar.make(binding.fragmentContainer, getString(R.string.unreachable_alarm), Snackbar.LENGTH_SHORT)
                             .setAnchorView(binding.action)
                             .show()
                     return
@@ -748,11 +748,19 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                         }
                     }
                 }
+                else {
+                    if(item.isExpired()) {
+                        Snackbar.make(binding.fragmentContainer, getString(R.string.unreachable_alarm), Snackbar.LENGTH_SHORT)
+                                .setAnchorView(binding.action)
+                                .show()
+                        return
+                    }
+                }
             }
             start != null -> {
                 viewModel.recurrences.value?.let { recurrences ->
                     if(!recurrences.any { it > 0 } && start.toEpochMilli() < System.currentTimeMillis()) {
-                        Snackbar.make(binding.fragmentContainer, getString(R.string.start_date_and_time_is_wrong), Snackbar.LENGTH_SHORT)
+                        Snackbar.make(binding.fragmentContainer, getString(R.string.unreachable_alarm), Snackbar.LENGTH_SHORT)
                                 .setAnchorView(binding.action)
                                 .show()
                         return

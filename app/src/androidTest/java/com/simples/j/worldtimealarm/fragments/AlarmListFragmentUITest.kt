@@ -15,6 +15,7 @@ import androidx.test.espresso.ViewAction
 import androidx.test.espresso.ViewInteraction
 import androidx.test.espresso.action.*
 import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.PickerActions.setTime
 import androidx.test.espresso.intent.Intents
@@ -134,22 +135,22 @@ class AlarmListFragmentUITest {
 
         // Check if new alarm has been delete by swiping
         itemView.perform(GeneralSwipeAction(Swipe.FAST, GeneralLocation.CENTER_RIGHT, GeneralLocation.CENTER_LEFT, Press.FINGER))
-        itemView.check(matches(not(isDisplayed())))
+        itemView.check(doesNotExist())
     }
 
-    @Test
-    fun f_checkSwapping() {
-        val first = createNewAlarm(9, 30)
-        val second = createNewAlarm(21, 30)
-
-        activityScenario.onActivity {
-            (it.supportFragmentManager.findFragmentByTag(AlarmListFragment.TAG) as AlarmListFragment).let { fragment ->
-                val p = getItemPosition(fragment.alarmList, getLocalTimeText(9, 30))
-
-                assertEquals(0, p)
-            }
-        }
-    }
+//    @Test
+//    fun f_checkSwapping() {
+//        val first = createNewAlarm(9, 30)
+//        val second = createNewAlarm(21, 30)
+//
+//        activityScenario.onActivity {
+//            (it.supportFragmentManager.findFragmentByTag(AlarmListFragment.TAG) as AlarmListFragment).let { fragment ->
+//                val p = getItemPosition(fragment.alarmList, getLocalTimeText(9, 30))
+//
+//                assertEquals(0, p)
+//            }
+//        }
+//    }
 
     @Test
     fun g_orientation_change_test() {

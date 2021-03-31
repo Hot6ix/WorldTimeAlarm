@@ -91,6 +91,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
         updateRequestReceiver = UpdateRequestReceiver()
         db = Room.databaseBuilder(fragmentContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
+                .addMigrations(AppDatabase.MIGRATION_4_8, AppDatabase.MIGRATION_5_8, AppDatabase.MIGRATION_7_8)
                 .build()
         alarmController = AlarmController.getInstance()
         audioManager = fragmentContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager

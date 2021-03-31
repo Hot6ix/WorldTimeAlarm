@@ -60,7 +60,6 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                 Intent.ACTION_MY_PACKAGE_REPLACED -> {
                     when(BuildConfig.VERSION_CODE) {
                         22, 23 -> {
-                            // reset order of list
                             activated.forEachIndexed { index, alarmItem ->
                                 val updated = alarmItem.apply {
                                     this.index = index
