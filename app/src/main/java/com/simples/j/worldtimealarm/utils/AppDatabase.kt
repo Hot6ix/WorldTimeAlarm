@@ -312,7 +312,11 @@ abstract class AppDatabase: RoomDatabase() {
             override fun migrate(database: SupportSQLiteDatabase) {
                 Log.d(C.TAG, "Migrate from 7 to 8")
                 // update picker time
-                val tmpCursor = database.query("SELECT * FROM ${DatabaseManager.TABLE_ALARM_LIST}")
+                val tmpCursor = database.query("SELECT " +
+                        "${DatabaseManager.COLUMN_ID}," +
+                        "${DatabaseManager.COLUMN_TIME_SET}," +
+                        "${DatabaseManager.COLUMN_PICKER_TIME} " +
+                        "FROM ${DatabaseManager.TABLE_ALARM_LIST}")
 
                 if(tmpCursor.count > 0) {
                     val list = ArrayList<Triple<Int, String, Int?>>()
