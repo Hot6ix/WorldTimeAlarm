@@ -96,6 +96,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         return binding.root
     }
 
+    // TODO: Crashed when fragment is launched with short-cut
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         setHasOptionsMenu(true)
@@ -470,37 +471,44 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
     override fun onButtonChecked(group: MaterialButtonToggleGroup?, checkedId: Int, isChecked: Boolean) {
         if(viewModel.recurrences.value == null) viewModel.recurrences.value = IntArray(7) { 0 }
-        when(checkedId) {
-            R.id.firstDayOfWeek -> {
-                viewModel.recurrences.value?.set(0, if(isChecked) (binding.firstDayOfWeek.tag as DayOfWeek).value else 0)
+
+        launch {
+            initJob.join()
+
+            when(checkedId) {
+                R.id.firstDayOfWeek -> {
+                    viewModel.recurrences.value?.set(0, if(isChecked) (binding.firstDayOfWeek.tag as DayOfWeek).value else 0)
+                }
+                R.id.secondDayOfWeek -> {
+                    viewModel.recurrences.value?.set(1, if(isChecked) (binding.secondDayOfWeek.tag as DayOfWeek).value else 0)
+                }
+                R.id.thirdDayOfWeek -> {
+                    viewModel.recurrences.value?.set(2, if(isChecked) (binding.thirdDayOfWeek.tag as DayOfWeek).value else 0)
+                }
+                R.id.fourthDayOfWeek -> {
+                    viewModel.recurrences.value?.set(3, if(isChecked) (binding.fourthDayOfWeek.tag as DayOfWeek).value else 0)
+                }
+                R.id.fifthDayOfWeek -> {
+                    viewModel.recurrences.value?.set(4, if(isChecked) (binding.fifthDayOfWeek.tag as DayOfWeek).value else 0)
+                }
+                R.id.sixthDayOfWeek -> {
+                    viewModel.recurrences.value?.set(5, if(isChecked) (binding.sixthDayOfWeek.tag as DayOfWeek).value else 0)
+                }
+                R.id.seventhDayOfWeek -> {
+                    viewModel.recurrences.value?.set(6, if(isChecked) (binding.seventhDayOfWeek.tag as DayOfWeek).value else 0)
+                }
             }
-            R.id.secondDayOfWeek -> {
-                viewModel.recurrences.value?.set(1, if(isChecked) (binding.secondDayOfWeek.tag as DayOfWeek).value else 0)
-            }
-            R.id.thirdDayOfWeek -> {
-                viewModel.recurrences.value?.set(2, if(isChecked) (binding.thirdDayOfWeek.tag as DayOfWeek).value else 0)
-            }
-            R.id.fourthDayOfWeek -> {
-                viewModel.recurrences.value?.set(3, if(isChecked) (binding.fourthDayOfWeek.tag as DayOfWeek).value else 0)
-            }
-            R.id.fifthDayOfWeek -> {
-                viewModel.recurrences.value?.set(4, if(isChecked) (binding.fifthDayOfWeek.tag as DayOfWeek).value else 0)
-            }
-            R.id.sixthDayOfWeek -> {
-                viewModel.recurrences.value?.set(5, if(isChecked) (binding.sixthDayOfWeek.tag as DayOfWeek).value else 0)
-            }
-            R.id.seventhDayOfWeek -> {
-                viewModel.recurrences.value?.set(6, if(isChecked) (binding.seventhDayOfWeek.tag as DayOfWeek).value else 0)
+
+            withContext(Dispatchers.Main) {
+                binding.date.text = AlarmStringFormatHelper.formatDate(
+                    fragmentContext,
+                    viewModel.startDate,
+                    viewModel.endDate,
+                    viewModel.recurrences.value?.any { it > 0 } ?: false
+                )
+                updateEstimated()
             }
         }
-
-        binding.date.text = AlarmStringFormatHelper.formatDate(
-                fragmentContext,
-                viewModel.startDate,
-                viewModel.endDate,
-                viewModel.recurrences.value?.any { it > 0 } ?: false
-        )
-        updateEstimated()
     }
 
     override fun onTimeChanged(picker: TimePicker?, hour: Int, minute: Int) {
