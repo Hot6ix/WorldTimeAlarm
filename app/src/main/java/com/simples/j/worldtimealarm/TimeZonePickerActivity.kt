@@ -67,7 +67,7 @@ class TimeZonePickerActivity : AppCompatActivity(), TimeZonePickerFragment.OnTim
         mTimeZonePickerFragment.arguments = bundle
         supportFragmentManager
                 .beginTransaction()
-                .setCustomAnimations(R.anim.fragment_open_enter, R.anim.fragment_open_exit, R.anim.fragment_close_enter, R.anim.fragment_close_exit)
+                .setCustomAnimations(R.animator.fragment_open_enter, R.animator.fragment_open_exit, R.animator.fragment_close_enter, R.animator.fragment_close_exit)
                 .replace(R.id.time_zone_picker_fragment_container, mTimeZonePickerFragment, tag)
                 .addToBackStack(tag)
                 .commit()
