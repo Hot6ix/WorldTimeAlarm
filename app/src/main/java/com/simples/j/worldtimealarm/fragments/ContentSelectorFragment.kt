@@ -32,7 +32,6 @@ import com.simples.j.worldtimealarm.etc.SnoozeItem
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
 import com.simples.j.worldtimealarm.support.ContentSelectorAdapter
 import com.simples.j.worldtimealarm.utils.AppDatabase
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.DatabaseManager
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.coroutines.*
@@ -191,14 +190,25 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                     val name = getNameFromUri(it)
 
                     launch(coroutineContext) {
-                        val isInserted = DatabaseCursor(requireContext()).insertUserRingtone(RingtoneItem(title = name, uri = it.toString()))
-                        if(!isInserted) {
-                            Toast.makeText(context, getString(R.string.exist_ringtone), Toast.LENGTH_SHORT).show()
+                        withContext(Dispatchers.IO) {
+                            try {
+                                db.ringtoneItemDao().insert(RingtoneItem(title = name, uri = it.toString()))
+
+                                viewModel.lastSelectedValue = RingtoneItem(title = getNameFromUri(it), uri = it.toString())
+                                play(it.toString())
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
                         }
-                        else {
-                            viewModel.lastSelectedValue = RingtoneItem(title = getNameFromUri(it), uri = it.toString())
-                            play(it.toString())
-                        }
+
+//                        val isInserted = DatabaseCursor(requireContext()).insertUserRingtone(RingtoneItem(title = name, uri = it.toString()))
+//                        if(!isInserted) {
+//                            Toast.makeText(context, getString(R.string.exist_ringtone), Toast.LENGTH_SHORT).show()
+//                        }
+//                        else {
+//                            viewModel.lastSelectedValue = RingtoneItem(title = getNameFromUri(it), uri = it.toString())
+//                            play(it.toString())
+//                        }
                     }
                 }
             }
