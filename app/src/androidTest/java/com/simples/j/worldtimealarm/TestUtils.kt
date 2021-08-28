@@ -1,6 +1,5 @@
 package com.simples.j.worldtimealarm
 
-import android.icu.util.TimeZone
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.ClockItem
 import java.util.*

@@ -9,7 +9,6 @@ import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.utils.AlarmController
 import com.simples.j.worldtimealarm.utils.AppDatabase
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.DatabaseManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

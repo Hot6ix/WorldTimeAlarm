@@ -17,10 +17,6 @@ import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.temporal.ChronoField
 import org.threeten.bp.temporal.TemporalAdjusters
-import org.threeten.bp.temporal.TemporalField
-import org.threeten.bp.temporal.WeekFields
-import java.util.*
-import kotlin.collections.ArrayList
 
 @MediumTest
 class AndroidOrdinalTest {

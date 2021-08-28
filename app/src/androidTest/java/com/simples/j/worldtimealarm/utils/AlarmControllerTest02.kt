@@ -6,7 +6,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Test
 import java.util.*
 
 @MediumTest

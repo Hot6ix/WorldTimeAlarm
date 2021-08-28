@@ -14,7 +14,7 @@ import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.ViewInteraction
 import androidx.test.espresso.action.*
-import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.PickerActions.setTime
@@ -26,23 +26,22 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.simples.j.worldtimealarm.AlarmGeneratorActivity
-import com.simples.j.worldtimealarm.ViewMatcherExtension.withTextColor
-import com.simples.j.worldtimealarm.ViewMatcherExtension.withTime
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.ViewMatcherExtension.withTextColor
+import com.simples.j.worldtimealarm.ViewMatcherExtension.withTime
 import com.simples.j.worldtimealarm.support.AlarmListAdapter
 import com.simples.j.worldtimealarm.utils.DatabaseManager
 import com.simples.j.worldtimealarm.utils.MediaCursor
-import kotlinx.android.synthetic.main.fragment_alarm_list.*
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.*
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.equalTo
 import org.junit.*
-import org.junit.Assert.assertEquals
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import java.util.*
 
-@RunWith(AndroidJUnit4::class)
+ @RunWith(AndroidJUnit4::class)
 @LargeTest
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class AlarmListFragmentUITest {

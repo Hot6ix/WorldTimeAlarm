@@ -4,13 +4,9 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.PowerManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents
-import androidx.test.espresso.intent.Intents.intended
-import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.LargeTest
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ServiceTestRule
@@ -20,12 +16,12 @@ import androidx.test.uiautomator.Until
 import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TestUtils
-import com.simples.j.worldtimealarm.WakeUpActivity
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.MethodSorters
-import java.lang.IllegalStateException
 
 @RunWith(AndroidJUnit4::class)
 @MediumTest

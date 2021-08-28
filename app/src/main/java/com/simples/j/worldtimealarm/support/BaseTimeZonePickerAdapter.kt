@@ -118,11 +118,11 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
         }
         else {
             list = ArrayList()
-            val prefix = text.toLowerCase(locale)
+            val prefix = text.lowercase(locale)
             mOriginal.forEach {
-                for(key in it.searchKeys) {
-                    val lower = key.toLowerCase(locale)
-                    if(lower.contains(prefix)) {
+                for (key in it.searchKeys) {
+                    val lower = key.lowercase(locale)
+                    if (lower.contains(prefix)) {
                         list.add(it)
                         return@forEach
                     }

@@ -1,21 +1,16 @@
 package com.simples.j.worldtimealarm
 
 import android.view.View
-import android.view.ViewGroup
-import android.view.ViewParent
-import android.widget.*
+import android.widget.HorizontalScrollView
+import android.widget.ListView
+import android.widget.ScrollView
+import android.widget.TimePicker
 import androidx.appcompat.widget.SearchView
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.core.view.ViewCompat
 import androidx.core.widget.NestedScrollView
-import androidx.test.espresso.PerformException
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.espresso.util.HumanReadables
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers
 import org.hamcrest.Matchers.allOf

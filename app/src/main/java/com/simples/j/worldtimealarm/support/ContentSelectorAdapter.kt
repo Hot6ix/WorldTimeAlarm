@@ -87,7 +87,7 @@ class ContentSelectorAdapter(val context: Context, val array: ArrayList<out Any>
 
                         holder.icon.setImageResource(R.drawable.ic_ringtone_white)
 
-                        if(item.uri.isNullOrEmpty() || item.uri == "null") holder.icon.imageTintMode = PorterDuff.Mode.CLEAR
+                        if(item.uri.isEmpty() || item.uri == "null") holder.icon.imageTintMode = PorterDuff.Mode.CLEAR
                         else holder.icon.imageTintMode = PorterDuff.Mode.SRC_ATOP
 
                         if(holder.itemViewType == TYPE_USER_RINGTONE) {

@@ -104,7 +104,9 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         query = text
         resultArray.clear()
         if(text != null && text.isNotEmpty()) {
-            resultArray.addAll(timeZoneArray.filter { it.toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)) })
+            resultArray.addAll(timeZoneArray.filter {
+                it.lowercase(Locale.ROOT).contains(text.lowercase(Locale.ROOT))
+            })
         }
         if(resultArray.isEmpty()) {
             binding.timeZoneSearchList.visibility = View.GONE
@@ -127,7 +129,9 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         query = text
         resultArray.clear()
         if(text != null && text.isNotEmpty()) {
-            resultArray.addAll(timeZoneArray.filter { it.toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)) })
+            resultArray.addAll(timeZoneArray.filter {
+                it.lowercase(Locale.ROOT).contains(text.lowercase(Locale.ROOT))
+            })
         }
         timeZoneAdapter.notifyDataSetChanged()
         return false

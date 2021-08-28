@@ -29,16 +29,20 @@ import com.simples.j.worldtimealarm.databinding.FragmentAlarmGeneratorBinding
 import com.simples.j.worldtimealarm.etc.*
 import com.simples.j.worldtimealarm.models.AlarmGeneratorViewModel
 import com.simples.j.worldtimealarm.support.AlarmOptionAdapter
-import com.simples.j.worldtimealarm.utils.*
 import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
-import kotlinx.android.synthetic.main.fragment_alarm_generator.*
+import com.simples.j.worldtimealarm.utils.AlarmStringFormatHelper
+import com.simples.j.worldtimealarm.utils.AppDatabase
+import com.simples.j.worldtimealarm.utils.DatabaseManager
+import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.coroutines.*
-import org.threeten.bp.*
+import org.threeten.bp.DayOfWeek
+import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
+import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.TextStyle
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.absoluteValue
 
