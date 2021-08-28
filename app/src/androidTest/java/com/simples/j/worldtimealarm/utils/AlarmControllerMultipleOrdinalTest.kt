@@ -341,7 +341,10 @@ class AlarmControllerMultipleOrdinalTest {
         }
     }
 
-    private fun mockAll(zoneId: ZoneId = ZoneId.systemDefault(), system: ZonedDateTime = ZonedDateTime.now(), ) {
+    private fun mockAll(
+        zoneId: ZoneId = ZoneId.systemDefault(),
+        system: ZonedDateTime = ZonedDateTime.now(),
+    ) {
         unmockkAll()
 
         mockkStatic(ZoneId::class)

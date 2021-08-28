@@ -225,21 +225,21 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             }
 
             // init observers
-            viewModel.ringtone.observe(viewLifecycleOwner, {
+            viewModel.ringtone.observe(viewLifecycleOwner) {
                 alarmOptionAdapter.notifyItemChanged(0)
-            })
-            viewModel.vibration.observe(viewLifecycleOwner, {
+            }
+            viewModel.vibration.observe(viewLifecycleOwner) {
                 alarmOptionAdapter.notifyItemChanged(1)
-            })
-            viewModel.snooze.observe(viewLifecycleOwner, {
+            }
+            viewModel.snooze.observe(viewLifecycleOwner) {
                 alarmOptionAdapter.notifyItemChanged(2)
-            })
-            viewModel.label.observe(viewLifecycleOwner, {
+            }
+            viewModel.label.observe(viewLifecycleOwner) {
                 alarmOptionAdapter.notifyItemChanged(3)
-            })
-            viewModel.colorTag.observe(viewLifecycleOwner, {
+            }
+            viewModel.colorTag.observe(viewLifecycleOwner) {
                 alarmOptionAdapter.notifyItemChanged(4)
-            })
+            }
 
             // init timezone
             binding.timeZoneName.text = getFormattedTimeZoneName(viewModel.timeZone.value)

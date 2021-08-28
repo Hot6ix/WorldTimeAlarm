@@ -152,13 +152,14 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             setUpClockList()
         }
 
-        viewModel.mainZonedDateTime.observe(viewLifecycleOwner, {
+        viewModel.mainZonedDateTime.observe(viewLifecycleOwner) {
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, it.hour)
                 set(Calendar.MINUTE, it.minute)
             }
 
-            binding.worldTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
+            binding.worldTime.text =
+                DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
             binding.worldDate.text = it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
 
             binding.timeZone.text = getNameForTimeZone(it.zone.id)
@@ -167,9 +168,9 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
             val set = setOf(it.toInstant().toEpochMilli().toString(), it.zone.id)
             mPrefManager.edit()
-                    .putStringSet(LAST_SETTING_KEY, set)
-                    .apply()
-        })
+                .putStringSet(LAST_SETTING_KEY, set)
+                .apply()
+        }
 
         timeZoneChangedReceiver = UpdateRequestReceiver()
         val intentFilter = IntentFilter().apply {
@@ -219,7 +220,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                             val id = db.clockItemDao().insert(clockItem)
                             clockItem.apply {
                                 index = id.toInt()
-                            }.also {
+                            }.also { it ->
                                 db.clockItemDao().update(it)
                             }
                             clockItems.add(clockItem)
