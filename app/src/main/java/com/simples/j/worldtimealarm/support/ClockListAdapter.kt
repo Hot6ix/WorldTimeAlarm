@@ -39,8 +39,8 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
     override fun getItemViewType(position: Int): Int = 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[holder.adapterPosition].timezone?.replace(" ", "_")
-        if(item.isNullOrEmpty()) {
+        val item = list[holder.absoluteAdapterPosition].timezone.replace(" ", "_")
+        if(item.isEmpty()) {
             holder.timeZoneName.text = context.getString(R.string.time_zone_wrong)
             holder.timeZoneOffset.visibility = View.GONE
         }
