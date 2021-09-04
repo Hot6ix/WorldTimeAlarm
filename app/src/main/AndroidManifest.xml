@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.simples.j.worldtimealarm">
 
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -38,6 +39,7 @@
             android:name=".MainActivity"
             android:label="@string/main_label"
             android:launchMode="singleTop"
+            android:exported="true"
             android:theme="@style/MaterialAppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -61,7 +63,7 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity android:name=".AlarmActivity" />
+        <activity android:name=".AlarmActivity" android:exported="false" />
 
         <receiver
             android:name=".AlarmReceiver"
@@ -71,6 +73,7 @@
             android:name=".WakeUpActivity"
             android:configChanges="orientation|screenSize"
             android:excludeFromRecents="true"
+            android:exported="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:showOnLockScreen="true"
@@ -79,6 +82,7 @@
         <activity
             android:name=".TimeZoneSearchActivity"
             android:label=""
+            android:exported="false"
             android:parentActivityName=".AlarmActivity">
             <meta-data
                 android:name="android.app.searchable"
@@ -86,10 +90,12 @@
         </activity>
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/action_settings" />
+            android:label="@string/action_settings"
+            android:exported="false"/>
         <activity
             android:name=".LicenseActivity"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:exported="false">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.simples.j.worldtimealarm.MainActivity" />
