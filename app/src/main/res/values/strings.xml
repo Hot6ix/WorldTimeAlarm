@@ -152,6 +152,12 @@
     <string name="setting_group_0">General</string>
     <string name="setting_time_zone_selector_key">TIME_ZONE_SELECTOR_KEY</string>
     <string name="setting_time_zone_selector_title">Select time zone by</string>
+    <string name="setting_converter_goto_key">CONVERTER_GOTO</string>
+    <string name="setting_converter_goto">Change date and time</string>
+    <string name="setting_24_hr_clock_key">ENABLE_24_HOUR_CLOCK</string>
+    <string name="setting_24_hr_clock_title">Enable 24 hour clock</string>
+    <string name="setting_label_size_key">SET_LABEL_SIZE</string>
+    <string name="setting_label_size_title">Set label size</string>
 
     <string name="setting_group_1_key">ALARM</string>
     <string name="setting_group_1">Alarm</string>
@@ -172,8 +178,6 @@
     <string name="setting_converter_timezone_key">CONVERTER_TIME_ZONE</string>
     <string name="setting_converter_timezone">Default time zone</string>
     <string name="setting_converter_timezone_id_key">CONVERTER_TIME_ZONE_ID</string>
-    <string name="setting_converter_goto_key">CONVERTER_GOTO</string>
-    <string name="setting_converter_goto">Change date and time</string>
     <string name="setting_converter_remember_last_key">REMEMBER</string>
     <string name="setting_converter_remember_last">Remember last settings</string>
 
@@ -198,6 +202,12 @@
     <string-array name="time_selector">
         <item>ID</item>
         <item>Region - Time zone (Recommended)</item>
+    </string-array>
+
+    <string-array name="label_size">
+        <item>Default</item>
+        <item>Big</item>
+        <item>Biggggggg</item>
     </string-array>
 
     <string-array name="alarm_mute">

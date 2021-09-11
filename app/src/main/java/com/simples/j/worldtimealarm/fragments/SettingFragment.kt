@@ -15,6 +15,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.preference.*
 import com.google.ads.consent.*
 import com.simples.j.worldtimealarm.LicenseActivity
+import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.utils.MediaCursor
@@ -49,6 +50,13 @@ class SettingFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChang
             it
         }
 
+        // enable 24 hour clock
+        findPreference<SwitchPreferenceCompat>(getString(R.string.setting_24_hr_clock_key))?.setOnPreferenceClickListener {
+            context?.sendBroadcast(Intent(MainActivity.ACTION_UPDATE_ALL))
+            true
+        }
+
+        // alarm mute
         findPreference<ListPreference>(getString(R.string.setting_alarm_mute_key))?.let {
             if(it.value.isNullOrEmpty()) {
                 it.value = "300000"
