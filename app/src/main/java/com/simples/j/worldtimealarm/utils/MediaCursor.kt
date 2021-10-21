@@ -294,6 +294,14 @@ class MediaCursor {
             return diff
         }
 
+        fun getLocalizedDateTimeFormat(in24Hour: Boolean = false): String {
+            val skeleton =
+                if(in24Hour) "yyyyMMMEddHm"
+                else "yyyyMMMddEhma"
+
+            return DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton)
+        }
+
         fun getLocalizedTimeFormat(in24Hour: Boolean = false): SpannableString {
             val skeleton =
                 if(in24Hour) "Hm"

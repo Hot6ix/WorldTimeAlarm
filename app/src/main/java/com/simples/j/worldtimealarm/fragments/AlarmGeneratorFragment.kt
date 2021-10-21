@@ -5,7 +5,7 @@ import android.app.Activity
 import android.content.*
 import android.os.Build
 import android.os.Bundle
-import android.text.format.DateUtils
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,6 +60,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
     private lateinit var snoozeList: ArrayList<SnoozeItem>
 
     private var now = ZonedDateTime.now()
+    private var is24HourMode = false
 
     @RequiresApi(Build.VERSION_CODES.N)
     private val icuCalendar = android.icu.util.Calendar.getInstance()
@@ -104,6 +105,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 .build()
 
         preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
+        is24HourMode = preference.getBoolean(fragmentContext.getString(R.string.setting_24_hr_clock_key), false)
         timeZoneSelectorOption = preference.getString(resources.getString(R.string.setting_time_zone_selector_key), SettingFragment.SELECTOR_OLD)
                 ?: SettingFragment.SELECTOR_OLD
 
@@ -268,6 +270,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         labelDialog = getLabelDialog()
         colorTagDialog = getColorTagChoiceDialog()
 
+        binding.timePicker.setIs24HourView(is24HourMode)
         binding.timePicker.setOnTimeChangedListener(this)
         binding.timeZoneView.setOnClickListener(this)
 
@@ -567,7 +570,8 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 val diffText = "${hourFormat.format(diffHour.absoluteValue)}:${minFormat.format(diffMin.absoluteValue)}"
 
                 binding.estTimeZone.text = getString(R.string.time_zone_with_diff, getFormattedTimeZoneName(resultInLocal.zone.id), diffText)
-                binding.estDateTime.text = DateUtils.formatDateTime(fragmentContext, resultInLocal.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
+                binding.estDateTime.text = DateFormat.format(MediaCursor.getLocalizedDateTimeFormat(is24HourMode), resultInLocal.toInstant().toEpochMilli())
+//                binding.estDateTime.text = DateUtils.formatDateTime(fragmentContext, resultInLocal.toInstant().toEpochMilli(), DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_SHOW_WEEKDAY or DateUtils.FORMAT_ABBREV_ALL)
             }
         }
     }

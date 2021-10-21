@@ -157,8 +157,6 @@
     <string name="setting_converter_goto">更改日期和时间</string>
     <string name="setting_24_hr_clock_key">ENABLE_24_HOUR_CLOCK</string>
     <string name="setting_24_hr_clock_title">启用 24 小时制</string>
-    <string name="setting_label_size_key">SET_LABEL_SIZE</string>
-    <string name="setting_label_size_title">设置标签大小</string>
 
     <!-- Settings -->
     <string name="setting_group_1_key">ALARM</string>
@@ -203,12 +201,6 @@
     <string-array name="time_selector">
         <item>ID</item>
         <item>区域 - 时区 (推荐的)</item>
-    </string-array>
-
-    <string-array name="label_size">
-        <item>Default</item>
-        <item>Big</item>
-        <item>Biggggggg</item>
     </string-array>
 
     <string-array name="alarm_mute">

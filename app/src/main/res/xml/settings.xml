@@ -20,12 +20,6 @@
             android:key="@string/setting_24_hr_clock_key"
             android:title="@string/setting_24_hr_clock_title"/>
 
-<!--        <ListPreference-->
-<!--            android:key="@string/setting_label_size_key"-->
-<!--            android:title="@string/setting_label_size_title"-->
-<!--            android:entries="@array/label_size"-->
-<!--            android:entryValues="@array/label_size_values"/>-->
-
     </PreferenceCategory>
 
     <PreferenceCategory
