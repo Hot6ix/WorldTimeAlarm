@@ -2,19 +2,18 @@ package com.simples.j.worldtimealarm.fragments
 
 
 import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.icu.util.TimeZone
 import android.os.Build
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -46,6 +45,7 @@ class TimeZoneFragment : Fragment(), CoroutineScope, View.OnClickListener {
     private lateinit var fragmentContext: Context
     private lateinit var binding: FragmentTimeZoneBinding
     private lateinit var db: AppDatabase
+    private lateinit var preference: SharedPreferences
 
     private var mPreviousTimeZone: TimeZone? = null
     private var mTimeZone: TimeZone? = null
@@ -54,6 +54,7 @@ class TimeZoneFragment : Fragment(), CoroutineScope, View.OnClickListener {
     private var mAction: Int = -1
     private var mType: Int = -1
     private var isTimeZoneExist = false
+    private var is24HourMode = false
     private val dateTimeChangedReceiver = DateTimeChangedReceiver()
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
@@ -95,6 +96,9 @@ class TimeZoneFragment : Fragment(), CoroutineScope, View.OnClickListener {
             supportActionBar?.title = getString(R.string.timezone_fragment_title)
             if(!mTimeZoneId.isNullOrEmpty()) mPreviousTimeZone = TimeZone.getTimeZone(mTimeZoneId)
         }
+
+        preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
+        is24HourMode = preference.getBoolean(fragmentContext.getString(R.string.setting_24_hr_clock_key), false)
 
         arguments?.let {
             val id = it.getString(TimeZonePickerActivity.TIME_ZONE_ID)
@@ -224,7 +228,7 @@ class TimeZoneFragment : Fragment(), CoroutineScope, View.OnClickListener {
 
                 if(mTimeZone.useDaylightTime()) {
                     val nextTransition = ZoneId.of(mTimeZone.id).rules.nextTransition(Instant.now())
-                    val nextTransitionLocal = ZonedDateTime.of(nextTransition.dateTimeBefore, ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.SHORT))
+                    val nextTransitionLocal = DateFormat.format(MediaCursor.getLocalizedDateTimeFormat(is24HourMode), ZonedDateTime.of(nextTransition.dateTimeBefore, ZoneId.systemDefault()).toInstant().toEpochMilli())
 
                     binding.timeZoneChangeInfo.text =
                             if(mTimeZone.inDaylightTime(Date())) {

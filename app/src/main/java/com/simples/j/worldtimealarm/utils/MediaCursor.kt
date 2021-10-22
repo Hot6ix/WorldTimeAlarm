@@ -296,8 +296,8 @@ class MediaCursor {
 
         fun getLocalizedDateTimeFormat(in24Hour: Boolean = false): String {
             val skeleton =
-                if(in24Hour) "yyyyMMMEddHm"
-                else "yyyyMMMddEhma"
+                if(in24Hour) "yyyyMMMEEEEddHm"
+                else "yyyyMMMddEEEEhma"
 
             return DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton)
         }
@@ -311,7 +311,7 @@ class MediaCursor {
             val amPmPos = pattern.indexOf("a")
 
             val spannable = SpannableString(pattern)
-            if(amPmPos > 0) spannable.setSpan(RelativeSizeSpan(0.5f), amPmPos, amPmPos + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            if(amPmPos >= 0) spannable.setSpan(RelativeSizeSpan(0.5f), amPmPos, amPmPos + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
             return spannable
         }
