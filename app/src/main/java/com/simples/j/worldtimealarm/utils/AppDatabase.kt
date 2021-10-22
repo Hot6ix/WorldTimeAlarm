@@ -86,8 +86,8 @@ abstract class AppDatabase: RoomDatabase() {
                     val list = ArrayList<Pair<Int, IntArray>>()
 
                     while(cursor.moveToNext()) {
-                        val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
-                        val repeat = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
+                        val id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseManager.COLUMN_ID))
+                        val repeat = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
 
                         val formattedRepeat =
                                 if(repeat.isEmpty()) {
@@ -225,8 +225,8 @@ abstract class AppDatabase: RoomDatabase() {
                     val list = ArrayList<Pair<Int, IntArray>>()
 
                     while(cursor.moveToNext()) {
-                        val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
-                        val repeat = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
+                        val id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseManager.COLUMN_ID))
+                        val repeat = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
 
                         val formattedRepeat =
                                 if(repeat.isEmpty()) {
@@ -321,9 +321,9 @@ abstract class AppDatabase: RoomDatabase() {
                 if(tmpCursor.count > 0) {
                     val list = ArrayList<Triple<Int, String, Int?>>()
                     while(tmpCursor.moveToNext()) {
-                        val id = tmpCursor.getInt(tmpCursor.getColumnIndex(DatabaseManager.COLUMN_ID))
-                        val timeSet = tmpCursor.getString(tmpCursor.getColumnIndex(DatabaseManager.COLUMN_TIME_SET))
-                        val pickerTime = tmpCursor.getInt(tmpCursor.getColumnIndex(DatabaseManager.COLUMN_PICKER_TIME))
+                        val id = tmpCursor.getInt(tmpCursor.getColumnIndexOrThrow(DatabaseManager.COLUMN_ID))
+                        val timeSet = tmpCursor.getString(tmpCursor.getColumnIndexOrThrow(DatabaseManager.COLUMN_TIME_SET))
+                        val pickerTime = tmpCursor.getInt(tmpCursor.getColumnIndexOrThrow(DatabaseManager.COLUMN_PICKER_TIME))
 
                         list.add(Triple(id, timeSet, pickerTime))
                     }
@@ -401,8 +401,8 @@ abstract class AppDatabase: RoomDatabase() {
                     val list = ArrayList<Pair<Int, IntArray>>()
 
                     while(cursor.moveToNext()) {
-                        val id = cursor.getInt(cursor.getColumnIndex(DatabaseManager.COLUMN_ID))
-                        val repeat = cursor.getString(cursor.getColumnIndex(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
+                        val id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseManager.COLUMN_ID))
+                        val repeat = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseManager.COLUMN_REPEAT)).replace("[", "").replace("]", "")
 
                         val formattedRepeat =
                                 if(repeat.isEmpty()) {
