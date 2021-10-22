@@ -551,7 +551,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                     binding.estTimeZone.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColorEnabled))
                     binding.estDateTime.setTextColor(ContextCompat.getColor(fragmentContext, R.color.textColor))
                     binding.estIcon.setImageDrawable(ContextCompat.getDrawable(fragmentContext, R.drawable.ic_event_available))
-                    binding.estIcon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.textColor))
+                    binding.estIcon.setColorFilter(ContextCompat.getColor(fragmentContext, R.color.color10))
                 }
 
                 val diff = ZoneId.systemDefault().rules.getOffset(resultInLocal.toInstant()).totalSeconds - viewModel.remoteZonedDateTime.zone.rules.getOffset(resultInLocal.toInstant()).totalSeconds
