@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.*
 import androidx.room.Room
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
@@ -62,6 +63,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
     private lateinit var mPrefManager: SharedPreferences
     private var mTimeZoneSelectorOption: String = ""
+    private var in24Hour = false
 
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext
@@ -101,6 +103,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         mPrefManager = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
         val rememberLast = mPrefManager.getBoolean(resources.getString(R.string.setting_converter_remember_last_key), false)
         mTimeZoneSelectorOption = mPrefManager.getString(resources.getString(R.string.setting_time_zone_selector_key), SettingFragment.SELECTOR_OLD) ?: SettingFragment.SELECTOR_OLD
+        in24Hour = mPrefManager.getBoolean(fragmentContext.getString(R.string.setting_24_hr_clock_key), false)
 
         if(rememberLast) {
             val set = mPrefManager.getStringSet(LAST_SETTING_KEY, null)
@@ -152,14 +155,13 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             setUpClockList()
         }
 
-        viewModel.mainZonedDateTime.observe(viewLifecycleOwner) {
+        viewModel.mainZonedDateTime.observe(viewLifecycleOwner, {
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, it.hour)
                 set(Calendar.MINUTE, it.minute)
             }
 
-            binding.worldTime.text =
-                DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
+            binding.worldTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), calendar)
             binding.worldDate.text = it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
 
             binding.timeZone.text = getNameForTimeZone(it.zone.id)
@@ -168,14 +170,15 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
             val set = setOf(it.toInstant().toEpochMilli().toString(), it.zone.id)
             mPrefManager.edit()
-                .putStringSet(LAST_SETTING_KEY, set)
-                .apply()
-        }
+                    .putStringSet(LAST_SETTING_KEY, set)
+                    .apply()
+        })
 
         timeZoneChangedReceiver = UpdateRequestReceiver()
         val intentFilter = IntentFilter().apply {
             addAction(ACTION_TIME_ZONE_CHANGED)
             addAction(ACTION_TIME_ZONE_SELECTOR_CHANGED)
+            addAction(MainActivity.ACTION_UPDATE_ALL)
         }
         fragmentContext.registerReceiver(timeZoneChangedReceiver, intentFilter)
     }
@@ -220,7 +223,7 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                             val id = db.clockItemDao().insert(clockItem)
                             clockItem.apply {
                                 index = id.toInt()
-                            }.also { it ->
+                            }.also {
                                 db.clockItemDao().update(it)
                             }
                             clockItems.add(clockItem)
@@ -430,6 +433,22 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                         mPrefManager.edit()
                                 .putStringSet(LAST_SETTING_KEY, set)
                                 .apply()
+                    }
+                }
+                MainActivity.ACTION_UPDATE_ALL -> {
+                    launch(coroutineContext) {
+                        job.join()
+                        clockListAdapter.notifyItemRangeChanged(0, clockItems.count())
+
+                        viewModel.mainZonedDateTime.value?.let {
+                            val calendar = Calendar.getInstance().apply {
+                                set(Calendar.HOUR_OF_DAY, it.hour)
+                                set(Calendar.MINUTE, it.minute)
+                            }
+
+                            in24Hour = mPrefManager.getBoolean(fragmentContext.getString(R.string.setting_24_hr_clock_key), false)
+                            binding.worldTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), calendar)
+                        }
                     }
                 }
             }

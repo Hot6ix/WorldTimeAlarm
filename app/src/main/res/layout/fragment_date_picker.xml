@@ -67,11 +67,11 @@
                         android:contentDescription="@string/clear"
                         android:src="@drawable/ic_action_clear"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:tint="@color/textColor"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@id/startDate"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:tint="@color/textColor" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -123,11 +123,11 @@
                         android:contentDescription="@string/clear"
                         android:src="@drawable/ic_action_clear"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:tint="@color/textColor"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toEndOf="@id/endDate"
-                        app:layout_constraintEnd_toEndOf="parent"/>
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:tint="@color/textColor" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -148,11 +148,11 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_arrow_left"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="@color/colorAccent"
                     android:contentDescription="@null"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"/>
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:tint="@color/colorAccent" />
 
                 <TextView
                     android:id="@+id/month"
@@ -175,11 +175,11 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_arrow_right"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:tint="@color/blueGray"
                     android:contentDescription="@null"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"/>
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:tint="@color/blueGray" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,5 +1,6 @@
 package com.simples.j.worldtimealarm.support
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.icu.text.LocaleDisplayNames
 import android.icu.util.TimeZone
@@ -110,6 +111,7 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
 
     private fun isPositionHeader(position: Int): Boolean = mShowHeader && position == 0
 
+    @SuppressLint("NotifyDataSetChanged")
     fun filterByText(text: String) {
         val list: List<T>
         val locale = Locale.getDefault()
@@ -120,9 +122,9 @@ class BaseTimeZonePickerAdapter<T : BaseTimeZonePickerAdapter.AdapterItem>(priva
             list = ArrayList()
             val prefix = text.lowercase(locale)
             mOriginal.forEach {
-                for (key in it.searchKeys) {
+                for(key in it.searchKeys) {
                     val lower = key.lowercase(locale)
-                    if (lower.contains(prefix)) {
+                    if(lower.contains(prefix)) {
                         list.add(it)
                         return@forEach
                     }

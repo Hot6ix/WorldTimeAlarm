@@ -8,6 +8,7 @@ import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.*
+import android.text.format.DateFormat
 import android.text.format.DateUtils
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -28,11 +29,7 @@ import com.simples.j.worldtimealarm.receiver.NotificationActionReceiver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.threeten.bp.Instant
-import org.threeten.bp.ZoneId
-import org.threeten.bp.ZonedDateTime
-import org.threeten.bp.format.DateTimeFormatter
-import org.threeten.bp.format.FormatStyle
+import java.util.*
 
 class WakeUpService : Service() {
 
@@ -50,6 +47,7 @@ class WakeUpService : Service() {
     private var serviceAction: String? = null
     private var serviceActionReceiver: BroadcastReceiver? = null
     private var defaultRingtone: RingtoneItem? = null
+    private var in24Hour = false
 
     private var isExpired = false
 
@@ -68,6 +66,7 @@ class WakeUpService : Service() {
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
                 .build()
         preference = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        in24Hour = preference.getBoolean(applicationContext.getString(R.string.setting_24_hr_clock_key), false)
         notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         serviceActionReceiver = object: BroadcastReceiver() {
@@ -189,8 +188,8 @@ class WakeUpService : Service() {
         val title: String
         val notificationBuilder = NotificationCompat.Builder(applicationContext, ALARM_NOTIFICATION_CHANNEL)
 
-        val instant = Instant.ofEpochMilli(alarmItem.timeSet.toLong())
-        val zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(alarmItem.timeZone))
+//        val instant = Instant.ofEpochMilli(alarmItem.timeSet.toLong())
+//        val zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(alarmItem.timeZone))
 
         when(type) {
             AlarmReceiver.TYPE_ALARM -> {
@@ -203,10 +202,12 @@ class WakeUpService : Service() {
                 title =
                         when {
                             isExpired && !alarmItem.label.isNullOrEmpty() -> {
-                                applicationContext.resources.getString(R.string.last_alarm_with_time).format(zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
+//                                applicationContext.resources.getString(R.string.last_alarm_with_time).format(zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
+                                applicationContext.resources.getString(R.string.last_alarm_with_time).format(DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), Date(alarmItem.timeSet.toLong())))
                             }
                             !alarmItem.label.isNullOrEmpty() -> {
-                                zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+//                                zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).format(ateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+                                DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), Date(alarmItem.timeSet.toLong())).toString()
                             }
                             isExpired -> {
                                 applicationContext.resources.getString(R.string.last_alarm)
@@ -221,10 +222,12 @@ class WakeUpService : Service() {
                             alarmItem.label
                         }
                         else if(intent?.action == AlarmReceiver.ACTION_SNOOZE) {
-                            ZonedDateTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+//                            ZonedDateTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+                            DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), Date(alarmItem.timeSet.toLong()))
                         }
                         else {
-                            zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+//                            zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+                            DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), Date(alarmItem.timeSet.toLong()))
                         }
 
                 val dismissIntent = Intent(this, NotificationActionReceiver::class.java).apply {

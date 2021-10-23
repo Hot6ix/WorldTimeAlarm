@@ -1,6 +1,7 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.PorterDuff
 import android.graphics.drawable.RippleDrawable
 import android.os.Handler
@@ -14,6 +15,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
@@ -37,6 +39,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
     private lateinit var listener: OnItemClickListener
     private var highlightId: Int = -1
     private var warningList: List<Pair<String, AlarmWarningReason>>? = null
+    private var preference: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     init {
         setHasStableIds(true)
@@ -58,8 +61,9 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
 
     // TODO: Replace deprecated
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[holder.adapterPosition]
+        val item = list[holder.absoluteAdapterPosition]
 
+        // highlight
         if(highlightId == item.notiId) {
             Handler().postDelayed({
                 val drawable = holder.mainView.background as RippleDrawable
@@ -114,6 +118,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             }
         }
 
+        // color tag
         val colorTag = item.colorTag
         if(colorTag != 0) {
             holder.colorTag.visibility = View.VISIBLE
@@ -123,12 +128,15 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
             holder.colorTag.visibility = View.GONE
         }
 
+        // time
         mainZonedDateTime?.let {
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, it.hour)
                 set(Calendar.MINUTE, it.minute)
             }
-            holder.localTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
+
+            val in24Hour = preference.getBoolean(context.getString(R.string.setting_24_hr_clock_key), false)
+            holder.localTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), calendar)
         }
 
         with(item.repeat) {
@@ -138,7 +146,7 @@ class AlarmListAdapter(private var list: ArrayList<AlarmItem>, private val conte
                 mainZonedDateTime?.toInstant()?.let {
                     holder.repeat.text =
                             when {
-                                DateUtils.isToday(it.toEpochMilli()) && it.isAfter(Instant.now()) && endDate == null -> {
+                                DateUtils.isToday(it.toEpochMilli()) && it.isAfter(Instant.now()) && startDate == null && endDate == null -> {
                                     context.resources.getString(R.string.today)
                                 }
                                 (it.isBefore(Instant.now()) || DateUtils.isToday(it.toEpochMilli() - DateUtils.DAY_IN_MILLIS)) && startDate == null && endDate == null -> {

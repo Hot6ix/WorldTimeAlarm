@@ -1,5 +1,6 @@
 package com.simples.j.worldtimealarm
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.SearchManager
 import android.content.Context
@@ -13,18 +14,19 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.databinding.ActivityTimeZoneSearchBinding
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.support.TimeZoneAdapter
 import com.simples.j.worldtimealarm.utils.AppDatabase
 import com.simples.j.worldtimealarm.utils.DatabaseManager
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.coroutines.CoroutineContext
 
-
-class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListener, TimeZoneAdapter.OnItemClickListener {
+@SuppressLint("NotifyDataSetChanged")
+class TimeZoneSearchActivity : AppCompatActivity(), CoroutineScope, SearchView.OnQueryTextListener, TimeZoneAdapter.OnItemClickListener {
 
     private lateinit var db: AppDatabase
     private lateinit var timeZoneArray: MutableList<String>
@@ -33,6 +35,21 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
     private var query: String? = null
     private var resultArray = ArrayList<String>()
     private var code: String? = null
+    private val crashlytics = FirebaseCrashlytics.getInstance()
+
+    private var job: Job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + coroutineExceptionHandler
+
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
+
+        crashlytics.recordException(throwable)
+        if(!isFinishing) {
+            Toast.makeText(applicationContext, getString(R.string.error_occurred), Toast.LENGTH_SHORT).show()
+            finish()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +80,14 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
 //        time_zone_search_list.adapter = timeZoneAdapter
         binding.timeZoneSearchList.layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
 //        time_zone_search_list.layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        launch(coroutineContext) {
+            job.cancelAndJoin()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -104,9 +129,9 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         query = text
         resultArray.clear()
         if(text != null && text.isNotEmpty()) {
-            resultArray.addAll(timeZoneArray.filter {
-                it.lowercase(Locale.ROOT).contains(text.lowercase(Locale.ROOT))
-            })
+            resultArray.addAll(timeZoneArray.filter { it.lowercase(Locale.ROOT).contains(text.lowercase(
+                Locale.ROOT
+            )) })
         }
         if(resultArray.isEmpty()) {
             binding.timeZoneSearchList.visibility = View.GONE
@@ -129,9 +154,8 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
         query = text
         resultArray.clear()
         if(text != null && text.isNotEmpty()) {
-            resultArray.addAll(timeZoneArray.filter {
-                it.lowercase(Locale.ROOT).contains(text.lowercase(Locale.ROOT))
-            })
+            resultArray.addAll(timeZoneArray.filter { it.lowercase(Locale.ROOT)
+                .contains(text.lowercase(Locale.ROOT)) })
         }
         timeZoneAdapter.notifyDataSetChanged()
         return false
@@ -139,7 +163,7 @@ class TimeZoneSearchActivity : AppCompatActivity(), SearchView.OnQueryTextListen
 
     override fun onItemClick(view: View, position: Int) {
         if(code != null) {
-            GlobalScope.launch {
+            job = launch {
                 val array = db.clockItemDao().getAll()
                 val sameClockItem = array.find {
                     it.timezone == resultArray[position]

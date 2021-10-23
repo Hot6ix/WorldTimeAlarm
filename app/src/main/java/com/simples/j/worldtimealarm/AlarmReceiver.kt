@@ -7,12 +7,14 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
-import android.text.format.DateUtils
+import android.text.format.DateFormat
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
@@ -20,10 +22,9 @@ import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_MISSED
 import com.simples.j.worldtimealarm.etc.C.Companion.MISSED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.utils.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.*
 
 /**
@@ -36,15 +37,20 @@ class AlarmReceiver: BroadcastReceiver() {
     private lateinit var notificationManager: NotificationManager
     private lateinit var wakeLocker: PowerManager.WakeLock
     private lateinit var powerManager: PowerManager
+    private lateinit var preference: SharedPreferences
 
     private var option: Bundle? = null
     private var isExpired = false
+    private var in24Hour = false
 
     override fun onReceive(context: Context, intent: Intent) {
         db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
                 .build()
         notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        preference = PreferenceManager.getDefaultSharedPreferences(context)
+
+        in24Hour = preference.getBoolean(context.getString(R.string.setting_24_hr_clock_key), false)
 
         // Wake up screen
         wakeLocker = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE, C.WAKE_TAG)
@@ -58,7 +64,7 @@ class AlarmReceiver: BroadcastReceiver() {
 
         val itemFromIntent = option?.getParcelable<AlarmItem>(ITEM)
 
-        GlobalScope.launch(Dispatchers.IO) {
+        CoroutineScope(Dispatchers.Main).launch(Dispatchers.IO) {
             // get item from database using notification id
             val item = db.alarmItemDao().getAlarmItemFromNotificationId(itemFromIntent?.notiId)
 
@@ -125,7 +131,7 @@ class AlarmReceiver: BroadcastReceiver() {
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
                 .setContentTitle(title)
-                .setContentText(SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong())))
+                .setContentText(DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), Date(item.timeSet.toLong())))
                 .setContentIntent(PendingIntent.getActivity(context, item.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setGroup(GROUP_MISSED)
 
@@ -140,13 +146,15 @@ class AlarmReceiver: BroadcastReceiver() {
         if(isExpired) {
             notificationBuilder
                     .setContentTitle(context.resources.getString(R.string.missed_and_last_alarm))
-                    .setContentText(context.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(context, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME)))
+//                    .setContentText(context.getString(R.string.alarm_no_long_fires).format(DateUtils.formatDateTime(context, item.timeSet.toLong(), DateUtils.FORMAT_SHOW_TIME)))
+                    .setContentText(context.getString(R.string.alarm_no_long_fires).format(DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), Date(item.timeSet.toLong()))))
                     .setDefaults(Notification.DEFAULT_ALL)
                     .priority = NotificationCompat.PRIORITY_DEFAULT
         }
 
         if(item.label != null && !item.label.isNullOrEmpty()) {
-            notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText("${SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))} - ${item.label}"))
+//            notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText("${SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(Date(item.timeSet.toLong()))} - ${item.label}"))
+            notificationBuilder.setStyle(NotificationCompat.BigTextStyle().bigText("${DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), Date(item.timeSet.toLong()))} - ${item.label}"))
         }
 
         notificationManager.notify(item.notiId, notificationBuilder.build())

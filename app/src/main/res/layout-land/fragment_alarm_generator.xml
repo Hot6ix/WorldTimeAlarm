@@ -256,7 +256,7 @@
                         android:layout_marginEnd="@dimen/padding20"
                         android:textSize="@dimen/text_middle"
                         android:textColor="@color/textColor"
-                        android:maxLines="1"
+                        android:maxLines="2"
                         android:gravity="start"
                         android:ellipsize="end"
                         app:layout_constraintTop_toBottomOf="@id/est_time_zone"

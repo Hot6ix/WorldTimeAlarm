@@ -102,7 +102,7 @@
         android:id="@+id/label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="@dimen/text_middle"
+        android:textSize="@dimen/text_xlarge"
         android:textColor="@color/textColorEnabled"
         android:gravity="center"
         android:layout_marginTop="@dimen/padding30"

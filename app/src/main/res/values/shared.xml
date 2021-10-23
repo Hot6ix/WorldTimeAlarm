@@ -11,6 +11,12 @@
         <item>1</item>
     </string-array>
 
+    <string-array name="label_size_values">
+        <item>16</item>
+        <item>18</item>
+        <item>20</item>
+    </string-array>
+
     <string-array name="alarm_mute_values">
         <item>0</item>
         <item>60000</item>

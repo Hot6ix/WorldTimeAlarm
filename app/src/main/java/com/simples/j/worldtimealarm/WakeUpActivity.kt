@@ -66,8 +66,9 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
         db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
                 .build()
         sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val in24Hour = sharedPref.getBoolean(applicationContext.getString(R.string.setting_24_hr_clock_key), false)
 
-        binding.clock.format12Hour = MediaCursor.getLocalizedTimeFormat()
+        binding.clock.format12Hour = MediaCursor.getLocalizedTimeFormat(in24Hour)
         binding.clockDate.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
 
         val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
@@ -89,7 +90,7 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                     binding.timeZoneClockTitle.text = name
 
                     binding.timeZoneClockTime.timeZone = timeZone
-                    binding.timeZoneClockTime.format12Hour = MediaCursor.getLocalizedTimeFormat()
+                    binding.timeZoneClockTime.format12Hour = MediaCursor.getLocalizedTimeFormat(in24Hour)
                     binding.timeZoneClockDate.timeZone = timeZone
                     binding.timeZoneClockDate.format12Hour = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyy-MMM-d EEEE")
                 }
