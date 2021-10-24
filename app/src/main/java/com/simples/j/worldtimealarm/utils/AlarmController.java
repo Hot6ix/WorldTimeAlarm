@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -367,8 +368,13 @@ public class AlarmController {
 
         ZonedDateTime resultDateTime = alarmDateTime.withZoneSameInstant(ZoneId.systemDefault());
         int alarmNotificationId = notiId + 1;
-        PendingIntent mainIntent = PendingIntent.getActivity(context, notiId, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        int pendingIntentFlag;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) pendingIntentFlag = PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
+        else pendingIntentFlag = PendingIntent.FLAG_UPDATE_CURRENT;
+
+        PendingIntent mainIntent = PendingIntent.getActivity(context, notiId, new Intent(context, MainActivity.class), pendingIntentFlag);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmNotificationId, intent, pendingIntentFlag);
         alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(resultDateTime.toInstant().toEpochMilli(), mainIntent), alarmIntent);
         Log.d(C.TAG, "Alarm will fire on " + resultDateTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL, FormatStyle.FULL)) + ", AlarmItem(" + item + "), " + type);
         Log.d(C.TAG, "Alarm(notiId=" + alarmNotificationId + ", type=" + type + ") scheduled");
@@ -408,9 +414,13 @@ public class AlarmController {
             intent.setAction(AlarmReceiver.ACTION_SNOOZE);
         }
 
+        int pendingIntentFlag;
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) pendingIntentFlag = PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
+            else pendingIntentFlag = PendingIntent.FLAG_UPDATE_CURRENT;
+
         int alarmNotificationId = notiId + 1;
-        PendingIntent mainIntent = PendingIntent.getActivity(context, notiId, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent mainIntent = PendingIntent.getActivity(context, notiId, new Intent(context, MainActivity.class), pendingIntentFlag);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmNotificationId, intent, pendingIntentFlag);
         alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(alarmCalendar.getTimeInMillis(), mainIntent), alarmIntent);
         Log.d(C.TAG, "Alarm will fire on " + SimpleDateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.getDefault()).format(alarmCalendar.getTime()) + ", AlarmItem(" + item + "), " + type);
         Log.d(C.TAG, "Alarm(notiId=" + alarmNotificationId + ", type=" + type + ") scheduled");
@@ -424,11 +434,16 @@ public class AlarmController {
         int alarmNotificationId = notiId + 1;
         Intent intent = new Intent(context, AlarmReceiver.class);
         intent.setAction(AlarmReceiver.ACTION_ALARM);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        int pendingIntentFlag;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) pendingIntentFlag = PendingIntent.FLAG_MUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
+        else pendingIntentFlag = PendingIntent.FLAG_UPDATE_CURRENT;
+
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarmNotificationId, intent, pendingIntentFlag);
         alarmManager.cancel(alarmIntent);
 
         intent.setAction(AlarmReceiver.ACTION_SNOOZE);
-        alarmIntent = PendingIntent.getBroadcast(context, alarmNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmIntent = PendingIntent.getBroadcast(context, alarmNotificationId, intent, pendingIntentFlag);
         alarmManager.cancel(alarmIntent);
 
         Log.d(C.TAG, "Alarm cancelled : ID(" + alarmNotificationId + ")");

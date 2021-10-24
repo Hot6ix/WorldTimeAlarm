@@ -126,13 +126,17 @@ class AlarmReceiver: BroadcastReceiver() {
 
         val title = context.resources.getString(R.string.missed_alarm)
 
+        val pendingIntentFlag: Int =
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            else PendingIntent.FLAG_UPDATE_CURRENT
+
         notificationBuilder
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
                 .setContentTitle(title)
                 .setContentText(DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), Date(item.timeSet.toLong())))
-                .setContentIntent(PendingIntent.getActivity(context, item.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentIntent(PendingIntent.getActivity(context, item.notiId, dstIntent, pendingIntentFlag))
                 .setGroup(GROUP_MISSED)
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
