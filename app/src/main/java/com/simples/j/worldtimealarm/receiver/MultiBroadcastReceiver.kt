@@ -20,9 +20,12 @@ import com.simples.j.worldtimealarm.etc.AlarmItem.Companion.REASON
 import com.simples.j.worldtimealarm.etc.AlarmItem.Companion.WARNING
 import com.simples.j.worldtimealarm.etc.AlarmWarningReason
 import com.simples.j.worldtimealarm.etc.C
-import com.simples.j.worldtimealarm.utils.*
+import com.simples.j.worldtimealarm.utils.AlarmController
+import com.simples.j.worldtimealarm.utils.AppDatabase
+import com.simples.j.worldtimealarm.utils.DatabaseManager
+import com.simples.j.worldtimealarm.utils.DstController
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -53,7 +56,7 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
             notificationManager.createNotificationChannel(notificationChannel)
         }
 
-        GlobalScope.launch(Dispatchers.IO) {
+        CoroutineScope(Dispatchers.IO).launch {
             val activated = db.alarmItemDao().getActivated()
 
             when(intent.action) {
@@ -104,7 +107,12 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                                         val applyIntent = Intent(context, NotificationActionReceiver::class.java).apply {
                                             putExtra(NotificationActionReceiver.NOTIFICATION_ACTION, NotificationActionReceiver.ACTION_APPLY_V22_UPDATE)
                                         }
-                                        val applyPendingIntent = PendingIntent.getBroadcast(context, BuildConfig.VERSION_CODE, applyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
+                                        val pendingIntentFlag: Int =
+                                            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                                            else PendingIntent.FLAG_UPDATE_CURRENT
+
+                                        val applyPendingIntent = PendingIntent.getBroadcast(context, BuildConfig.VERSION_CODE, applyIntent, pendingIntentFlag)
                                         val applyAction = NotificationCompat.Action(0, context.getString(R.string.apply_changes), applyPendingIntent)
 
                                         val msg = context.getString(R.string.v22_time_set_message_change, it.size)
@@ -180,12 +188,16 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
             flags = Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
 
+        val pendingIntentFlag: Int =
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            else PendingIntent.FLAG_UPDATE_CURRENT
+
         notificationBuilder
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 .setSmallIcon(R.drawable.ic_action_alarm_white)
                 .setContentTitle(title)
                 .setContentText(msg)
-                .setContentIntent(PendingIntent.getActivity(context, BuildConfig.VERSION_CODE, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentIntent(PendingIntent.getActivity(context, BuildConfig.VERSION_CODE, dstIntent, pendingIntentFlag))
                 .setGroup(C.GROUP_DEFAULT)
                 .setDefaults(Notification.DEFAULT_ALL)
                 .priority = NotificationCompat.PRIORITY_DEFAULT

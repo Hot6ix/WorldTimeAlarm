@@ -26,6 +26,7 @@ import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_EXPIRED
 import com.simples.j.worldtimealarm.etc.RingtoneItem
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.NotificationActionReceiver
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -50,6 +51,10 @@ class WakeUpService : Service() {
     private var in24Hour = false
 
     private var isExpired = false
+
+    private val pendingIntentFlag: Int =
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        else PendingIntent.FLAG_UPDATE_CURRENT
 
     inner class WakeUpBinder: Binder() {
         fun getService(): WakeUpService = this@WakeUpService
@@ -233,14 +238,14 @@ class WakeUpService : Service() {
                 val dismissIntent = Intent(this, NotificationActionReceiver::class.java).apply {
                     putExtra(NotificationActionReceiver.NOTIFICATION_ACTION, NotificationActionReceiver.ACTION_DISMISS)
                 }
-                val dismissPendingIntent = PendingIntent.getBroadcast(applicationContext, alarmItem.notiId+20, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val dismissPendingIntent = PendingIntent.getBroadcast(applicationContext, alarmItem.notiId+20, dismissIntent, pendingIntentFlag)
                 val dismissAction = NotificationCompat.Action(0, getString(R.string.dismiss), dismissPendingIntent)
 
                 val snoozeIntent = Intent(this, NotificationActionReceiver::class.java).apply {
                     putExtra(NotificationActionReceiver.NOTIFICATION_ACTION, NotificationActionReceiver.ACTION_SNOOZE)
                     putExtra(AlarmReceiver.ITEM, alarmItem)
                 }
-                val snoozePendingIntent = PendingIntent.getBroadcast(applicationContext, alarmItem.notiId+30, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val snoozePendingIntent = PendingIntent.getBroadcast(applicationContext, alarmItem.notiId+30, snoozeIntent, pendingIntentFlag)
                 val snoozeAction = NotificationCompat.Action(0, getString(R.string.snooze), snoozePendingIntent)
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -260,7 +265,7 @@ class WakeUpService : Service() {
                         .setAutoCancel(false)
                         .setContentText(contentText)
                         .setStyle(NotificationCompat.BigTextStyle().bigText(contentText))
-                        .setFullScreenIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT), true)
+                        .setFullScreenIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId, dstIntent, pendingIntentFlag), true)
 
                 if(alarmItem.snooze > 0 && intent?.action == AlarmReceiver.ACTION_ALARM) notificationBuilder.addAction(snoozeAction)
             }
@@ -284,7 +289,7 @@ class WakeUpService : Service() {
                         .setGroup(GROUP_EXPIRED)
                         .setAutoCancel(true)
                         .setDefaults(Notification.DEFAULT_ALL)
-                        .setContentIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId+10, dstIntent, PendingIntent.FLAG_UPDATE_CURRENT))
+                        .setContentIntent(PendingIntent.getActivity(applicationContext, alarmItem.notiId+10, dstIntent, pendingIntentFlag))
                         .priority = NotificationCompat.PRIORITY_HIGH
             }
             else -> {
@@ -325,7 +330,7 @@ class WakeUpService : Service() {
                 also will play default ringtone.
             */
             if(!isSystemRingtone(ringtone)) {
-                GlobalScope.launch(Dispatchers.IO) {
+                CoroutineScope(Dispatchers.IO).launch {
                     db.ringtoneItemDao().getRingtoneFromUri(ringtone).also {
                         if(it == null) {
                             // if ringtone is not in list, set to default ringtone
