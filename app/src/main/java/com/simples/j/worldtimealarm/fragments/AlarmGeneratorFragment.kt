@@ -246,6 +246,14 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
             // init timezone
             binding.timeZoneName.text = getFormattedTimeZoneName(viewModel.timeZone.value)
 
+            // init date
+            binding.date.text = AlarmStringFormatHelper.formatDate(
+                fragmentContext,
+                viewModel.startDate,
+                viewModel.endDate,
+                viewModel.recurrences.value?.any { it > 0 } ?: false
+            )
+
             // show components & hide progress bar
             binding.detailContentLayout.visibility = View.VISIBLE
             binding.action.visibility = View.VISIBLE
@@ -262,13 +270,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
             }
         }
-
-        binding.date.text = AlarmStringFormatHelper.formatDate(
-                fragmentContext,
-                viewModel.startDate,
-                viewModel.endDate,
-                viewModel.recurrences.value?.any { it > 0 } ?: false
-        )
 
         // init dialog
         labelDialog = getLabelDialog()
