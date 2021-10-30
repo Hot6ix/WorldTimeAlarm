@@ -294,12 +294,24 @@ class MediaCursor {
             return diff
         }
 
-        fun getLocalizedTimeFormat(): SpannableString {
-            val pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "hma").replace(" ", "\u200A")
+        fun getLocalizedDateTimeFormat(in24Hour: Boolean = false): String {
+            val skeleton =
+                if(in24Hour) "yyyyMMMEEEEddHm"
+                else "yyyyMMMddEEEEhma"
+
+            return DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton)
+        }
+
+        fun getLocalizedTimeFormat(in24Hour: Boolean = false): SpannableString {
+            val skeleton =
+                if(in24Hour) "Hm"
+                else "hma"
+
+            val pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton).replace(" ", "\u200A")
             val amPmPos = pattern.indexOf("a")
 
             val spannable = SpannableString(pattern)
-            spannable.setSpan(RelativeSizeSpan(0.5f), amPmPos, amPmPos + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            if(amPmPos >= 0) spannable.setSpan(RelativeSizeSpan(0.5f), amPmPos, amPmPos + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
             return spannable
         }

@@ -22,9 +22,7 @@ import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.databinding.FragmentTimeZonePickerBinding
 import com.simples.j.worldtimealarm.support.BaseTimeZonePickerAdapter
 import com.simples.j.worldtimealarm.utils.MediaCursor
-import kotlinx.android.synthetic.main.fragment_time_zone_picker.*
 import kotlinx.coroutines.*
-import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 

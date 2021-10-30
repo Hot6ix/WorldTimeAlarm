@@ -7,7 +7,6 @@ import org.junit.runners.Suite
 @RunWith(Suite::class)
 @Suite.SuiteClasses(
         AlarmControllerSimpleTest::class,
-        AlarmControllerTest02::class,
         AlarmControllerSingleRepeatingAndroidTest::class,
         AlarmControllerMultipleRepeatingAndroidTest::class,
         AlarmControllerSingleOrdinalTest::class,

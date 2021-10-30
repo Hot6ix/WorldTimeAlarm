@@ -1,7 +1,6 @@
 package com.simples.j.worldtimealarm.fragments
 
 import android.content.Context
-import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatEditText
 import androidx.lifecycle.Lifecycle

@@ -22,6 +22,11 @@ class DstController(private val context: Context) {
     private val db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
             .build()
 
+    // This variable will not be changed until this class is being used.
+    private val pendingIntentFlag: Int =
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        else PendingIntent.FLAG_UPDATE_CURRENT
+
     suspend fun handleSystemDst() {
         val timeZone = TimeZone.getDefault()
         val zoneId = ZoneId.systemDefault()
@@ -85,10 +90,10 @@ class DstController(private val context: Context) {
             action = ACTION_DST_CHANGED
             putExtra(AlarmController.EXTRA_TIME_IN_MILLIS, millis)
         }
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, pendingIntentFlag)
 
         if (Build.VERSION.SDK_INT < 23) {
-            val mainIntent = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
+            val mainIntent = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), pendingIntentFlag)
             alarmManager.setAlarmClock(AlarmClockInfo(millis, mainIntent), pendingIntent)
         } else {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, millis, pendingIntent)
@@ -105,7 +110,7 @@ class DstController(private val context: Context) {
             putExtra(AlarmController.EXTRA_TIME_IN_MILLIS, millis)
         }
 
-        val alarmIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val alarmIntent = PendingIntent.getBroadcast(context, 0, intent, pendingIntentFlag)
         alarmManager.cancel(alarmIntent)
         Log.d(C.TAG, "DST cancelled: ${ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault())}")
     }

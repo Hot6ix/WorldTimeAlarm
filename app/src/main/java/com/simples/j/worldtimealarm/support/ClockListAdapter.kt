@@ -1,6 +1,7 @@
 package com.simples.j.worldtimealarm.support
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.icu.util.TimeZone
 import android.os.Build
 import android.text.format.DateFormat
@@ -8,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.etc.AlarmItem
@@ -27,6 +29,7 @@ import java.util.*
 class ClockListAdapter(private var context: Context, private var list: ArrayList<ClockItem>, private var viweModel: WorldClockViewModel): RecyclerView.Adapter<ClockListAdapter.ViewHolder>() {
 
     private lateinit var listener: OnItemClickListener
+    private var preference: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.clock_list_item, parent, false))
@@ -39,8 +42,8 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
     override fun getItemViewType(position: Int): Int = 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = list[holder.adapterPosition].timezone?.replace(" ", "_")
-        if(item.isNullOrEmpty()) {
+        val item = list[holder.absoluteAdapterPosition].timezone.replace(" ", "_")
+        if(item.isEmpty()) {
             holder.timeZoneName.text = context.getString(R.string.time_zone_wrong)
             holder.timeZoneOffset.visibility = View.GONE
         }
@@ -67,7 +70,8 @@ class ClockListAdapter(private var context: Context, private var list: ArrayList
                     set(Calendar.MINUTE, target.minute)
                 }
 
-                holder.timeZoneTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(), calendar)
+                val in24Hour = preference.getBoolean(context.getString(R.string.setting_24_hr_clock_key), false)
+                holder.timeZoneTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), calendar)
                 holder.timeZoneDate.text = target.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
             }
         }

@@ -10,7 +10,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.threeten.bp.Instant
-import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 
@@ -21,7 +20,7 @@ class ZoneTest {
 
     @Before
     fun setup() {
-        this.context = ApplicationProvider.getApplicationContext<Context>()
+        this.context = ApplicationProvider.getApplicationContext()
         AndroidThreeTen.init(context)
     }
 

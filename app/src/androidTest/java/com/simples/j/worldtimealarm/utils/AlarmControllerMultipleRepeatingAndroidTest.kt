@@ -27,7 +27,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
 
     @Before
     fun setup() {
-        this.context = ApplicationProvider.getApplicationContext<Context>()
+        this.context = ApplicationProvider.getApplicationContext()
         AndroidThreeTen.init(context)
 
         mockkStatic(ZoneId::class)

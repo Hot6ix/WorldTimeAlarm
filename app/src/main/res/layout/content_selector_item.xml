@@ -14,10 +14,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@null"
-        android:tint="@color/textColorEnabled"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:tint="@color/textColorEnabled" />
 
     <TextView
         android:id="@+id/title"
@@ -40,9 +40,9 @@
         android:src="@drawable/ic_action_done_white"
         android:contentDescription="@null"
         android:visibility="invisible"
-        android:tint="@color/textColorEnabled"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/textColorEnabled" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

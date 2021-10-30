@@ -351,7 +351,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
             try {
                 cursor?.let {
                     it.moveToFirst()
-                    var name = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                    var name = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
                     val extensionIndex = name.lastIndexOf('.')
                     if(extensionIndex > 0 && extensionIndex < (name.length - 1)) {
                         name = name.substring(0, extensionIndex)

@@ -29,7 +29,9 @@ import com.simples.j.worldtimealarm.fragments.SettingFragment
 import com.simples.j.worldtimealarm.fragments.WorldClockFragment
 import com.simples.j.worldtimealarm.receiver.MultiBroadcastReceiver
 import com.simples.j.worldtimealarm.utils.MediaCursor
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlin.coroutines.CoroutineContext
 
 class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.OnNavigationItemSelectedListener {
@@ -229,7 +231,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope, BottomNavigationView.O
         }
     }
 
-    inner class ConsentListener(): ConsentFormListener() {
+    inner class ConsentListener: ConsentFormListener() {
         override fun onConsentFormLoaded() {
             super.onConsentFormLoaded()
             Log.d(C.TAG, "Consent form loaded")

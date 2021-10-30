@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
  * Created by j on 03/03/2018.
  *
  */
-class ListSwipeController(): ItemTouchHelper.Callback() {
+class ListSwipeController: ItemTouchHelper.Callback() {
 
     private lateinit var listener: OnListControlListener
 

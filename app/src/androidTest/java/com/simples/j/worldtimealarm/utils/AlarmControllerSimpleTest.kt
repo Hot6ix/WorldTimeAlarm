@@ -1,7 +1,6 @@
 package com.simples.j.worldtimealarm.utils
 
 import android.content.Context
-import android.icu.util.TimeZone
 import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.MediumTest
@@ -31,7 +30,7 @@ class AlarmControllerSimpleTest {
 
     @Before
     fun setup() {
-        this.context = ApplicationProvider.getApplicationContext<Context>()
+        this.context = ApplicationProvider.getApplicationContext()
         AndroidThreeTen.init(context)
     }
 
