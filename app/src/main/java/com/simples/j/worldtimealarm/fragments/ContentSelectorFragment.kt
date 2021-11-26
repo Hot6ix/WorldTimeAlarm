@@ -32,7 +32,6 @@ import com.simples.j.worldtimealarm.etc.SnoozeItem
 import com.simples.j.worldtimealarm.models.ContentSelectorViewModel
 import com.simples.j.worldtimealarm.support.ContentSelectorAdapter
 import com.simples.j.worldtimealarm.utils.AppDatabase
-import com.simples.j.worldtimealarm.utils.DatabaseCursor
 import com.simples.j.worldtimealarm.utils.DatabaseManager
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.coroutines.*
@@ -191,7 +190,11 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                     val name = getNameFromUri(it)
 
                     launch(coroutineContext) {
-                        val isInserted = DatabaseCursor(requireContext()).insertUserRingtone(RingtoneItem(title = name, uri = it.toString()))
+                        withContext(Dispatchers.IO) {
+                            db.ringtoneItemDao().insert(RingtoneItem(title = name, uri = it.toString()))
+                        }
+
+                        val isInserted = db.ringtoneItemDao().getRingtoneFromUri(it.toString()) != null
                         if(!isInserted) {
                             Toast.makeText(context, getString(R.string.exist_ringtone), Toast.LENGTH_SHORT).show()
                         }
@@ -240,11 +243,13 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             if(item.uri != "null") {
                                 if(viewModel.lastSelectedValue != item && action != ContentSelectorAdapter.ACTION_NOT_PLAY) {
                                     it?.stop()
-                                    play(item.uri)
+                                    if(item.uri.isNotBlank() && item.uri.isNotEmpty())
+                                        play(item.uri)
                                 }
                                 else if(it == null || !it.isPlaying) {
                                     if(action != ContentSelectorAdapter.ACTION_NOT_PLAY)
-                                        play(item.uri)
+                                        if(item.uri.isNotBlank() && item.uri.isNotEmpty())
+                                            play(item.uri)
                                 }
                                 else {
                                     it.stop()
@@ -289,8 +294,9 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
 
                         // update all alarm items that have deleted ringtone
                         item.uri.let { uri ->
-                            launch(coroutineExceptionHandler) {
-                                db.alarmItemDao().getAll()
+                            launch(coroutineContext) {
+                                withContext(Dispatchers.IO) {
+                                    db.alarmItemDao().getAll()
                                         .filter { it.ringtone == uri }
                                         .forEach {
                                             val modified = it.apply {
@@ -299,7 +305,8 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                                             db.alarmItemDao().update(modified)
                                         }
 
-                                db.ringtoneItemDao().delete(uri)
+                                    db.ringtoneItemDao().delete(uri)
+                                }
                             }
                         }
                     }
