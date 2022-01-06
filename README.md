@@ -1,6 +1,6 @@
 # World Time Alarm
 
-[![Version](https://img.shields.io/badge/version-1.7.1-blue)](https://play.google.com/store/apps/details?id=com.simples.j.worldtimealarm)
+[![Version](https://img.shields.io/badge/version-1.7.2-blue)](https://play.google.com/store/apps/details?id=com.simples.j.worldtimealarm)
 [![GitHub license](https://img.shields.io/github/license/Hot6ix/WorldTimeAlarm)](https://github.com/Hot6ix/WorldTimeAlarm/blob/master/LICENSE)
 [![Codacy Badge](https://img.shields.io/codacy/grade/bed3155059c348c3ad390147db599eca)](https://app.codacy.com/manual/jamesy5017/WorldTimeAlarm?utm_source=github.com&utm_medium=referral&utm_content=Hot6ix/WorldTimeAlarm&utm_campaign=Badge_Grade_Dashboard)
 
