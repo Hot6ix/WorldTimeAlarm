@@ -1,67 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:iconSpaceReserved="false">
 
     <PreferenceCategory
         android:key="@string/setting_group_0_key"
-        android:title="@string/setting_group_0">
+        android:title="@string/setting_group_0"
+        android:paddingStart="0dp"
+        android:paddingLeft="0dp"
+        app:iconSpaceReserved="false">
 
         <ListPreference
             android:key="@string/setting_time_zone_selector_key"
             android:title="@string/setting_time_zone_selector_title"
             android:entries="@array/time_selector"
-            android:entryValues="@array/time_selector_values"/>
+            android:entryValues="@array/time_selector_values"
+            app:iconSpaceReserved="false"/>
 
         <Preference
             android:key="@string/setting_converter_goto_key"
-            android:title="@string/setting_converter_goto"/>
+            android:title="@string/setting_converter_goto"
+            app:iconSpaceReserved="false"/>
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="@string/setting_24_hr_clock_key"
-            android:title="@string/setting_24_hr_clock_title"/>
+            android:title="@string/setting_24_hr_clock_title"
+            app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="@string/setting_group_1_key"
-        android:title="@string/setting_group_1">
+        android:title="@string/setting_group_1"
+        app:iconSpaceReserved="false">
 
         <com.simples.j.worldtimealarm.support.SeekBarPreference
             android:key="@string/setting_alarm_volume_key"
             android:title="@string/setting_alarm_volume_title"
-            android:layout="@layout/preference_seekbar" />
+            android:layout="@layout/preference_seekbar"/>
 
         <SwitchPreference
             android:defaultValue="false"
             android:key="@string/setting_alarm_volume_increase_key"
-            android:title="@string/setting_alarm_volume_increase_title"/>
+            android:title="@string/setting_alarm_volume_increase_title"
+            app:iconSpaceReserved="false"/>
 
         <ListPreference
             android:key="@string/setting_alarm_mute_key"
             android:title="@string/setting_alarm_mute_title"
             android:defaultValue="600000"
             android:entries="@array/alarm_mute"
-            android:entryValues="@array/alarm_mute_values"/>
+            android:entryValues="@array/alarm_mute_values"
+            app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="@string/setting_group_2_key"
-        android:title="@string/setting_group_2">
+        android:title="@string/setting_group_2"
+        app:iconSpaceReserved="false">
 
         <SwitchPreference
             android:key="@string/setting_converter_remember_last_key"
             android:title="@string/setting_converter_remember_last"
-            android:defaultValue="true"/>
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/setting_group_3" >
+        android:title="@string/setting_group_3"
+        app:iconSpaceReserved="false" >
 
         <Preference
             android:key="@string/setting_version_key"
-            android:title="@string/setting_version_title">
+            android:title="@string/setting_version_title"
+            app:iconSpaceReserved="false">
 
             <intent
                 android:action="android.intent.action.VIEW"
@@ -71,7 +87,8 @@
 
         <Preference
             android:key="@string/setting_help_key"
-            android:title="@string/setting_help_title">
+            android:title="@string/setting_help_title"
+            app:iconSpaceReserved="false">
 
             <intent
                 android:action="android.intent.action.VIEW"
@@ -81,7 +98,8 @@
 
         <Preference
             android:key="@string/setting_source_key"
-            android:title="@string/setting_source_title">
+            android:title="@string/setting_source_title"
+            app:iconSpaceReserved="false">
 
             <intent
                 android:action="android.intent.action.VIEW"
@@ -91,11 +109,13 @@
 
         <Preference
             android:key="@string/setting_license_key"
-            android:title="@string/setting_license_title"/>
+            android:title="@string/setting_license_title"
+            app:iconSpaceReserved="false"/>
 
         <Preference
             android:key="@string/setting_privacy_policy_key"
-            android:title="@string/setting_privacy_policy_title">
+            android:title="@string/setting_privacy_policy_title"
+            app:iconSpaceReserved="false">
 
             <intent
                 android:action="android.intent.action.VIEW"
