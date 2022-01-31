@@ -76,5 +76,6 @@ class AlarmGeneratorActivity : AppCompatActivity() {
         const val TAG_FRAGMENT_LABEL = "TAG_FRAGMENT_LABEL"
         const val TAG_FRAGMENT_COLOR_TAG = "TAG_FRAGMENT_COLOR_TAG"
         const val BUNDLE_KEY = "BUNDLE_KEY"
+        const val SCHEDULED_TIME = "SCHEDULED_TIME"
     }
 }

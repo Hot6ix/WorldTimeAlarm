@@ -17,6 +17,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -182,26 +183,24 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when {
-            requestCode == ContentSelectorActivity.USER_AUDIO_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
-                data?.data?.also {
-                    context?.contentResolver?.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    val name = getNameFromUri(it)
+    private val onCustomRingtoneSelectionActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if(result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.also {
+                context?.contentResolver?.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                val name = getNameFromUri(it)
 
-                    launch(coroutineContext) {
-                        withContext(Dispatchers.IO) {
-                            db.ringtoneItemDao().insert(RingtoneItem(title = name, uri = it.toString()))
-                        }
+                launch(coroutineContext) {
+                    withContext(Dispatchers.IO) {
+                        db.ringtoneItemDao().insert(RingtoneItem(title = name, uri = it.toString()))
+                    }
 
-                        val isInserted = db.ringtoneItemDao().getRingtoneFromUri(it.toString()) != null
-                        if(!isInserted) {
-                            Toast.makeText(context, getString(R.string.exist_ringtone), Toast.LENGTH_SHORT).show()
-                        }
-                        else {
-                            viewModel.lastSelectedValue = RingtoneItem(title = getNameFromUri(it), uri = it.toString())
-                            play(it.toString())
-                        }
+                    val isInserted = db.ringtoneItemDao().getRingtoneFromUri(it.toString()) != null
+                    if(!isInserted) {
+                        Toast.makeText(context, getString(R.string.exist_ringtone), Toast.LENGTH_SHORT).show()
+                    }
+                    else {
+                        viewModel.lastSelectedValue = RingtoneItem(title = getNameFromUri(it), uri = it.toString())
+                        play(it.toString())
                     }
                 }
             }
@@ -235,7 +234,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                             type = "audio/*"
                             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
                         }
-                        startActivityForResult(uriIntent, ContentSelectorActivity.USER_AUDIO_REQUEST_CODE)
+                        onCustomRingtoneSelectionActivityResult.launch(uriIntent)
                     }
                     else {
                         // user selected user ringtone

@@ -6,12 +6,13 @@ import android.content.*
 import android.os.Build
 import android.os.Bundle
 import android.text.format.DateFormat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TimePicker
 import android.widget.Toast
-import androidx.annotation.RequiresApi
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
@@ -65,9 +66,6 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
 
     private var now = ZonedDateTime.now()
     private var is24HourMode = false
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    private val icuCalendar = android.icu.util.Calendar.getInstance()
 
     private val crashlytics = FirebaseCrashlytics.getInstance()
 
@@ -312,102 +310,129 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
+    private val onTimeZoneActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.d(TAG, "onTimeZoneActivityResult()")
         launch(coroutineContext) {
             initJob.join()
 
-            if(resultCode == Activity.RESULT_OK) {
-                when (requestCode) {
-                    TimeZoneSearchActivity.TIME_ZONE_REQUEST_CODE -> {
-                        if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                            val replacedTz = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.replace(" ", "_")
-                            replacedTz?.let {
-                                viewModel.timeZone.value = it.replace(" ", "_")
+            result.data?.let { data ->
+                if(data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
+                    val replacedTz = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.replace(" ", "_")
+                    replacedTz?.let {
+                        viewModel.timeZone.value = it.replace(" ", "_")
 
-                                viewModel.remoteZonedDateTime =
-                                        viewModel.remoteZonedDateTime
-                                                .withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
+                        viewModel.remoteZonedDateTime =
+                            viewModel.remoteZonedDateTime
+                                .withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
 
-                                viewModel.startDate = viewModel.startDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
-                                viewModel.endDate = viewModel.endDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
-                            }
-
-                            binding.timeZoneName.text = getFormattedTimeZoneName(replacedTz)
-                            updateEstimated()
-                            setupRecurrences()
-                        }
+                        viewModel.startDate = viewModel.startDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
+                        viewModel.endDate = viewModel.endDate?.withZoneSameLocal(ZoneId.of(viewModel.timeZone.value))
                     }
-                    ContentSelectorActivity.AUDIO_REQUEST_CODE -> {
-                        data?.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
-                            val ringtone = it as RingtoneItem
-                            viewModel.ringtone.value = ringtone
-                            viewModel.optionList[0].summary = ringtone.title
-                        }
-                    }
-                    ContentSelectorActivity.VIBRATION_REQUEST_CODE -> {
-                        data?.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
-                            val vibration = it as PatternItem
-                            viewModel.vibration.value = vibration
-                            viewModel.optionList[1].summary = vibration.title
-                        }
-                    }
-                    ContentSelectorActivity.SNOOZE_REQUEST_CODE -> {
-                        data?.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
-                            val snooze = it as SnoozeItem
-                            viewModel.snooze.value = snooze
-                            viewModel.optionList[2].summary = snooze.title
-                        }
-                    }
-                    ContentSelectorActivity.DATE_REQUEST_CODE -> {
-                        data?.getLongExtra(ContentSelectorActivity.START_DATE_KEY, -1)?.let {
-                            viewModel.startDate =
-                                    if(it > 0) {
-                                        val startInstant = Instant.ofEpochMilli(it)
-                                        ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
-                                                .withHour(viewModel.remoteZonedDateTime.hour)
-                                                .withMinute(viewModel.remoteZonedDateTime.minute)
-                                    }
-                                    else null
-                        }
 
-                        data?.getLongExtra(ContentSelectorActivity.END_DATE_KEY, -1)?.let {
-                            viewModel.endDate =
-                                    if(it > 0) {
-                                        val endInstant = Instant.ofEpochMilli(it)
-                                        ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
-                                                .withHour(viewModel.remoteZonedDateTime.hour)
-                                                .withMinute(viewModel.remoteZonedDateTime.minute)
-                                    }
-                                    else null
-                        }
-
-                        viewModel.startDate.let {
-                            viewModel.remoteZonedDateTime =
-                                    if(it == null) {
-                                        viewModel.remoteZonedDateTime
-                                                .withYear(now.year)
-                                                .withMonth(now.monthValue)
-                                                .withDayOfMonth(now.dayOfMonth)
-                                    }
-                                    else {
-                                        viewModel.remoteZonedDateTime
-                                                .withYear(it.year)
-                                                .withMonth(it.monthValue)
-                                                .withDayOfMonth(it.dayOfMonth)
-                                    }
-                        }
-
-                        binding.date.text = AlarmStringFormatHelper.formatDate(
-                                fragmentContext,
-                                viewModel.startDate,
-                                viewModel.endDate,
-                                viewModel.recurrences.value?.any { it > 0 } ?: false
-                        )
-                        updateEstimated()
-                    }
+                    binding.timeZoneName.text = getFormattedTimeZoneName(replacedTz)
+                    updateEstimated()
+                    setupRecurrences()
                 }
+            }
+        }
+    }
+
+    private val onRingtoneSelectionActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.d(TAG, "onRingtoneSelectionActivityResult()")
+        launch(coroutineContext) {
+            initJob.join()
+
+            result.data?.let { data ->
+                data.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
+                    val ringtone = it as RingtoneItem
+                    viewModel.ringtone.value = ringtone
+                    viewModel.optionList[0].summary = ringtone.title
+                }
+            }
+        }
+    }
+
+    private val onVibrationSelectionActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.d(TAG, "onVibrationSelectionActivityResult()")
+        launch(coroutineContext) {
+            initJob.join()
+
+            result.data?.let { data ->
+                data.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
+                    val vibration = it as PatternItem
+                    viewModel.vibration.value = vibration
+                    viewModel.optionList[1].summary = vibration.title
+                }
+            }
+        }
+    }
+
+    private val onSnoozeSelectionActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.d(TAG, "onSnoozeSelectionActivityResult()")
+        launch(coroutineContext) {
+            initJob.join()
+
+            result.data?.let { data ->
+                data.getSerializableExtra(ContentSelectorActivity.LAST_SELECTED_KEY)?.also {
+                    val snooze = it as SnoozeItem
+                    viewModel.snooze.value = snooze
+                    viewModel.optionList[2].summary = snooze.title
+                }
+            }
+        }
+    }
+
+    private val onDateSelectionActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.d(TAG, "onDateSelectionActivityResult()")
+        launch(coroutineContext) {
+            initJob.join()
+
+            result.data?.let { data ->
+                data.getLongExtra(ContentSelectorActivity.START_DATE_KEY, -1).let {
+                    viewModel.startDate =
+                        if(it > 0) {
+                            val startInstant = Instant.ofEpochMilli(it)
+                            ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
+                                .withHour(viewModel.remoteZonedDateTime.hour)
+                                .withMinute(viewModel.remoteZonedDateTime.minute)
+                        }
+                        else null
+                }
+
+                data.getLongExtra(ContentSelectorActivity.END_DATE_KEY, -1).let {
+                    viewModel.endDate =
+                        if(it > 0) {
+                            val endInstant = Instant.ofEpochMilli(it)
+                            ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
+                                .withHour(viewModel.remoteZonedDateTime.hour)
+                                .withMinute(viewModel.remoteZonedDateTime.minute)
+                        }
+                        else null
+                }
+
+                viewModel.startDate.let {
+                    viewModel.remoteZonedDateTime =
+                        if(it == null) {
+                            viewModel.remoteZonedDateTime
+                                .withYear(now.year)
+                                .withMonth(now.monthValue)
+                                .withDayOfMonth(now.dayOfMonth)
+                        }
+                        else {
+                            viewModel.remoteZonedDateTime
+                                .withYear(it.year)
+                                .withMonth(it.monthValue)
+                                .withDayOfMonth(it.dayOfMonth)
+                        }
+                }
+
+                binding.date.text = AlarmStringFormatHelper.formatDate(
+                    fragmentContext,
+                    viewModel.startDate,
+                    viewModel.endDate,
+                    viewModel.recurrences.value?.any { it > 0 } ?: false
+                )
+                updateEstimated()
             }
         }
     }
@@ -421,9 +446,9 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                         putExtra(TimeZonePickerActivity.TIME_ZONE_ID, viewModel.timeZone.value)
                         putExtra(TimeZonePickerActivity.TYPE, TimeZonePickerActivity.TYPE_ALARM_CLOCK)
                     }
-                    startActivityForResult(i, TimeZoneSearchActivity.TIME_ZONE_REQUEST_CODE)
+                    onTimeZoneActivityResult.launch(i)
                 }
-                else startActivityForResult(Intent(fragmentContext, TimeZoneSearchActivity::class.java), TimeZoneSearchActivity.TIME_ZONE_REQUEST_CODE)
+                else onTimeZoneActivityResult.launch(Intent(fragmentContext, TimeZoneSearchActivity::class.java))
             }
             R.id.date_view -> {
                 val contentIntent = Intent(fragmentContext, ContentSelectorActivity::class.java).apply {
@@ -432,7 +457,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                     putExtra(ContentSelectorActivity.END_DATE_KEY, viewModel.endDate?.toInstant()?.toEpochMilli())
                     putExtra(ContentSelectorActivity.TIME_ZONE_KEY, viewModel.timeZone.value)
                 }
-                startActivityForResult(contentIntent, ContentSelectorActivity.DATE_REQUEST_CODE)
+                onDateSelectionActivityResult.launch(contentIntent)
             }
             R.id.action -> {
                 saveAlarm()
@@ -447,21 +472,21 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                     action = ContentSelectorActivity.ACTION_REQUEST_AUDIO
                     putExtra(ContentSelectorActivity.LAST_SELECTED_KEY, viewModel.ringtone.value)
                 }
-                startActivityForResult(contentIntent, ContentSelectorActivity.AUDIO_REQUEST_CODE)
+                onRingtoneSelectionActivityResult.launch(contentIntent)
             }
             1 -> { // Vibration
                 val contentIntent = Intent(fragmentContext, ContentSelectorActivity::class.java).apply {
                     action = ContentSelectorActivity.ACTION_REQUEST_VIBRATION
                     putExtra(ContentSelectorActivity.LAST_SELECTED_KEY, viewModel.vibration.value)
                 }
-                startActivityForResult(contentIntent, ContentSelectorActivity.VIBRATION_REQUEST_CODE)
+                onVibrationSelectionActivityResult.launch(contentIntent)
             }
             2 -> { // Snooze
                 val contentIntent = Intent(fragmentContext, ContentSelectorActivity::class.java).apply {
                     action = ContentSelectorActivity.ACTION_REQUEST_SNOOZE
                     putExtra(ContentSelectorActivity.LAST_SELECTED_KEY, viewModel.snooze.value)
                 }
-                startActivityForResult(contentIntent, ContentSelectorActivity.SNOOZE_REQUEST_CODE)
+                onSnoozeSelectionActivityResult.launch(contentIntent)
             }
             3 -> { // Label
                 viewModel.label.value?.let {
@@ -595,7 +620,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 // set color for weekend
                 // color will be red if weekendCease and weekendOnset are same
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    with(icuCalendar.weekData) {
+                    with(android.icu.util.Calendar.getInstance().weekData) {
                         when(dayOfWeek.value) {
                             // weekend finish
                             MediaCursor.getDayOfWeekValueFromCalendarToThreeTenBp(weekendCease) -> {

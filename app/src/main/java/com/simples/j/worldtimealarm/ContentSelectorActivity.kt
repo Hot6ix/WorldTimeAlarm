@@ -53,7 +53,7 @@ class ContentSelectorActivity : AppCompatActivity(), Toolbar.OnMenuItemClickList
             }
         }
 
-        viewModel = ViewModelProvider(this).get(ContentSelectorViewModel::class.java)
+        viewModel = ViewModelProvider(this)[ContentSelectorViewModel::class.java]
 
         if(savedInstanceState == null) {
             viewModel.action = intent.action

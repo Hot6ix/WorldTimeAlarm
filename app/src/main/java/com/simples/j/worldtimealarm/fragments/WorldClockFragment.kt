@@ -1,18 +1,19 @@
 package com.simples.j.worldtimealarm.fragments
 
 
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.*
 import android.os.Build
 import android.os.Bundle
 import android.text.format.DateFormat
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.TimePicker
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -26,12 +27,14 @@ import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.TimeZonePickerActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity
 import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_NEW_CODE
-import com.simples.j.worldtimealarm.TimeZoneSearchActivity.Companion.TIME_ZONE_REQUEST_CODE
 import com.simples.j.worldtimealarm.databinding.FragmentWorldClockBinding
 import com.simples.j.worldtimealarm.etc.ClockItem
 import com.simples.j.worldtimealarm.models.WorldClockViewModel
 import com.simples.j.worldtimealarm.support.ClockListAdapter
-import com.simples.j.worldtimealarm.utils.*
+import com.simples.j.worldtimealarm.utils.AppDatabase
+import com.simples.j.worldtimealarm.utils.DatabaseManager
+import com.simples.j.worldtimealarm.utils.ListSwipeController
+import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.coroutines.*
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -39,7 +42,6 @@ import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
 class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController.OnListControlListener, CoroutineScope, DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
@@ -155,13 +157,14 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
             setUpClockList()
         }
 
-        viewModel.mainZonedDateTime.observe(viewLifecycleOwner, {
+        viewModel.mainZonedDateTime.observe(viewLifecycleOwner) {
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, it.hour)
                 set(Calendar.MINUTE, it.minute)
             }
 
-            binding.worldTime.text = DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), calendar)
+            binding.worldTime.text =
+                DateFormat.format(MediaCursor.getLocalizedTimeFormat(in24Hour), calendar)
             binding.worldDate.text = it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL))
 
             binding.timeZone.text = getNameForTimeZone(it.zone.id)
@@ -170,9 +173,9 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
 
             val set = setOf(it.toInstant().toEpochMilli().toString(), it.zone.id)
             mPrefManager.edit()
-                    .putStringSet(LAST_SETTING_KEY, set)
-                    .apply()
-        })
+                .putStringSet(LAST_SETTING_KEY, set)
+                .apply()
+        }
 
         timeZoneChangedReceiver = UpdateRequestReceiver()
         val intentFilter = IntentFilter().apply {
@@ -199,49 +202,49 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    private val onMainTimeZoneSelectionActivityResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result ->
 
-        var scrollToLast: Boolean
+        Log.d(TAG, "onMainTimeZoneSelectionActivityResult()")
+        result.data?.let {
+            if(it.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
+                val id = it.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.replace(" ", "_")
 
-        when {
-            requestCode == TIME_ZONE_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
-                if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    val id = data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.replace(" ", "_")
-
-                    viewModel.mainZonedDateTime.value =
-                            viewModel.mainZonedDateTime.value?.withZoneSameLocal(ZoneId.of(id))
-                }
+                viewModel.mainZonedDateTime.value =
+                    viewModel.mainZonedDateTime.value?.withZoneSameLocal(ZoneId.of(id))
             }
-            requestCode == TIME_ZONE_NEW_CODE && resultCode == Activity.RESULT_OK -> {
-                if(data != null && data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
-                    launch(coroutineContext) {
-                        job.join()
+        }
+    }
 
-                        data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.let {
-                            val clockItem = ClockItem(null, it, -1)
-                            val id = db.clockItemDao().insert(clockItem)
-                            clockItem.apply {
-                                index = id.toInt()
-                            }.also {
-                                db.clockItemDao().update(it)
-                            }
-                            clockItems.add(clockItem)
+    private val onNewTimeZoneActivityResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result ->
 
-                            scrollToLast = true
+        Log.d(TAG, "onNewTimeZoneActivityResult()")
+        result.data?.let { data ->
+            if(data.hasExtra(TimeZoneSearchActivity.TIME_ZONE_ID)) {
+                launch(coroutineContext) {
+                    job.join()
 
-                            updateList(scrollToLast)
-                            if(!job.isCancelled) showMessage(TYPE_RECYCLER_VIEW)
-                            else {
-                                binding.progressBar.visibility = View.VISIBLE
-                                showMessage(TYPE_NOTHING)
-                                job = launch(coroutineContext) {
-                                    setUpClockList()
-                                }
+                    data.getStringExtra(TimeZoneSearchActivity.TIME_ZONE_ID)?.let {
+                        val clockItem = ClockItem(null, it, -1)
+                        val id = db.clockItemDao().insert(clockItem)
+                        clockItem.apply {
+                            index = id.toInt()
+                        }.also { item ->
+                            db.clockItemDao().update(item)
+                        }
+                        clockItems.add(clockItem)
+
+                        updateList(true)
+                        if(!job.isCancelled) showMessage(TYPE_RECYCLER_VIEW)
+                        else {
+                            binding.progressBar.visibility = View.VISIBLE
+                            showMessage(TYPE_NOTHING)
+                            job = launch(coroutineContext) {
+                                setUpClockList()
                             }
                         }
                     }
-
                 }
             }
         }
@@ -256,9 +259,9 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                         putExtra(TimeZonePickerActivity.TIME_ZONE_ID, viewModel.mainZonedDateTime.value?.zone?.id)
                         putExtra(TimeZonePickerActivity.TYPE, TimeZonePickerActivity.TYPE_WORLD_CLOCK)
                     }
-                    startActivityForResult(i, TIME_ZONE_REQUEST_CODE)
+                    onMainTimeZoneSelectionActivityResult.launch(i)
                 }
-                else startActivityForResult(Intent(activity, TimeZoneSearchActivity::class.java), TIME_ZONE_REQUEST_CODE)
+                else onMainTimeZoneSelectionActivityResult.launch(Intent(activity, TimeZoneSearchActivity::class.java))
             }
             R.id.new_timezone -> {
                 if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M && mTimeZoneSelectorOption == SettingFragment.SELECTOR_NEW) {
@@ -266,12 +269,12 @@ class WorldClockFragment : Fragment(), View.OnClickListener, ListSwipeController
                         putExtra(TimeZonePickerActivity.ACTION, TimeZonePickerActivity.ACTION_ADD)
                         putExtra(TimeZonePickerActivity.TYPE, TimeZonePickerActivity.TYPE_WORLD_CLOCK)
                     }
-                    startActivityForResult(i, TIME_ZONE_NEW_CODE)
+                    onNewTimeZoneActivityResult.launch(i)
                 }
                 else {
-                    val intent = Intent(activity, TimeZoneSearchActivity::class.java)
-                    intent.putExtra(TIME_ZONE_NEW_KEY, TIME_ZONE_NEW_CODE.toString())
-                    startActivityForResult(intent, TIME_ZONE_NEW_CODE)
+                    val i = Intent(activity, TimeZoneSearchActivity::class.java)
+                    i.putExtra(TIME_ZONE_NEW_KEY, TIME_ZONE_NEW_CODE.toString())
+                    onNewTimeZoneActivityResult.launch(i)
                 }
             }
         }
