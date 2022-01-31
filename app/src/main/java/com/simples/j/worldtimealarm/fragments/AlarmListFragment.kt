@@ -285,7 +285,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
                 val oldResult =
                         try {
-                            val oldDateTimeMillis = alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyRepeat)
+                            @Suppress("DEPRECATION") val oldDateTimeMillis = alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyRepeat)
                             ZonedDateTime.ofInstant(Instant.ofEpochMilli(oldDateTimeMillis.timeInMillis), ZoneId.systemDefault())
                         } catch (e: Exception) {
                             e.printStackTrace()

@@ -7,10 +7,7 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.RingtoneManager
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
+import android.os.*
 import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -45,6 +42,7 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
     private lateinit var recyclerLayoutManager: LinearLayoutManager
     private lateinit var audioManager: AudioManager
     private lateinit var vibrator: Vibrator
+    private lateinit var vibratorManager: VibratorManager
     private lateinit var defaultRingtone: RingtoneItem
     private lateinit var binding: ContentSelectorFragmentBinding
     private lateinit var db: AppDatabase
@@ -99,7 +97,12 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         db = Room.databaseBuilder(requireContext(), AppDatabase::class.java, DatabaseManager.DB_NAME)
                 .build()
         audioManager = requireContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+        @Suppress("DEPRECATION")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            vibratorManager = requireContext().getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+        else
+            vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
         activity?.run {
             viewModel = ViewModelProvider(this)[ContentSelectorViewModel::class.java]
@@ -219,7 +222,13 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
                 viewModel.ringtone?.let {
                     if(it.isPlaying) it.stop()
                 }
-                if(vibrator.hasVibrator()) vibrator.cancel()
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if(vibratorManager.defaultVibrator.hasVibrator()) vibratorManager.cancel()
+                }
+                else {
+                    if(vibrator.hasVibrator()) vibrator.cancel()
+                }
             }
         }
     }
@@ -339,13 +348,21 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
             job.join()
 
             if(array != null) {
-                if(Build.VERSION.SDK_INT < 26) {
-                    if(array.size > 1) vibrator.vibrate(array, -1)
-                    else vibrator.vibrate(array[0])
-                }
-                else {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     if(array.size > 1) vibrator.vibrate(VibrationEffect.createWaveform(array, -1))
                     else vibrator.vibrate(VibrationEffect.createOneShot(array[0], VibrationEffect.DEFAULT_AMPLITUDE))
+                }
+                else {
+                    if(Build.VERSION.SDK_INT < 26) {
+                        @Suppress("DEPRECATION")
+                        if(array.size > 1) vibrator.vibrate(array, -1)
+                        else vibrator.vibrate(array[0])
+                    }
+                    else {
+                        if(array.size > 1) vibrator.vibrate(VibrationEffect.createWaveform(array, -1))
+                        else vibrator.vibrate(VibrationEffect.createOneShot(array[0], VibrationEffect.DEFAULT_AMPLITUDE))
+                    }
                 }
             }
         }
