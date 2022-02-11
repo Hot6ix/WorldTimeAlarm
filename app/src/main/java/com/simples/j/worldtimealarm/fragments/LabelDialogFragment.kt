@@ -6,6 +6,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -79,8 +80,8 @@ class LabelDialogFragment: DialogFragment() {
         return dialog.create()
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
     }

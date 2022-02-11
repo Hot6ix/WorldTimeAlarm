@@ -17,6 +17,7 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.google.android.material.textfield.TextInputEditText
 import com.simples.j.worldtimealarm.*
 import com.simples.j.worldtimealarm.ViewMatcherExtension.exists
 import com.simples.j.worldtimealarm.ViewMatcherExtension.withNeighbor
@@ -239,7 +240,7 @@ class AlarmGeneratorFragmentUITest {
         // check dialog components are displayed
         onView(allOf(
                 withId(R.id.label),
-                withClassName(`is`(AppCompatEditText::class.java.canonicalName))
+                withClassName(`is`(TextInputEditText::class.java.canonicalName))
         )).check(matches(isDisplayed()))
         // close dialog using button
         onView(allOf(

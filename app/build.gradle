@@ -4,13 +4,13 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
     defaultConfig {
         applicationId "com.simples.j.worldtimealarm"
         minSdkVersion 21
-        targetSdkVersion 31
-        versionCode 34
-        versionName "1.7.2"
+        targetSdkVersion 32
+        versionCode 35
+        versionName "1.7.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
@@ -49,10 +49,10 @@ android {
     buildFeatures {
         viewBinding true
     }
-
-    lintOptions {
+    lint {
         abortOnError false
     }
+
 }
 
 dependencies {

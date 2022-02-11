@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
@@ -122,7 +123,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
 
         binding.newAlarm.setOnClickListener {
-            startActivityForResult(Intent(fragmentContext, AlarmGeneratorActivity::class.java), REQUEST_CODE_NEW)
+            onNewAlarmActivityResult.launch(Intent(fragmentContext, AlarmGeneratorActivity::class.java))
         }
         binding.retry.setOnClickListener {
             binding.progressBar.visibility = View.VISIBLE
@@ -204,58 +205,57 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        when {
-            requestCode == REQUEST_CODE_NEW && resultCode == Activity.RESULT_OK -> {
-                val bundle = data?.getBundleExtra(AlarmReceiver.OPTIONS)
-                bundle?.let {
-                    val item = it.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
-                    val scheduledTime = it.getLong(AlarmActivity.SCHEDULED_TIME, -1)
-                    if(item != null) {
-                        alarmItems.add(item)
-                        if(::alarmListAdapter.isInitialized) {
-                            alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
+    private val onNewAlarmActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if(result.resultCode == Activity.RESULT_OK) {
+            val bundle = result.data?.getBundleExtra(AlarmReceiver.OPTIONS)
+            bundle?.let {
+                val item = it.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+                val scheduledTime = it.getLong(AlarmGeneratorActivity.SCHEDULED_TIME, -1)
+                if(item != null) {
+                    alarmItems.add(item)
+                    if(::alarmListAdapter.isInitialized) {
+                        alarmListAdapter.notifyItemInserted(alarmItems.size - 1)
+                        binding.alarmList.scrollToPosition(alarmItems.size - 1)
+                    }
+                    else {
+                        launch(coroutineContext) {
+                            job.join()
                             binding.alarmList.scrollToPosition(alarmItems.size - 1)
                         }
-                        else {
-                            launch(coroutineContext) {
-                                job.join()
-                                binding.alarmList.scrollToPosition(alarmItems.size - 1)
-                            }
-                        }
+                    }
 
-                        showSnackBar(scheduledTime)
-                        if(!job.isCancelled) showMessage(TYPE_RECYCLER_VIEW)
-                        else {
-                            binding.progressBar.visibility = View.VISIBLE
-                            showMessage(TYPE_NOTHING)
-                            job = launch(coroutineContext) {
-                                setUpAlarmList()
-                            }
+                    showSnackBar(scheduledTime)
+                    if(!job.isCancelled) showMessage(TYPE_RECYCLER_VIEW)
+                    else {
+                        binding.progressBar.visibility = View.VISIBLE
+                        showMessage(TYPE_NOTHING)
+                        job = launch(coroutineContext) {
+                            setUpAlarmList()
                         }
                     }
                 }
             }
-            requestCode == REQUEST_CODE_MODIFY && resultCode == Activity.RESULT_OK -> {
-                val bundle = data?.getBundleExtra(AlarmReceiver.OPTIONS)
-                bundle?.let { b ->
-                    val item = b.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
-                    val scheduledTime = b.getLong(AlarmActivity.SCHEDULED_TIME, -1)
-                    if(item != null) {
-                        launch(coroutineContext) {
-                            job.join()
+        }
+    }
 
-                            val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
-                            if(index > -1) {
-                                binding.alarmList.scrollToPosition(index)
-                                alarmItems[index] = item
-                                alarmListAdapter.notifyItemChanged(index)
-                            }
+    private val onAlarmModificationActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if(result.resultCode == Activity.RESULT_OK) {
+            val bundle = result.data?.getBundleExtra(AlarmReceiver.OPTIONS)
+            bundle?.let { b ->
+                val item = b.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+                val scheduledTime = b.getLong(AlarmGeneratorActivity.SCHEDULED_TIME, -1)
+                if(item != null) {
+                    launch(coroutineContext) {
+                        job.join()
+
+                        val index = alarmItems.indexOfFirst { it.notiId == item.notiId }
+                        if(index > -1) {
+                            binding.alarmList.scrollToPosition(index)
+                            alarmItems[index] = item
+                            alarmListAdapter.notifyItemChanged(index)
                         }
-                        showSnackBar(scheduledTime)
                     }
+                    showSnackBar(scheduledTime)
                 }
             }
         }
@@ -285,7 +285,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
                 val oldResult =
                         try {
-                            val oldDateTimeMillis = alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyRepeat)
+                            @Suppress("DEPRECATION") val oldDateTimeMillis = alarmController.calculateDate(item, AlarmController.TYPE_ALARM, applyRepeat)
                             ZonedDateTime.ofInstant(Instant.ofEpochMilli(oldDateTimeMillis.timeInMillis), ZoneId.systemDefault())
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -330,7 +330,7 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                     putSerializable(AlarmItem.ALARM_ITEM_STATUS, status)
                 }
                 intent.putExtra(AlarmGeneratorActivity.BUNDLE_KEY, bundle)
-                startActivityForResult(intent, REQUEST_CODE_MODIFY)
+                onAlarmModificationActivityResult.launch(intent)
             }
         }
     }
@@ -576,8 +576,6 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
 
     companion object {
         const val TAG = "AlarmListFragment"
-        const val REQUEST_CODE_NEW = 10
-        const val REQUEST_CODE_MODIFY = 20
         const val STATE_SNACK_BAR = "STATE_SNACK_BAR"
         const val HIGHLIGHT_KEY = "HIGHLIGHT_KEY"
 
