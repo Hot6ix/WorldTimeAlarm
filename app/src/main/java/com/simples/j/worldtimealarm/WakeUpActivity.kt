@@ -5,6 +5,7 @@ import android.content.*
 import android.os.Build
 import android.os.Bundle
 import android.os.Vibrator
+import android.os.VibratorManager
 import android.text.format.DateFormat
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -130,8 +131,15 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
     override fun onDestroy() {
         super.onDestroy()
 
-        val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        vibrator.cancel()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = applicationContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.cancel()
+        }
+        else {
+            @Suppress("DEPRECATION")
+            val vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            vibrator.cancel()
+        }
 
         stopService(Intent(applicationContext, WakeUpService::class.java))
 

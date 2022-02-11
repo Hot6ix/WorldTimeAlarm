@@ -28,7 +28,6 @@ import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.receiver.NotificationActionReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -40,6 +39,7 @@ class WakeUpService : Service() {
 
     private var audioManager: AudioManager? = null
     private var vibrator: Vibrator? = null
+    private var vibratorManager: VibratorManager? = null
     private var mediaPlayer: MediaPlayer? = null
     private var option: Bundle? = null
     private var item: AlarmItem? = null
@@ -184,8 +184,17 @@ class WakeUpService : Service() {
     private fun setup(item: AlarmItem) {
         if(!item.ringtone.isNullOrEmpty())
             audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        if(item.vibration != null)
-            vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if(item.vibration != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                vibratorManager = applicationContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                vibratorManager?.cancel()
+            }
+            else {
+                @Suppress("DEPRECATION")
+                vibrator = applicationContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                vibrator?.cancel()
+            }
+        }
     }
 
     private fun getNotification(type: Int, alarmItem: AlarmItem, intent: Intent? = null): Notification {
@@ -370,14 +379,14 @@ class WakeUpService : Service() {
 
     private fun vibrate(array: LongArray?) {
         if(array != null) {
-            if(Build.VERSION.SDK_INT < 26) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if(array.size > 1) vibratorManager?.defaultVibrator?.vibrate(VibrationEffect.createWaveform(array, 0))
+                else vibratorManager?.defaultVibrator?.vibrate(VibrationEffect.createOneShot(array[0], VibrationEffect.DEFAULT_AMPLITUDE))
+            }
+            else {
                 @Suppress("DEPRECATION")
                 if(array.size > 1) vibrator?.vibrate(array, 0)
                 else vibrator?.vibrate(array[0])
-            }
-            else {
-                if(array.size > 1) vibrator?.vibrate(VibrationEffect.createWaveform(array, 0))
-                else vibrator?.vibrate(VibrationEffect.createOneShot(array[0], VibrationEffect.DEFAULT_AMPLITUDE))
             }
         }
     }
