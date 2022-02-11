@@ -66,8 +66,8 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         arguments?.let {
             mRequestType = it.getInt(TimeZonePickerActivity.REQUEST_TYPE)
@@ -122,14 +122,9 @@ class TimeZonePickerFragment : Fragment(), CoroutineScope, SearchView.OnQueryTex
                 }
             }
 
-            if(view != null) {
-                binding.timeZoneBaseRecyclerView.adapter = mAdapter
-//                time_zone_base_recycler_view.adapter = mAdapter
-                binding.timeZoneBaseRecyclerView.layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
-//                time_zone_base_recycler_view.layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
-                binding.progressBar.visibility = View.GONE
-//                progressBar.visibility = View.GONE
-            }
+            binding.timeZoneBaseRecyclerView.adapter = mAdapter
+            binding.timeZoneBaseRecyclerView.layoutManager = LinearLayoutManager(fragmentContext, LinearLayoutManager.VERTICAL, false)
+            binding.progressBar.visibility = View.GONE
 
             mSearchView?.apply {
                 if(isIconified) isIconified = false

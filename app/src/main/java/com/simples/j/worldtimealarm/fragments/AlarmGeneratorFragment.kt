@@ -99,17 +99,17 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
 
         db = Room.databaseBuilder(fragmentContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .build()
+            .build()
 
         preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
         is24HourMode = preference.getBoolean(fragmentContext.getString(R.string.setting_24_hr_clock_key), false)
         timeZoneSelectorOption = preference.getString(resources.getString(R.string.setting_time_zone_selector_key), SettingFragment.SELECTOR_OLD)
-                ?: SettingFragment.SELECTOR_OLD
+            ?: SettingFragment.SELECTOR_OLD
 
         activity?.run {
             viewModel = ViewModelProvider(this)[AlarmGeneratorViewModel::class.java]
@@ -143,8 +143,8 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                         if (startDateInMillis > 0) {
                             val startInstant = Instant.ofEpochMilli(startDateInMillis)
                             viewModel.startDate = ZonedDateTime.ofInstant(startInstant, ZoneId.of(viewModel.timeZone.value))
-                                    .withHour(viewModel.remoteZonedDateTime.hour)
-                                    .withMinute(viewModel.remoteZonedDateTime.minute)
+                                .withHour(viewModel.remoteZonedDateTime.hour)
+                                .withMinute(viewModel.remoteZonedDateTime.minute)
                         }
                     }
 
@@ -152,24 +152,24 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                         if (endDateInMillis > 0) {
                             val endInstant = Instant.ofEpochMilli(endDateInMillis)
                             viewModel.endDate = ZonedDateTime.ofInstant(endInstant, ZoneId.of(viewModel.timeZone.value))
-                                    .withHour(viewModel.remoteZonedDateTime.hour)
-                                    .withMinute(viewModel.remoteZonedDateTime.minute)
+                                .withHour(viewModel.remoteZonedDateTime.hour)
+                                .withMinute(viewModel.remoteZonedDateTime.minute)
                         }
                     }
 
                     viewModel.startDate.let { start ->
                         if (start == null) {
                             viewModel.remoteZonedDateTime =
-                                    viewModel.remoteZonedDateTime
-                                            .withYear(now.year)
-                                            .withMonth(now.monthValue)
-                                            .withDayOfMonth(now.dayOfMonth)
+                                viewModel.remoteZonedDateTime
+                                    .withYear(now.year)
+                                    .withMonth(now.monthValue)
+                                    .withDayOfMonth(now.dayOfMonth)
                         } else {
                             viewModel.remoteZonedDateTime =
-                                    viewModel.remoteZonedDateTime
-                                            .withYear(start.year)
-                                            .withMonth(start.monthValue)
-                                            .withDayOfMonth(start.dayOfMonth)
+                                viewModel.remoteZonedDateTime
+                                    .withYear(start.year)
+                                    .withMonth(start.monthValue)
+                                    .withDayOfMonth(start.dayOfMonth)
                         }
                     }
 
@@ -864,7 +864,7 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 val intent = Intent()
                 val bundle = Bundle().apply {
                     putParcelable(AlarmReceiver.ITEM, item)
-                    putLong(AlarmActivity.SCHEDULED_TIME, scheduledTime)
+                    putLong(AlarmGeneratorActivity.SCHEDULED_TIME, scheduledTime)
                 }
                 intent.putExtra(AlarmReceiver.OPTIONS, bundle)
                 setResult(Activity.RESULT_OK, intent)

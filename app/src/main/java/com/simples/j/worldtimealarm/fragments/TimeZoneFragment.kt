@@ -34,8 +34,6 @@ import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
-import org.threeten.bp.format.DateTimeFormatter
-import org.threeten.bp.format.FormatStyle
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
@@ -86,11 +84,11 @@ class TimeZoneFragment : Fragment(), CoroutineScope, View.OnClickListener {
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         db = Room.databaseBuilder(fragmentContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .build()
+            .build()
 
         (activity as TimeZonePickerActivity).apply {
             supportActionBar?.title = getString(R.string.timezone_fragment_title)

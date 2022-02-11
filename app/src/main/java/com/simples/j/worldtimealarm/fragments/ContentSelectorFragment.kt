@@ -91,23 +91,23 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         db = Room.databaseBuilder(requireContext(), AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .build()
+            .build()
         audioManager = requireContext().getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             vibratorManager = requireContext().getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        else
+        else {
+            @Suppress("DEPRECATION")
             vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
 
         activity?.run {
             viewModel = ViewModelProvider(this)[ContentSelectorViewModel::class.java]
         }
-
     }
 
     override fun onResume() {
