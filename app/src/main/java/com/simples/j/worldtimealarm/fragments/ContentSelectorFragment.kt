@@ -100,10 +100,9 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             vibratorManager = requireContext().getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        else {
-            @Suppress("DEPRECATION")
-            vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
+
+        @Suppress("DEPRECATION")
+        vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
         activity?.run {
             viewModel = ViewModelProvider(this)[ContentSelectorViewModel::class.java]
@@ -348,13 +347,12 @@ class ContentSelectorFragment : Fragment(), ContentSelectorAdapter.OnItemSelecte
             job.join()
 
             if(array != null) {
-
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if(array.size > 1) vibrator.vibrate(VibrationEffect.createWaveform(array, -1))
-                    else vibrator.vibrate(VibrationEffect.createOneShot(array[0], VibrationEffect.DEFAULT_AMPLITUDE))
+                    if(array.size > 1) vibratorManager.defaultVibrator.vibrate(VibrationEffect.createWaveform(array, -1))
+                    else vibratorManager.defaultVibrator.vibrate(VibrationEffect.createOneShot(array[0], VibrationEffect.DEFAULT_AMPLITUDE))
                 }
                 else {
-                    if(Build.VERSION.SDK_INT < 26) {
+                    if(Build.VERSION.SDK_INT < 26) { // VERSION_CODES.O
                         @Suppress("DEPRECATION")
                         if(array.size > 1) vibrator.vibrate(array, -1)
                         else vibrator.vibrate(array[0])
