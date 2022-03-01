@@ -147,6 +147,7 @@
     <string name="time_zone_dst_end_msg">%1$s处于夏令时。 结束于%2$s。</string>
     <string name="time_zone_dst_start_msg">%1$s遵守夏令时。 它开始于%2$s.</string>
     <string name="time_zone_no_dst_msg">%1$s使用夏令时。</string>
+    <string name="time_zone_dst_resolve_error_msg">%1$s 使用夏令时，但无法解析信息。 请稍后再试。</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>

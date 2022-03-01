@@ -146,6 +146,7 @@
     <string name="time_zone_dst_end_msg">%1$s is in Summer Time. It ends on %2$s.</string>
     <string name="time_zone_dst_start_msg">%1$s uses Summer Time, but not in it now. It starts on %2$s.</string>
     <string name="time_zone_no_dst_msg">%1$s doesn\'t use Daylight Saving Time.</string>
+    <string name="time_zone_dst_resolve_error_msg">%1$s uses Summer Time, but could not resolve information. Please try again later.</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>

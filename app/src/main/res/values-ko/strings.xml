@@ -147,6 +147,7 @@
     <string name="time_zone_dst_end_msg">%1$s (은)는 서머타임을 적용 중 입니다. %2$s에 종료됩니다.</string>
     <string name="time_zone_dst_start_msg">%1$s (은)는 서머타임을 시행합니다. %2$s에 시작합니다.</string>
     <string name="time_zone_no_dst_msg">%1$s (은)는 서머타임을 시행하지 않습니다.</string>
+    <string name="time_zone_dst_resolve_error_msg">%1$s (은)는 서머타임을 시행합니다. 서머타임 정보를 불러오는 중 오류가 발생했습니다. 나중에 다시 시도해주세요.</string>
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>
     <string name="setting_group_0">일반</string>
