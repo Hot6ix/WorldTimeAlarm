@@ -127,6 +127,8 @@
     <string name="v22_change_dialog_message">Before change\n%1$s\n\nAfter change\n%2$s\n\nTo apply immediately, click Apply Changes in notification.</string>
     <string name="eu_consent">Please open app to review Google EU User Consent Policy.</string>
     <string name="eea_update_message">The change wil be applied next app launch.</string>
+    <string name="scheduling_error_title">Alarm scheduling failed</string>
+    <string name="scheduling_error_message">An error occurred while scheduling alarm.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>

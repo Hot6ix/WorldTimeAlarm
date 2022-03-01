@@ -13,9 +13,11 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import androidx.room.Room
+import com.simples.j.worldtimealarm.AlarmReceiver
 import com.simples.j.worldtimealarm.BuildConfig
 import com.simples.j.worldtimealarm.MainActivity
 import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.AlarmItem.Companion.REASON
 import com.simples.j.worldtimealarm.etc.AlarmItem.Companion.WARNING
 import com.simples.j.worldtimealarm.etc.AlarmWarningReason
@@ -171,6 +173,24 @@ class MultiBroadcastReceiver : BroadcastReceiver() {
                     }
 
                     context.sendBroadcast(Intent(MainActivity.ACTION_UPDATE_ALL))
+                }
+                AlarmController.ACTION_ON_ALARM_SCHEDULING_FAILED -> {
+                    val option = intent.getBundleExtra(AlarmReceiver.OPTIONS)
+                    val itemFromIntent = option?.getParcelable<AlarmItem>(AlarmReceiver.ITEM)
+
+                    itemFromIntent?.let {
+                        val offItem = it.apply {
+                            on_off = 0
+                        }
+
+                        val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
+                            val bundle = Bundle().apply {
+                                putParcelable(AlarmReceiver.ITEM, offItem)
+                            }
+                            putExtra(AlarmReceiver.OPTIONS, bundle)
+                        }
+                        context.sendBroadcast(requestIntent)
+                    }
                 }
                 else -> {
 

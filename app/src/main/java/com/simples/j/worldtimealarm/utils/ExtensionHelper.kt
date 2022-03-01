@@ -1,6 +1,11 @@
 package com.simples.j.worldtimealarm.utils
 
+import android.app.Notification
+import android.content.Context
+import androidx.core.app.NotificationCompat
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.simples.j.worldtimealarm.R
+import com.simples.j.worldtimealarm.etc.C
 import kotlinx.coroutines.delay
 
 object ExtensionHelper {
@@ -19,5 +24,19 @@ object ExtensionHelper {
         }
 
         throw Exception("Retry Failed")
+    }
+
+    fun getSimpleNotification(context: Context, title: String, content: String): Notification {
+        val builder = NotificationCompat.Builder(context, C.DEFAULT_NOTIFICATION_CHANNEL)
+
+        builder
+            .setCategory(NotificationCompat.CATEGORY_ERROR)
+            .setAutoCancel(true)
+            .setSmallIcon(R.drawable.ic_action_alarm_white)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setGroup(C.GROUP_DEFAULT)
+
+        return builder.build()
     }
 }

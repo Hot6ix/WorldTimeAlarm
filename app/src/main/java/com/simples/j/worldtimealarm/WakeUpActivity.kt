@@ -162,10 +162,33 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                 finish()
             }
             R.id.snooze -> {
-                AlarmController.getInstance().scheduleLocalAlarm(applicationContext, item, AlarmController.TYPE_SNOOZE)
+                // TODO: Alarm will be disabled when app fails to schedule in both repeat days and snooze
+                // TODO: Find out how to handle it
+                val scheduledTime = AlarmController.getInstance().scheduleLocalAlarm(applicationContext, item, AlarmController.TYPE_SNOOZE)
+                if(scheduledTime == -1L) {
+                    notificationManager.notify(
+                        C.SHARED_NOTIFICATION_ID,
+                        ExtensionHelper.getSimpleNotification(
+                            applicationContext,
+                            getString(R.string.scheduling_error_title),
+                            getString(R.string.scheduling_error_message)
+                        )
+                    )
 
-                val minutes = getString(R.string.minutes, item?.snooze?.div((60 * 1000)))
-                Toast.makeText(applicationContext, getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()
+                    item?.let {
+                        val requestIntent = Intent(AlarmController.ACTION_ON_ALARM_SCHEDULING_FAILED).apply {
+                            val bundle = Bundle().apply {
+                                putParcelable(AlarmReceiver.ITEM, it)
+                            }
+                            putExtra(AlarmReceiver.OPTIONS, bundle)
+                        }
+                        sendBroadcast(requestIntent)
+                    }
+                }
+                else {
+                    val minutes = getString(R.string.minutes, item?.snooze?.div((60 * 1000)))
+                    Toast.makeText(applicationContext, getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()
+                }
 
                 val serviceActionIntent = Intent(WakeUpService.REQUEST_SERVICE_ACTION).apply { putExtra(WakeUpService.SERVICE_ACTION, AlarmReceiver.ACTION_SNOOZE) }
                 sendBroadcast(serviceActionIntent)

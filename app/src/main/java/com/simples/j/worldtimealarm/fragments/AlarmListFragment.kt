@@ -19,7 +19,10 @@ import androidx.recyclerview.widget.*
 import androidx.room.Room
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.simples.j.worldtimealarm.*
+import com.simples.j.worldtimealarm.AlarmGeneratorActivity
+import com.simples.j.worldtimealarm.AlarmReceiver
+import com.simples.j.worldtimealarm.MainActivity
+import com.simples.j.worldtimealarm.R
 import com.simples.j.worldtimealarm.databinding.FragmentAlarmListBinding
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.AlarmStatus
@@ -35,7 +38,6 @@ import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.FormatStyle
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -87,13 +89,13 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         updateRequestReceiver = UpdateRequestReceiver()
         db = Room.databaseBuilder(fragmentContext, AppDatabase::class.java, DatabaseManager.DB_NAME)
-                .addMigrations(AppDatabase.MIGRATION_4_8, AppDatabase.MIGRATION_5_8, AppDatabase.MIGRATION_7_8)
-                .build()
+            .addMigrations(AppDatabase.MIGRATION_4_8, AppDatabase.MIGRATION_5_8, AppDatabase.MIGRATION_7_8)
+            .build()
         alarmController = AlarmController.getInstance()
         audioManager = fragmentContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         preference = PreferenceManager.getDefaultSharedPreferences(fragmentContext)
@@ -110,14 +112,14 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
             if(audioManager.getStreamVolume(AudioManager.STREAM_ALARM) == 0) {
                 Handler(Looper.getMainLooper()).postDelayed({
                     Snackbar.make(fragmentLayout, muted, Snackbar.LENGTH_LONG)
-                            .setAction(unMute) {
-                        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
-                    }.addCallback(object: Snackbar.Callback() {
-                        override fun onShown(sb: Snackbar?) {
-                            super.onShown(sb)
-                            muteStatusIsShown = true
-                        }
-                    }).show()
+                        .setAction(unMute) {
+                            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, (audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM) * 60) / 100, 0)
+                        }.addCallback(object: Snackbar.Callback() {
+                            override fun onShown(sb: Snackbar?) {
+                                super.onShown(sb)
+                                muteStatusIsShown = true
+                            }
+                        }).show()
                 }, 500)
             }
         }
@@ -338,9 +340,17 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
     override fun onItemStatusChanged(b: Boolean, item: AlarmItem) {
         launch(coroutineContext) {
             if(b) {
-                alarmItems.find { it.notiId == item.notiId }?.on_off = 1
                 val scheduledTime = alarmController.scheduleLocalAlarm(fragmentContext, item, AlarmController.TYPE_ALARM)
 
+                if(scheduledTime == -1L) {
+                    snackBar = Snackbar.make(fragmentLayout, getString(R.string.unable_to_create_alarm), Snackbar.LENGTH_SHORT)
+                    snackBar?.show()
+
+                    alarmListAdapter.notifyItemChanged(alarmItems.indexOf(item))
+                    return@launch
+                }
+
+                alarmItems.find { it.notiId == item.notiId }?.on_off = 1
                 item.apply {
                     on_off = 1
                 }.also {
@@ -386,7 +396,13 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                     it.apply {
                         id = newId.toInt()
                     }.also {
-                        if(it.on_off == 1) alarmController.scheduleLocalAlarm(fragmentContext, it, AlarmController.TYPE_ALARM)
+                        if(it.on_off == 1) {
+                            val scheduledTime = alarmController.scheduleLocalAlarm(fragmentContext, it, AlarmController.TYPE_ALARM)
+                            if(scheduledTime == -1L) {
+                                snackBar = Snackbar.make(fragmentLayout, getString(R.string.unable_to_create_alarm), Snackbar.LENGTH_SHORT)
+                                snackBar?.show()
+                            }
+                        }
 
                         // add deleted item to list
                         alarmListAdapter.addItem(itemPosition, it)
@@ -548,10 +564,12 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                 }
                 MainActivity.ACTION_RESCHEDULE_ACTIVATED -> {
                     launch(coroutineContext) {
-                        db.alarmItemDao().getActivated().forEach {
+                        db.alarmItemDao().getActivated().map {
                             alarmController.cancelAlarm(context, it.notiId)
-                            alarmController.scheduleLocalAlarm(context, it, AlarmController.TYPE_ALARM)
+                            val scheduledTime = alarmController.scheduleLocalAlarm(context, it, AlarmController.TYPE_ALARM)
 
+                            scheduledTime
+                        }.also {
                             if(::alarmListAdapter.isInitialized) {
                                 alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
                             }
@@ -559,6 +577,11 @@ class AlarmListFragment : Fragment(), AlarmListAdapter.OnItemClickListener, List
                                 job.join()
                                 alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
                             }
+                        }.any { it == -1L }.run {
+                            snackBar = Snackbar.make(fragmentLayout, getString(R.string.unable_to_create_alarm), Snackbar.LENGTH_SHORT)
+                            snackBar?.show()
+
+                            alarmListAdapter.notifyItemRangeChanged(0, alarmItems.count())
                         }
                     }
                 }

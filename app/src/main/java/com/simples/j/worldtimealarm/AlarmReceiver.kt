@@ -25,7 +25,6 @@ import com.simples.j.worldtimealarm.utils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import java.util.*
 
 /**
@@ -88,7 +87,25 @@ class AlarmReceiver: BroadcastReceiver() {
             isExpired = item.isExpired()
             // re-schedule alarm if it is repeating alarm and still valid
             if(!item.isInstantAlarm() && !isExpired) {
-                AlarmController.getInstance().scheduleLocalAlarm(context, item, AlarmController.TYPE_ALARM)
+                val scheduledTime = AlarmController.getInstance().scheduleLocalAlarm(context, item, AlarmController.TYPE_ALARM)
+                if(scheduledTime == -1L) {
+                    notificationManager.notify(
+                        C.SHARED_NOTIFICATION_ID,
+                        ExtensionHelper.getSimpleNotification(
+                            context,
+                            context.getString(R.string.scheduling_error_title),
+                            context.getString(R.string.scheduling_error_message)
+                        )
+                    )
+
+                    val requestIntent = Intent(AlarmController.ACTION_ON_ALARM_SCHEDULING_FAILED).apply {
+                        val bundle = Bundle().apply {
+                            putParcelable(ITEM, item)
+                        }
+                        putExtra(OPTIONS, bundle)
+                    }
+                    context.sendBroadcast(requestIntent)
+                }
             }
 
             // Only a single alarm will be shown to user, even if several alarms triggered at same time.
