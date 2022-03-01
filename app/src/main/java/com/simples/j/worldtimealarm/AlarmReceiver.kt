@@ -25,6 +25,7 @@ import com.simples.j.worldtimealarm.utils.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.lang.Exception
 import java.util.*
 
 /**
@@ -103,10 +104,15 @@ class AlarmReceiver: BroadcastReceiver() {
                     action = intent.action
                 }
 
-                if(Build.VERSION.SDK_INT >= 26)
-                    context.startForegroundService(serviceIntent)
-                else
-                    context.startService(serviceIntent)
+                // TODO: Find out how to show an alert when app failed to launch WakeUpService
+                try {
+                    if(Build.VERSION.SDK_INT >= 26)
+                        context.startForegroundService(serviceIntent)
+                    else
+                        context.startService(serviceIntent)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
             else {
                 Log.d(C.TAG, "Alarm(notiId=${item.notiId+1}, type=${intent.action}) missed")
