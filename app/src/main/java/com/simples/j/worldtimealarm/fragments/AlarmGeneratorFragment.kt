@@ -252,21 +252,21 @@ class AlarmGeneratorFragment : Fragment(), CoroutineScope, AlarmOptionAdapter.On
                 viewModel.recurrences.value?.any { it > 0 } ?: false
             )
 
+            // init action button
+            binding.action.apply {
+                if (viewModel.alarmItem != null) {
+                    text = getString(R.string.apply)
+                    icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_done_white)
+                } else {
+                    text = getString(R.string.create)
+                    icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
+                }
+            }
+
             // show components & hide progress bar
             binding.detailContentLayout.visibility = View.VISIBLE
             binding.action.visibility = View.VISIBLE
             binding.progressBar.visibility = View.INVISIBLE
-        }
-
-        // init action button
-        binding.action.apply {
-            if (viewModel.alarmItem != null) {
-                text = getString(R.string.apply)
-                icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_done_white)
-            } else {
-                text = getString(R.string.create)
-                icon = ContextCompat.getDrawable(fragmentContext, R.drawable.ic_action_add)
-            }
         }
 
         // init dialog
