@@ -1,6 +1,7 @@
 package com.simples.j.worldtimealarm.utils
 
 import android.app.Notification
+import android.app.PendingIntent
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -26,7 +27,7 @@ object ExtensionHelper {
         throw Exception("Retry Failed")
     }
 
-    fun getSimpleNotification(context: Context, title: String, content: String): Notification {
+    fun getSimpleNotification(context: Context, title: String, content: String, contentIntent: PendingIntent? = null): Notification {
         val builder = NotificationCompat.Builder(context, C.DEFAULT_NOTIFICATION_CHANNEL)
 
         builder
@@ -36,6 +37,7 @@ object ExtensionHelper {
             .setContentTitle(title)
             .setContentText(content)
             .setGroup(C.GROUP_DEFAULT)
+            .setContentIntent(contentIntent)
 
         return builder.build()
     }

@@ -1,5 +1,6 @@
 package com.simples.j.worldtimealarm
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,30 +9,37 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
+import android.provider.Settings
 import android.text.format.DateFormat
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import androidx.room.Room
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.etc.C.Companion.GROUP_MISSED
 import com.simples.j.worldtimealarm.etc.C.Companion.MISSED_NOTIFICATION_CHANNEL
 import com.simples.j.worldtimealarm.fragments.AlarmListFragment
 import com.simples.j.worldtimealarm.utils.*
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Created by j on 21/02/2018.
  *
  */
-class AlarmReceiver: BroadcastReceiver() {
+class AlarmReceiver: BroadcastReceiver(), CoroutineScope {
 
     private lateinit var db: AppDatabase
     private lateinit var notificationManager: NotificationManager
@@ -39,9 +47,19 @@ class AlarmReceiver: BroadcastReceiver() {
     private lateinit var powerManager: PowerManager
     private lateinit var preference: SharedPreferences
 
+    private val crashlytics = FirebaseCrashlytics.getInstance()
     private var option: Bundle? = null
     private var isExpired = false
     private var in24Hour = false
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + coroutineExceptionHandler
+
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
+
+        crashlytics.recordException(throwable)
+    }
 
     override fun onReceive(context: Context, intent: Intent) {
         db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
@@ -64,7 +82,7 @@ class AlarmReceiver: BroadcastReceiver() {
 
         val itemFromIntent = option?.getParcelable<AlarmItem>(ITEM)
 
-        CoroutineScope(Dispatchers.Main).launch(Dispatchers.IO) {
+        launch(Dispatchers.IO + coroutineExceptionHandler) {
             // get item from database using notification id
             val item = db.alarmItemDao().getAlarmItemFromNotificationId(itemFromIntent?.notiId)
 
@@ -98,13 +116,20 @@ class AlarmReceiver: BroadcastReceiver() {
                         )
                     )
 
-                    val requestIntent = Intent(AlarmController.ACTION_ON_ALARM_SCHEDULING_FAILED).apply {
-                        val bundle = Bundle().apply {
-                            putParcelable(ITEM, item)
+                    itemFromIntent?.let {
+                        val offItem = it.apply {
+                            on_off = 0
                         }
-                        putExtra(OPTIONS, bundle)
+
+                        db.alarmItemDao().update(offItem)
+                        val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
+                            val bundle = Bundle().apply {
+                                putParcelable(ITEM, offItem)
+                            }
+                            putExtra(OPTIONS, bundle)
+                        }
+                        context.sendBroadcast(requestIntent)
                     }
-                    context.sendBroadcast(requestIntent)
                 }
             }
 
@@ -122,6 +147,12 @@ class AlarmReceiver: BroadcastReceiver() {
                 }
 
                 // TODO: Find out how to show an alert when app failed to launch WakeUpService
+                val permissionResult =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.FOREGROUND_SERVICE)
+                    else
+                        null
+
                 try {
                     if(Build.VERSION.SDK_INT >= 26)
                         context.startForegroundService(serviceIntent)
@@ -129,6 +160,45 @@ class AlarmReceiver: BroadcastReceiver() {
                         context.startService(serviceIntent)
                 } catch (e: Exception) {
                     e.printStackTrace()
+
+                    WakeUpService.isWakeUpServiceRunning = false
+
+                    itemFromIntent?.let {
+                        val offItem = it.apply {
+                            on_off = 0
+                        }
+
+                        AlarmController.getInstance().disableAlarm(context, offItem)
+                        val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
+                            val bundle = Bundle().apply {
+                                putParcelable(ITEM, offItem)
+                            }
+                            putExtra(OPTIONS, bundle)
+                        }
+                        context.sendBroadcast(requestIntent)
+                    }
+
+                    if(permissionResult == PackageManager.PERMISSION_DENIED) {
+                        val i = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+
+                        val pendingIntentFlag: Int =
+                            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                            else PendingIntent.FLAG_UPDATE_CURRENT
+
+                        notificationManager.notify(
+                            C.SHARED_NOTIFICATION_ID + 1,
+                            ExtensionHelper.getSimpleNotification(
+                                context,
+                                context.getString(R.string.wakeup_permission_error_title),
+                                context.getString(R.string.wakeup_permission_error_message),
+                                PendingIntent.getActivity(context, 0, i, pendingIntentFlag)
+                            )
+                        )
+                    }
+
+                    coroutineExceptionHandler.handleException(coroutineContext, e)
                 }
             }
             else {

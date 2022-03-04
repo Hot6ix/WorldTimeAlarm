@@ -170,20 +170,25 @@ class WakeUpActivity : AppCompatActivity(), View.OnClickListener {
                         C.SHARED_NOTIFICATION_ID,
                         ExtensionHelper.getSimpleNotification(
                             applicationContext,
-                            getString(R.string.scheduling_error_title),
-                            getString(R.string.scheduling_error_message)
+                            getString(R.string.snooze_scheduling_error_title),
+                            getString(R.string.snooze_scheduling_error_message)
                         )
                     )
 
-                    item?.let {
-                        val requestIntent = Intent(AlarmController.ACTION_ON_ALARM_SCHEDULING_FAILED).apply {
-                            val bundle = Bundle().apply {
-                                putParcelable(AlarmReceiver.ITEM, it)
-                            }
-                            putExtra(AlarmReceiver.OPTIONS, bundle)
-                        }
-                        sendBroadcast(requestIntent)
-                    }
+//                    item?.let {
+//                        val offItem = it.apply {
+//                            on_off = 0
+//                        }
+//
+//                        AlarmController.getInstance().disableAlarm(applicationContext, offItem)
+//                        val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
+//                            val bundle = Bundle().apply {
+//                                putParcelable(AlarmReceiver.ITEM, offItem)
+//                            }
+//                            putExtra(AlarmReceiver.OPTIONS, bundle)
+//                        }
+//                        sendBroadcast(requestIntent)
+//                    }
                 }
                 else {
                     val minutes = getString(R.string.minutes, item?.snooze?.div((60 * 1000)))

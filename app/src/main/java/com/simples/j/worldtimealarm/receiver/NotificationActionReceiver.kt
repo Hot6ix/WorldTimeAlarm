@@ -45,18 +45,25 @@ class NotificationActionReceiver : BroadcastReceiver() {
                                 C.SHARED_NOTIFICATION_ID,
                                 ExtensionHelper.getSimpleNotification(
                                     context,
-                                    context.getString(R.string.scheduling_error_title),
-                                    context.getString(R.string.scheduling_error_message)
+                                    context.getString(R.string.snooze_scheduling_error_title),
+                                    context.getString(R.string.snooze_scheduling_error_message)
                                 )
                             )
 
-                            val requestIntent = Intent(AlarmController.ACTION_ON_ALARM_SCHEDULING_FAILED).apply {
-                                val bundle = Bundle().apply {
-                                    putParcelable(AlarmReceiver.ITEM, it)
-                                }
-                                putExtra(AlarmReceiver.OPTIONS, bundle)
-                            }
-                            context.sendBroadcast(requestIntent)
+//                            it.let {
+//                                val offItem = it.apply {
+//                                    on_off = 0
+//                                }
+//
+//                                AlarmController.getInstance().disableAlarm(context, offItem)
+//                                val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
+//                                    val bundle = Bundle().apply {
+//                                        putParcelable(AlarmReceiver.ITEM, offItem)
+//                                    }
+//                                    putExtra(AlarmReceiver.OPTIONS, bundle)
+//                                }
+//                                context.sendBroadcast(requestIntent)
+//                            }
                         }
                         else {
                             val minutes = context.getString(R.string.minutes, it.snooze.div((60 * 1000)))

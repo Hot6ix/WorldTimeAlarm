@@ -130,6 +130,10 @@
     <string name="eea_update_message">更改将在下次应用启动时应用。</string>
     <string name="scheduling_error_title">报警调度失败</string>
     <string name="scheduling_error_message">安排警报时出错。</string>
+    <string name="snooze_scheduling_error_title">暂停闹钟计划失败</string>
+    <string name="snooze_scheduling_error_message">安排贪睡警报时出错。</string>
+    <string name="wakeup_permission_error_title">无法启动警报警报</string>
+    <string name="wakeup_permission_error_message">应用程序因失去权限而无法启动警报警报。 单击此处检查应用程序权限。</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>
