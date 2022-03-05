@@ -197,6 +197,16 @@ class AlarmReceiver: BroadcastReceiver(), CoroutineScope {
                             )
                         )
                     }
+                    else {
+                        notificationManager.notify(
+                            C.SHARED_NOTIFICATION_ID + 1,
+                            ExtensionHelper.getSimpleNotification(
+                                context,
+                                context.getString(R.string.wakeup_permission_error_title),
+                                context.getString(R.string.wakeup_error_message),
+                            )
+                        )
+                    }
 
                     coroutineExceptionHandler.handleException(coroutineContext, e)
                 }

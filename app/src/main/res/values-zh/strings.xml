@@ -134,6 +134,7 @@
     <string name="snooze_scheduling_error_message">安排贪睡警报时出错。</string>
     <string name="wakeup_permission_error_title">无法启动警报警报</string>
     <string name="wakeup_permission_error_message">应用程序因失去权限而无法启动警报警报。 单击此处检查应用程序权限。</string>
+    <string name="wakeup_error_message">应用程序无法启动警报警报。</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">选择时区</string>

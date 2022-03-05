@@ -133,6 +133,7 @@
     <string name="snooze_scheduling_error_message">An error occurred while scheduling snooze alarm.</string>
     <string name="wakeup_permission_error_title">Could not start alarm alert</string>
     <string name="wakeup_permission_error_message">App failed to start alarm alert due to lost its permission. Click here to check app permission.</string>
+    <string name="wakeup_error_message">App failed to start alarm alert.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>

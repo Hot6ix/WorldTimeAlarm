@@ -134,6 +134,7 @@
     <string name="snooze_scheduling_error_message">다시 알림 알람 설정 중 오류가 발생하였습니다.</string>
     <string name="wakeup_permission_error_title">알람을 시작하는데 실패했습니다</string>
     <string name="wakeup_permission_error_message">앱이 필요한 권한을 가지고 있지 않아 알람을 시작할 수 없습니다. 여기를 눌러 앱 권한을 확인할 수 있습니다.</string>
+    <string name="wakeup_error_message">알람을 시작할 수 없습니다.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">시간대 선택</string>
