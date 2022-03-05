@@ -25,6 +25,8 @@ import com.simples.j.worldtimealarm.databinding.FragmentTimeZoneBinding
 import com.simples.j.worldtimealarm.etc.TimeZoneInfo
 import com.simples.j.worldtimealarm.utils.AppDatabase
 import com.simples.j.worldtimealarm.utils.DatabaseManager
+import com.simples.j.worldtimealarm.utils.ExtensionHelper
+import com.simples.j.worldtimealarm.utils.ExtensionHelper.retryIO
 import com.simples.j.worldtimealarm.utils.MediaCursor
 import kotlinx.android.synthetic.main.fragment_time_zone.*
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -225,16 +227,26 @@ class TimeZoneFragment : Fragment(), CoroutineScope, View.OnClickListener {
                 val timeZoneName = getString(R.string.timezone_format, MediaCursor.getBestNameForTimeZone(mTimeZone), MediaCursor.getGmtOffsetString(Locale.getDefault(), mTimeZone, mDate))
 
                 if(mTimeZone.useDaylightTime()) {
-                    val nextTransition = ZoneId.of(mTimeZone.id).rules.nextTransition(Instant.now())
-                    val nextTransitionLocal = DateFormat.format(MediaCursor.getLocalizedDateTimeFormat(is24HourMode), ZonedDateTime.of(nextTransition.dateTimeBefore, ZoneId.systemDefault()).toInstant().toEpochMilli())
+                    CoroutineScope(Dispatchers.Main + CoroutineExceptionHandler { _, throwable ->
+                        throwable.printStackTrace()
+                        crashlytics.recordException(throwable)
 
-                    binding.timeZoneChangeInfo.text =
-                            if(mTimeZone.inDaylightTime(Date())) {
-                                getString(R.string.time_zone_dst_end_msg, timeZoneName, nextTransitionLocal)
-                            }
-                            else {
-                                getString(R.string.time_zone_dst_start_msg, timeZoneName, nextTransitionLocal)
-                            }
+                        binding.timeZoneChangeInfo.text = getString(R.string.time_zone_dst_resolve_error_msg, timeZoneName)
+                    }).launch {
+                        retryIO {
+                            val nextTransition = ZoneId.of(mTimeZone.id).rules.nextTransition(Instant.now())
+                            val nextTransitionLocal = DateFormat.format(MediaCursor.getLocalizedDateTimeFormat(is24HourMode), ZonedDateTime.of(nextTransition.dateTimeBefore, ZoneId.systemDefault()).toInstant().toEpochMilli())
+
+                            binding.timeZoneChangeInfo.text =
+                                if(mTimeZone.inDaylightTime(Date())) {
+                                    getString(R.string.time_zone_dst_end_msg, timeZoneName, nextTransitionLocal)
+                                }
+                                else {
+                                    getString(R.string.time_zone_dst_start_msg, timeZoneName, nextTransitionLocal)
+                                }
+                        }
+
+                    }
                 }
                 else {
                     binding.timeZoneChangeInfo.text = getString(R.string.time_zone_no_dst_msg, timeZoneName)

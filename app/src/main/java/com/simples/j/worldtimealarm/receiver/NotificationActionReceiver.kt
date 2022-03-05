@@ -14,8 +14,8 @@ import com.simples.j.worldtimealarm.etc.AlarmItem
 import com.simples.j.worldtimealarm.etc.C
 import com.simples.j.worldtimealarm.utils.*
 import com.simples.j.worldtimealarm.utils.AlarmController.TYPE_ALARM
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
@@ -24,6 +24,7 @@ import org.threeten.bp.ZonedDateTime
 class NotificationActionReceiver : BroadcastReceiver() {
     // TODO:  Check RuntimeException/SecurityException
     private lateinit var db: AppDatabase
+    private lateinit var notificationManager: NotificationManager
 
     override fun onReceive(context: Context, intent: Intent) {
         if(intent.hasExtra(NOTIFICATION_ACTION)) {
@@ -32,14 +33,42 @@ class NotificationActionReceiver : BroadcastReceiver() {
 
             db = Room.databaseBuilder(context, AppDatabase::class.java, DatabaseManager.DB_NAME)
                     .build()
+            notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             when(action) {
                 ACTION_SNOOZE -> {
                     intent.getParcelableExtra<AlarmItem>(AlarmReceiver.ITEM)?.let {
-                        AlarmController.getInstance().scheduleLocalAlarm(context, it, AlarmController.TYPE_SNOOZE)
+                        val scheduledTime = AlarmController.getInstance().scheduleLocalAlarm(context, it, AlarmController.TYPE_SNOOZE)
 
-                        val minutes = context.getString(R.string.minutes, it.snooze.div((60 * 1000)))
-                        Toast.makeText(context, context.getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()
+                        if(scheduledTime == -1L) {
+                            notificationManager.notify(
+                                C.SHARED_NOTIFICATION_ID,
+                                ExtensionHelper.getSimpleNotification(
+                                    context,
+                                    context.getString(R.string.snooze_scheduling_error_title),
+                                    context.getString(R.string.snooze_scheduling_error_message)
+                                )
+                            )
+
+//                            it.let {
+//                                val offItem = it.apply {
+//                                    on_off = 0
+//                                }
+//
+//                                AlarmController.getInstance().disableAlarm(context, offItem)
+//                                val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
+//                                    val bundle = Bundle().apply {
+//                                        putParcelable(AlarmReceiver.ITEM, offItem)
+//                                    }
+//                                    putExtra(AlarmReceiver.OPTIONS, bundle)
+//                                }
+//                                context.sendBroadcast(requestIntent)
+//                            }
+                        }
+                        else {
+                            val minutes = context.getString(R.string.minutes, it.snooze.div((60 * 1000)))
+                            Toast.makeText(context, context.getString(R.string.alarm_on, minutes), Toast.LENGTH_SHORT).show()
+                        }
                     }
                     val serviceActionIntent = Intent(WakeUpService.REQUEST_SERVICE_ACTION).apply { putExtra(WakeUpService.SERVICE_ACTION, AlarmReceiver.ACTION_SNOOZE) }
                     context.sendBroadcast(serviceActionIntent)
@@ -53,7 +82,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
                     val alarmController = AlarmController()
                     val preference = PreferenceManager.getDefaultSharedPreferences(context)
 
-                    GlobalScope.launch(Dispatchers.IO) {
+                    CoroutineScope(Dispatchers.IO).launch {
                         db.alarmItemDao().getActivated().filter {
                             val applyDayRepeat = preference.getBoolean(context.getString(R.string.setting_time_zone_affect_repetition_key), false)
                             val oldResult =

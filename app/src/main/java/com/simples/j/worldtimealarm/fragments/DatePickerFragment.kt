@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.*
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -46,9 +45,6 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
 
     private var dateSet = ZonedDateTime.now()
     private var now = YearMonth.now()
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    private val icuCalendar = Calendar.getInstance()
 
     private fun Float.toSp(): Float {
         return this / resources.displayMetrics.scaledDensity
@@ -207,7 +203,7 @@ class DatePickerFragment : Fragment(), View.OnClickListener {
                         tag = dayOfWeek
 
                         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            with(icuCalendar.weekData) {
+                            with(Calendar.getInstance().weekData) {
                                 when(dayOfWeek.value) {
                                     // weekend finish
                                     MediaCursor.getDayOfWeekValueFromCalendarToThreeTenBp(weekendCease) -> {

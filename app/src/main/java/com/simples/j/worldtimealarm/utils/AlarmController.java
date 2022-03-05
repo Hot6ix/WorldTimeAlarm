@@ -339,6 +339,8 @@ public class AlarmController {
 
     public Long scheduleLocalAlarm(Context context, AlarmItem item, int type) {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            if(!alarmManager.canScheduleExactAlarms()) return -1L;
 
         ZonedDateTime alarmDateTime = null;
         try {
@@ -465,5 +467,6 @@ public class AlarmController {
     }
 
     public static final String EXTRA_TIME_IN_MILLIS = "EXTRA_TIME_IN_MILLIS";
+    public static final String ACTION_ON_ALARM_SCHEDULING_FAILED = "com.simples.j.world_time_alarm.ACTION_ON_ALARM_SCHEDULING_FAILED";
 
 }

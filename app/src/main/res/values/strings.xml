@@ -127,6 +127,13 @@
     <string name="v22_change_dialog_message">Before change\n%1$s\n\nAfter change\n%2$s\n\nTo apply immediately, click Apply Changes in notification.</string>
     <string name="eu_consent">Please open app to review Google EU User Consent Policy.</string>
     <string name="eea_update_message">The change wil be applied next app launch.</string>
+    <string name="scheduling_error_title">Alarm scheduling failed</string>
+    <string name="scheduling_error_message">An error occurred while scheduling alarm.</string>
+    <string name="snooze_scheduling_error_title">Snooze alarm scheduling failed</string>
+    <string name="snooze_scheduling_error_message">An error occurred while scheduling snooze alarm.</string>
+    <string name="wakeup_permission_error_title">Could not start alarm alert</string>
+    <string name="wakeup_permission_error_message">App failed to start alarm alert due to lost its permission. Click here to check app permission.</string>
+    <string name="wakeup_error_message">App failed to start alarm alert.</string>
 
     <!-- Text -->
     <string name="timezone_fragment_title">Select time zone</string>
@@ -146,6 +153,7 @@
     <string name="time_zone_dst_end_msg">%1$s is in Summer Time. It ends on %2$s.</string>
     <string name="time_zone_dst_start_msg">%1$s uses Summer Time, but not in it now. It starts on %2$s.</string>
     <string name="time_zone_no_dst_msg">%1$s doesn\'t use Daylight Saving Time.</string>
+    <string name="time_zone_dst_resolve_error_msg">%1$s uses Summer Time, but could not resolve information. Please try again later.</string>
 
     <!-- Settings -->
     <string name="setting_group_0_key">GENERAL</string>
