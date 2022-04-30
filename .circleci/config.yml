@@ -31,19 +31,29 @@ jobs:
 
       # Then start the emulator and run the Instrumentation tests!
       - android/start-emulator-and-run-tests:
-          test-command: ./gradlew connectedDebugAndroidTest
-          system-image: system-images;android-25;google_apis;x86
+          test-command: ./gradlew test --tests Alarm
+          system-image: system-images;android-29;google_apis;x86
 
       # And finally run the release build
       - run:
           name: Assemble release build
           command: |
             ./gradlew assembleRelease
-
-# Invoke jobs via workflows
+  ui-test:
+    executor:
+      name: android/android-machine
+    steps:
+      - checkout
+      - android/run-ui-tests:
+          test-command: ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.simples.j.worldtimealarm.suite.AlarmControllerTestSuite --continue
+          system-image: system-images;android-29;google_apis;x86
+      - run:
+          name: Assemble debug build
+          command: |
+            ./gradlew assembleDebug
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   sample: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - build-and-test
+      - ui-test
