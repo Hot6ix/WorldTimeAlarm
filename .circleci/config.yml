@@ -44,7 +44,7 @@ jobs:
       name: android/android-machine
     steps:
       - checkout
-      - android/run-ui-tests:
+      - android/start-emulator-and-run-tests:
           test-command: ./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.simples.j.worldtimealarm.suite.AlarmControllerTestSuite --continue
           system-image: system-images;android-29;google_apis;x86
       - run:
