@@ -407,7 +407,7 @@ class AlarmControllerMultipleRepeatingAndroidTest {
         unmockkStatic(ZonedDateTime::class)
     }
 
-    @Test
+//    @Test
     fun testMultipleRepeatingCase08() {
         /*
         * System date/time: 0700, First Monday in Mar
