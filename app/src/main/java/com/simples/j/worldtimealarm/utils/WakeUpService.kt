@@ -110,7 +110,7 @@ class WakeUpService : Service() {
                     stopSelf()
                 }
 
-                item?.let { alarmItem ->
+                item?.also { alarmItem ->
                     startForeground(alarmItem.notiId, getNotification(AlarmReceiver.TYPE_ALARM, alarmItem, intent))
                     setup(alarmItem)
                     play(alarmItem.ringtone)
@@ -119,17 +119,16 @@ class WakeUpService : Service() {
 
                     val alarmMuteTime = preference.getString(applicationContext.resources.getString(R.string.setting_alarm_mute_key), "0")?.toLong()
                     if(alarmMuteTime != null && alarmMuteTime != 0L) {
+                        Runnable {
+                            stopAll()
+                            Log.d(C.TAG, "Alarm muted : ID(${alarmItem.notiId.plus(1)})")
+                        }.also {  runnable ->
+                            timerRunnable = runnable
 
-                    Runnable {
-                        stopAll()
-                        Log.d(C.TAG, "Alarm muted : ID(${alarmItem.notiId.plus(1)})")
-                    }.also {  runnable ->
-                        timerRunnable = runnable
-
-                        timer = Handler(Looper.getMainLooper()).apply {
-                            postDelayed(runnable, alarmMuteTime)
+                            timer = Handler(Looper.getMainLooper()).apply {
+                                postDelayed(runnable, alarmMuteTime)
+                            }
                         }
-                    }
                     }
                 }
             }
@@ -143,6 +142,7 @@ class WakeUpService : Service() {
         isWakeUpServiceRunning = false
         stopAll()
         timerRunnable?.let { timer?.removeCallbacks(it) }
+        currentAlarmItemId = -1
 
         item?.let {
             notificationManager.cancel(it.notiId)
@@ -404,8 +404,15 @@ class WakeUpService : Service() {
                 }
             }
 
-            vibrator?.let {
-                if(it.hasVibrator()) it.cancel()
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                vibratorManager?.defaultVibrator?.let {
+                    if(it.hasVibrator()) it.cancel()
+                }
+            }
+            else {
+                vibrator?.let {
+                    if(it.hasVibrator()) it.cancel()
+                }
             }
         }
     }
