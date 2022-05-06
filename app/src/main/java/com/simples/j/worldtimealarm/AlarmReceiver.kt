@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.text.format.DateFormat
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import androidx.room.Room
@@ -138,6 +139,28 @@ class AlarmReceiver: BroadcastReceiver(), CoroutineScope {
 
             // If alarm alerted to user and until dismiss or snooze, also upcoming alarms will be notified as missed.
             if(!WakeUpService.isWakeUpServiceRunning) {
+                /*
+                    these condition will check whether app has permission of showing notification.
+                    app will not run alarm procedure if it cannot show notifications.
+                */
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    if(
+                        !NotificationManagerCompat.from(context).areNotificationsEnabled() ||
+                        NotificationManagerCompat.from(context).getNotificationChannel(C.ALARM_NOTIFICATION_CHANNEL)?.importance == NotificationManagerCompat.IMPORTANCE_NONE
+                    ) {
+                        if(item.isInstantAlarm() || isExpired)
+                            disableAlarm(context, item)
+                        return@launch
+                    }
+                }
+                else {
+                    if(!NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+                        if(item.isInstantAlarm() || isExpired)
+                            disableAlarm(context, item)
+                        return@launch
+                    }
+                }
+
                 WakeUpService.isWakeUpServiceRunning = true
 
                 val serviceIntent = Intent(context, WakeUpService::class.java).apply {
@@ -162,21 +185,7 @@ class AlarmReceiver: BroadcastReceiver(), CoroutineScope {
                     e.printStackTrace()
 
                     WakeUpService.isWakeUpServiceRunning = false
-
-                    itemFromIntent?.let {
-                        val offItem = it.apply {
-                            on_off = 0
-                        }
-
-                        AlarmController.getInstance().disableAlarm(context, offItem)
-                        val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
-                            val bundle = Bundle().apply {
-                                putParcelable(ITEM, offItem)
-                            }
-                            putExtra(OPTIONS, bundle)
-                        }
-                        context.sendBroadcast(requestIntent)
-                    }
+                    disableAlarm(context, itemFromIntent)
 
                     if(permissionResult == PackageManager.PERMISSION_DENIED) {
                         val i = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
@@ -265,6 +274,23 @@ class AlarmReceiver: BroadcastReceiver(), CoroutineScope {
         }
 
         notificationManager.notify(item.notiId, notificationBuilder.build())
+    }
+
+    private fun disableAlarm(context: Context, item: AlarmItem?) {
+        item?.let {
+            val offItem = it.apply {
+                on_off = 0
+            }
+
+            AlarmController.getInstance().disableAlarm(context, offItem)
+            val requestIntent = Intent(MainActivity.ACTION_UPDATE_SINGLE).apply {
+                val bundle = Bundle().apply {
+                    putParcelable(ITEM, offItem)
+                }
+                putExtra(OPTIONS, bundle)
+            }
+            context.sendBroadcast(requestIntent)
+        }
     }
 
     companion object {
