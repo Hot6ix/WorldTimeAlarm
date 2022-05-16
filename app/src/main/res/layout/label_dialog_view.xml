@@ -28,6 +28,7 @@
             android:text="@string/test"
             android:textColor="@color/blueGrayDarker"
             android:focusable="true"
+            android:focusableInTouchMode="true"
             android:importantForAutofill="no"
             android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
             android:labelFor="@id/label"

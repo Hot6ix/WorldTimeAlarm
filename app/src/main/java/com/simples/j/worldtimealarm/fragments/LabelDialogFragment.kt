@@ -59,11 +59,8 @@ class LabelDialogFragment: DialogFragment() {
             override fun afterTextChanged(s: Editable) {
                 currentLabel = s.toString()
             }
-
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
         })
 
         val dialog = AlertDialog.Builder(fragmentContext)
@@ -77,7 +74,9 @@ class LabelDialogFragment: DialogFragment() {
                 }
                 .setOnCancelListener { currentLabel = lastLabel }
 
-        return dialog.create()
+        return dialog.create().apply {
+            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

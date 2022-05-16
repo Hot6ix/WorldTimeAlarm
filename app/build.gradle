@@ -9,8 +9,8 @@ android {
         applicationId "com.simples.j.worldtimealarm"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 36
-        versionName "1.7.4"
+        versionCode 37
+        versionName "1.7.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {

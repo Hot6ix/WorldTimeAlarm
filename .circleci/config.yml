@@ -39,7 +39,7 @@ jobs:
           name: Assemble release build
           command: |
             ./gradlew assembleRelease
-  ui-test:
+  alarm-controller-test:
     executor:
       name: android/android-machine
     steps:
@@ -56,4 +56,4 @@ workflows:
   sample: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - ui-test
+      - alarm-controller-test
